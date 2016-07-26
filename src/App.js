@@ -1,11 +1,28 @@
 import React, { Component } from 'react';
-import Input from './input';
+import Show from './show/show';
 
 class Expo extends Component {
   render() {
+    let def = {
+      title: 'my demo',
+      input: 'The blue dog jumps',
+      context: {},
+      methods: [
+        {
+          kind: 'to',
+          method: 'Exclamation'
+        }
+      ],
+      render: 'html',
+      css: `
+        .nlpAdjective{
+          color:steelblue;
+        }
+      `
+    }
     return (
       <div >
-        <Input text='the blue dog jumps'/>
+        <Show data={def}/>
       </div>
       );
   }

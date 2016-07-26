@@ -26,8 +26,7 @@ class Input extends Component {
       maxHeight: 300,
       winHeight: 80,
       color: 'darkslategray',
-      margin: '10%',
-      width: '80%',
+      width: '100%',
       overflow: 'hidden',
       fontSize: 28,
       padding: '10px 15px 10px 15px'
