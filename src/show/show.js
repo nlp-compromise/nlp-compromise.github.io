@@ -28,7 +28,7 @@ class Show extends Component {
     return (
       <div >
         <div style={css.box}>
-          <Input text=''/>
+          <Input text={data.input}/>
           <Code data={data}/>
         </div>
         <Output data={data}/>

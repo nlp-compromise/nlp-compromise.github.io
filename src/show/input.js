@@ -29,7 +29,8 @@ class Input extends Component {
       width: '100%',
       overflow: 'hidden',
       fontSize: 28,
-      padding: '10px 15px 10px 15px'
+      padding: '10px 15px 10px 15px',
+      fontFamily: 'Roboto sans-serif'
     }
     let text = this.props.text || 'Wee-ooh, I look just like Buddy Holly.'
     return <Textarea ref='input' style={css} defaultValue={text} />
