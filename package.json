@@ -2,7 +2,9 @@
   "name": "nlp-expo",
   "version": "0.0.1",
   "private": true,
-  "devDependencies": {},
+  "devDependencies": {
+    "nlp-corpus": "^1.0.1"
+  },
   "scripts": {
     "start": "budo ./src/index.js --live"
   },
