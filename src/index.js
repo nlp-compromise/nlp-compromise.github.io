@@ -1,9 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
+'use strict';
+const React = require('react')
+const ReactDOM = require('react-dom')
+const Main = require('./main')
+
 
 ReactDOM.render(
-  <App />,
-  document.getElementById('root')
+  React.createElement(Main, null),
+  document.body
 );
