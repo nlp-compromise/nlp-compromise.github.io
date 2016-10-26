@@ -1,13 +1,10 @@
-'use strict';
-const r = require('r-dom');
-const React = require('react')
-const ReactDOM = require('react-dom')
-const firebase = require('firebase');
-const Textarea = require('react-textarea-autosize').default
-const Cmd = require('./command')
-const Output = require('./output')
-const nlp = require('nlp_compromise')
-// import 'antd/dist/antd.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import firebase from 'firebase';
+import Textarea from 'react-textarea-autosize'
+// import Cmd from './command'
+// import Output from './output'
+// import nlp from 'nlp_compromise'
 
 // Initialize Firebase
 const config = {
@@ -35,33 +32,27 @@ class Main extends React.Component {
   }
   render() {
     let state = this.state
-    let result = nlp(state.text)
-    return r.div({}, [
-      r(Textarea, {
-        value: state.text,
-        maxRows: 8,
-        style: {
-          width: '80%',
-          margin: '9%',
-          padding: 8,
-          color: 'grey',
-          borderRadius: 5
-        },
-        onChange: (e) => this.setState({
-          text: e.target.value
-        })
-      }),
-      r(Cmd),
-      r(Output, {
-        result: result
-      })
-    ])
+    // let result = nlp(state.text)
+    return (
+      <div>
+        <Textarea
+      value={state.text}
+      maxRows={8}
+      style= {{
+        width: '80%',
+        margin: '9%',
+        padding: 8,
+        color: 'grey',
+        borderRadius: 5
+      }}
+      onChange= {(e) => this.setState({
+        text: e.target.value
+      })}/>
+    </div>
+    )
   }
 }
-module.exports = Main
-
-
 ReactDOM.render(
-  React.createElement(Main, null),
-  document.body
+  <Main />,
+  document.getElementById('root')
 );
