@@ -2,10 +2,12 @@
 const r = require('r-dom');
 const React = require('react')
 const ReactDOM = require('react-dom')
-const reqwest = require('reqwest')
 const firebase = require('firebase');
 const Textarea = require('react-textarea-autosize').default
 const Cmd = require('./command')
+const Output = require('./output')
+const nlp = require('nlp_compromise')
+// import 'antd/dist/antd.css';
 
 // Initialize Firebase
 const config = {
@@ -33,6 +35,7 @@ class Main extends React.Component {
   }
   render() {
     let state = this.state
+    let result = nlp(state.text)
     return r.div({}, [
       r(Textarea, {
         value: state.text,
@@ -48,7 +51,10 @@ class Main extends React.Component {
           text: e.target.value
         })
       }),
-      r(Cmd)
+      r(Cmd),
+      r(Output, {
+        result: result
+      })
     ])
   }
 }
