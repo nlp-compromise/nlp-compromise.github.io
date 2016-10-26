@@ -5,7 +5,7 @@ import Radium from 'radium'
 import Firebase from './firebase'
 import Bottom from './bottom'
 // import Output from './output'
-// import nlp from 'nlp_compromise'
+import nlp from 'nlp_compromise'
 
 class Main extends React.Component {
   constructor() {
@@ -22,7 +22,7 @@ class Main extends React.Component {
   }
   render() {
     let state = this.state
-    // let result = nlp(state.text)
+    let result = nlp(state.text)
     return (
       <div>
         <Textarea
@@ -38,7 +38,7 @@ class Main extends React.Component {
       onChange={(e) => this.setState({
         text: e.target.value
       })}/>
-      <Bottom/>
+      <Bottom result={result}/>
     </div>
     )
   }
