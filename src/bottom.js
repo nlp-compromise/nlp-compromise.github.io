@@ -75,9 +75,10 @@ class Bottom extends React.Component {
   plaintext() {
     let {props, css} = this
     let r = props.result
+    let str = r.plaintext()
     return (
       <pre style={css.plaintext}>
-        {r.plaintext()}
+        {str}
       </pre>
     )
   }
@@ -86,13 +87,15 @@ class Bottom extends React.Component {
     let r = props.result
 
     const states = {
-      Plaintext: this.plaintext(),
-      Html: <Html html={r.asHtml()}/>,
-      AsArray: <AsArray arr={[]}/>,
-      Diff: <Diff arr={[]}/>
+      Plaintext: () => this.plaintext(),
+      Html: () => <Html result={r}/>,
+      asArray: () => <AsArray result={r}/>,
+      Diff: () => <Diff result={r} cmp={this.props.cmp}/>
     }
     let output = null
-
+    if (r && states[state.tab]) {
+      output = states[state.tab]()
+    }
     return (
       <div style={css.container}>
         <div style={css.tabs}>

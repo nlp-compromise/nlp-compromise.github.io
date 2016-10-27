@@ -4,6 +4,7 @@ import Textarea from 'react-textarea-autosize'
 import Radium from 'radium'
 import Firebase from './firebase'
 import Bottom from './bottom'
+import debounce from './debounce'
 // import Output from './output'
 import nlp from 'nlp_compromise'
 
@@ -11,7 +12,8 @@ class Main extends React.Component {
   constructor() {
     super()
     this.state = {
-      text: 'placeholder'
+      text: 'his name is John smith',
+      result: nlp('')
     }
     this.css = {
 
@@ -19,10 +21,27 @@ class Main extends React.Component {
     this.db = new Firebase()
     let src = 'sotu/bush_1989'
     this.db.fetchText(src, this)
+    this.onType = this.onType.bind(this)
+    this.reParse = this.reParse.bind(this)
+    this.reParse = debounce(this.reParse, 300)
+    this.reParse()
+  }
+  onType(e) {
+    this.setState({
+      text: e.target.value
+    })
+    this.reParse()
+  }
+  reParse() {
+    console.time('parse')
+    let state = this.state
+    this.setState({
+      result: nlp(state.text)
+    })
+    console.timeEnd('parse')
   }
   render() {
     let state = this.state
-    let result = nlp(state.text)
     return (
       <div>
         <Textarea
@@ -35,10 +54,8 @@ class Main extends React.Component {
         color: 'grey',
         borderRadius: 5
       }}
-      onChange={(e) => this.setState({
-        text: e.target.value
-      })}/>
-      <Bottom result={result}/>
+      onChange={this.onType}/>
+      <Bottom result={state.result} cmp={this}/>
     </div>
     )
   }

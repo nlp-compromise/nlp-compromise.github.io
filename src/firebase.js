@@ -17,9 +17,11 @@ class Firebase {
   }
   fetchText(src, cmp) {
     this.db.ref('/texts/' + src).once('value').then((res) => {
+      console.log('fetched-' + src)
       cmp.setState({
         text: res.val()
       })
+      cmp.reParse()
     });
 
   }

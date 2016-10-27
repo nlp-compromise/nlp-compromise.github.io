@@ -10,8 +10,12 @@ class Html extends React.Component {
     super(props);
     this.state = {}
     this.css = {}
+    console.time('ashtml')
+    // this.props.result.asHtml()
+    console.timeEnd('ashtml')
   }
   render() {
+    console.log('hi')
     let {props, state, css} = this
     return (
       <div>
