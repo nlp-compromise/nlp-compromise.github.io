@@ -1,5 +1,5 @@
 'use strict';
-const corpus = require('nlp-corpus')
+const corpus = require('nlp-corpus');
 const firebase = require('firebase');
 const config = {
   apiKey: 'AIzaSyCJPPhmg_nc8PluHrmnfD3viyMTSW1x0Fs',
@@ -10,11 +10,13 @@ const config = {
 };
 firebase.initializeApp(config);
 
-let texts = {}
-texts.sotu = corpus.parsed.sotu()
-texts.friends = corpus.text.friends()
-texts.poe = corpus.parsed.poe()
-texts.hardy = corpus.parsed.hardy()
-texts.erowid = corpus.parsed.erowid()
+let texts = {};
+texts.weezer = corpus.parsed.weezer();
+texts.fleetwood_mac = corpus.parsed.fleetwood_mac();
+texts.state_of_the_union = corpus.parsed.sotu();
+texts.friends = corpus.text.friends();
+// texts.poe = corpus.parsed.poe()
+// texts.hardy = corpus.parsed.hardy()
+// texts.erowid = corpus.parsed.erowid()
 
 firebase.database().ref('/texts').set(texts);
