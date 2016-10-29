@@ -42,7 +42,7 @@ class Main extends React.Component {
     this.setState({
       src: src
     });
-    this.db.fetchText(this.state.src, this);
+    this.db.fetchText(src, this);
   }
   onType(e) {
     this.setState({

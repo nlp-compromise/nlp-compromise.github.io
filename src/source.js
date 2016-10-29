@@ -33,15 +33,10 @@ const sources = {
     'bush_2001',
     'bush_2002',
     'bush_2003',
-    'bush_2004',
-    'bush_2005',
     'bush_2006',
     'bush_2007',
     'bush_2008',
     'obama_2009',
-    'obama_2010',
-    'obama_2011',
-    'obama_2012',
     'obama_2013',
     'obama_2014',
     'obama_2015'
@@ -79,18 +74,77 @@ selected_dot
   background-color:steelblue
   height:8
   width:8
+choose
+  position:relative
+  display:block
+  width:400
+  marginLeft:25
+choice
+  background-color:white
+  color:steelblue
+  cursor:pointer
+  margin:5
+  line-height:130%
+  border-bottom:1px dashed lightsteelblue
+  :hover
+    background-color:steelblue
+    color:white
+arrow
+  border-color:#999 transparent transparent
+  border-style:solid
+  border-width:5px 5px 0
+  content:' '
+  display:block
+  height:0
+  margin-top:-ceil(2.5)
+  width:0
+arrow_right
+  color:#999
+  margin:15
+  font-size:12
 `;
 
 class Source extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      expand: false
+    };
     this.css = style;
     this.makeDots = this.makeDots.bind(this);
+    this.choose = this.choose.bind(this);
+    this.showOne = this.showOne.bind(this);
   }
-  makeDots() {
+  makeChoice(k) {
+    this.setState({
+      expand: false
+    });
+    let arr = sources[k];
+    let r = parseInt(Math.random() * arr.length - 1, 10);
+    let src = k + '/' + arr[r];
+    console.log('==' + src);
+    this.props.cmp.setText(src);
+  }
+  choose() {
     let {props, css} = this;
-    let [ns, title] = props.src.split('/');
+    let choices = Object.keys(sources).map((k, i) => {
+      return (
+        <div key={i} style={css.choice} onClick={this.makeChoice.bind(this, k)}>
+        {k}
+        {this.makeDots(k)}
+        </div>
+        );
+    });
+    return (
+      <div style={css.choose}>
+        <span style={[css.arrow, css.up_arrow]}/>
+        {choices}
+      </div>
+      );
+  }
+  makeDots(src) {
+    let {props, css} = this;
+    let [ns, title] = src.split('/');
     let dots = sources[ns] || [];
     dots = dots.map((d) => {
       let more = {};
@@ -101,19 +155,32 @@ class Source extends React.Component {
     });
     return <span style={css.dots}>{dots}</span>;
   }
-  render() {
-    let {props, css} = this;
-    console.log(props.src);
+  showOne() {
+    let {props, state, css} = this;
     let ns = props.src.replace(/\/.*/, '');
     let title = ns.replace(/_/g, ' ');
     return (
-      <div>
-        {'🔽'}
-        <span style={css.src}>{title + ':'}</span>
+      <div >
+        <span onClick={() => this.setState({
+        expand: true
+      })}>
+          <span style={css.arrow_right}>{'▶️'}</span>
+          <span style={css.src}>
+            {'texts/' + title}
+          </span>
+        </span>
         {this.makeDots(props.src)}
       </div>
       );
   }
+  render() {
+    let {props, state, css} = this;
+    if (!state.expand) {
+      return this.showOne();
+    }
+    return this.choose();
+  }
+
 }
 Source = Radium(Source);
 module.exports = Source;
