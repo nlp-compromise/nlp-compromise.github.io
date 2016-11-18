@@ -146,12 +146,12 @@ class Source extends React.Component {
     let {props, css} = this;
     let [ns, title] = src.split('/');
     let dots = sources[ns] || [];
-    dots = dots.map((d) => {
+    dots = dots.map((d, i) => {
       let more = {};
       if (title === d) {
         more = css.selected_dot;
       }
-      return <span style={[css.dot, more]} onClick={() => props.cmp.setText(ns + '/' + d)}/>;
+      return <span key={i} style={[css.dot, more]} onClick={() => props.cmp.setText(ns + '/' + d)}/>;
     });
     return <span style={css.dots}>{dots}</span>;
   }
