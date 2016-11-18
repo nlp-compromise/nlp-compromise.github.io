@@ -15,6 +15,7 @@
     "nlp_compromise": "nlp-compromise/nlp_compromise#v7",
     "radium": "^0.18.1",
     "react": "^15.3.2",
+    "react-codemirror": "^0.2.6",
     "react-dom": "^15.3.2",
     "react-styling": "^1.5.1",
     "react-textarea-autosize": "^4.0.5"
