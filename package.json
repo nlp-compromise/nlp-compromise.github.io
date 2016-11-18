@@ -15,7 +15,7 @@
     "highlight.js": "^9.7.0",
     "highlightjs": "^8.7.0",
     "js-beautify": "^1.6.4",
-    "nlp_compromise": "nlp-compromise/nlp_compromise#v7",
+    "nlp_compromise": "next",
     "radium": "^0.18.1",
     "react": "^15.3.2",
     "react-codemirror": "^0.2.6",

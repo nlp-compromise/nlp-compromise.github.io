@@ -29,8 +29,8 @@ class Diff extends React.Component {
     let cmp = this.props.cmp;
     let r = cmp.state.result;
     let oldStr = cmp.state.text;
-    let newStr = r.normal();
-    this.state.diff = diffWords(oldStr, newStr);
+    let newStr = r.plaintext();
+    this.state.diff = diffWords(newStr, oldStr);
     this.setState(this.state);
   }
   render() {

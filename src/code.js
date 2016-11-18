@@ -3,6 +3,8 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import Codemirror from 'react-codemirror'
 import formatter from 'js-beautify'
+import nlp from 'nlp_compromise';
+window.nlp = nlp
 import './lib/codemirror.css';
 import './lib/mytheme.css';
 import 'codemirror/mode/javascript/javascript'
@@ -25,17 +27,8 @@ const style = styler`
     border:2px solid darkred;
 
 `
-let placeholder = `var d=3;
-//fns
-for(var x=3; x<=6; x++){
-var print=funcftion(s){
-console.log(s)
-}
-print(x)
-}
-// nlp(mything).match('#lkjsdfj').filter(()=>{})
-// alert('hi')
-return 'hello'
+let placeholder = `var context = {}
+return nlp(myText, context).match('#Verb')
 `
 
 
@@ -53,9 +46,10 @@ class Code extends React.Component {
     this.updateCode = this.updateCode.bind(this)
     this.onFocusChange = this.onFocusChange.bind(this)
     this.eval = this.eval.bind(this)
+  }
+  componentDidRecieveProps() {
     this.eval()
   }
-
   formatCode(code) {
     return formatter(code, {
       indent_size: 2
@@ -69,13 +63,21 @@ class Code extends React.Component {
   }
 
   eval() {
-    let {state} = this
-    let code = state.code || ''
-    code = '(function(){' + code + '})()'
+    console.log('-eval')
+    let {state, props} = this
+    window.myText = props.text || ''
     try {
+      let code = state.code || ''
+      code = `(function(){
+        ` + code + `
+      })()`
       state.result = eval(code)
+      console.log(state.result)
       state.error = null
       state.valid = true
+      let cmpState = props.cmp.state
+      cmpState.result = state.result
+      props.cmp.setState(cmpState)
     } catch (e) {
       state.result = null
       state.error = e.toString()

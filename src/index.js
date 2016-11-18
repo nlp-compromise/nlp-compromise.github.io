@@ -69,7 +69,7 @@ class Main extends React.Component {
       maxRows={8}
       style={css.textarea}
       onChange={this.onType}/>
-      <Code />
+      <Code text={state.text} cmp={this}/>
       <Bottom result={state.result} cmp={this}/>
     </div>
       );
