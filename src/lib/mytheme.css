@@ -2,7 +2,7 @@
   Based on Base16 Default Light by     Chris Kempson (http://chriskempson.com)
 */
 
-.cm-s-spencertheme.CodeMirror { background: white; color: grey; border:1px solid lightgrey; font-size:14px;  height: auto;}
+.cm-s-spencertheme.CodeMirror { background: white; color: grey; font-size:14px;  height: auto; max-width:700px;}
 .cm-s-spencertheme div.CodeMirror-selected { background: powderblue;}
 .cm-s-spencertheme .CodeMirror-line::selection, .cm-s-spencertheme .CodeMirror-line > span::selection, .cm-s-spencertheme .CodeMirror-line > span > span::selection { background: lightsteelblue; }
 .cm-s-spencertheme .CodeMirror-line::-moz-selection, .cm-s-spencertheme .CodeMirror-line > span::-moz-selection, .cm-s-spencertheme .CodeMirror-line > span > span::-moz-selection { background: lightsteelblue; }
@@ -30,3 +30,8 @@
 
 .cm-s-spencertheme .CodeMirror-activeline-background { background: lightgrey; }
 .cm-s-spencertheme .CodeMirror-matchingbracket { text-decoration: underline; color: white !important; }
+
+.line-error {
+    background: #FBC2C4 !important;
+    color: #8a1f11 !important;
+}
