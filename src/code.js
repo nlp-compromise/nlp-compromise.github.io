@@ -1,4 +1,4 @@
-'use strict';
+/* eslint-disable */
 import React from 'react';
 import styler from 'react-styling/flat';
 import Codemirror from 'react-codemirror'
@@ -102,7 +102,23 @@ class Code extends React.Component {
       styleActiveLine: true,
       tabSize: 2,
       gutters: ["CodeMirror-lint-markers"],
-      lint: true
+      // lint: function(text, options, cm) {
+      //   console.log(text)
+      //   //  var linter = cm.getHelper(CodeMirror.Pos(0, 0), 'lint');
+      //   //  return linter(text, options);
+      // },
+      lint: true,
+//       //options.lintWith = CodeMirror.javascriptValidator;
+//       lintWith : javascriptValidatorWithOptions({
+//         asi: true,
+//         laxcomma: true,
+//         laxbreak: true      lint: true,
+// ,
+//         loopfunc: true,
+//         smarttabs: true,
+//         multistr: true,
+//         sub: true
+//       })
     };
     let border = css.valid
     if (!state.valid) {
