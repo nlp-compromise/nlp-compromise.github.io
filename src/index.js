@@ -69,7 +69,7 @@ class Main extends React.Component {
           })}
         </div>
         <div style={css.headline3}>
-          {'now it\'s much easier'}
+          {'and now it\'s much easier'}
         </div>
       </div>
     );
