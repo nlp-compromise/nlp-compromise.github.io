@@ -8,4 +8,4 @@ https://nlp-compromise.github.io/expo
 #firebase hosted
 https://nlp-expo.firebaseapp.com/
 
-`gh-pages -d build`
+`gh-pages -d build --branch master`
