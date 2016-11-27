@@ -2,77 +2,77 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Textarea from 'react-textarea-autosize';
 import Radium from 'radium';
-import Firebase from './firebase';
-import Bottom from './bottom';
-import debounce from './debounce';
-import Source from './source';
-import Code from './code';
 import styler from 'react-styling/flat';
-import nlp from 'nlp_compromise';
+import word from './word';
+import './index.css'
 
 const style = styler`
 container
-  width: 80%
-  margin: 9%
+  marginTop: 9%
   padding: 8
-textarea
-  color: grey
-  width:100%
-  borderRadius: 5
+headline:
+  color:steelblue;
+  font-size:34
+  marginLeft:20%
+headline2
+  color:lightgrey
+  font-size:30
+  marginLeft:25%
+headline3
+  color:palevioletred
+  font-size:30
+  marginLeft:25%
+demo
+  color:dimgrey
+  font-size:50
+  margin:50
+  marginLeft:10%
+  font-family:Inconsolata
+
 `;
 
 class Main extends React.Component {
   constructor() {
     super();
-    this.state = {
-      text: 'his name is John smith',
-      result: nlp(''),
-      // src: 'sotu/bush_1989',
-      src: 'weezer/buddyholly'
-    };
+    this.state = {};
     this.css = style;
-    this.db = new Firebase();
-    this.db.fetchText(this.state.src, this);
-    this.onType = this.onType.bind(this);
-    this.reParse = this.reParse.bind(this);
-    this.setText = this.setText.bind(this);
-    this.reParse = debounce(this.reParse, 300);
-    this.reParse();
-  }
-  setText(src) {
-    this.setState({
-      src: src
-    });
-    this.db.fetchText(src, this);
-  }
-  onType(e) {
-    this.setState({
-      text: e.target.value
-    });
-    this.reParse();
-  }
-  reParse() {
-    console.time('parse');
-    let state = this.state;
-    this.setState({
-      result: nlp(state.text)
-    });
-    console.timeEnd('parse');
   }
   render() {
-    let {state, css} = this;
+    let {state,css} = this;
     return (
       <div style={css.container}>
-        <Source src={state.src} cmp={this}/>
-        <Textarea
-      value={state.text}
-      maxRows={8}
-      style={css.textarea}
-      onChange={this.onType}/>
-      <Code text={state.text} cmp={this}/>
-      <Bottom result={state.result} cmp={this}/>
-    </div>
-      );
+        <div style={css.headline}>
+          {'using language is hard'}
+        </div>
+        <div style={css.headline2}>
+          {'\'cuz there\'s a gazillion words'}
+        </div>
+        <div style={[css.demo, { fontStyle: 'italic'}]}>
+          {`‘she sells seashells by the seashore’`}
+        </div>
+        <div style={css.headline}>
+          {'but,'}
+        </div>
+        <div style={css.headline2}>
+          {'there\'s just a few types'}
+        </div>
+        <div style={css.demo}>
+          {[
+            ['she','Pronoun'],
+            ['sells','Verb'],
+            ['seashells','Plural'],
+            ['by','Preposition'],
+            ['the','Determiner'],
+            ['seashore','Singular'],
+          ].map((a)=>{
+            return word(a[0], a[1])
+          })}
+        </div>
+        <div style={css.headline3}>
+          {'now it\'s much easier'}
+        </div>
+      </div>
+    );
   }
 }
 Main = Radium(Main);

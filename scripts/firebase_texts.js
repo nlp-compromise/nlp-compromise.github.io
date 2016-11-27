@@ -11,10 +11,10 @@ const config = {
 firebase.initializeApp(config);
 
 let texts = {};
-texts.weezer = corpus.parsed.weezer();
-texts.fleetwood_mac = corpus.parsed.fleetwood_mac();
-texts.state_of_the_union = corpus.parsed.sotu();
-texts.friends = corpus.text.friends();
+texts.weezer = corpus.weezer.parsed();
+texts.fleetwood_mac = corpus.fleetwood_mac.parsed();
+texts.state_of_the_union = corpus.sotu.parsed();
+texts.friends = corpus.friends.parsed();
 // texts.poe = corpus.parsed.poe()
 // texts.hardy = corpus.parsed.hardy()
 // texts.erowid = corpus.parsed.erowid()
