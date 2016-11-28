@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Textarea from 'react-textarea-autosize';
+// import Textarea from 'react-textarea-autosize';
 import Radium from 'radium';
-import nlp_compromise from 'nlp_compromise';
+import nlp from 'nlp_compromise';
 import styler from 'react-styling/flat';
-import word from './word';
+import Result from './result';
 import AutosizeInput from 'react-input-autosize'
 import './index.css'
 
@@ -50,15 +50,18 @@ class Main extends React.Component {
   constructor() {
     super();
     this.state = {
-      text:'she sells seashells by the seashore'
+      text:'john is nice and cool'
     };
+    this.state.result=nlp(this.state.text)
     this.css = style;
     this.onChange=this.onChange.bind(this)
   }
   onChange(e){
-    this.setState({
-      text:e.target.value
-    })
+    let {state} = this;
+    state.text=e.target.value||''
+    state.result=nlp(state.text)
+    console.log(state.result)
+    this.setState(state)
   }
   componentDidMount(){
     setTimeout(()=>{
@@ -68,6 +71,7 @@ class Main extends React.Component {
 
   render() {
     let {state,css} = this;
+    let pastTense=state.result.clone().verbs().toPast()
 
     return (
       <div style={css.container}>
@@ -94,54 +98,18 @@ class Main extends React.Component {
           {'there\'s just a few types'}
         </div>
         <div style={css.demo}>
-          {[
-            ['she','Pronoun'],
-            ['sells','Verb'],
-            ['seashells','Plural'],
-            ['by','Preposition'],
-            ['the','Determiner'],
-            ['seashore','Singular'],
-          ].map((a)=>{
-            return word(a[0], a[1])
-          })}
+          <Result result={state.result}/>
         </div>
         <div style={css.headline3}>
           {'and now it\'s much easier'}
         </div>
 
         <div style={css.transform}>
-          {'.toSingular():'}
+          {'past tense:'}
         </div>
-        <div style={[css.demo, {opacity:0.5, marginTop:5}]}>
-          {[
-            ['she','Pronoun'],
-            ['sells','Verb', true],
-            ['a','Determiner', true],
-            ['seashell','Singular'],
-            ['by','Preposition'],
-            ['the','Determiner'],
-            ['seashore','Singular'],
-          ].map((a)=>{
-            return word(a[0], a[1])
-          })}
+        <div style={[css.demo, {fontSize:30, marginTop:0}]}>
+          <Result result={pastTense}/>
         </div>
-
-        <div style={css.transform}>
-          {'.toPastTense():'}
-        </div>
-        <div style={[css.demo, {opacity:0.5, marginTop:5}]}>
-          {[
-            ['she','Pronoun'],
-            ['sold','Verb', true],
-            ['seashells','Plural'],
-            ['by','Preposition'],
-            ['the','Determiner'],
-            ['seashore','Singular'],
-          ].map((a)=>{
-            return word(a[0], a[1])
-          })}
-        </div>
-
 
 
       </div>
