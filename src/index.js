@@ -5,6 +5,7 @@ import Radium from 'radium';
 import nlp_compromise from 'nlp_compromise';
 import styler from 'react-styling/flat';
 import word from './word';
+import AutosizeInput from 'react-input-autosize'
 import './index.css'
 
 const style = styler`
@@ -30,12 +31,11 @@ demo
   font-size:50
   font-family:Inconsolata
 input:
-  fontStyle: 'italic'
   border:none
-  width:1000
   color:dimgrey
   font-size:50
   font-family:Inconsolata
+  border-bottom:1px dashed lightgrey
 transform
   marginTop:80
   marginBottom:0
@@ -60,8 +60,15 @@ class Main extends React.Component {
       text:e.target.value
     })
   }
+  componentDidMount(){
+    setTimeout(()=>{
+      this.refs.input.updateInputWidth()
+    },50)
+  }
+
   render() {
     let {state,css} = this;
+
     return (
       <div style={css.container}>
         <div style={css.headline}>
@@ -72,7 +79,12 @@ class Main extends React.Component {
         </div>
         <div style={css.demo}>
           {'‘'}
-          <input type="text" value={state.text} style={css.input} onChange={this.onChange}/>
+          <AutosizeInput
+            ref={'input'}
+            value={state.text}
+            inputStyle={css.input}
+            onChange={this.onChange}
+          />
           {'’'}
         </div>
         <div style={css.headline}>
