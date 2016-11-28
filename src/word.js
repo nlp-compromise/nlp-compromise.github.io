@@ -10,6 +10,10 @@ const color={
 }
 
 const word=(str, tag)=>{
+  let container={
+    position:'relative'
+  }
+  let tagName={}
   let css={
     color:'dimgrey',
     fontSize:50,
@@ -18,11 +22,19 @@ const word=(str, tag)=>{
   }
   if(color[tag]){
     css.borderBottom='4px solid '+color[tag]
+    tagName={
+      position:'absolute',
+      bottom:-20,
+      right:20,
+      color:color[tag],
+      fontSize:11
+    }
   }
  return (
-   <span>
+   <span style={container}>
      <span style={css}>{str.trim()}</span>
      <span style={{fontSize:50}}>{' '}</span>
+     <span style={tagName}>{tag}</span>
    </span>
  )
 }
