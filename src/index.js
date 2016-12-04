@@ -7,7 +7,7 @@ import style from './style'
 import Result from './result';
 import Logo from './logo';
 import AutosizeInput from 'react-input-autosize'
-import Textarea from 'react-textarea-autosize';
+import Textarea from './textarea';
 import './index.css'
 
 class Main extends React.Component {
@@ -48,6 +48,7 @@ class Main extends React.Component {
           <div style={css.headline2}>
             {'\'and there\'s a gazillion words'}
           </div>
+          {/*
           <div style={css.demo}>
             {'‘'}
             <AutosizeInput
@@ -79,7 +80,6 @@ class Main extends React.Component {
           <div style={css.headline3}>
             {'and now it\'s much easier'}
           </div>
-
           <div style={css.transform}>
             {'to past tense:'}
           </div>
@@ -99,12 +99,8 @@ class Main extends React.Component {
         }]}>
             <Result result={pastTense}/>
           </div>
-
-          <Textarea
-        value={state.text}
-        maxRows={8}
-        style={css.textarea}
-        onChange={this.onType}/>
+*/}
+          <Textarea />
 
         </div>
       </div>

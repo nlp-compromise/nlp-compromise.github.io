@@ -28,7 +28,7 @@ text:
   font-family:Inconsolata
   display:block
 thing:
-  height:4
+  height:2
   background-color:steelblue
   transition: flex-basis 1.2s;
 `
@@ -46,14 +46,13 @@ class Logo extends Component {
     let {state} = this
     setInterval(()=>{
       state.sizes= state.sizes.map((c,i)=>{
-        return parseInt(Math.random()*80, 10)+20
+        return parseInt(Math.random()*100, 10)//+20
       })
       this.setState(state)
     },7000)
   }
   makeThings(){
     let {css, state} = this
-    console.log(state.sizes)
     return state.sizes.map((s,i)=>{
       let theCss={flexBasis:s, backgroundColor:colors[i]}
       return <span key={i} style={[css.thing, theCss]} />
