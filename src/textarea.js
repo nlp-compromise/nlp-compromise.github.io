@@ -9,9 +9,9 @@ import texts from './texts/index'
 const style = styler`
 container
   position:relative
-  margin:50
-  marginLeft:10%
-  max-width:800
+  // margin:50
+  // marginLeft:10%
+  max-width:700
 drop:
   position:absolute;
   color:steelblue;
@@ -59,7 +59,7 @@ class TextThing extends React.Component {
     this.state = {
       whichText: 'freshPrince',
       text: texts['freshPrince'],
-      dropDown:true
+      dropDown:false
     };
     this.state.result = nlp(this.state.text)
     this.css = style;

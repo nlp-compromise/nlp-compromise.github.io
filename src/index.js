@@ -24,7 +24,6 @@ class Main extends React.Component {
     let {state} = this;
     state.text = e.target.value || ''
     state.result = nlp(state.text)
-    console.log(state.result)
     this.setState(state)
   }
   componentDidMount() {
@@ -48,7 +47,6 @@ class Main extends React.Component {
           <div style={css.headline2}>
             {'\'and there\'s a gazillion words'}
           </div>
-          {/*
           <div style={css.demo}>
             {'‘'}
             <AutosizeInput
@@ -99,8 +97,12 @@ class Main extends React.Component {
         }]}>
             <Result result={pastTense}/>
           </div>
-*/}
-          <Textarea />
+
+          <div style={css.freshprince}>
+            <Textarea />
+          </div>
+
+          <div style={css.spacer}/>
 
         </div>
       </div>

@@ -38,6 +38,12 @@ transform
   font-family:Inconsolata
 orange:
   color: #f39c73
+freshprince:
+  position:relative
+  marginTop:100
+  marginLeft:200
+spacer:
+  padding:60
 code:
   color:dimgrey
   display:inline
