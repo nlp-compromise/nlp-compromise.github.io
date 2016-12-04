@@ -60,5 +60,17 @@ code:
   background-color:whitesmoke
   border:1px solid lightgrey;
   border-radius:5
+install:
+  position:relative
+  marginTop:50
+  display:flex
+  flex-flow:center
+  padding:25
+  margin:125
+mode:
+  border:1px solid lightgrey
+  flexGrow:1
+  flex-basis:5
+  margin:20
 `;
 module.exports = style

@@ -8,7 +8,32 @@ import Result from './result';
 import Logo from './logo';
 import AutosizeInput from 'react-input-autosize'
 import Textarea from './textarea';
+import Codemirror from 'react-codemirror'
+import 'codemirror/mode/javascript/javascript'
+import 'codemirror/mode/htmlmixed/htmlmixed'
+import './lib/codemirror.css';
+import './lib/mytheme.css';
 import './index.css'
+
+const examples={
+  node:`import nlp from 'compromise'
+
+var r = nlp('dinosaur').nouns().toPlural();
+var str = r.normal();
+
+console.log(str);
+//'dinosaurs'
+`,
+  html:`<script src="https://unpkg.com/nlp_compromise@latest/builds/nlp_compromise.min.js"></script>
+<script>
+  var r = window.nlp('dinosaur').nouns().toPlural();
+
+  var str = r.normal();
+  document.body.innerHTML= str;
+  //'dinosaurs'
+</script>
+`
+}
 
 class Main extends React.Component {
   constructor() {
@@ -96,14 +121,30 @@ class Main extends React.Component {
       </div>
 
           <div style={[css.headline, {marginTop:20, fontSize:25, marginLeft:100}]}>
-            {'so'}
-            <span style={[css.orange, {marginLeft: 20}]}>
+            {'ok'}
+            <span style={[css.orange, {marginLeft: 15}]}>
               {'um,'}
             </span>
           </div>
           <div style={css.code}>
             {'npm install compromise'}
           </div>
+
+          <div style={css.install}>
+            <div style={css.mode}>
+              <Codemirror
+                options={{ mode:'javascript', theme:'spencertheme', readOnly:true}}
+                value={examples.node}
+                />
+             </div>
+            <div style={css.mode}>
+              <Codemirror
+                options={{ mode:'htmlmixed', theme:'spencertheme', readOnly:true}}
+                value={examples.html}
+              />
+             </div>
+          </div>
+
 
           <div style={css.freshprince}>
             <Textarea />
