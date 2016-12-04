@@ -12,6 +12,8 @@ tagName:
   fontSize:11
 demo
   color:dimgrey
+  marginTop:0
+  padding:0
   font-family:Inconsolata
 `;
 

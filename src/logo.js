@@ -14,7 +14,7 @@ const colors = [
 const style = styler`
 container:
   position:relative
-  width:110px
+  width:1210px
   padding:20
   text-align:center
 bars:
@@ -28,7 +28,7 @@ text:
   font-family:Inconsolata
   display:block
 thing:
-  height:2
+  height:600
   background-color:steelblue
   transition: flex-basis 1.2s;
 `
@@ -37,19 +37,19 @@ class Logo extends Component {
   constructor(props) {
     super(props);
     this.state={
-      sizes:[80,60,20,80,70]
+      sizes:[180,160,120,180,170]
     }
     this.css = style
     this.makeThings=this.makeThings.bind(this)
   }
   componentDidMount(){
     let {state} = this
-    setInterval(()=>{
-      state.sizes= state.sizes.map((c,i)=>{
-        return parseInt(Math.random()*100, 10)//+20
-      })
-      this.setState(state)
-    },7000)
+    // setInterval(()=>{
+    //   state.sizes= state.sizes.map((c,i)=>{
+    //     return parseInt(Math.random()*200, 10)//+20
+    //   })
+    //   this.setState(state)
+    // },19000)
   }
   makeThings(){
     let {css, state} = this
@@ -63,7 +63,7 @@ class Logo extends Component {
     return (
       <div style={css.container}>
         <div style={css.text}>
-          {'compromise'}
+          {'a compromise can go pretty far'}
         </div>
         <div style={css.bars}>
           {this.makeThings()}

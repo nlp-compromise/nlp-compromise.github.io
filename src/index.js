@@ -47,6 +47,20 @@ class Main extends React.Component {
           <div style={css.headline2}>
             {'\'and there\'s a gazillion words'}
           </div>
+          <div style={css.headline}>
+            <span style={css.orange}>{'compromise'}</span>
+            {' interprets and '}
+            <b>{'pre-parses'}</b>
+            {' words'}
+          </div>
+          <div style={css.headline3}>
+            {'so that it\'s much nicer.'}
+          </div>
+
+
+          <div style={css.transform}>
+            {'so'}
+          </div>
           <div style={css.demo}>
             {'‘'}
             <AutosizeInput
@@ -57,45 +71,38 @@ class Main extends React.Component {
         />
             {'’'}
           </div>
-          <div style={css.headline}>
-            {'but'}
-            <span style={[css.orange, {
-          marginLeft: 20
-        }]}>
-              {'um,'}
-            </span>
-          </div>
-          <div style={[css.headline, {
-        }]}>
 
-          </div>
-          <div style={css.code}>
-            {'npm install compromise'}
+          <div style={css.transform}>
+            {'becomes:'}
           </div>
           <div style={css.demo}>
             <Result result={state.result}/>
           </div>
-          <div style={css.headline3}>
-            {'and now it\'s much easier'}
-          </div>
-          <div style={css.transform}>
+
+<div style={{marginLeft:200}}>
+          <div style={[css.transform]}>
             {'to past tense:'}
           </div>
-          <div style={[css.demo, {
-          fontSize: 30,
-          marginTop: 0
-        }]}>
+          <div style={[css.demo, {fontSize: 20, marginTop: 0 }]}>
             <Result result={pastTense}/>
           </div>
-
           <div style={css.transform}>
             {'to negative:'}
           </div>
-          <div style={[css.demo, {
-          fontSize: 30,
-          marginTop: 0
-        }]}>
+          <div style={[css.demo, {fontSize: 20, marginTop: 0 }]}>
             <Result result={pastTense}/>
+          </div>
+
+      </div>
+
+          <div style={[css.headline, {marginTop:20, fontSize:25, marginLeft:100}]}>
+            {'so'}
+            <span style={[css.orange, {marginLeft: 20}]}>
+              {'um,'}
+            </span>
+          </div>
+          <div style={css.code}>
+            {'npm install compromise'}
           </div>
 
           <div style={css.freshprince}>

@@ -2,7 +2,7 @@ import styler from 'react-styling/flat';
 
 const style = styler`
 container
-  marginTop: 9%
+  marginTop: 50
   padding: 8
 headline:
   color:steelblue;
@@ -16,9 +16,11 @@ headline3
   color:palevioletred
   font-size:30
   marginLeft:25%
+  marginTop:25
 demo
-  margin:50
-  marginLeft:10%
+  margin:15
+  marginLeft:50
+  marginBottom:35
   color:dimgrey
   font-size:50
   font-family:Inconsolata
@@ -28,8 +30,9 @@ input:
   font-size:50
   font-family:Inconsolata
   border-bottom:1px dashed lightgrey
+  background-color:#fdfeff
 transform
-  marginTop:80
+  marginTop:30
   marginBottom:0
   marginLeft:30
   color:steelblue
@@ -51,8 +54,8 @@ code:
   paddingLeft:7
   paddingRight:7
   position:relative
-  left:25%
-  top:15
+  marginLeft:90
+  top:10
   font-size:22
   background-color:whitesmoke
   border:1px solid lightgrey;
