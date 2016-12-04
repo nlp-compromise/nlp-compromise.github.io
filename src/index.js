@@ -5,6 +5,7 @@ import Radium from 'radium';
 import nlp from 'nlp_compromise';
 import style from './style'
 import Result from './result';
+import Logo from './logo';
 import AutosizeInput from 'react-input-autosize'
 import Textarea from 'react-textarea-autosize';
 import './index.css'
@@ -38,71 +39,74 @@ class Main extends React.Component {
     // let negative = state.result.clone().sentences().toNegative()
     // let plural = state.result.clone().sentences().toPlural()
     return (
-      <div style={css.container}>
-        <div style={css.headline}>
-          {'cuz using language is hard'}
-        </div>
-        <div style={css.headline2}>
-          {'\'and there\'s a gazillion words'}
-        </div>
-        <div style={css.demo}>
-          {'‘'}
-          <AutosizeInput
-      ref={'input'}
-      value={state.text}
-      inputStyle={css.input}
-      onChange={this.onChange}
-      />
-          {'’'}
-        </div>
-        <div style={css.headline}>
-          {'but'}
-          <span style={[css.orange, {
-        marginLeft: 20
-      }]}>
-            {'um,'}
-          </span>
-        </div>
-        <div style={[css.headline, {
-      }]}>
+      <div>
+        <Logo />
+        <div style={css.container}>
+          <div style={css.headline}>
+            {'cuz using language is hard'}
+          </div>
+          <div style={css.headline2}>
+            {'\'and there\'s a gazillion words'}
+          </div>
+          <div style={css.demo}>
+            {'‘'}
+            <AutosizeInput
+        ref={'input'}
+        value={state.text}
+        inputStyle={css.input}
+        onChange={this.onChange}
+        />
+            {'’'}
+          </div>
+          <div style={css.headline}>
+            {'but'}
+            <span style={[css.orange, {
+          marginLeft: 20
+        }]}>
+              {'um,'}
+            </span>
+          </div>
+          <div style={[css.headline, {
+        }]}>
+
+          </div>
+          <div style={css.code}>
+            {'npm install compromise'}
+          </div>
+          <div style={css.demo}>
+            <Result result={state.result}/>
+          </div>
+          <div style={css.headline3}>
+            {'and now it\'s much easier'}
+          </div>
+
+          <div style={css.transform}>
+            {'to past tense:'}
+          </div>
+          <div style={[css.demo, {
+          fontSize: 30,
+          marginTop: 0
+        }]}>
+            <Result result={pastTense}/>
+          </div>
+
+          <div style={css.transform}>
+            {'to negative:'}
+          </div>
+          <div style={[css.demo, {
+          fontSize: 30,
+          marginTop: 0
+        }]}>
+            <Result result={pastTense}/>
+          </div>
+
+          <Textarea
+        value={state.text}
+        maxRows={8}
+        style={css.textarea}
+        onChange={this.onType}/>
 
         </div>
-        <div style={css.code}>
-          {'npm install compromise'}
-        </div>
-        <div style={css.demo}>
-          <Result result={state.result}/>
-        </div>
-        <div style={css.headline3}>
-          {'and now it\'s much easier'}
-        </div>
-
-        <div style={css.transform}>
-          {'to past tense:'}
-        </div>
-        <div style={[css.demo, {
-        fontSize: 30,
-        marginTop: 0
-      }]}>
-          <Result result={pastTense}/>
-        </div>
-
-        <div style={css.transform}>
-          {'to negative:'}
-        </div>
-        <div style={[css.demo, {
-        fontSize: 30,
-        marginTop: 0
-      }]}>
-          <Result result={pastTense}/>
-        </div>
-
-        <Textarea
-      value={state.text}
-      maxRows={8}
-      style={css.textarea}
-      onChange={this.onType}/>
-
       </div>
       );
   }

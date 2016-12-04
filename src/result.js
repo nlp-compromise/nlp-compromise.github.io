@@ -65,7 +65,7 @@ class Result extends React.Component {
 
   render(){
     let {props, css}=this
-    let terms=props.result.terms
+    let terms=props.result.terms()
     return (
       <div style={css.demo}>
        {terms.map(this.doTerm)}
