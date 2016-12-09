@@ -28,7 +28,7 @@ text:
   font-family:Inconsolata
   display:block
 thing:
-  height:600
+  height:300
   background-color:steelblue
   transition: flex-basis 1.2s;
 `
@@ -36,25 +36,28 @@ thing:
 class Logo extends Component {
   constructor(props) {
     super(props);
-    this.state={
-      sizes:[180,160,120,180,170]
+    this.state = {
+      sizes: [180, 160, 120, 180, 170]
     }
     this.css = style
-    this.makeThings=this.makeThings.bind(this)
+    this.makeThings = this.makeThings.bind(this)
   }
-  componentDidMount(){
+  componentDidMount() {
     let {state} = this
-    // setInterval(()=>{
-    //   state.sizes= state.sizes.map((c,i)=>{
-    //     return parseInt(Math.random()*200, 10)//+20
-    //   })
-    //   this.setState(state)
-    // },19000)
+  // setInterval(()=>{
+  //   state.sizes= state.sizes.map((c,i)=>{
+  //     return parseInt(Math.random()*200, 10)//+20
+  //   })
+  //   this.setState(state)
+  // },19000)
   }
-  makeThings(){
+  makeThings() {
     let {css, state} = this
-    return state.sizes.map((s,i)=>{
-      let theCss={flexBasis:s, backgroundColor:colors[i]}
+    return state.sizes.map((s, i) => {
+      let theCss = {
+        flexBasis: s,
+        backgroundColor: colors[i]
+      }
       return <span key={i} style={[css.thing, theCss]} />
     })
   }
@@ -63,7 +66,6 @@ class Logo extends Component {
     return (
       <div style={css.container}>
         <div style={css.text}>
-          {'a compromise can go pretty far'}
         </div>
         <div style={css.bars}>
           {this.makeThings()}

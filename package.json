@@ -26,6 +26,7 @@
     "react-dom": "^15.3.2",
     "react-icons": "^2.2.1",
     "react-input-autosize": "^1.1.0",
+    "react-select": "^1.0.0-rc.2",
     "react-styling": "^1.5.1",
     "react-textarea-autosize": "^4.0.5"
   },

@@ -17,6 +17,10 @@ headline3
   font-size:30
   marginLeft:25%
   marginTop:25
+param:
+  color:palevioletred
+  font-size:30
+  marginLeft:15
 demo
   margin:15
   marginLeft:50
