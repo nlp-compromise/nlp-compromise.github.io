@@ -3,8 +3,8 @@ import styler from 'react-styling/flat';
 import Radium from 'radium';
 import Textarea from 'react-textarea-autosize';
 import nlp from 'nlp_compromise';
-import Down from 'react-icons/lib/go/chevron-down'
 import texts from './texts/index'
+import Down from 'react-icons/lib/go/chevron-down'
 
 const style = styler`
 container

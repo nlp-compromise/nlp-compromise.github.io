@@ -27,12 +27,15 @@ code:
   marginLeft:35%
 param:
   color:palevioletred
-  font-size:22
-  borderBottom:1px solid palevioletred
-  marginLeft:15
+  font-size:18
+  // borderBottom:1px dotted palevioletred
+  marginLeft:5
 param2:
-  font-size:28
+  font-size:30
+  margin:4
   color:#87a9c5
+  fontFamily:'times mono'
+  font-weight:300
 freshprince:
   position:relative
   marginTop:100
@@ -43,11 +46,14 @@ ns:
   color:deepskyblue
 transform
   marginTop:30
+  display:inline
   marginBottom:0
-  marginLeft:60
+  marginLeft:12%
   color:steelblue
   font-size:16
   font-weight:500
+  border-bottom:1px solid steelblue
+mono:
 `
 const code=`Text[
   Terms[ Term, Term, Term, ...],
@@ -150,10 +156,35 @@ class Example extends Component {
         </ul>
 
         <div style={css.transform}>
-          {'change:'}
+          {'transform:'}
         </div>
-
+        <div style={css.headline}>
+          <span style={css.r}>{'r'}</span>
+          {'.sentences( '}
+          <span style={css.param2}>{` 1 `}</span>
+          {' ).append('}
+          <span style={css.param2}>{` \'Basically,\' `}</span>
+          {')'}
         </div>
+        <div style={css.headline}>
+          <span style={css.r}>{'r'}</span>
+          {'.adverbs().remove()'}
+        </div>
+        <div style={css.headline}>
+          <span style={css.r}>{'r'}</span>
+          {'.people().normalize( '}
+          <span style={[css.param2, css.mono]}>{`{case:true}`}</span>
+          {' )'}
+        </div>
+        <div style={css.headline}>
+          <span style={css.r}>{'r'}</span>
+          {'.values().toCardinal()'}
+        </div>
+        <div style={css.headline}>
+          <span style={css.r}>{'r'}</span>
+          {'.places().addCountry()'}
+        </div>
+      </div>
     )
   }
 }
