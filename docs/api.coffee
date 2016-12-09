@@ -125,6 +125,36 @@ module.exports=
 
     sentences:
       normalize:
+        _desc:'add a period or question-mark at the end, titlecase first word'
+      toSingular:
+        _desc:'turn the major nouns in the sentence into singular-form, and correct any of their articles'
+      toPlural:
+        _desc:'turn the major nouns in the sentence into plural-form, and correct any of their articles'
+      toNegative:
+        _desc:'make the positively-stated verbs into negative-form'
+      toPositive:
+        _desc:'turn any negatively-stated verbs into their opposite'
+      toPast:
+        _desc:'conjugate the sentence to past tense'
+      toPresent:
+        _desc:'conjugate the sentence to present tense'
+      toFuture:
+        _desc:'conjugate the sentence to future tense'
+      parse:
+        _desc:'find the sentence-type, see if the sentence is passive'
+
+    questions:
+      normalize:
+        _desc:'add a question-mark at the end'
+      parse:
+        _desc:''
+    statements:
+      normalize:
+        _desc:'add a period to the end'
+      parse:
+        _desc:''
+    fragments:
+      normalize:
         _desc:''
       parse:
         _desc:''
@@ -189,6 +219,10 @@ module.exports=
     dates:
       normalize:
         _desc:'change to long-format date'
+      toShortForm:
+        _desc:'Tuesday -> tues, January -> Jan'
+      toLongForm:
+        _desc:'Tues -> Tuesday, Apr -> April'
       parse:
         _desc:'pull-apart and normalize matches into a structured form'
 
@@ -210,5 +244,13 @@ module.exports=
     values:
       normalize:
         _desc:'convert to numerical, undashed format'
+      toNumber:
+        _desc:'turn \'two hundred\' into 200'
+      toTextValue:
+        _desc:'turn 200 into \'two hundred\''
+      toCardinal:
+        _desc:'turn 25th to 25'
+      toOrdinal:
+        _desc:'turn 55 to 55th'
       parse:
         _desc:'pull-apart and normalize matches into a structured form'
