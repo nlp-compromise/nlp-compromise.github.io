@@ -60,6 +60,8 @@ module.exports=
       _desc:'turn a list of matches into one match'
     clone:
       _desc:'deepCopy this result, so it no longer effects the original'
+    all:
+      _desc:'\'zoom-out\' from the current matches, to the original text'
 
 
   inspect:
