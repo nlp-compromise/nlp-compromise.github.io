@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Radium from 'radium';
 import styler from 'react-styling/flat';
-
 const colors = [
   'palevioletred',
   'steelblue',

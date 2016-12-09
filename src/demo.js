@@ -4,7 +4,31 @@ import AutosizeInput from 'react-input-autosize'
 import styler from 'react-styling/flat';
 import Result from './result';
 import nlp from 'nlp_compromise';
-import style from './style'
+const style = styler`
+demo
+  margin:15
+  marginLeft:50
+  marginBottom:35
+  color:dimgrey
+  font-size:50
+  font-family:Inconsolata
+input:
+  border:none
+  color:dimgrey
+  font-size:50
+  font-family:Inconsolata
+  border-bottom:1px dashed lightgrey
+  background-color:#fdfeff
+transform
+  marginTop:30
+  marginBottom:0
+  marginLeft:30
+  color:steelblue
+  font-size:20
+  font-weight:500
+  font-family:Inconsolata
+`
+
 
 class Demo extends Component {
   constructor(props) {

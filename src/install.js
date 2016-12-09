@@ -1,12 +1,35 @@
 import React, { Component } from 'react';
 import Radium from 'radium';
-import styler from 'react-styling/flat';
-import style from './style'
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
 import './lib/codemirror.css';
 import './lib/mytheme.css';
+import styler from 'react-styling/flat';
+const style = styler`
+code:
+  color:dimgrey
+  display:inline
+  padding:2
+  paddingLeft:7
+  paddingRight:7
+  position:relative
+  marginLeft:90
+  top:10
+  font-size:22
+  background-color:whitesmoke
+  border:1px solid lightgrey;
+  border-radius:5
+install:
+  position:relative
+  marginTop:15
+  marginLeft:10%
+  marginRight:10%
+mode:
+  border:1px solid lightgrey
+  color:lightgrey
+  width:50%
+`
 
 const examples = {
   node: `import nlp from 'compromise'
@@ -17,7 +40,7 @@ var str = r.normal();
 console.log(str);
 //'dinosaurs'
 `,
-  html: `<script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
+  html: `<script src="https://unpkg.com/compromise/builds/compromise.min.js"></script>
 <script>
   var r = window.nlp('dinosaur').nouns().toPlural();
 
@@ -65,14 +88,21 @@ class Install extends Component {
           {'npm install compromise'}
         </div>
 
-        <div style={css.install}>
-          <div style={css.mode}>
-            <Codemirror options={node} value={examples.node}/>
-           </div>
-          <div style={css.mode}>
-            <Codemirror options={html} value={examples.html}/>
-           </div>
-        </div>
+        <table style={css.install}>
+          <tr style={{color:'grey'}}>
+            <td>{'on a server:'}</td>
+            <td>{'or in a client:'}</td>
+          </tr>
+          <tr>
+            <td style={css.mode}>
+              <Codemirror options={node} value={examples.node}/>
+             </td>
+            <td style={css.mode}>
+              <Codemirror options={html} value={examples.html}/>
+             </td>
+          </tr>
+        </table>
+
       </div>
     )
   }
