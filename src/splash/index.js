@@ -7,12 +7,12 @@ import Demo from './demo';
 import Install from './install';
 import Example from './example';
 import styler from 'react-styling/flat';
-import Zap from 'react-icons/lib/go/zap'
-import Bowtie from 'react-icons/lib/io/bowtie'
-import Code from 'react-icons/lib/io/code'
-import Twitter from 'react-icons/lib/fa/twitter'
-import Slack from 'react-icons/lib/fa/slack'
-import GitHub from 'react-icons/lib/fa/github'
+// import Zap from 'react-icons/lib/go/zap'
+// import Bowtie from 'react-icons/lib/io/bowtie'
+// import Code from 'react-icons/lib/io/code'
+// import Twitter from 'react-icons/lib/fa/twitter'
+// import Slack from 'react-icons/lib/fa/slack'
+// import GitHub from 'react-icons/lib/fa/github'
 
 import 'react-select/dist/react-select.css';
 import './index.css'
@@ -69,9 +69,7 @@ class Main extends React.Component {
           </div>
 
           <Demo />
-
           <Install />
-
           <Example />
           <div style={css.spacer}/>
 
@@ -81,8 +79,4 @@ class Main extends React.Component {
   }
 }
 Main = Radium(Main);
-
-ReactDOM.render(
-  <Main />,
-  document.getElementById('root')
-);
+module.exports = Main

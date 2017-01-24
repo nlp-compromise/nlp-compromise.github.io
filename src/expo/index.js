@@ -8,7 +8,7 @@ import debounce from './debounce';
 import Source from './source';
 import Code from './code';
 import styler from 'react-styling/flat';
-import nlp from 'nlp_compromise';
+import nlp from 'compromise';
 
 const style = styler`
 container

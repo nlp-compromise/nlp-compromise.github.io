@@ -18,7 +18,7 @@
     "highlight.js": "^9.7.0",
     "highlightjs": "^8.7.0",
     "js-beautify": "^1.6.4",
-    "nlp_compromise": "next",
+    "compromise": "latest",
     "radium": "^0.18.1",
     "react": "^15.3.2",
     "react-anime": "^0.3.4",

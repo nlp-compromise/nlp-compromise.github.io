@@ -3,7 +3,7 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import Codemirror from 'react-codemirror'
 import formatter from 'js-beautify'
-import nlp from 'nlp_compromise';
+import nlp from 'compromise';
 window.nlp = nlp
 import './lib/codemirror.css';
 import './lib/mytheme.css';
@@ -108,17 +108,17 @@ class Code extends React.Component {
       //   //  return linter(text, options);
       // },
       lint: true,
-//       //options.lintWith = CodeMirror.javascriptValidator;
-//       lintWith : javascriptValidatorWithOptions({
-//         asi: true,
-//         laxcomma: true,
-//         laxbreak: true      lint: true,
-// ,
-//         loopfunc: true,
-//         smarttabs: true,
-//         multistr: true,
-//         sub: true
-//       })
+    //       //options.lintWith = CodeMirror.javascriptValidator;
+    //       lintWith : javascriptValidatorWithOptions({
+    //         asi: true,
+    //         laxcomma: true,
+    //         laxbreak: true      lint: true,
+    // ,
+    //         loopfunc: true,
+    //         smarttabs: true,
+    //         multistr: true,
+    //         sub: true
+    //       })
     };
     let border = css.valid
     if (!state.valid) {

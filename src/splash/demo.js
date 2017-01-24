@@ -3,7 +3,7 @@ import Radium from 'radium';
 import AutosizeInput from 'react-input-autosize'
 import styler from 'react-styling/flat';
 import Result from './result';
-import nlp from 'nlp_compromise';
+import nlp from 'compromise';
 const style = styler`
 demo
   margin:15
@@ -16,7 +16,7 @@ input:
   border:none
   color:dimgrey
   font-size:50
-  font-family:Inconsolata
+  // font-family:Inconsolata
   border-bottom:1px dashed lightgrey
   background-color:#fdfeff
 transform
@@ -57,6 +57,7 @@ class Demo extends Component {
   render() {
     let {css, state} = this
     let pastTense = state.result.clone().verbs().toPast()
+    console.log(state.result)
     return (
       <div>
         <div style={css.transform}>
@@ -71,21 +72,21 @@ class Demo extends Component {
           {'becomes:'}
         </div>
         <div style={css.demo}>
-          <Result result={state.result}/>
+          {/*<Result result={state.result}/>*/}
         </div>
 
         <div style={{marginLeft: 200}}>
           <div style={[css.transform]}>
             {'to past tense:'}
           </div>
-          <div style={[css.demo, {fontSize: 20,marginTop: 0}]}>
-            <Result result={pastTense}/>
+          <div style={[css.demo, { fontSize: 20, marginTop: 0 }]}>
+              {/* <Result result={pastTense}/>*/}
           </div>
           <div style={css.transform}>
             {'to negative:'}
           </div>
-          <div style={[css.demo, {fontSize: 20,marginTop: 0}]}>
-            <Result result={pastTense}/>
+          <div style={[css.demo, { fontSize: 20, marginTop: 0}]}>
+              {/* <Result result={pastTense}/>*/}
           </div>
         </div>
       </div>
