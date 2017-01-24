@@ -4,6 +4,12 @@ import styler from 'react-styling/flat';
 import Textarea from './textarea';
 import Select from 'react-select';
 const style = styler`
+container:
+  marginTop:65
+title:
+  color:steelblue;
+  font-size:34
+  marginLeft:7%
 headline:
   color:steelblue;
   font-size:34
@@ -27,9 +33,10 @@ code:
   marginLeft:35%
 param:
   color:palevioletred
-  font-size:18
+  font-size:22
   // borderBottom:1px dotted palevioletred
   marginLeft:5
+  marginBottom:10
 param2:
   font-size:30
   margin:4
@@ -38,12 +45,12 @@ param2:
   font-weight:300
 freshprince:
   position:relative
-  marginTop:100
+  marginTop:15
   marginLeft:200
 r:
   color:palevioletred
 ns:
-  color:deepskyblue
+  color:#f39c73
 transform
   marginTop:30
   display:inline
@@ -56,14 +63,13 @@ transform
 mono:
 `
 const code = `Text[
-  Terms[ Term, Term, Term, ...],
-  Terms[ Term, Term, Term, ...]
+  Terms[ Term, Term, Term, Term],
+  Terms[ Term, Term, Term]
 ]
 `
 const code2 = `Text[
-  Noun[ Term ],
-  Noun[ Term ],
-  Noun[ Term ]
+  Place[ Term, Term ],
+  Place[ Term ]
 ]
 `
 class Example extends Component {
@@ -85,30 +91,22 @@ class Example extends Component {
       normal: 'bel-air',
       count: 2
     }, {
-      normal: 'b-ball',
-      count: 1
-    }, {
-      normal: 'dice',
-      count: 1
-    }, {
-      normal: 'mirror',
+      normal: 'philidelphia',
       count: 1
     }]
     nouns = nouns.map((n) => {
       return (
-        <li style={css.ns}>
+        <li>
           {n.normal}
-          <span style={{
-          color: 'lightgrey'
-        }}>
-                                            {' - ' + n.count}
-                                          </span>
+          <span style={{color: 'lightgrey'}}>
+            {' - ' + n.count}
+          </span>
         </li>
       )
     })
     return (
-      <div>
-        <div style={css.headline}>
+      <div style={css.container}>
+        <div style={css.title}>
           {'This is the '}
           <img src='https://twemoji.maxcdn.com/36x36/2728.png'/>
           {':'}
@@ -128,91 +126,68 @@ class Example extends Component {
         <div style={css.explain}>
           {'this automatically tokenizes and tags the input'}
         </div>
-        { /* <pre style={css.code}>{code}</pre> */ }
-        <div style={css.transform}>
-          {'render:'}
-        </div>
+        <pre style={css.code}>{code}</pre>
         <div style={css.section}>
           {'if you run this:'}
         </div>
         <div style={css.headline}>
           <span style={css.r}>{'r'}</span>
-          {`.out('text')`}
-        </div>
-        <div style={css.dump}>
-          {'"Now this is a story all about how..."'}
+          {'.out('}
+          <span style={css.param}>{`'text' `}</span>
+          {')'}
         </div>
         <div style={css.explain}>
-          {'you\'ll get a pixel-perfect output of your text'}
+        {'you\'ll get a pixel-perfect output of your text'}
         </div>
-        <div style={css.transform}>
-          {'inspect:'}
+        <div style={css.dump}>
+        {'"Now this is a story all about how..."'}
         </div>
+
+        <p></p>
+
         <div style={css.section}>
-          {'reach into a specific part of the text:'}
+          {'reach into specific parts of the text:'}
         </div>
         <div style={css.headline}>
-          <span style={css.ns}>{'ns = '}</span>
+          <span style={css.ns}>{'some = '}</span>
           <span style={css.r}>{'r'}</span>
-          {'.nouns()'}
+        {'.places()'}
         </div>
         <pre style={css.code}>{code2}</pre>
-        <ul style={{
-        marginLeft: 75
-      }}>
-          <div style={css.section}>
-            {'sort them by frequency:'}
-          </div>
           <div style={css.headline}>
             <span style={css.ns}>
-                                                          {'ns'}
-                                                        </span>
+              {'some'}
+            </span>
             {'.sort('}
-            <span style={css.param2}>{` [`}</span>
-            <span style={css.param}>{`'freq'`}</span>
-            {' , '}
             <span style={css.param}>{`'alpha' `}</span>
-            <span style={css.param2}>{`] `}</span>
             {').slice('}
             <span style={css.param2}>{` 0, `}</span>
-            <span style={css.param2}>{` 3 `}</span>
-            {')'}
+          <span style={css.param2}>{` 2 `}</span>
+            {').data()'}
           </div>
           <ul style={{
         marginLeft: 285,
-        fontSize: 30
+        fontSize: 20,
+        color: 'lightsteelblue'
       }}>
             {nouns}
-          </ul>
         </ul>
-        <div style={css.transform}>
-          {'transform:'}
+        <div style={css.section}>
+          {'transform things how you\'d like:'}
         </div>
         <div style={css.headline}>
           <span style={css.r}>{'r'}</span>
           {'.sentences( '}
-          <span style={css.param2}>{` 1 `}</span>
+          <span style={css.param2}>{` 0 `}</span>
           {' ).append('}
-          <span style={css.param2}>{` 'Basically,' `}</span>
+          <span style={css.param2}>{` 'So,' `}</span>
           {')'}
         </div>
-        <div style={css.headline}>
-          <span style={css.r}>{'r'}</span>
-          {'.adverbs().remove()'}
+        <div style={css.explain}>
+        {'It very carefully changes things,'}
         </div>
-        <div style={css.headline}>
-          <span style={css.r}>{'r'}</span>
-          {'.people().normalize( '}
-          <span style={[css.param2, css.mono]}>{`{case:true}`}</span>
-          {' )'}
-        </div>
-        <div style={css.headline}>
-          <span style={css.r}>{'r'}</span>
-          {'.values().toCardinal()'}
-        </div>
-        <div style={css.headline}>
-          <span style={css.r}>{'r'}</span>
-          {'.places().addCountry()'}
+        <div style={css.dump}>
+        {'"So now this is a story all about how..."'}
         </div>
       </div>
     )

@@ -15,6 +15,7 @@ container:
   position:relative
   width:1210px
   padding:20
+  paddingTop:4
   text-align:center
 bars:
   display:flex

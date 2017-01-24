@@ -26,6 +26,8 @@ const chooseTag = (t) => {
 
     ['Verb', 'palevioletred'],
 
+    ['Adverb', '#f39c73'],
+
     ['Adjective', '#b3d3c6'],
 
     ['Determiner', '#d3c0b3'],
@@ -58,9 +60,15 @@ class Result extends React.Component {
     let color = a[1] || 'dimgrey'
     return (
       <span style={css.container}>
-       <span style={{borderBottom: '4px solid ' + color}}>{t.text.trim()}</span>
-       <span style={{fontSize: 50}}>{' '}</span>
-       <span style={[css.tagName, {color: color}]}>{tag}</span>
+       <span style={{
+        borderBottom: '4px solid ' + color
+      }}>{t.text.trim()}</span>
+       <span style={{
+        fontSize: 50
+      }}>{' '}</span>
+       <span style={[css.tagName, {
+        color: color
+      }]}>{tag}</span>
      </span>
     )
   }
