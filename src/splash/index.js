@@ -78,9 +78,9 @@ trigger:
   border:1px solid white
   href
     text-decoration:none
-    color:#6393b9;
+    color:#fdfeff;
     :hover
-      color:white
+      color:#6393b9
 `
 
 
@@ -147,8 +147,18 @@ class Main extends React.Component {
             </tr>
           </table>
           <div style={css.spacer}/>
+          <div style={{color:'steelblue'}}>
+            {' ...but really, you should just see '}
+            <a href="./demos" style={{color:'steelblue'}}>
+              <b>
+                {'the demos'}
+              </b>
+              {' ->'}
+            </a>
+          </div>
+          <div style={css.spacer}/>
           <div style={css.trigger}>
-            <a style={css.trigger.href} href='./expo'>
+            <a style={css.trigger.href} href='./demos'>
               <div style={{
         fontSize: 42
       }}>{'>'}</div>

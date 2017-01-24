@@ -118,9 +118,9 @@ class Example extends Component {
         <div style={css.headline}>
           <span style={css.r}>{'r = '}</span>
           {'nlp('}
-          <span style={css.param}>{'myText'}</span>
+          <span style={css.param} title="just a string">{'myText'}</span>
           <span style={{}}>{' , '}</span>
-          <span style={css.param}>{' [customLexicon] '}</span>
+          <span style={css.param} title="a key-value object of word-> POS">{' [customLexicon] '}</span>
           {')'}
         </div>
         <div style={css.explain}>
@@ -184,7 +184,7 @@ class Example extends Component {
           {')'}
         </div>
         <div style={css.explain}>
-        {'It very carefully changes things,'}
+        {'It very carefully changes things'}
         </div>
         <div style={css.dump}>
         {'"So now this is a story all about how..."'}
