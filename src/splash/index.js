@@ -148,12 +148,12 @@ class Main extends React.Component {
           </table>
           <div style={css.spacer}/>
           <div style={{color:'steelblue'}}>
-            {' ...but really, you should just see '}
-            <a href="./demos" style={{color:'steelblue'}}>
-              <b>
-                {'the demos'}
-              </b>
-              {' ->'}
+            <i>
+              {' ... but really,'}
+            </i>
+            {' you should just see '}
+            <a href="./demos" style={{color:'steelblue', fontWeight:600}}>
+              {'the demos >'}
             </a>
           </div>
           <div style={css.spacer}/>

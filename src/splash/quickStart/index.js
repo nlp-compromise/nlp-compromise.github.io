@@ -75,7 +75,7 @@ class Install extends Component {
     return (
       <div>
         <div style={[css.headline, {
-        marginTop: 20,
+        marginTop: 45,
         fontSize: 25,
         marginLeft: 100
       }]}>
