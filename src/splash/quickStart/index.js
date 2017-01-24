@@ -57,11 +57,8 @@ class Install extends Component {
     this.state = {}
     this.css = style
   }
-  componentDidMount() {
-    let {state} = this
-  }
   render() {
-    let {css, state} = this
+    let {css} = this
     const node = {
       mode: 'javascript',
       theme: 'spencertheme',

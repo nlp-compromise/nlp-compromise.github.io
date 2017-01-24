@@ -30,13 +30,13 @@ return nlp(myText, context).match('#Verb')
 class Code extends React.Component {
   constructor(props) {
     super(props);
+    let code=props.code || placeholder
     this.state = {
-      code: props.code || placeholder,
       error: null,
       valid: true,
-      result: null
+      result: null,
+      code : this.formatCode(code)
     }
-    this.state.code = this.formatCode(this.state.code)
     this.css = style
     this.updateCode = this.updateCode.bind(this)
     this.onFocusChange = this.onFocusChange.bind(this)
@@ -64,21 +64,25 @@ class Code extends React.Component {
       code = `(function(){
         ` + code + `
       })()`
-      state.result = eval(code)
-      console.log(state.result)
-      state.error = null
-      state.valid = true
-      let cmpState = props.cmp.state
-      cmpState.result = state.result
-      props.cmp.setState(cmpState)
+      let result = eval(code)
+      console.log(result)
+      props.cmp.setState({
+        result : result
+      })
+      this.setState({
+        result:result,
+        code:this.formatCode(state.code),
+        error: null,
+        valid : true
+      })
     } catch (e) {
-      state.result = null
-      state.error = e.toString()
-      state.valid = false
+      this.setState({
+        result:null,
+        error : e.toString(),
+        valid : false
+      })
       console.log(e)
     }
-    state.code = this.formatCode(state.code)
-    this.setState(state)
   }
   onFocusChange(focused) {
     if (!focused) {

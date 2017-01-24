@@ -94,31 +94,28 @@ const examples = {
 class Demo extends Component {
   constructor(props) {
     super(props);
+    let text='john is nice and cool'
     this.state = {
-      text: 'john is nice and cool'
+      text: text,
+      result : nlp(text)
     }
-    this.state.result = nlp(this.state.text)
     this.css = style
     this.onChange = this.onChange.bind(this)
   }
   onChange(e) {
-    let {state} = this;
-    state.text = e.target.value || ''
-    state.result = nlp(state.text)
-    this.setState(state)
+    let text = e.target.value || ''
+    this.setState({
+      text:text,
+      result: nlp(text)
+    })
   }
   componentDidMount() {
     setTimeout(() => {
       this.refs.input.updateInputWidth()
     }, 50)
   }
-  componentDidMount() {
-    let {state} = this
-  }
   render() {
     let {css, state} = this
-    // let pastTense = state.result.clone().sentences().toPastTense()
-    // let negative = state.result.clone().sentences().toNegative()
     return (
       <div>
         <div style={ css.transform }>

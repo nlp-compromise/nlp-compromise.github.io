@@ -18,7 +18,7 @@ class Text extends React.Component {
     console.log(obj)
   }
   render() {
-    let {state, css} = this
+    let {css} = this
     return (
       <div style={css.container}>
         <ChooseText callback={this.onChange}/>

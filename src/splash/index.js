@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 // import Textarea from 'react-textarea-autosize';
 import Radium from 'radium';
 import Logo from './logo';
@@ -8,9 +7,9 @@ import QuickStart from './quickStart';
 import Usage from './usage';
 import styler from 'react-styling';
 
-import Zap from 'react-icons/lib/go/zap'
-import Bowtie from 'react-icons/lib/io/bowtie'
-import Code from 'react-icons/lib/io/code'
+// import Zap from 'react-icons/lib/go/zap'
+// import Bowtie from 'react-icons/lib/io/bowtie'
+// import Code from 'react-icons/lib/io/code'
 import Twitter from 'react-icons/lib/fa/twitter'
 import Slack from 'react-icons/lib/fa/slack'
 import GitHub from 'react-icons/lib/fa/github'
@@ -89,7 +88,7 @@ class Main extends React.Component {
     this.css = style;
   }
   render() {
-    let {state, css} = this;
+    let {css} = this;
     return (
       <div>
         <div style={css.top}>

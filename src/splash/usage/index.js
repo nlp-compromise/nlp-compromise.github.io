@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Radium from 'radium';
 import styler from 'react-styling/flat';
 import ChooseText from '../../shared/textarea/chooseText';
-import Select from 'react-select';
 const style = styler`
 container:
   marginTop:65
@@ -80,17 +79,11 @@ class Example extends Component {
     this.changeSelector = this.changeSelector.bind(this)
     this.update = this.update.bind(this)
   }
-  componentDidMount() {
-    let {state} = this
-  }
-  changeSelector() {
-    let {css, state} = this
-  }
   update(obj){
     console.log(obj)
   }
   render() {
-    let {css, state} = this
+    let {css} = this
     let nouns = [{
       normal: 'bel-air',
       count: 2
@@ -112,7 +105,7 @@ class Example extends Component {
       <div style={css.container}>
         <div style={css.title}>
           {'This is the '}
-          <img src='https://twemoji.maxcdn.com/36x36/2728.png'/>
+          <img alt="beans" src='https://twemoji.maxcdn.com/36x36/2728.png'/>
           {':'}
         </div>
         <p></p>

@@ -19,7 +19,7 @@ class AsArray extends React.Component {
     hljs.highlightBlock(el);
   }
   render() {
-    let {props, state, css} = this
+    let {props, css} = this
     let arr = props.result.asArray()
     return (
       <div style={css.json} id='asArr'>

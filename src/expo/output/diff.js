@@ -2,7 +2,6 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import Radium from 'radium';
 import { diffWords } from 'diff';
-console.log(diffWords);
 const style = styler`
 container
   marginLeft:10%
@@ -30,11 +29,12 @@ class Diff extends React.Component {
     let r = cmp.state.result;
     let oldStr = cmp.state.text;
     let newStr = r.plaintext();
-    this.state.diff = diffWords(newStr, oldStr);
-    this.setState(this.state);
+    this.setState({
+      diff:diffWords(newStr, oldStr)
+    });
   }
   render() {
-    let {props, state, css} = this;
+    let {state, css} = this;
     let diff = state.diff.map((o) => {
       let css = {
         color: 'grey'

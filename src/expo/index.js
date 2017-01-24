@@ -1,10 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import Text from './text';
 import Radium from 'radium';
-import Firebase from './firebase';
 import Bottom from './bottom';
-import Source from './source';
 import Code from './code';
 import styler from 'react-styling/flat';
 import nlp from 'compromise';
@@ -25,45 +22,27 @@ class Expo extends React.Component {
   constructor() {
     super();
     this.state = {
-      text: 'his name is John smith',
+      text: '',
+      src:"weezer/buddyholly",
       result: nlp(''),
-      // src: 'sotu/bush_1989',
-      src: 'weezer/buddyholly'
     };
     this.css = style;
-    this.db = new Firebase();
-    this.db.fetchText(this.state.src, this);
-    this.onType = this.onType.bind(this);
-    this.reParse = this.reParse.bind(this);
-    this.setText = this.setText.bind(this);
-    this.reParse();
+    // this.db = new Firebase();
+    // this.db.fetchText(this.state.src, this);
+    this.onChange = this.onChange.bind(this);
   }
-  setText(src) {
+  onChange(obj) {
+    console.log(obj)
     this.setState({
-      src: src
+      text: obj.text,
+      result:obj.result
     });
-    this.db.fetchText(src, this);
-  }
-  onType(txt) {
-    this.setState({
-      text: txt
-    });
-    this.reParse();
-  }
-  reParse() {
-    console.time('parse');
-    let state = this.state;
-    this.setState({
-      result: nlp(state.text)
-    });
-    console.timeEnd('parse');
   }
   render() {
     let {state, css} = this;
     return (
       <div style={css.container}>
-        <Source src={state.src} cmp={this} />
-        <Text callback={this.onType}/>
+        <Text callback={this.onChange} init={state.src}/>
         <Code text={state.text} cmp={this} />
         <Bottom result={state.result} cmp={this} />
       </div>

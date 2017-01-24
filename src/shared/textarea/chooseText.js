@@ -55,10 +55,12 @@ choice:
 class ChooseText extends React.Component {
   constructor(props) {
     super(props);
+    let text=texts['freshPrince']
     this.state = {
       whichText: 'freshPrince',
-      text: texts['freshPrince'],
+      text: text,
       dropDown: false,
+      result:nlp(text)
     };
     this.css = style;
     this.callback = props.callback || function(){}
@@ -66,6 +68,9 @@ class ChooseText extends React.Component {
     this.parse = debounce(this.parse, 300);
     this.onType = this.onType.bind(this)
     this.toggleDrop = this.toggleDrop.bind(this)
+  }
+  componentDidMount(){
+    this.callback(this.state)
   }
   onType(e) {
     this.setState({
@@ -76,9 +81,11 @@ class ChooseText extends React.Component {
   }
   parse(){
     let {state} = this;
-    state.result=nlp(state.text)
-    this.setState(state)
-    this.callback(state)
+    this.setState({
+      result:nlp(state.text)
+    },function(){
+      this.callback(state)
+    })
   }
   toggleDrop(){
     let {state} = this;
@@ -86,6 +93,15 @@ class ChooseText extends React.Component {
       dropDown: !state.dropDown
     })
   }
+
+  // setText(src) {
+  //   this.setState({
+  //     src: src
+  //   });
+  //   this.db.fetchText(src, this);
+  // }
+
+
   dropDown() {
     let {css, state} = this;
     if (!state.dropDown) {
@@ -93,11 +109,13 @@ class ChooseText extends React.Component {
     }
     let choices = Object.keys(texts).map((txt, i) => {
       const choice=() => {
-        this.setState({
+        let state={
           text: texts[txt],
           whichText: txt,
           dropDown: false
-        })
+        }
+        this.setState(state)
+        this.callback(state)
       }
       return <div style={css.choice} key={i} onClick={choice}>{txt}</div>
     })

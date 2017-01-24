@@ -42,15 +42,6 @@ class Logo extends Component {
     this.css = style
     this.makeThings = this.makeThings.bind(this)
   }
-  componentDidMount() {
-    let {state} = this
-  // setInterval(()=>{
-  //   state.sizes= state.sizes.map((c,i)=>{
-  //     return parseInt(Math.random()*200, 10)//+20
-  //   })
-  //   this.setState(state)
-  // },19000)
-  }
   makeThings() {
     let {css, state} = this
     return state.sizes.map((s, i) => {
