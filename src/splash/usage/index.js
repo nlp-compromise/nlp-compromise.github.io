@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Radium from 'radium';
 import styler from 'react-styling/flat';
-import Textarea from '../../shared/textarea/textarea';
+import ChooseText from '../../shared/textarea/chooseText';
 import Select from 'react-select';
 const style = styler`
 container:
@@ -78,12 +78,16 @@ class Example extends Component {
     this.state = {}
     this.css = style
     this.changeSelector = this.changeSelector.bind(this)
+    this.update = this.update.bind(this)
   }
   componentDidMount() {
     let {state} = this
   }
   changeSelector() {
     let {css, state} = this
+  }
+  update(obj){
+    console.log(obj)
   }
   render() {
     let {css, state} = this
@@ -113,7 +117,7 @@ class Example extends Component {
         </div>
         <p></p>
         <div style={css.freshprince}>
-          <Textarea />
+          <ChooseText callback={this.update} />
         </div>
         <div style={css.headline}>
           <span style={css.r}>{'r = '}</span>

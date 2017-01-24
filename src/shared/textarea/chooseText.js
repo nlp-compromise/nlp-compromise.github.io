@@ -2,20 +2,19 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import Radium from 'radium';
 import Textarea from 'react-textarea-autosize';
-import nlp from 'compromise';
 import texts from './texts/index'
 import Down from 'react-icons/lib/go/chevron-down'
+import nlp from 'compromise';
+import debounce from './debounce';
 
 const style = styler`
 container
   position:relative
-  // margin:50
-  // marginLeft:10%
   max-width:700
 drop:
   position:absolute;
   color:steelblue;
-  x-index:4
+  z-index:19
   background-color:white
   border:1px solid lightgrey
   padding:3
@@ -27,16 +26,16 @@ textarea
   width:100%
   color:dimgrey
   font-size:14
-  // font-family:Inconsolata
   borderRadius: 5
   paddingTop:28
   paddingLeft:20
 choices:
   position:absolute
+  z-index:19
   top:25
-  width:300
+  width:220
   background-color:white
-  padding:15
+  padding:5
   border:1px solid lightgrey
   border-radius:3
 choice:
@@ -45,40 +44,47 @@ choice:
   color:grey
   background-color:white
   font-size:18
-  border-bottom:1px solid lightgrey
+  border-bottom:2px solid lightgrey
   padding:5
   margin:15
   :hover:
     color:steelblue
-    border-bottom:1px solid steelblue
+    border-bottom:2px solid steelblue
 `;
 
-class TextThing extends React.Component {
-  constructor() {
-    super();
+class ChooseText extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {
       whichText: 'freshPrince',
       text: texts['freshPrince'],
-      dropDown: false
+      dropDown: false,
     };
-    this.state.result = nlp(this.state.text)
     this.css = style;
+    this.callback = props.callback || function(){}
+    this.parse = this.parse.bind(this)
+    this.parse = debounce(this.parse, 300);
     this.onType = this.onType.bind(this)
+    this.toggleDrop = this.toggleDrop.bind(this)
   }
   onType(e) {
     this.setState({
       text: e.target.value,
       whichText: 'custom'
     });
-    this.reParse();
+    this.parse()
   }
-  reParse() {
-    console.time('parse');
-    let state = this.state;
+  parse(){
+    let {state} = this;
+    state.result=nlp(state.text)
+    this.setState(state)
+    this.callback(state)
+  }
+  toggleDrop(){
+    let {state} = this;
     this.setState({
-      result: nlp(state.text)
-    });
-    console.timeEnd('parse');
+      dropDown: !state.dropDown
+    })
   }
   dropDown() {
     let {css, state} = this;
@@ -86,41 +92,38 @@ class TextThing extends React.Component {
       return null
     }
     let choices = Object.keys(texts).map((txt, i) => {
-      return <div style={css.choice} key={i} onClick={() => {
-          this.setState({
-            text: texts[txt],
-            whichText: txt,
-            dropDown: false
-          })
-        }}>{txt}</div>
+      const choice=() => {
+        this.setState({
+          text: texts[txt],
+          whichText: txt,
+          dropDown: false
+        })
+      }
+      return <div style={css.choice} key={i} onClick={choice}>{txt}</div>
     })
     return <div style={css.choices}>{choices}</div>
   }
   render() {
     let {state, css} = this;
-    console.log(css.textarea)
     return (
       <div style={css.container}>
-        <div style={css.drop} onClick={() => {
-        this.setState({
-          dropDown: !state.dropDown
-        })
-      }}>
-          <Down/>
+        <div style={css.drop} onClick={this.toggleDrop}>
+         <Down/>
           {' -' + state.whichText + ' '}
         </div>
         {this.dropDown()}
         <Textarea
-      value={state.text}
-      minRows={4}
-      maxRows={7}
-      style={css.textarea}
-      onChange={this.onType}/>
+          value={state.text}
+          minRows={4}
+          maxRows={7}
+          style={css.textarea}
+          onChange={this.onType}
+          />
       </div>
     )
   }
 }
 
 
-TextThing = Radium(TextThing);
-module.exports = TextThing
+ChooseText = Radium(ChooseText);
+module.exports = ChooseText

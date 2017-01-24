@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Textarea from 'react-textarea-autosize';
+import Text from './text';
 import Radium from 'radium';
 import Firebase from './firebase';
 import Bottom from './bottom';
-import debounce from './debounce';
 import Source from './source';
 import Code from './code';
 import styler from 'react-styling/flat';
@@ -37,7 +36,6 @@ class Expo extends React.Component {
     this.onType = this.onType.bind(this);
     this.reParse = this.reParse.bind(this);
     this.setText = this.setText.bind(this);
-    this.reParse = debounce(this.reParse, 300);
     this.reParse();
   }
   setText(src) {
@@ -46,9 +44,9 @@ class Expo extends React.Component {
     });
     this.db.fetchText(src, this);
   }
-  onType(e) {
+  onType(txt) {
     this.setState({
-      text: e.target.value
+      text: txt
     });
     this.reParse();
   }
@@ -65,7 +63,7 @@ class Expo extends React.Component {
     return (
       <div style={css.container}>
         <Source src={state.src} cmp={this} />
-        <Textarea value={state.text} maxRows={8} style={css.textarea} onChange={this.onType} />
+        <Text callback={this.onType}/>
         <Code text={state.text} cmp={this} />
         <Bottom result={state.result} cmp={this} />
       </div>

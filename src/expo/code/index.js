@@ -1,18 +1,14 @@
-/* eslint-disable */
 import React from 'react';
 import styler from 'react-styling/flat';
-import Codemirror from 'react-codemirror'
 import formatter from 'js-beautify'
 import nlp from 'compromise';
 window.nlp = nlp
-import './lib/codemirror.css';
-import './lib/mytheme.css';
+
+import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
-import 'codemirror/addon/lint/lint'
-import 'codemirror/addon/lint/javascript-lint'
-import 'codemirror/addon/lint/lint.css'
-// import 'codemirror/theme/base16-light.css'
-// import 'codemirror/theme/mdn-like.css'
+import 'codemirror/mode/htmlmixed/htmlmixed'
+import '../../shared/codemirror/codemirror.css';
+import '../../shared/codemirror/mytheme.css';
 
 const style = styler`
   container
@@ -30,7 +26,6 @@ const style = styler`
 let placeholder = `var context = {}
 return nlp(myText, context).match('#Verb')
 `
-
 
 class Code extends React.Component {
   constructor(props) {
@@ -55,13 +50,11 @@ class Code extends React.Component {
       indent_size: 2
     })
   }
-
   updateCode(newCode) {
     this.setState({
       code: newCode
     });
   }
-
   eval() {
     console.log('-eval')
     let {state, props} = this
@@ -86,7 +79,6 @@ class Code extends React.Component {
     }
     state.code = this.formatCode(state.code)
     this.setState(state)
-  // CodeMirror.runMode(myCodeMirror.getValue(), "application/javascript", document.getElementById("run_result"));
   }
   onFocusChange(focused) {
     if (!focused) {
@@ -102,23 +94,7 @@ class Code extends React.Component {
       styleActiveLine: true,
       tabSize: 2,
       gutters: ['CodeMirror-lint-markers'],
-      // lint: function(text, options, cm) {
-      //   console.log(text)
-      //   //  var linter = cm.getHelper(CodeMirror.Pos(0, 0), 'lint');
-      //   //  return linter(text, options);
-      // },
-      lint: true,
-    //       //options.lintWith = CodeMirror.javascriptValidator;
-    //       lintWith : javascriptValidatorWithOptions({
-    //         asi: true,
-    //         laxcomma: true,
-    //         laxbreak: true      lint: true,
-    // ,
-    //         loopfunc: true,
-    //         smarttabs: true,
-    //         multistr: true,
-    //         sub: true
-    //       })
+      lint: true
     };
     let border = css.valid
     if (!state.valid) {
