@@ -1,3 +1,4 @@
+'use strict'
 import React from 'react';
 import styler from 'react-styling/flat';
 import Radium from 'radium';
@@ -130,14 +131,14 @@ class Source extends React.Component {
     let choices = Object.keys(sources).map((k, i) => {
       return (
         <div key={i} style={css.choice} onClick={this.makeChoice.bind(this, k)}>
-        {k}
-        {this.makeDots(k)}
+          {k}
+          {this.makeDots(k)}
         </div>
         );
     });
     return (
       <div style={css.choose}>
-        <span style={[css.arrow, css.up_arrow]}/>
+        <span style={[css.arrow, css.up_arrow]} />
         {choices}
       </div>
       );
@@ -151,7 +152,7 @@ class Source extends React.Component {
       if (title === d) {
         more = css.selected_dot;
       }
-      return <span key={i} style={[css.dot, more]} onClick={() => props.cmp.setText(ns + '/' + d)}/>;
+      return <span key={i} style={[css.dot, more]} onClick={() => props.cmp.setText(ns + '/' + d)} />;
     });
     return <span style={css.dots}>{dots}</span>;
   }
@@ -160,14 +161,16 @@ class Source extends React.Component {
     let ns = props.src.replace(/\/.*/, '');
     let title = ns.replace(/_/g, ' ');
     return (
-      <div >
+      <div>
         <span onClick={() => this.setState({
         expand: true
       })}>
-          <span style={css.arrow_right}>{'▶️'}</span>
-          <span style={css.src}>
-            {'texts/' + title}
-          </span>
+        <span style={{}}>
+          {'▶️'}
+        </span>
+        <span style={css.src}>
+          {'texts/' + title}
+        </span>
         </span>
         {this.makeDots(props.src)}
       </div>

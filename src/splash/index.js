@@ -3,16 +3,17 @@ import ReactDOM from 'react-dom';
 // import Textarea from 'react-textarea-autosize';
 import Radium from 'radium';
 import Logo from './logo';
-import Demo from './demo';
-import Install from './install';
-import Example from './example';
-import styler from 'react-styling/flat';
-// import Zap from 'react-icons/lib/go/zap'
-// import Bowtie from 'react-icons/lib/io/bowtie'
-// import Code from 'react-icons/lib/io/code'
-// import Twitter from 'react-icons/lib/fa/twitter'
-// import Slack from 'react-icons/lib/fa/slack'
-// import GitHub from 'react-icons/lib/fa/github'
+import ShowOff from './showOff';
+import QuickStart from './quickStart';
+import Usage from './usage';
+import styler from 'react-styling';
+
+import Zap from 'react-icons/lib/go/zap'
+import Bowtie from 'react-icons/lib/io/bowtie'
+import Code from 'react-icons/lib/io/code'
+import Twitter from 'react-icons/lib/fa/twitter'
+import Slack from 'react-icons/lib/fa/slack'
+import GitHub from 'react-icons/lib/fa/github'
 
 import 'react-select/dist/react-select.css';
 import './index.css'
@@ -68,9 +69,9 @@ class Main extends React.Component {
             {'so that it\'s much easier.'}
           </div>
 
-          <Demo />
-          <Install />
-          <Example />
+          <ShowOff />
+          <QuickStart id='quickstart'/>
+          <Usage id='usage'/>
           <div style={css.spacer}/>
 
         </div>

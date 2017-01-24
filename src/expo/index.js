@@ -21,7 +21,7 @@ textarea
   borderRadius: 5
 `;
 
-class Main extends React.Component {
+class Expo extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -63,21 +63,13 @@ class Main extends React.Component {
     let {state, css} = this;
     return (
       <div style={css.container}>
-        <Source src={state.src} cmp={this}/>
-        <Textarea
-      value={state.text}
-      maxRows={8}
-      style={css.textarea}
-      onChange={this.onType}/>
-      <Code text={state.text} cmp={this}/>
-      <Bottom result={state.result} cmp={this}/>
-    </div>
+        <Source src={state.src} cmp={this} />
+        <Textarea value={state.text} maxRows={8} style={css.textarea} onChange={this.onType} />
+        <Code text={state.text} cmp={this} />
+        <Bottom result={state.result} cmp={this} />
+      </div>
       );
   }
 }
-Main = Radium(Main);
-
-ReactDOM.render(
-  <Main />,
-  document.getElementById('root')
-);
+Expo = Radium(Expo);
+module.exports = Expo

@@ -3,9 +3,9 @@ import Radium from 'radium';
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
-import './lib/codemirror.css';
-import './lib/mytheme.css';
-import styler from 'react-styling/flat';
+import '../lib/codemirror.css';
+import '../lib/mytheme.css';
+import styler from 'react-styling';
 const style = styler`
 code:
   color:dimgrey
@@ -62,12 +62,12 @@ class Install extends Component {
   }
   render() {
     let {css, state} = this
-    const node={
+    const node = {
       mode: 'javascript',
       theme: 'spencertheme',
       readOnly: true
     }
-    const html={
+    const html = {
       mode: 'htmlmixed',
       theme: 'spencertheme',
       readOnly: true
@@ -75,12 +75,14 @@ class Install extends Component {
     return (
       <div>
         <div style={[css.headline, {
-          marginTop: 20,
-          fontSize: 25,
-          marginLeft: 100
-        }]}>
+        marginTop: 20,
+        fontSize: 25,
+        marginLeft: 100
+      }]}>
           {'so'}
-          <span style={[css.orange, {marginLeft: 15}]}>
+          <span style={[css.orange, {
+        marginLeft: 15
+      }]}>
             {'um,'}
           </span>
         </div>
@@ -89,7 +91,9 @@ class Install extends Component {
         </div>
 
         <table style={css.install}>
-          <tr style={{color:'grey'}}>
+          <tr style={{
+        color: 'grey'
+      }}>
             <td>{'on a server:'}</td>
             <td>{'or in a client:'}</td>
           </tr>

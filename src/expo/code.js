@@ -101,7 +101,7 @@ class Code extends React.Component {
       theme: 'spencertheme',
       styleActiveLine: true,
       tabSize: 2,
-      gutters: ["CodeMirror-lint-markers"],
+      gutters: ['CodeMirror-lint-markers'],
       // lint: function(text, options, cm) {
       //   console.log(text)
       //   //  var linter = cm.getHelper(CodeMirror.Pos(0, 0), 'lint');

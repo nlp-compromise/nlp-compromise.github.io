@@ -51,14 +51,14 @@ class Result extends React.Component {
     this.doTerm = this.doTerm.bind(this)
   }
 
-  doTerm(ts, i) {
+  doTerm(t, i) {
     let {css} = this
-    let a = chooseTag(ts.terms[0])
+    let a = chooseTag(t)
     let tag = a[0]
     let color = a[1] || 'dimgrey'
     return (
       <span style={css.container}>
-       <span style={{borderBottom: '4px solid ' + color}}>{ts.plaintext().trim()}</span>
+       <span style={{borderBottom: '4px solid ' + color}}>{t.text.trim()}</span>
        <span style={{fontSize: 50}}>{' '}</span>
        <span style={[css.tagName, {color: color}]}>{tag}</span>
      </span>
@@ -67,7 +67,7 @@ class Result extends React.Component {
 
   render() {
     let {props, css} = this
-    let terms = props.result.terms()
+    let terms = props.result.flatten().list[0].terms
     return (
       <div style={css.demo}>
        {terms.map(this.doTerm)}

@@ -55,12 +55,12 @@ transform
   border-bottom:1px solid steelblue
 mono:
 `
-const code=`Text[
+const code = `Text[
   Terms[ Term, Term, Term, ...],
   Terms[ Term, Term, Term, ...]
 ]
 `
-const code2=`Text[
+const code2 = `Text[
   Noun[ Term ],
   Noun[ Term ],
   Noun[ Term ]
@@ -81,22 +81,39 @@ class Example extends Component {
   }
   render() {
     let {css, state} = this
-    let nouns=[{normal:'bel-air', count:2}, {normal:'b-ball', count:1}, {normal:'dice', count:1}]
-    nouns=nouns.map((n)=>{
+    let nouns = [{
+      normal: 'bel-air',
+      count: 2
+    }, {
+      normal: 'b-ball',
+      count: 1
+    }, {
+      normal: 'dice',
+      count: 1
+    }, {
+      normal: 'mirror',
+      count: 1
+    }]
+    nouns = nouns.map((n) => {
       return (
         <li style={css.ns}>
           {n.normal}
-          <span style={{color:'lightgrey'}}>
-            {' - '+n.count}
-          </span>
+          <span style={{
+          color: 'lightgrey'
+        }}>
+                                            {' - ' + n.count}
+                                          </span>
         </li>
       )
     })
     return (
       <div>
         <div style={css.headline}>
-          {'This is how:'}
+          {'This is the '}
+          <img src='https://twemoji.maxcdn.com/36x36/2728.png'/>
+          {':'}
         </div>
+        <p></p>
         <div style={css.freshprince}>
           <Textarea />
         </div>
@@ -108,53 +125,66 @@ class Example extends Component {
           <span style={css.param}>{' [customLexicon] '}</span>
           {')'}
         </div>
-        <div style={css.explain}>{'this tokenizes and tags the input'}</div>
-        <pre style={css.code}>{code}</pre>
-
+        <div style={css.explain}>
+          {'this automatically tokenizes and tags the input'}
+        </div>
+        { /* <pre style={css.code}>{code}</pre> */ }
         <div style={css.transform}>
           {'render:'}
         </div>
-        <div style={css.section}>{'if you run this:'}</div>
+        <div style={css.section}>
+          {'if you run this:'}
+        </div>
         <div style={css.headline}>
           <span style={css.r}>{'r'}</span>
-          {'.plaintext()'}
+          {`.out('text')`}
         </div>
-        <div style={css.dump}>{'"Now this is a story all about how..."'}</div>
-        <div style={css.explain}>{'you\'ll get a pixel-perfect output of your text'}</div>
-
+        <div style={css.dump}>
+          {'"Now this is a story all about how..."'}
+        </div>
+        <div style={css.explain}>
+          {'you\'ll get a pixel-perfect output of your text'}
+        </div>
         <div style={css.transform}>
           {'inspect:'}
         </div>
-        <div style={css.section}>{'reach into a specific part of the text:'}</div>
+        <div style={css.section}>
+          {'reach into a specific part of the text:'}
+        </div>
         <div style={css.headline}>
           <span style={css.ns}>{'ns = '}</span>
           <span style={css.r}>{'r'}</span>
           {'.nouns()'}
         </div>
         <pre style={css.code}>{code2}</pre>
-        <ul style={{marginLeft:75}}>
-          <div style={css.section}>{'sort them by frequency:'}
+        <ul style={{
+        marginLeft: 75
+      }}>
+          <div style={css.section}>
+            {'sort them by frequency:'}
           </div>
-            <div style={css.headline}>
-              <span style={css.ns}>
-                {'ns'}
-              </span>
-              {'.sort('}
-              <span style={css.param2}>{` [`}</span>
-              <span style={css.param}>{`\'freq\'`}</span>
-              {' , '}
-              <span style={css.param}>{`\'alpha\' `}</span>
-              <span style={css.param2}>{`] `}</span>
-              {').slice('}
-              <span style={css.param2}>{` 0, `}</span>
-              <span style={css.param2}>{` 3 `}</span>
-              {')'}
-            </div>
-          <ul style={{marginLeft:285, fontSize:30}}>
+          <div style={css.headline}>
+            <span style={css.ns}>
+                                                          {'ns'}
+                                                        </span>
+            {'.sort('}
+            <span style={css.param2}>{` [`}</span>
+            <span style={css.param}>{`'freq'`}</span>
+            {' , '}
+            <span style={css.param}>{`'alpha' `}</span>
+            <span style={css.param2}>{`] `}</span>
+            {').slice('}
+            <span style={css.param2}>{` 0, `}</span>
+            <span style={css.param2}>{` 3 `}</span>
+            {')'}
+          </div>
+          <ul style={{
+        marginLeft: 285,
+        fontSize: 30
+      }}>
             {nouns}
           </ul>
         </ul>
-
         <div style={css.transform}>
           {'transform:'}
         </div>
@@ -163,7 +193,7 @@ class Example extends Component {
           {'.sentences( '}
           <span style={css.param2}>{` 1 `}</span>
           {' ).append('}
-          <span style={css.param2}>{` \'Basically,\' `}</span>
+          <span style={css.param2}>{` 'Basically,' `}</span>
           {')'}
         </div>
         <div style={css.headline}>
