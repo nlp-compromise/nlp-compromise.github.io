@@ -3,8 +3,8 @@ import Radium from 'radium';
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
-import '../lib/codemirror.css';
-import '../lib/mytheme.css';
+import '../../shared/codemirror/codemirror.css';
+import '../../shared/codemirror/mytheme.css';
 import styler from 'react-styling';
 const style = styler`
 code:

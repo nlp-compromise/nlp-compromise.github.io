@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Radium from 'radium';
 import styler from 'react-styling/flat';
-import Textarea from './textarea';
+import Textarea from '../../shared/textarea/textarea';
 import Select from 'react-select';
 const style = styler`
 container:

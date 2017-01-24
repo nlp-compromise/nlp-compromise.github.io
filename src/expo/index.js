@@ -9,6 +9,7 @@ import Source from './source';
 import Code from './code';
 import styler from 'react-styling/flat';
 import nlp from 'compromise';
+import '../shared/index.css'
 
 const style = styler`
 container
