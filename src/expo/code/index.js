@@ -2,7 +2,6 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import formatter from 'js-beautify'
 import nlp from '../../shared/nlp';
-window.nlp = nlp
 
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
@@ -23,32 +22,19 @@ const style = styler`
     border:2px solid darkred;
 
 `
-let placeholder = `let r = nlp(myText)
-r.toLowerCase()
-r.match('#Verb').toUpperCase()
-return r
-`
 
 class Code extends React.Component {
   constructor(props) {
     super(props);
-    let code=props.code || placeholder
     this.state = {
       error: null,
-      valid: true,
       result: null,
-      code : this.formatCode(code)
+      code : this.formatCode(props.code||'')
     }
+    this.callback=props.callback||function(){}
     this.css = style
     this.updateCode = this.updateCode.bind(this)
     this.onFocusChange = this.onFocusChange.bind(this)
-    this.eval = this.eval.bind(this)
-  }
-  componentDidMount() {
-    this.eval()
-  }
-  componentDidRecieveProps() {
-    this.eval()
   }
   formatCode(code) {
     return formatter(code, {
@@ -59,43 +45,15 @@ class Code extends React.Component {
     this.setState({
       code: newCode
     });
-  }
-  eval() {
-    let {state, props} = this
-    console.log('eval \''+props.text+'\'')
-    //variables accessable to the eval'd code
-    window.myText = props.text || ''
-    try {
-      let code = state.code || ''
-      code = `(function(){
-        ` + code + `
-      })()`
-      let result = eval(code)
-      props.cmp.setState({
-        result : result
-      })
-      this.setState({
-        result:result,
-        code:this.formatCode(state.code),
-        error: null,
-        valid : true
-      })
-    } catch (e) {
-      this.setState({
-        result:null,
-        error : e.toString(),
-        valid : false
-      })
-      console.log(e)
-    }
+    this.callback(newCode)
   }
   onFocusChange(focused) {
     if (!focused) {
-      this.eval()
+      this.callback(this.state.code)
     }
   }
   render() {
-    let {state, css} = this
+    let {state, props, css} = this
     var options = {
       lineNumbers: true,
       mode: 'javascript',
@@ -106,15 +64,16 @@ class Code extends React.Component {
       lint: true
     };
     let border = css.valid
-    if (!state.valid) {
+    if (!props.valid) {
       border = css.invalid
     }
+    console.log(props.error)
     return (
       <div style={css.container}>
-        <div style={css.error}>{state.error}</div>
         <div style={border}>
-          <Codemirror value={state.code}  onChange={this.updateCode}  options={options} onFocusChange={this.onFocusChange}/>
+          <Codemirror value={state.code} onChange={this.updateCode} options={options} onFocusChange={this.onFocusChange}/>
         </div>
+        <div style={css.error}>{props.error||''}</div>
       </div>
     )
   }

@@ -63,29 +63,22 @@ class ChooseText extends React.Component {
       result:nlp(text)
     };
     this.css = style;
+    // this.db = new Firebase();
+    // this.db.fetchText(this.state.src, this);
     this.callback = props.callback || function(){}
-    this.parse = this.parse.bind(this)
-    this.parse = debounce(this.parse, 300);
     this.onType = this.onType.bind(this)
     this.toggleDrop = this.toggleDrop.bind(this)
   }
   componentDidMount(){
-    this.callback(this.state)
+    this.callback(this.state.text)
   }
   onType(e) {
     this.setState({
       text: e.target.value,
       whichText: 'custom'
+    },()=>{
+      this.callback(this.state.text)
     });
-    this.parse()
-  }
-  parse(){
-    let {state} = this;
-    this.setState({
-      result:nlp(state.text)
-    },function(){
-      this.callback(state)
-    })
   }
   toggleDrop(){
     let {state} = this;
@@ -115,7 +108,7 @@ class ChooseText extends React.Component {
           dropDown: false
         }
         this.setState(state)
-        this.callback(state)
+        this.callback(state.text)
       }
       return <div style={css.choice} key={i} onClick={choice}>{txt}</div>
     })

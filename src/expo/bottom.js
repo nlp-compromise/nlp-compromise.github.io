@@ -80,15 +80,13 @@ class Bottom extends React.Component {
     )
   }
   render() {
-    console.log('BOTTOM')
     let {state, css, props} = this
     let r = props.result
-
     const states = {
       Plaintext: () => this.plaintext(),
       Html: () => <Html result={r}/>,
       asArray: () => <AsArray result={r}/>,
-      Diff: () => <Diff result={r} cmp={this.props.cmp}/>
+      Diff: () => <Diff result={r}/>
     }
     let output = null
     if (r && states[state.tab]) {
