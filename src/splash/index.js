@@ -122,26 +122,28 @@ class Main extends React.Component {
           <Usage id='usage'/>
           <div style={css.spacer}/>
           <table style={css.table}>
-            <tr>
-              <td>
-                <a style={css.table.href} href='https://github.com/nlp-compromise/compromise'>
-                  <GitHub size={50}/>
-                  <div style={css.table.link}>github</div>
-                </a>
-              </td>
-              <td>
-                <a style={css.table.href} href='https://www.twitter.com/compromisejs'>
-                  <Twitter size={50}/>
-                  <div style={css.table.link}>twitter</div>
-                </a>
-              </td>
-              <td>
-                <a style={css.table.href} href='http://slack.compromise.cool'>
-                  <Slack size={50}/>
-                  <div style={css.table.link}>slack</div>
-                </a>
-              </td>
-            </tr>
+            <tbody>
+              <tr>
+                <td>
+                  <a style={css.table.href} href='https://github.com/nlp-compromise/compromise'>
+                    <GitHub size={50}/>
+                    <div style={css.table.link}>github</div>
+                  </a>
+                </td>
+                <td>
+                  <a style={css.table.href} href='https://www.twitter.com/compromisejs'>
+                    <Twitter size={50}/>
+                    <div style={css.table.link}>twitter</div>
+                  </a>
+                </td>
+                <td>
+                  <a style={css.table.href} href='http://slack.compromise.cool'>
+                    <Slack size={50}/>
+                    <div style={css.table.link}>slack</div>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
           </table>
           <div style={css.spacer}/>
           <div style={{color:'steelblue'}}>

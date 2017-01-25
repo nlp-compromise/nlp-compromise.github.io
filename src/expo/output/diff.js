@@ -1,60 +1,56 @@
 import React from 'react';
-import styler from 'react-styling/flat';
-import Radium from 'radium';
-import { diffWords } from 'diff';
+import styler from 'react-styling/flat'
+import Radium from 'radium'
+import hljs from 'highlight.js'
+import chooseTag from '../../shared/colors';
 const style = styler`
-container
-  marginLeft:10%
-  marginRight:10%
+plaintext
   width:100%
   white-space: pre-wrap
   word-wrap: break-word
   color: darkgrey
   marginLeft:15
   marginRight:15
-`;
+`
 
 class Diff extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      diff: []
-    };
-    this.css = style;
-    this.doDiff = this.doDiff.bind(this);
-    this.doDiff();
+    this.state = {}
+    this.css = style
   }
-  doDiff() {
-    let cmp = this.props.cmp;
-    let r = cmp.state.result;
-    let oldStr = cmp.state.text;
-    let newStr = r.plaintext();
-    this.setState({
-      diff:diffWords(newStr, oldStr)
-    });
-  }
+
   render() {
-    let {state, css} = this;
-    let diff = state.diff.map((o) => {
-      let css = {
-        color: 'grey'
-      };
-      if (o.added) {
-        css.color = '#b30000';
-        css.backgroundColor = '#fadad7';
-      }
-      if (o.removed) {
-        css.color = '#406619';
-        css.backgroundColor = '#eaf2c2';
-      }
-      return <span style={css}>{o.value}</span>;
-    });
+    let {props, css} = this
+    let result=props.result.clone()
+    let html=result.list.map((ts,i)=>{
+      let terms=ts.terms.map((t,o)=>{
+        let style={}
+        console.log(t.dirty)
+        if(t.dirty){
+          style={
+            color:'steelblue'
+          }
+        }
+        return (
+          <span key={i+''+o} style={style}>
+            {t.whitespace.before+t.text+t.whitespace.after}
+          </span>
+        )
+      })
+      return (
+        <div>
+          {terms}
+        </div>
+      )
+    })
+    let txt = props.result.out('text')
     return (
-      <div style={css.container}>
-        {diff}
+      <div style={css.plaintext} >
+        {txt}
       </div>
-      );
+    )
   }
 }
 Diff = Radium(Diff);
-module.exports = Diff;
+module.exports = Diff

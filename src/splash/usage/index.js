@@ -76,7 +76,6 @@ class Example extends Component {
     super(props);
     this.state = {}
     this.css = style
-    this.changeSelector = this.changeSelector.bind(this)
     this.update = this.update.bind(this)
   }
   update(obj){

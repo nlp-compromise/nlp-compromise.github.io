@@ -1,6 +1,7 @@
 import React from 'react';
 import Radium from 'radium';
 import styler from 'react-styling/flat';
+import chooseTag from '../../shared/colors';
 
 const style = styler`
 container:
@@ -17,33 +18,6 @@ demo
   font-family:Inconsolata
 `;
 
-const chooseTag = (t) => {
-  const colors = [
-    ['Person', '#6393b9'],
-    ['Pronoun', '#81acce'],
-    ['Plural', 'steelblue'],
-    ['Singular', 'lightsteelblue'],
-
-    ['Verb', 'palevioletred'],
-
-    ['Adverb', '#f39c73'],
-
-    ['Adjective', '#b3d3c6'],
-
-    ['Determiner', '#d3c0b3'],
-    ['Preposition', '#9794a8'],
-    ['Conjunction', '#c8c9cf']
-  ]
-  for (let i = 0; i < colors.length; i++) {
-    if (t.tag[colors[i][0]]) {
-      return colors[i]
-    }
-  }
-  console.log('no color for:')
-  console.log(t.tag)
-  return []
-}
-
 
 class Result extends React.Component {
   constructor(props) {
@@ -59,16 +33,16 @@ class Result extends React.Component {
     let tag = a[0]
     let color = a[1] || 'dimgrey'
     return (
-      <span style={css.container}>
-       <span style={{
-        borderBottom: '4px solid ' + color
-      }}>{t.text.trim()}</span>
-       <span style={{
-        fontSize: 50
-      }}>{' '}</span>
-       <span style={[css.tagName, {
-        color: color
-      }]}>{tag}</span>
+      <span key={i} style={css.container}>
+       <span style={{borderBottom: '4px solid ' + color}}>
+         {t.text.trim()}
+       </span>
+       <span style={{fontSize: 50}}>
+         {' '}
+        </span>
+       <span style={[css.tagName, {color: color}]}>
+         {tag}
+       </span>
      </span>
     )
   }

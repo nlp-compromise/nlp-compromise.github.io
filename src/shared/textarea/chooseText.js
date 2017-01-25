@@ -4,7 +4,7 @@ import Radium from 'radium';
 import Textarea from 'react-textarea-autosize';
 import texts from './texts/index'
 import Down from 'react-icons/lib/go/chevron-down'
-import nlp from 'compromise';
+import nlp from '../../shared/nlp';
 import debounce from './debounce';
 
 const style = styler`

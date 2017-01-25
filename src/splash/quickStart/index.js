@@ -88,20 +88,20 @@ class Install extends Component {
         </div>
 
         <table style={css.install}>
-          <tr style={{
-        color: 'grey'
-      }}>
-            <td>{'on a server:'}</td>
-            <td>{'or in a client:'}</td>
-          </tr>
-          <tr>
-            <td style={css.mode}>
-              <Codemirror options={node} value={examples.node}/>
-             </td>
-            <td style={css.mode}>
-              <Codemirror options={html} value={examples.html}/>
-             </td>
-          </tr>
+          <tbody>
+            <tr style={{color: 'grey'}}>
+              <td>{'on a server:'}</td>
+              <td>{'or in a client:'}</td>
+            </tr>
+            <tr>
+              <td style={css.mode}>
+                <Codemirror options={node} value={examples.node}/>
+               </td>
+              <td style={css.mode}>
+                <Codemirror options={html} value={examples.html}/>
+               </td>
+            </tr>
+          </tbody>
         </table>
 
       </div>

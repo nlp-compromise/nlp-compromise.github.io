@@ -1,10 +1,10 @@
 import React from 'react';
-import Text from './text';
+import ChooseText from '../shared/textarea/chooseText';
 import Radium from 'radium';
 import Bottom from './bottom';
 import Code from './code';
 import styler from 'react-styling/flat';
-import nlp from 'compromise';
+import nlp from '../shared/nlp';
 import '../shared/index.css'
 
 const style = styler`
@@ -13,9 +13,7 @@ container
   margin: 9%
   padding: 8
 textarea
-  color: grey
-  width:100%
-  borderRadius: 5
+  margin-left:50
 `;
 
 class Expo extends React.Component {
@@ -42,7 +40,9 @@ class Expo extends React.Component {
     let {state, css} = this;
     return (
       <div style={css.container}>
-        <Text callback={this.onChange} init={state.src}/>
+        <div style={css.textarea}>
+          <ChooseText callback={this.onChange}/>
+        </div>
         <Code text={state.text} cmp={this} />
         <Bottom result={state.result} cmp={this} />
       </div>

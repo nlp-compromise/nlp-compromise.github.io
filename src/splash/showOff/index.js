@@ -3,7 +3,7 @@ import Radium from 'radium';
 import AutosizeInput from 'react-input-autosize'
 import styler from 'react-styling';
 import Result from './result';
-import nlp from 'compromise';
+import nlp from '../../shared/nlp';
 const style = styler`
 demo
   margin:15
@@ -137,14 +137,16 @@ class Demo extends Component {
           { 'so you can do your weird stuff:' }
         </div>
         <table style={css.table}>
-          <tr>
-            <td>{examples.tense(state.result, css)}</td>
-            <td>{examples.really(state.result, css)}</td>
-          </tr>
-          <tr>
-            <td>{examples.negate(state.result, css)}</td>
-            <td>{examples.replace(state.result, css)}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>{examples.tense(state.result, css)}</td>
+              <td>{examples.really(state.result, css)}</td>
+            </tr>
+            <tr>
+              <td>{examples.negate(state.result, css)}</td>
+              <td>{examples.replace(state.result, css)}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     )

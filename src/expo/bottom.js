@@ -17,13 +17,14 @@ const style = styler`
   output
     border-top:1px solid lightgrey
     width:100%
-  plaintext
+  textarea
     width:100%
+    height:300
+    border-radius:5
     white-space: pre-wrap
     word-wrap: break-word
     color: darkgrey
-    marginLeft:15
-    marginRight:15
+    marginTop:15
   tab
     color: darkgrey
     cursor:pointer
@@ -58,17 +59,15 @@ class Bottom extends React.Component {
       if (state.tab === str) {
         s = css.selected
       }
-      return (<span
-        key={i}
-        style={[css.tab, s]}
-        onClick={() => {
-          this.setState({
-            tab: str
-          })
-        }}
-        >
-      {str}
-      </span>
+      const click=() => {
+        this.setState({
+          tab: str
+        })
+      }
+      return (
+        <span key={i} style={[css.tab, s]}  onClick={click} >
+          {str}
+        </span>
       )
     })
   }
@@ -77,12 +76,11 @@ class Bottom extends React.Component {
     let r = props.result
     let str = r.plaintext()
     return (
-      <pre style={css.plaintext}>
-        {str}
-      </pre>
+      <textarea style={css.textarea} value={str} />
     )
   }
   render() {
+    console.log('BOTTOM')
     let {state, css, props} = this
     let r = props.result
 
