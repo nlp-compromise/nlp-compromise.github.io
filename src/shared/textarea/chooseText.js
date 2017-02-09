@@ -21,12 +21,13 @@ drop:
   border-radius:0px 0px 3px 0px
   cursor:pointer
   font-size:14
+  borderRadius: 7px 0px 5px 0px
 textarea
   min-width:400
   width:100%
   color:dimgrey
   font-size:14
-  borderRadius: 5
+  borderRadius: 7px 7px 0px 0px
   paddingTop:28
   paddingLeft:20
 choices:
@@ -55,32 +56,32 @@ choice:
 class ChooseText extends React.Component {
   constructor(props) {
     super(props);
-    let text=texts['freshPrince']
+    let text = texts['freshPrince']
     this.state = {
       whichText: 'freshPrince',
       text: text,
       dropDown: false,
-      result:nlp(text)
+      result: nlp(text)
     };
     this.css = style;
     // this.db = new Firebase();
     // this.db.fetchText(this.state.src, this);
-    this.callback = props.callback || function(){}
+    this.callback = props.callback || function() {}
     this.onType = this.onType.bind(this)
     this.toggleDrop = this.toggleDrop.bind(this)
   }
-  componentDidMount(){
+  componentDidMount() {
     this.callback(this.state.text)
   }
   onType(e) {
     this.setState({
       text: e.target.value,
       whichText: 'custom'
-    },()=>{
+    }, () => {
       this.callback(this.state.text)
     });
   }
-  toggleDrop(){
+  toggleDrop() {
     let {state} = this;
     this.setState({
       dropDown: !state.dropDown
@@ -101,8 +102,8 @@ class ChooseText extends React.Component {
       return null
     }
     let choices = Object.keys(texts).map((txt, i) => {
-      const choice=() => {
-        let state={
+      const choice = () => {
+        let state = {
           text: texts[txt],
           whichText: txt,
           dropDown: false
@@ -124,12 +125,12 @@ class ChooseText extends React.Component {
         </div>
         {this.dropDown()}
         <Textarea
-          value={state.text}
-          minRows={4}
-          maxRows={7}
-          style={css.textarea}
-          onChange={this.onType}
-          />
+      value={state.text}
+      minRows={4}
+      maxRows={6}
+      style={css.textarea}
+      onChange={this.onType}
+      />
       </div>
     )
   }

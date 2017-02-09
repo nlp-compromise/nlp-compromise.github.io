@@ -40,6 +40,8 @@ class Logo extends Component {
       sizes: [180, 160, 120, 180, 170]
     }
     this.css = style
+    this.height = props.height || 300
+    this.width = props.width || 1210
     this.makeThings = this.makeThings.bind(this)
   }
   makeThings() {
@@ -47,7 +49,8 @@ class Logo extends Component {
     return state.sizes.map((s, i) => {
       let theCss = {
         flexBasis: s,
-        backgroundColor: colors[i]
+        backgroundColor: colors[i],
+        height: this.height
       }
       return <span key={i} style={[css.thing, theCss]} />
     })
@@ -55,7 +58,9 @@ class Logo extends Component {
   render() {
     let {css} = this
     return (
-      <div style={css.container}>
+      <div style={[css.container, {
+        width: this.width
+      }]}>
         <div style={css.text}>
         </div>
         <div style={css.bars}>

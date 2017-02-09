@@ -2,7 +2,7 @@ import React from 'react';
 import styler from 'react-styling/flat';
 import formatter from 'js-beautify'
 import nlp from '../../shared/nlp';
-
+import Zap from 'react-icons/lib/go/zap'
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
@@ -11,7 +11,7 @@ import '../../shared/codemirror/mytheme.css';
 
 const style = styler`
   container
-    margin-left:10%
+    // margin-left:10%
     max-width:700px;
   error
     color:darkred;
@@ -20,7 +20,16 @@ const style = styler`
     border:1px solid lightgrey;
   invalid
     border:2px solid darkred;
-
+  go:
+    width:100%
+    height:25px
+    color:white
+    font-weight:700
+    paddingTop:5px
+    font-size:18px
+    text-align:center
+    background-color:steelblue
+    border-radius:0 0 7px 7px
 `
 
 class Code extends React.Component {
@@ -29,9 +38,9 @@ class Code extends React.Component {
     this.state = {
       error: null,
       result: null,
-      code : this.formatCode(props.code||'')
+      code: this.formatCode(props.code || '')
     }
-    this.callback=props.callback||function(){}
+    this.callback = props.callback || function() {}
     this.css = style
     this.updateCode = this.updateCode.bind(this)
     this.onFocusChange = this.onFocusChange.bind(this)
@@ -73,7 +82,11 @@ class Code extends React.Component {
         <div style={border}>
           <Codemirror value={state.code} onChange={this.updateCode} options={options} onFocusChange={this.onFocusChange}/>
         </div>
-        <div style={css.error}>{props.error||''}</div>
+        <div style={css.error}>{props.error || ''}</div>
+        <div style={css.go}>
+          {'run  '}
+          <Zap/>
+        </div>
       </div>
     )
   }

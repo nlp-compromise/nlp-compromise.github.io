@@ -50,16 +50,14 @@ class Bottom extends React.Component {
     let {state, css} = this
     let tabs = [
       'Plaintext',
-      'Diff',
-      'Html',
-      'asArray'
+      'json'
     ]
     return tabs.map((str, i) => {
       let s = {}
       if (state.tab === str) {
         s = css.selected
       }
-      const click=() => {
+      const click = () => {
         this.setState({
           tab: str
         })
@@ -74,7 +72,7 @@ class Bottom extends React.Component {
   plaintext() {
     let {props, css} = this
     let r = props.result
-    let str = r.plaintext()
+    let str = r.out('text')
     return (
       <textarea style={css.textarea} value={str} />
     )

@@ -1,7 +1,7 @@
 import React from 'react';
 // import Textarea from 'react-textarea-autosize';
 import Radium from 'radium';
-import Logo from './logo';
+import Logo from '../shared/logo';
 import ShowOff from './showOff';
 import QuickStart from './quickStart';
 import Usage from './usage';
@@ -146,12 +146,17 @@ class Main extends React.Component {
             </tbody>
           </table>
           <div style={css.spacer}/>
-          <div style={{color:'steelblue'}}>
+          <div style={{
+        color: 'steelblue'
+      }}>
             <i>
               {' ... but really,'}
             </i>
             {' you should just see '}
-            <a href="./demos" style={{color:'steelblue', fontWeight:600}}>
+            <a href='./demos' style={{
+        color: 'steelblue',
+        fontWeight: 600
+      }}>
               {'the demos >'}
             </a>
           </div>
