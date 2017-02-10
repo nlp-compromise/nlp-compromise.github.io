@@ -81,7 +81,7 @@ const examples = {
   },
   replace: function(r, css) {
     r = r.clone()
-    r.match('(#Adjective|#Conjunction)+').if('#Adjective').replaceWith('miserable')
+    r.people(0).replaceWith('Alice Cooper')
     return (
       <div>
         <div style={css.example.text}>replace:</div>
@@ -94,7 +94,7 @@ const examples = {
 class Demo extends Component {
   constructor(props) {
     super(props);
-    let text = 'john is nice and cool'
+    let text = 'I look just like Buddy Holly.'
     this.state = {
       text: text,
       result: nlp(text)

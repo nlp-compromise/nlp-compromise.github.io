@@ -35,18 +35,17 @@ const examples = {
   node: `import nlp from 'compromise'
 
 var r = nlp('dinosaur').nouns().toPlural();
-var str = r.normal();
+var str = r.out('text');
 
 console.log(str);
 //'dinosaurs'
 `,
   html: `<script src="https://unpkg.com/compromise/builds/compromise.min.js"></script>
 <script>
-  var r = window.nlp('dinosaur').nouns().toPlural();
-
-  var str = r.normal();
+  var r = window.nlp('five hundred and twenty').values().toNumber();
+  var str = r.out('text');
   document.body.innerHTML= str;
-  //'dinosaurs'
+  //'520'
 </script>
 `
 }
@@ -89,7 +88,9 @@ class Install extends Component {
 
         <table style={css.install}>
           <tbody>
-            <tr style={{color: 'grey'}}>
+            <tr style={{
+        color: 'grey'
+      }}>
               <td>{'on a server:'}</td>
               <td>{'or in a client:'}</td>
             </tr>
