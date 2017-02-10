@@ -40,12 +40,13 @@ var str = r.out('text');
 console.log(str);
 //'dinosaurs'
 `,
+
   html: `<script src="https://unpkg.com/compromise/builds/compromise.min.js"></script>
 <script>
-  var r = window.nlp('five hundred and twenty').values().toNumber();
-  var str = r.out('text');
-  document.body.innerHTML= str;
-  //'520'
+  var r = window.nlp('five hundred and twenty-seven').values().toNumber();
+
+  document.body.innerHTML = r.out('text');
+  //'527'
 </script>
 `
 }

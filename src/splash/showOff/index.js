@@ -51,7 +51,7 @@ table:
 const examples = {
   tense: function(r, css) {
     r = r.clone()
-    r.sentences().toPastTense()
+    r = r.sentences().toPastTense()
     return (
       <div>
         <div style={css.example.text}>change tense:</div>
@@ -61,7 +61,7 @@ const examples = {
   },
   negate: function(r, css) {
     r = r.clone()
-    r.sentences().toNegative()
+    r = r.sentences().toNegative()
     return (
       <div>
         <div style={css.example.text}>negate:</div>
@@ -81,7 +81,7 @@ const examples = {
   },
   replace: function(r, css) {
     r = r.clone()
-    r.people(0).replaceWith('Alice Cooper')
+    r = r.match('#Person+').replaceWith('Alice Cooper').all()
     return (
       <div>
         <div style={css.example.text}>replace:</div>
@@ -94,7 +94,7 @@ const examples = {
 class Demo extends Component {
   constructor(props) {
     super(props);
-    let text = 'I look just like Buddy Holly.'
+    let text = 'I look just like Buddy Holly'
     this.state = {
       text: text,
       result: nlp(text)
@@ -134,7 +134,7 @@ class Demo extends Component {
         </div>
         <p></p>
         <div style={css.aside}>
-          { 'so you can do your weird stuff:' }
+          { 'so you can do your crazy stuff:' }
         </div>
         <table style={css.table}>
           <tbody>
