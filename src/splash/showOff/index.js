@@ -94,10 +94,10 @@ const examples = {
 class Demo extends Component {
   constructor(props) {
     super(props);
-    let text='john is nice and cool'
+    let text = 'john is nice and cool'
     this.state = {
       text: text,
-      result : nlp(text)
+      result: nlp(text)
     }
     this.css = style
     this.onChange = this.onChange.bind(this)
@@ -105,7 +105,7 @@ class Demo extends Component {
   onChange(e) {
     let text = e.target.value || ''
     this.setState({
-      text:text,
+      text: text,
       result: nlp(text)
     })
   }

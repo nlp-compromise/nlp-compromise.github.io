@@ -27,11 +27,17 @@ logo:
   position:absolute;
   left:5
   top:20
+  text-decoration:none
 textarea
   // margin-left:50
 subline:
   color:lightgrey
   font-size:15
+home:
+  margin-left:50
+  color:grey
+  position:relative
+  top:-20px
 `;
 
 class Expo extends React.Component {
@@ -85,11 +91,11 @@ class Expo extends React.Component {
     let {state, css} = this;
     return (
       <div>
-        <div style={css.logo}>
+        <a href='./' style={css.logo}>
           <Logo height={10} width={150}/>
-          <span>{'compromise '}</span>//
+          <span style={css.home}>{'compromise'}</span>
           { /*<div style={css.subline}>{'nlp in the browser'}</div>*/ }
-        </div>
+        </a>
         <div style={css.container}>
           <div style={css.textarea}>
             <ChooseText whichText={state.whichText} text={state.text} callback={this.textChange}/>

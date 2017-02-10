@@ -1,7 +1,7 @@
 import React from 'react';
+import Radium from 'radium';
 import styler from 'react-styling/flat';
 import formatter from 'js-beautify'
-import nlp from '../../shared/nlp';
 import Zap from 'react-icons/lib/go/zap'
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
@@ -30,6 +30,9 @@ const style = styler`
     text-align:center
     background-color:steelblue
     border-radius:0 0 7px 7px
+    cursor:pointer;
+    :hover
+      background-color:navyblue
 `
 
 class Code extends React.Component {
@@ -38,17 +41,25 @@ class Code extends React.Component {
     this.state = {
       error: null,
       result: null,
+      dirty: false,
       code: this.formatCode(props.code || '')
     }
     this.callback = props.callback || function() {}
     this.css = style
-    this.updateCode = this.updateCode.bind(this)
+    this.go = this.go.bind(this)
     this.onFocusChange = this.onFocusChange.bind(this)
+    this.hasChanged = this.hasChanged.bind(this)
   }
   formatCode(code) {
     return formatter(code, {
       indent_size: 2
     })
+  }
+  go() {
+    this.setState({
+      dirty: false
+    });
+    this.callback(this.state.code)
   }
   updateCode(newCode) {
     this.setState({
@@ -61,10 +72,16 @@ class Code extends React.Component {
       this.callback(this.state.code)
     }
   }
+  hasChanged(newCode) {
+    this.setState({
+      code: newCode,
+      dirty: true
+    });
+  }
   render() {
     let {state, props, css} = this
     var options = {
-      lineNumbers: true,
+      // lineNumbers: true,
       mode: 'javascript',
       theme: 'spencertheme',
       styleActiveLine: true,
@@ -76,19 +93,34 @@ class Code extends React.Component {
     if (!props.valid) {
       border = css.invalid
     }
-    console.log(props.error)
+    let button = {
+      backgroundColor: '#7caed8',
+      height: 10
+    }
+    let title = null
+    if (this.state.dirty) {
+      button = {
+        backgroundColor: 'steelblue'
+      }
+      title = (
+        <span>
+          {'run  '}
+          <Zap/>
+        </span>
+      )
+    }
     return (
       <div style={css.container}>
         <div style={border}>
-          <Codemirror value={state.code} onChange={this.updateCode} options={options} onFocusChange={this.onFocusChange}/>
+          <Codemirror value={state.code} onChange={this.hasChanged} options={options} onFocusChange={this.onFocusChange}/>
         </div>
         <div style={css.error}>{props.error || ''}</div>
-        <div style={css.go}>
-          {'run  '}
-          <Zap/>
+        <div style={[css.go, button]} onClick={this.go}>
+          {title}
         </div>
       </div>
     )
   }
 }
+Code = Radium(Code);
 module.exports = Code

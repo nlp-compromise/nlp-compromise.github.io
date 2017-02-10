@@ -3,13 +3,13 @@ import styler from 'react-styling/flat'
 import Radium from 'radium'
 const style = styler`
   container
-    border:1px solid lightgrey
-    border-radius:7
+    border-top:1px solid lightgrey
+    border-left:1px solid lightgrey
+    border-radius:7px 0 0 0
     padding:15
     line-height:175%
   term
     color:dimgrey
-    padding:2
 `
 class Dirty extends React.Component {
   constructor(props) {
@@ -20,13 +20,14 @@ class Dirty extends React.Component {
   renderText() {
     let {css, props} = this
     return props.result.list.map((ts) => {
-      return ts.terms.map((t) => {
+      let sen = ts.terms.map((t) => {
         let c = {}
         if (t.dirty) {
           c.color = 'steelblue'
         }
         return <span style={[css.term, c]}>{t.out('text')}</span>
       })
+      return <div>{sen}</div>
     })
   }
   render() {
