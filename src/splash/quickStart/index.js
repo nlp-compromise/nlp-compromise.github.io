@@ -10,9 +10,7 @@ const style = styler`
 code:
   color:dimgrey
   display:inline
-  padding:2
-  paddingLeft:7
-  paddingRight:7
+  padding:2px 7px 2px 7px
   position:relative
   marginLeft:90
   top:10

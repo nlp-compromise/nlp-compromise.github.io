@@ -3,7 +3,7 @@ import Radium from 'radium';
 import AutosizeInput from 'react-input-autosize'
 import styler from 'react-styling';
 import Result from './result';
-import nlp from '../../shared/nlp';
+import { nlp } from '../../shared/nlp';
 const style = styler`
 demo
   margin:15

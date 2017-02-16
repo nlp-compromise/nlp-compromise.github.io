@@ -79,7 +79,7 @@ class Example extends Component {
     this.update = this.update.bind(this)
   }
   update(obj){
-    console.log(obj)
+    // console.log(obj)
   }
   render() {
     let {css} = this
@@ -90,9 +90,9 @@ class Example extends Component {
       normal: 'philidelphia',
       count: 1
     }]
-    nouns = nouns.map((n) => {
+    nouns = nouns.map((n,i) => {
       return (
-        <li>
+        <li key={i}>
           {n.normal}
           <span style={{color: 'lightgrey'}}>
             {' - ' + n.count}

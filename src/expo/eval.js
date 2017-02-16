@@ -1,5 +1,5 @@
 'use strict';
-import nlp from '../shared/nlp';
+import { nlp } from '../shared/nlp';
 
 const exec = (obj, callback) => {
   console.log('eval')

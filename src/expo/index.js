@@ -6,7 +6,7 @@ import Code from './code';
 import exec from './eval';
 // import debounce from './debounce';
 import styler from 'react-styling';
-import nlp from '../shared/nlp';
+import { nlp } from '../shared/nlp';
 import Logo from '../shared/logo';
 import '../shared/index.css'
 
