@@ -23,6 +23,7 @@ about
 desc:
   flex:2
   flex-basis:80px
+  color:grey
 return:
   color:lightgrey
   font-size:12
@@ -32,9 +33,12 @@ class:
   font-weight:600
 method:
   color:steelblue
+  text-decoration:none;
+  font-weight:600
+  font-size:18
 each:
   marginLeft:50
-  padding:8
+  padding:25
 collapse:
   color:darkgrey
   text-decoration:underline
@@ -57,24 +61,25 @@ class Docs extends React.Component {
     this.renderMethod = this.renderMethod.bind(this)
     this.renderCollection = this.renderCollection.bind(this)
   }
-  renderCollection(obj, k, i) {
+  renderCollection(obj, section, i) {
     let {css} = this
     return (
-      <div key={i} style={css.collection}>
-        <div style={css.collapse}>
-          {k + ':'}
-        </div>
+      <div key={i} id={section} style={css.collection}>
+        <a href={'#' + section} style={css.collapse}>
+          {section + ':'}
+        </a>
         <div style={css.group}>
-          {Object.keys(obj).map((fn, o) => this.renderMethod(obj[fn], fn, o))}
+          {Object.keys(obj).map((fn, o) => this.renderMethod(obj[fn], fn, o, section))}
         </div>
       </div>
     )
   }
-  renderMethod(obj, k, i) {
+  renderMethod(obj, k, i, section) {
     let {css} = this
+    let id = section + '/' + k
     return (
-      <div key={i} style={css.each}>
-        <h3 style={css.method}>{'.' + k + '()'}</h3>
+      <div key={i} id={id} style={css.each}>
+        <a href={'#' + id} style={css.method}>{'.' + k + '()'}</a>
         <div style={css.about}>
           <span style={css.desc}>{obj.desc}</span>
           <div style={css.return}>
