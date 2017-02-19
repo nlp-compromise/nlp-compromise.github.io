@@ -31,8 +31,6 @@ const style = styler`
     background-color:steelblue
     border-radius:0 0 7px 7px
     cursor:pointer;
-    :hover
-      background-color:navyblue
 `
 
 class Code extends React.Component {
@@ -41,7 +39,7 @@ class Code extends React.Component {
     this.state = {
       error: null,
       result: null,
-      dirty: false,
+      dirty: true,
       code: this.formatCode(props.code || '')
     }
     this.callback = props.callback || function() {}
@@ -95,19 +93,15 @@ class Code extends React.Component {
     }
     let button = {
       backgroundColor: '#7caed8',
-      height: 10
+      color: 'lightgrey',
+      opacity: 0.7
+    // height: 10
     }
-    let title = null
+    // let title = null
     if (this.state.dirty) {
       button = {
         backgroundColor: 'steelblue'
       }
-      title = (
-        <span>
-          {'run  '}
-          <Zap/>
-        </span>
-      )
     }
     return (
       <div style={css.container}>
@@ -116,7 +110,10 @@ class Code extends React.Component {
         </div>
         <div style={css.error}>{props.error || ''}</div>
         <div style={[css.go, button]} onClick={this.go}>
-          {title}
+          <span>
+            {'run  '}
+            <Zap/>
+          </span>
         </div>
       </div>
     )

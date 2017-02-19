@@ -2,6 +2,7 @@ import React from 'react';
 import Radium from 'radium';
 import styler from 'react-styling';
 import Firebase from './firebase';
+import demos from './demos';
 
 const style = styler`
 container
@@ -22,30 +23,30 @@ class Demos extends React.Component {
   constructor() {
     super();
     this.state = {
-      demos:{}
+      demos: demos
     };
     this.css = style;
-    this.db = new Firebase();
-    this.db.fetchDemos((obj)=>{
-      this.setState({demos:obj})
-    });
-    this.printDemos=this.printDemos.bind(this)
+    // this.db = new Firebase();
+    // this.db.fetchDemos((obj)=>{
+    //   this.setState({demos:obj})
+    // });
+    this.printDemos = this.printDemos.bind(this)
   }
-  printDemos(){
-    let {state,css}=this
-    let demos=state.demos||{}
-    return Object.keys(demos).map((k)=>{
+  printDemos() {
+    let {state, css} = this
+    let demos = state.demos || {}
+    return Object.keys(demos).map((k) => {
       return (<div style={css.demo}>
-        <a href={'./expo/'+k} style={css.title}>{demos[k].title}</a>
+        <a href={'./expo/' + k} style={css.title}>{demos[k].title}</a>
         <div style={css.about}>{demos[k].about}</div>
       </div>
-    )
+      )
     })
   }
   render() {
     let {css} = this;
     return (
-    <div style={css.container}>
+      <div style={css.container}>
       demos!
       <ul>
         {this.printDemos()}

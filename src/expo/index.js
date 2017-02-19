@@ -4,19 +4,13 @@ import Radium from 'radium';
 import Dirty from './dirty';
 import Code from './code';
 import exec from './eval';
+import demos from '../demos/demos';
 // import debounce from './debounce';
 import styler from 'react-styling';
 import { nlp } from '../shared/nlp';
 import Logo from '../shared/logo';
+import HomeIcon from 'react-icons/lib/md/keyboard-arrow-left'
 import '../shared/index.css'
-
-const obj = {
-  code: `var r = nlp(myText)
-r.match('#Verb').toUpperCase()
-return r
-  `,
-  src: 'weezer/buddyholly'
-}
 
 const style = styler`
 container
@@ -38,15 +32,30 @@ home:
   color:grey
   position:relative
   top:-20px
+title
+  text-decoration:underline
+  font-size:25
+  position:relative
+  left:-40
+description
+  marginBottom:20
+  font-size:18
+  marginLeft:50
+  color:grey
 `;
 
 class Expo extends React.Component {
   constructor() {
+    let demo = window.location.pathname.replace('/expo/', '') || 'uppercase-all-verbs-197792'
+    let obj = demos[demo]
+    obj = obj || {}
     super();
     this.state = {
       result: nlp(''),
       code: obj.code,
       text: obj.text,
+      title: obj.title,
+      description: obj.description,
       src: obj.src,
       valid: true,
       error: null
@@ -73,7 +82,7 @@ class Expo extends React.Component {
   }
   exec() {
     exec(this.state, (r, err) => {
-      if (!r) {
+      if (err) {
         this.setState({
           valid: false,
           error: err.message
@@ -93,10 +102,19 @@ class Expo extends React.Component {
       <div>
         <a href='./' style={css.logo}>
           <Logo height={10} width={150}/>
-          <span style={css.home}>{'compromise'}</span>
+          <span style={css.home}>
+            <HomeIcon size={20}/>
+            {'compromise'}
+          </span>
           { /*<div style={css.subline}>{'nlp in the browser'}</div>*/ }
         </a>
         <div style={css.container}>
+          <div style={css.title}>
+            {state.title}
+          </div>
+          <div style={css.description}>
+            {state.description}
+          </div>
           <div style={css.textarea}>
             <ChooseText whichText={state.whichText} text={state.text} callback={this.textChange}/>
           </div>

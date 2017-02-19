@@ -8,7 +8,7 @@ import 'codemirror/mode/htmlmixed/htmlmixed'
 import '../shared/codemirror/codemirror.css';
 import '../shared/codemirror/mytheme.css';
 import ListIcon from 'react-icons/lib/go/list-unordered'
-import HomeIcon from 'react-icons/lib/md/home'
+import HomeIcon from 'react-icons/lib/md/keyboard-arrow-left'
 import Logo from '../shared/logo';
 
 const style = styler`
