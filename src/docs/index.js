@@ -7,6 +7,9 @@ import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
 import '../shared/codemirror/codemirror.css';
 import '../shared/codemirror/mytheme.css';
+import ListIcon from 'react-icons/lib/go/list-unordered'
+import HomeIcon from 'react-icons/lib/md/home'
+import Logo from '../shared/logo';
 
 const style = styler`
 container
@@ -24,6 +27,8 @@ desc:
   flex:2
   flex-basis:80px
   color:grey
+  margin-left:20
+  padding-right:30
 return:
   color:lightgrey
   font-size:12
@@ -35,13 +40,39 @@ method:
   color:steelblue
   text-decoration:none;
   font-weight:600
-  font-size:18
+  font-size:20
 each:
-  marginLeft:50
-  padding:25
+  marginLeft:15
+  paddingBottom:10
+  paddingTop:10
+  paddingLeft:25
+  borderLeft:2px dotted lightsteelblue
+  margin:40
 collapse:
   color:darkgrey
   text-decoration:underline
+  cursor:pointer
+group:
+  marginLeft:10
+  marginTop:20
+expand:
+  text-decoration:none
+  color:#81acce
+fixed:
+  position:relative
+  width:100%
+  height:75
+  border-bottom:1px solid lightgrey
+subline:
+  color:steelblue
+  font-size:15
+  padding:25
+home:
+  margin-left:50
+  color:grey
+  position:relative
+  top:-20px
+  text-decoration:none
 `;
 
 let options = {
@@ -56,23 +87,46 @@ class Docs extends React.Component {
   constructor() {
     super();
     this.state = {
+      showAll: false,
+      show: {}
     };
     this.css = style;
     this.renderMethod = this.renderMethod.bind(this)
     this.renderCollection = this.renderCollection.bind(this)
+    this.expand = this.expand.bind(this)
+    this.showOne = this.showOne.bind(this)
   }
   renderCollection(obj, section, i) {
-    let {css} = this
-    return (
-      <div key={i} id={section} style={css.collection}>
-        <a href={'#' + section} style={css.collapse}>
-          {section + ':'}
-        </a>
-        <div style={css.group}>
+    let {css, state} = this
+    let showGroup = null
+    if (state.showAll || state.show[section]) {
+      showGroup = (
+        <div style={[css.group]}>
           {Object.keys(obj).map((fn, o) => this.renderMethod(obj[fn], fn, o, section))}
         </div>
+      )
+    }
+    return (
+      <div key={i} id={section} style={css.collection}>
+        <span style={css.collapse} onClick={() => {
+        this.showOne(section)
+        history.pushState(null, null, '#' + section);
+      }}>
+          {section + ':'}
+        </span>
+        {showGroup}
       </div>
     )
+  }
+  expand() {
+    this.setState({
+      showAll: !this.state.showAll
+    })
+  }
+  showOne(str) {
+    console.log(str)
+    this.state.show[str] = !!!this.state.show[str]
+    this.setState(this.state)
   }
   renderMethod(obj, k, i, section) {
     let {css} = this
@@ -103,7 +157,23 @@ class Docs extends React.Component {
     })
     return (
       <div style={css.container}>
-        docs!
+        <div style={css.fixed}>
+          <a href='../' style={{
+        textDecoration: 'none'
+      }}>
+            <Logo height={10} width={150}/>
+            <span style={css.home}>
+              <HomeIcon size={20}/>
+              {'compromise'}
+            </span>
+          </a>
+          <br/>
+          <span style={css.subline}>{'docs! '}</span>
+          <a href='#' style={css.expand} onClick={this.expand}>
+            <ListIcon size={22}/>
+            {' show all'}
+          </a>
+        </div>
         <ul>
           {generic}
           {subsets}
