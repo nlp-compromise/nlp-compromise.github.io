@@ -15,7 +15,7 @@ import '../shared/index.css'
 const style = styler`
 container
   width: 80%
-  margin: 9%
+  margin: 85
   padding: 8
 logo:
   position:absolute;
@@ -32,6 +32,11 @@ home:
   color:grey
   position:relative
   top:-20px
+demos:
+  position:relative
+  left:-80
+  font-size:17
+  color:grey
 title
   text-decoration:underline
   font-size:25
@@ -103,12 +108,15 @@ class Expo extends React.Component {
         <a href='./' style={css.logo}>
           <Logo height={10} width={150}/>
           <span style={css.home}>
-            <HomeIcon size={20}/>
             {'compromise'}
           </span>
           { /*<div style={css.subline}>{'nlp in the browser'}</div>*/ }
         </a>
         <div style={css.container}>
+          <a href='../demos' style={css.demos}>
+            <HomeIcon size={20}/>
+            {'other demos'}
+          </a>
           <div style={css.title}>
             {state.title}
           </div>

@@ -1,7 +1,7 @@
 const demos = [
   {
     title: 'Uppercase all verbs',
-    description: 'grab a subset of the text, and apply a generic case transform method',
+    description: 'grab a subset of the text, and make a boring transformation',
     code: `var r = nlp(myText)
   r.match('#Verb').toUpperCase()
   return r
@@ -10,9 +10,57 @@ const demos = [
   },
   {
     title: 'Find all people',
-    description: 'use the `.people()` subset to grab all person names in the text',
+    description: 'use the `.people()` method to grab all person names in the text',
     code: `var r = nlp(myText)
   return r.people()
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'Grab the places',
+    description: 'use the `.places()` method to grab all locations in the text',
+    code: `var r = nlp(myText)
+  return r.places()
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'parse all the numbers',
+    description: 'use the `.values()` method to collect and parse all numbers in the text',
+    code: `var r = nlp(myText)
+  return r.values().data()
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'Show all the nouns',
+    description: 'use the `.nouns()` method to grab all the nouns in the text',
+    code: `var r = nlp(myText)
+  return r.nouns()
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'Named-entity-recognition',
+    description: 'grab all people/places/orgs, sorted by frequency',
+    code: `var r = nlp(myText)
+  return r.topics().out('freq')
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'Change sentence tense',
+    description: 'change a sentence to the past-tense',
+    code: `var r = nlp(myText)
+  return r.sentences(0).toPastTense()
+    `,
+    src: 'weezer/buddyholly'
+  },
+  {
+    title: 'Negate a sentence',
+    description: 'turn a sentence into its opposite meaning',
+    code: `var r = nlp(myText)
+  return r.sentences(0).toNegative()
     `,
     src: 'weezer/buddyholly'
   },
@@ -34,7 +82,7 @@ function hashCode(str) {
     hash += char * Math.pow(31, (len - i));
     hash = hash & hash; //javascript limitation to force to 32 bits
   }
-  return (hash + '').substr(0, 6)
+  return (Math.abs(hash) + '').substr(0, 6)
 }
 
 module.exports = demos.reduce((h, obj) => {
