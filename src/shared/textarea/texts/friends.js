@@ -59,7 +59,7 @@ Mhm... it's moist.
 Hi!
 Hi! Emma will be up in a minute!
 Oh, good!
-Oh hey Ross... Listen, I heard about you and Charlie. I'm really sorry.
+Oh hey Ross... listen, I heard about you and Charlie. I'm really sorry.
 Oh, that's OK. I'm sure there are tons of other beautiful paleontologists    out there.
 Absolutely.
 There was one! She's it! All the rest look like they should live under    a bridge!

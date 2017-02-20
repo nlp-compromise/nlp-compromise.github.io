@@ -124,7 +124,7 @@ class Expo extends React.Component {
             {state.description}
           </div>
           <div style={css.textarea}>
-            <ChooseText whichText={state.whichText} text={state.text} callback={this.textChange}/>
+            <ChooseText src={state.src} text={state.text} callback={this.textChange}/>
           </div>
           <Code code={state.code} callback={this.codeChange} valid={state.valid} error={state.error}/>
           <Dirty result={state.result} />

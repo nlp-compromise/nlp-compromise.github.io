@@ -51,7 +51,6 @@ class Demos extends React.Component {
         <a href={'./expo/' + k} style={css.title}>{demos[k].title}</a>
         <div style={css.about}>{demos[k].about}</div>
         <ul style={css.description}>{demos[k].description}</ul>
-
       </div>
       )
     })

@@ -56,9 +56,17 @@ choice:
 class ChooseText extends React.Component {
   constructor(props) {
     super(props);
-    let text = texts['freshPrince']
+    let src = props.src
+    if (props.text) {
+      src = 'custom'
+    }
+    let text = props.text || texts[src]
+    if (!text) {
+      src = 'freshPrince/intro'
+      text = texts[src]
+    }
     this.state = {
-      whichText: 'freshPrince',
+      whichText: src,
       text: text,
       dropDown: false,
       result: nlp(text)
@@ -111,7 +119,7 @@ class ChooseText extends React.Component {
         this.setState(state)
         this.callback(state.text)
       }
-      return <div style={css.choice} key={i} onClick={choice}>{txt}</div>
+      return <div style={css.choice} key={i} onClick={choice}>{txt.replace(/\/.*/, '')}</div>
     })
     return <div style={css.choices}>{choices}</div>
   }
