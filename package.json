@@ -29,6 +29,7 @@
     "react-icons": "^2.2.1",
     "react-input-autosize": "^1.1.0",
     "react-mdl": "^1.9.0",
+    "react-remarkable": "^1.1.1",
     "react-router": "^3.0.2",
     "react-select": "^1.0.0-rc.2",
     "react-styling": "^1.5.1",

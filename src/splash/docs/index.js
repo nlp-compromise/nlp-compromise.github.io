@@ -20,7 +20,7 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 0
+      tab: 1
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
