@@ -8,6 +8,7 @@ import styler from 'react-styling/flat';
 import ChooseText from '../../shared/textarea/chooseText';
 
 import Basic from './basic.js';
+import Subset from './subset.js';
 import Links from './links.js';
 
 const style = styler`
@@ -20,13 +21,14 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 1
+      tab: 2
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
     this.tabs = [
       <Links />,
       <Basic />,
+      <Subset />,
       <div/>,
     ]
   }
