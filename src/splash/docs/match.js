@@ -72,6 +72,9 @@ function doc(props) {
           <b>.match()</b> also works nicely with the <b>.tag()</b> method:
           <br/>
            <Code code={examples.tag}/>
+           <b>tag()</b> will accept anything,
+           <br/>
+           but the built-in tags will perform additional logical operations, like ensuring a <b>Noun</b> is never a <b>Verb</b>, and so on.
          </p>
       </div>
     </div>
