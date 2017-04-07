@@ -78,7 +78,7 @@ class Example extends Component {
     this.css = style
     this.update = this.update.bind(this)
   }
-  update(obj){
+  update(obj) {
     // console.log(obj)
   }
   render() {
@@ -90,11 +90,13 @@ class Example extends Component {
       normal: 'philidelphia',
       count: 1
     }]
-    nouns = nouns.map((n,i) => {
+    nouns = nouns.map((n, i) => {
       return (
         <li key={i}>
           {n.normal}
-          <span style={{color: 'lightgrey'}}>
+          <span style={{
+          color: 'lightgrey'
+        }}>
             {' - ' + n.count}
           </span>
         </li>
@@ -102,21 +104,16 @@ class Example extends Component {
     })
     return (
       <div style={css.container}>
-        <div style={css.title}>
-          {'This is the '}
-          <img alt="beans" src='https://twemoji.maxcdn.com/36x36/2728.png'/>
-          {':'}
-        </div>
-        <p></p>
+
         <div style={css.freshprince}>
           <ChooseText callback={this.update} />
         </div>
         <div style={css.headline}>
           <span style={css.r}>{'r = '}</span>
           {'nlp('}
-          <span style={css.param} title="just a string">{'myText'}</span>
+          <span style={css.param} title='just a string'>{'myText'}</span>
           <span style={{}}>{' , '}</span>
-          <span style={css.param} title="a key-value object of word-> POS">{' [customLexicon] '}</span>
+          <span style={css.param} title='a key-value object of word-> POS'>{' [customLexicon] '}</span>
           {')'}
         </div>
         <div style={css.explain}>

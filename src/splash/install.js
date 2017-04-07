@@ -3,8 +3,8 @@ import Radium from 'radium';
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
-import '../../shared/codemirror/codemirror.css';
-import '../../shared/codemirror/mytheme.css';
+import '../shared/codemirror/codemirror.css';
+import '../shared/codemirror/mytheme.css';
 import styler from 'react-styling';
 const style = styler`
 code:
@@ -30,21 +30,23 @@ mode:
 `
 
 const examples = {
-  node: `import nlp from 'compromise'
+  node: `var nlp = require('compromise')
 
-var r = nlp('dinosaur').nouns().toPlural();
-var str = r.out('text');
+var word = nlp('dinosaur')
+//inflects/pluralizes
+word.nouns().toPlural();
 
-console.log(str);
+console.log(word.out('text'));
 //'dinosaurs'
 `,
 
   html: `<script src="https://unpkg.com/compromise/builds/compromise.min.js"></script>
 <script>
-  var r = window.nlp('five hundred and twenty-seven').values().toNumber();
+  var num = nlp('five-hundred and twenty')
+  num.values().toNumber();
 
-  document.body.innerHTML = r.out('text');
-  //'527'
+  document.body.innerHTML = num.out('text');
+  //'520'
 </script>
 `
 }
@@ -91,7 +93,7 @@ class Install extends Component {
         color: 'grey'
       }}>
               <td>{'on a server:'}</td>
-              <td>{'or in a client:'}</td>
+              <td>{'in a browser:'}</td>
             </tr>
             <tr>
               <td style={css.mode}>

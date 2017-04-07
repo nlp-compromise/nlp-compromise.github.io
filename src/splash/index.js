@@ -3,17 +3,11 @@ import React from 'react';
 import Radium from 'radium';
 import Logo from '../shared/logo';
 import ShowOff from './showOff';
-import QuickStart from './quickStart';
-import Usage from './usage';
+import Install from './install';
 import styler from 'react-styling';
-
-// import Zap from 'react-icons/lib/go/zap'
-// import Bowtie from 'react-icons/lib/io/bowtie'
-// import Code from 'react-icons/lib/io/code'
-import Twitter from 'react-icons/lib/fa/twitter'
-import Slack from 'react-icons/lib/fa/slack'
-import GitHub from 'react-icons/lib/fa/github'
+import Tabs from './docs'
 import '../shared/index.css'
+
 const style = styler`
 container
   marginTop: 50
@@ -33,20 +27,12 @@ headline3
   marginTop:25
 orange:
   color: #f39c73
+title:
+  color:steelblue;
+  font-size:34
+  marginLeft:7%
 spacer:
   padding:60
-table:
-  width:90%
-  border-spacing: 10
-  marginLeft:5%
-  marginRight:5%
-  text-align:center
-  link:
-    font-size:12
-    color:darkgrey
-  href:
-    text-decoration:none
-    color:black
 top:
   marginRight:15
   text-align:right
@@ -58,33 +44,15 @@ top:
   byline:
     marginRight:90
     color:silver
-trigger:
-  position:fixed
-  display:block
-  z-index:4
-  bottom:10
-  font-size:12
-  right:10
-  width:60
-  height:60
-  border-radius:50%
-  background-color:#f39c73;
-  text-align:center;
-  marginTop:20
-  cursor:pointer
-  border:1px solid white
-  href
-    text-decoration:none
-    color:#fdfeff;
-    :hover
-      color:#6393b9
 `
 
 
 class Main extends React.Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      tab: 1
+    };
     this.css = style;
   }
   render() {
@@ -118,33 +86,20 @@ class Main extends React.Component {
 
 
           <ShowOff />
-          <QuickStart id='quickstart'/>
-          <Usage id='usage'/>
+          <Install id='quickstart'/>
+
+          <p></p>
+          <div style={css.title}>
+            {'This is the '}
+            <img alt='beans' src='https://twemoji.maxcdn.com/36x36/2728.png'/>
+            {':'}
+          </div>
+          <p></p>
+
+          <Tabs />
           <div style={css.spacer}/>
-          <table style={css.table}>
-            <tbody>
-              <tr>
-                <td>
-                  <a style={css.table.href} href='https://github.com/nlp-compromise/compromise'>
-                    <GitHub size={50}/>
-                    <div style={css.table.link}>github</div>
-                  </a>
-                </td>
-                <td>
-                  <a style={css.table.href} href='https://www.twitter.com/compromisejs'>
-                    <Twitter size={50}/>
-                    <div style={css.table.link}>twitter</div>
-                  </a>
-                </td>
-                <td>
-                  <a style={css.table.href} href='http://slack.compromise.cool'>
-                    <Slack size={50}/>
-                    <div style={css.table.link}>slack</div>
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+
           <div style={css.spacer}/>
           <div style={{
         color: 'steelblue'
@@ -161,13 +116,6 @@ class Main extends React.Component {
             </a>
           </div>
           <div style={css.spacer}/>
-          <div style={css.trigger}>
-            <a style={css.trigger.href} href='./demos'>
-              <div style={{
-        fontSize: 42
-      }}>{'>'}</div>
-            </a>
-          </div>
         </div>
       </div>
       );
