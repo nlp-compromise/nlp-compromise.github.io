@@ -26,17 +26,34 @@ var parsed = nlp('Now this is a story all about how..')`,
 console.log(parsed.out('tags'))`,
 
   output: `parsed.out('text') //character-perfect output
-parsed.out('normal') //cleaned-up, normalized text
+parsed.out('normal') //cleaned-up text format
 parsed.out('terms') //individual-word data
 parsed.out('html') //sanitized, formatted html`,
 
-  subset1: `var nouns = parsed.nouns()
-nouns.out('topk')
-/*[
-  {text:'story', count:1},
-  {text:'life', count:1}
-]*/`,
+  subset1: `parsed.verbs().out('array')
+// ['is']
+parsed.people().out('json')
+// [ ]
+parsed.nouns().out('topk')
+//[{text:'story', count:1},
+// {text:'life', count:1}
+//]`,
+  subsetAll: `var weezer = nlp("Oh-oh and you're Mary-Tyler Moore")
+weezer.people().dehyphenate().toUpperCase()
+weezer.out('text')
+//"Uh-oh and you're MARY TYLER MOORE"
 
+//or inline,
+weezer.people().toLowerCase().all().out()
+//"Uh-oh and you're mary tyler moore"`,
+  clone: `var main = nlp("I don't care what they say about us, anyway")
+//make a quick copy:
+var clone = main.clone()
+clone.contractions().expand() //make a change on it
+
+clone.out('text') //'I do not care...'
+main.out('text')  //'I don't care...'
+  `
 }
 function doc(props) {
   return (
@@ -58,12 +75,20 @@ function doc(props) {
           <Code code={examples.pretty}/>
         </p>
         <p>
-         these <b>.out()</b> methods are handy:
+         {'these <b>.out()</b> methods are handy, while we\'re at it:'}
          <Code code={examples.output}/>
         </p>
         <p>
-          but they become interesting when you grab a subset of your text:
+          but they become more interesting when you grab a subset of the text:
           <Code code={examples.subset1}/>
+        </p>
+        <p>
+          you can grab parts of your text, and change them:
+          <Code code={examples.subsetAll}/>
+        </p>
+        <p>
+          {`if you're changing a subset, and don't want the document effected`}:
+          <Code code={examples.clone}/>
         </p>
       </div>
     </div>

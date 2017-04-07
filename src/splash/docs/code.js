@@ -15,7 +15,7 @@ const Code = (props) => {
     border: '1px solid lightgrey',
     borderRadius: 5,
     display: 'block',
-    maxWidth: 600
+    maxWidth: 650
   }
   return (
     <div style={container}>
