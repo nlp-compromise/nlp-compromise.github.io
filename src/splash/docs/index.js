@@ -7,9 +7,10 @@ import Tab from 'react-mdl/lib/Tabs/Tab';
 import styler from 'react-styling/flat';
 import ChooseText from '../../shared/textarea/chooseText';
 
+import Links from './links.js';
 import Basic from './basic.js';
 import Subset from './subset.js';
-import Links from './links.js';
+import Match from './match.js';
 
 const style = styler`
 container:
@@ -21,7 +22,7 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 2
+      tab: 3
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
@@ -29,7 +30,7 @@ class TheTabs extends React.Component {
       <Links />,
       <Basic />,
       <Subset />,
-      <div/>,
+      <Match/>,
     ]
   }
   changeTab(tabId) {
