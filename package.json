@@ -38,7 +38,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "deploy:github": "gh-pages -d build --branch master",
-    "deploy:firebase": "firebase deploy",
+    "deploy:firebase": "./node_modules/.bin/firebase deploy",
     "deploy": "npm run deploy:github && npm run deploy:firebase"
   }
 }
