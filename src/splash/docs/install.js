@@ -3,8 +3,8 @@ import Radium from 'radium';
 import Codemirror from 'react-codemirror'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/htmlmixed/htmlmixed'
-import '../shared/codemirror/codemirror.css';
-import '../shared/codemirror/mytheme.css';
+import '../../shared/codemirror/codemirror.css';
+import '../../shared/codemirror/mytheme.css';
 import styler from 'react-styling';
 const style = styler`
 code:
@@ -73,15 +73,11 @@ class Install extends Component {
       <div>
         <div style={[css.headline, {
         marginTop: 45,
-        fontSize: 25,
         marginLeft: 100
       }]}>
-          {'so'}
-          <span style={[css.orange, {
-        marginLeft: 15
-      }]}>
-            {'um,'}
-          </span>
+        <b>compromise</b> is a one single javascript file, and is only about 210kb
+        <br/>
+         so just go:
         </div>
         <div style={css.code}>
           {'npm install compromise'}

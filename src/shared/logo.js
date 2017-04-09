@@ -13,7 +13,7 @@ const colors = [
 const style = styler`
 container:
   position:relative
-  width:1210px
+  width:600px
   padding:20
   paddingTop:4
   text-align:center
@@ -40,8 +40,8 @@ class Logo extends Component {
       sizes: [180, 160, 120, 180, 170]
     }
     this.css = style
-    this.height = props.height || 300
-    this.width = props.width || 1210
+    this.height = props.height || 200
+    this.width = props.width || 600
     this.makeThings = this.makeThings.bind(this)
   }
   makeThings() {

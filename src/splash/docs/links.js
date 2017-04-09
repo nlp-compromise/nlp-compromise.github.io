@@ -4,14 +4,17 @@ import Radium from 'radium';
 import Twitter from 'react-icons/lib/fa/twitter'
 import Slack from 'react-icons/lib/fa/slack'
 import GitHub from 'react-icons/lib/fa/github'
-import styler from 'react-styling/flat';
+import styler from 'react-styling';
 
 const style = styler`
+container:
+  text-align:center;
 table:
   width:90%
   border-spacing: 10
   marginLeft:5%
   marginRight:5%
+  margin-top:75
   text-align:center;
   color:black;
   link:
@@ -29,6 +32,7 @@ class Links extends React.Component {
   render() {
     let css = this.css
     return (
+      <div style={css.container}>
       <table style={css.table}>
         <tbody>
           <tr>
@@ -53,6 +57,13 @@ class Links extends React.Component {
           </tr>
         </tbody>
       </table>
+      <p>
+        <a href='https://github.com/nlp-compromise/compromise/wiki/Contributing'>YOU SHOULD ALSO COME AND HACK, {'WE\'RE'} COOL</a>
+      </p>
+      <p style={css.left}>
+        compromise was made by <a href='http://spencermounta.in'>spencer kelly</a> and <a href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
+      </p>
+      </div>
     )
   }
 }

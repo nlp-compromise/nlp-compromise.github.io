@@ -7,10 +7,12 @@ import Tab from 'react-mdl/lib/Tabs/Tab';
 import styler from 'react-styling/flat';
 import ChooseText from '../../shared/textarea/chooseText';
 
+import Install from './install.js';
 import Links from './links.js';
 import Basic from './basic.js';
 import Subset from './subset.js';
 import Match from './match.js';
+import Extend from './extend.js';
 
 const style = styler`
 container:
@@ -22,15 +24,17 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 3
+      tab: 4
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
     this.tabs = [
-      <Links />,
+      <Install />,
       <Basic />,
       <Subset />,
       <Match/>,
+      <Extend />,
+      <Links />,
     ]
   }
   changeTab(tabId) {
@@ -44,13 +48,12 @@ class TheTabs extends React.Component {
       <div>
       <div >
           <Tabs style={css.tabs} activeTab={state.tab} onChange={this.changeTab} ripple>
-              <Tab>Links</Tab>
+              <Tab>Install</Tab>
               <Tab>Basic Usage</Tab>
               <Tab>Subsets</Tab>
               <Tab>Matches</Tab>
               <Tab>Extending</Tab>
-              <Tab>Verbs</Tab>
-              <Tab>Values</Tab>
+              <Tab>Links</Tab>
           </Tabs>
           <section>
               {this.tabs[state.tab]}

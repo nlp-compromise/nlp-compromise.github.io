@@ -4,14 +4,15 @@ import AutosizeInput from 'react-input-autosize'
 import styler from 'react-styling';
 import Result from './result';
 import { nlp } from '../../shared/nlp';
+import Down from 'react-icons/lib/fa/long-arrow-down'
 const style = styler`
 demo
   margin:15
-  marginLeft:50
   marginBottom:35
   color:dimgrey
-  font-size:50
+  font-size:40
   font-family:Inconsolata
+  white-space: nowrap;
 input:
   border:none
   color:dimgrey
@@ -20,14 +21,19 @@ input:
   border-bottom:1px dashed lightgrey
   background-color:#fdfeff
 transform
+  text-align:left;
   marginTop:30
   marginBottom:0
-  marginLeft:30
+  marginLeft:25%
   color:steelblue
   font-size:20
   font-weight:500
   space:
     marginTop: 60
+center:
+  text-align:center
+  color:steelblue
+  padding-bottom:25
 example:
   text:
     color:palevioletred
@@ -40,14 +46,35 @@ example:
     color:steelblue
 aside:
   color:silver
-  marginTop:15
+  font-size:20
+  marginTop:100
+dirt:
+  color:steelblue
+noDirt:
+  color:lightsteelblue
 table:
   width:90%
   border-spacing: 10
   marginLeft:5%
   marginRight:5%
 `
-
+const printTerms = function(r) {
+  let dirt = {
+    color: '#b37291'
+  }
+  let noDirt = {
+    color: 'steelblue'
+  }
+  return r.list.map((ts) => {
+    return ts.terms.map((t) => {
+      if (t.dirty) {
+        return <span style={dirt}>{t.out('text')}</span>
+      } else {
+        return <span style={noDirt}>{t.out('text')}</span>
+      }
+    })
+  })
+}
 const examples = {
   tense: function(r, css) {
     r = r.clone()
@@ -55,7 +82,7 @@ const examples = {
     return (
       <div>
         <div style={css.example.text}>change tense:</div>
-        <div style={css.example.result}>{r.out('text')}</div>
+        <div style={css.example.result}>{printTerms(r)}</div>
       </div>
     )
   },
@@ -65,7 +92,7 @@ const examples = {
     return (
       <div>
         <div style={css.example.text}>negate:</div>
-        <div style={css.example.result}>{r.out('text')}</div>
+        <div style={css.example.result}>{printTerms(r)}</div>
       </div>
     )
   },
@@ -75,7 +102,7 @@ const examples = {
     return (
       <div>
         <div style={css.example.text}>add words:</div>
-        <div style={css.example.result}>{r.out('text')}</div>
+        <div style={css.example.result}>{printTerms(r)}</div>
       </div>
     )
   },
@@ -85,7 +112,7 @@ const examples = {
     return (
       <div>
         <div style={css.example.text}>replace:</div>
-        <div style={css.example.result}>{r.out('text')}</div>
+        <div style={css.example.result}>{printTerms(r)}</div>
       </div>
     )
   }
@@ -116,25 +143,31 @@ class Demo extends Component {
   }
   render() {
     let {css, state} = this
+    let smaller = {
+      '@media (min-width: 700px)': {
+        fontSize: 25,
+        color: 'red'
+      }
+    }
     return (
       <div>
         <div style={ css.transform }>
-          { 'so' }
+          { 'look,' }
         </div>
         <div style={ css.demo }>
           { '‘' }
           <AutosizeInput ref={ 'input' } value={ state.text } inputStyle={ css.input } onChange={ this.onChange } />
           { '’' }
         </div>
-        <div style={ css.transform }>
-          { 'becomes:' }
+        <div style={ css.center }>
+          <Down size={40}/> becomes
         </div>
         <div style={ css.demo }>
           <Result result={ state.result } />
         </div>
         <p></p>
         <div style={css.aside}>
-          { 'so you can do your crazy stuff:' }
+          { 'then you can chuck things around:' }
         </div>
         <table style={css.table}>
           <tbody>

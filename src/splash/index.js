@@ -3,7 +3,6 @@ import React from 'react';
 import Radium from 'radium';
 import Logo from '../shared/logo';
 import ShowOff from './showOff';
-import Install from './install';
 import styler from 'react-styling';
 import Tabs from './docs'
 import '../shared/index.css'
@@ -15,16 +14,21 @@ container
 headline:
   color:steelblue;
   font-size:34
+  line-height:105%
   marginLeft:20%
 headline2
   color:lightgrey
   font-size:30
+  line-height:105%
+  marginTop:10px
+  marginBottom:15px
   marginLeft:25%
 headline3
   color:palevioletred
   font-size:30
   marginLeft:25%
-  marginTop:25
+  marginTop:15
+  marginBottom:35
 orange:
   color: #f39c73
 title:
@@ -33,6 +37,8 @@ title:
   marginLeft:7%
 spacer:
   padding:60
+center:
+  text-align:center
 top:
   marginRight:15
   text-align:right
@@ -69,7 +75,7 @@ class Main extends React.Component {
         <Logo />
         <div style={css.container}>
           <div style={css.headline}>
-            {'cuz using language is hard'}
+            {'cuz language is cõmplicated'}
           </div>
           <div style={css.headline2}>
             {'\'and there\'s a gazillion words'}
@@ -81,14 +87,15 @@ class Main extends React.Component {
             {' text'}
           </div>
           <div style={css.headline3}>
-            {'so that it\'s much easier.'}
+            {'so life is way better.'}
           </div>
 
+          <div style={css.center}>
+            <ShowOff />
+          </div>
 
-          <ShowOff />
-          <Install id='quickstart'/>
+          <div style={css.spacer}/>
 
-          <p></p>
           <div style={css.title}>
             {'This is the '}
             <img alt='beans' src='https://twemoji.maxcdn.com/36x36/2728.png'/>
@@ -97,8 +104,6 @@ class Main extends React.Component {
           <p></p>
 
           <Tabs />
-          <div style={css.spacer}/>
-
 
           <div style={css.spacer}/>
           <div style={{

@@ -14,6 +14,13 @@ const chooseTag = (t) => {
     ['Determiner', '#d3c0b3'],
     ['Preposition', '#9794a8'],
     ['Conjunction', '#c8c9cf'],
+
+    ['Value', 'palegoldenrod'],
+    ['QuestionWord', 'lavender'],
+    ['Acronym', 'violet'],
+    ['Possessive', '#7990d6'],
+    ['Noun', '#7990d6'],
+    ['Expression', '#b3d3c6']
   ]
   for (let i = 0; i < colors.length; i++) {
     if (t.tag[colors[i][0]]) {

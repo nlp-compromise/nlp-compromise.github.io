@@ -9,7 +9,7 @@ container:
 tagName:
   position:absolute
   bottom:-20
-  right:20
+  right:15
   fontSize:11
 demo
   color:dimgrey
@@ -32,15 +32,33 @@ class Result extends React.Component {
     let a = chooseTag(t)
     let tag = a[0]
     let color = a[1] || 'dimgrey'
+    let highlight = {
+      borderBottom: '4px solid ' + color
+    }
+    let space = {
+      fontSize: 50
+    }
+    let bottom = {
+      color: color,
+      marginLeft: 10
+    }
+    console.log(t.silent_term)
+    if (t.silent_term && !t.text) {
+      tag = ''
+    }
+    if (t.text.length <= 2) {
+      bottom.right = 10
+      bottom.bottom = -30
+    }
     return (
       <span key={i} style={css.container}>
-       <span style={{borderBottom: '4px solid ' + color}}>
+       <span style={highlight}>
          {t.text.trim()}
        </span>
-       <span style={{fontSize: 50}}>
+       <span style={space}>
          {' '}
         </span>
-       <span style={[css.tagName, {color: color}]}>
+       <span style={[css.tagName, bottom]}>
          {tag}
        </span>
      </span>
@@ -49,7 +67,11 @@ class Result extends React.Component {
 
   render() {
     let {props, css} = this
-    let terms = props.result.flatten().list[0].terms
+    let the = props.result.flatten().list[0]
+    if (!the) {
+      return null
+    }
+    let terms = the.terms
     return (
       <div style={css.demo}>
        {terms.map(this.doTerm)}
