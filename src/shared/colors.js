@@ -23,7 +23,7 @@ const chooseTag = (t) => {
     ['Expression', '#b3d3c6']
   ]
   for (let i = 0; i < colors.length; i++) {
-    if (t.tag[colors[i][0]]) {
+    if (t.tags[colors[i][0]]) {
       return colors[i]
     }
   }

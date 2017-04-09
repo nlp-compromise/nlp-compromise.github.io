@@ -42,7 +42,6 @@ class Result extends React.Component {
       color: color,
       marginLeft: 10
     }
-    console.log(t.silent_term)
     if (t.silent_term && !t.text) {
       tag = ''
     }

@@ -24,7 +24,7 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 4
+      tab: 0
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
@@ -46,8 +46,7 @@ class TheTabs extends React.Component {
     let {css, state} = this;
     return (
       <div>
-      <div >
-          <Tabs style={css.tabs} activeTab={state.tab} onChange={this.changeTab} ripple>
+          <Tabs style={css.tabs} activeTab={state.tab} onChange={this.changeTab}>
               <Tab>Install</Tab>
               <Tab>Basic Usage</Tab>
               <Tab>Subsets</Tab>
@@ -55,12 +54,9 @@ class TheTabs extends React.Component {
               <Tab>Extending</Tab>
               <Tab>Links</Tab>
           </Tabs>
-          <section>
-              {this.tabs[state.tab]}
-          </section>
-      </div>
-
-
+          <div>
+            {this.tabs[state.tab]}
+          </div>
       </div>
     )
   }

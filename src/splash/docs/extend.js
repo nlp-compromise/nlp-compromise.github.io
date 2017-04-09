@@ -15,6 +15,8 @@ words:
   text-align:left
 indent:
   marginLeft:80
+space:
+  marginTop:15
 `
 
 const examples = {
@@ -54,22 +56,26 @@ function doc(props) {
         <br/>
         For this reason, <b>compromise</b> supports all-sorts of customization and wrangling.
         <p></p>
-        <p>
+
+        <div style={css.space}>
          The simplest way is to pass-in words that you know about in advance:
          <Code code={examples.match1}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
          You can make-up your own tags, too
          <Code code={examples.match2}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
          or, you can always change the tags <i>'in post'</i>:
          <Code code={examples.posthoc}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
          Note that compromise is <i>somewhat-clever</i> about avoiding contradiction:
          <Code code={examples.logic}/>
-        </p>
+        </div>
 
       </div>
     </div>

@@ -13,6 +13,8 @@ code:
   border:1px solid lightgrey
 words:
   text-align:left
+space:
+  marginTop:15
 indent:
   marginLeft:80
 `
@@ -57,37 +59,46 @@ function doc(props) {
   return (
     <div style={css.container}>
       <div style={css.words}>
+      
+      <div style={css.space}>
         <b>compromise</b> is pretty easy to use:
         <Code code={examples.init}/>
-        <p>
+      </div>
+
+      <div style={css.space}>
          The text you enter is immediately
          <div style={css.indent}>
           <li>parsed into sentences,</li>
           <li>tokenized into terms,</li>
           <li>and <a href='https://github.com/nlp-compromise/compromise/wiki/Part-of-Speech-Tagging'>part-of-speech tagged</a></li>
-        </div>
-        </p>
+         </div>
+      </div>
+
         This all happens <a href='https://github.com/nlp-compromise/compromise/wiki/Performance'>pretty quickly</a>. You can parse a big document in a few seconds.
-        <p>
+        <div style={css.space}>
           to see the whole-thing:
           <Code code={examples.pretty}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
          These <b>.out()</b> methods are handy, while {'we\'re at it:'}
          <Code code={examples.output}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
           but they become more interesting when you grab a subset of the text.
           <Code code={examples.subset1}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
           You can grab parts of your text, and change them:
           <Code code={examples.subsetAll}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
           {`If you're changing a subset, and don't want the document effected`}:
           <Code code={examples.clone}/>
-        </p>
+        </div>
       </div>
     </div>
   )

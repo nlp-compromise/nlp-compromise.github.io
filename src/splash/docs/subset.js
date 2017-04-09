@@ -15,6 +15,8 @@ words:
   text-align:left
 indent:
   marginLeft:80
+space:
+  marginTop:15
 `
 
 const examples = {
@@ -69,27 +71,33 @@ function doc(props) {
   return (
     <div style={css.container}>
       <div style={css.words}>
-        {`You shouldn't`} have to know any <a href='https://github.com/nlp-compromise/compromise/wiki/jargon'>linguistic jargon</a>,
-        {`or `}
-        <a href='https://github.com/nlp-compromise/compromise/wiki/Tagset'>library internals</a> to use <b>compromise</b> effectively.
-        <p>
-         For this reason, it comes with some cool pre-tweaked selectors:
-         <Code code={examples.subsets}/>
-         you can see all of them in the <a href='https://nlp-expo.firebaseapp.com/docs'>api documentation</a>
-        </p>
-        <p>
-         These subsets return more-specific methods to call:
-         <Code code={examples.functions}/>
-        </p>
-        <p>
+        <div style={css.space}>
+          {`You shouldn't`} have to know any <a href='https://github.com/nlp-compromise/compromise/wiki/jargon'>linguistic jargon</a>,
+          {`or `}
+          <a href='https://github.com/nlp-compromise/compromise/wiki/Tagset'>library internals</a> to use <b>compromise</b> effectively.
+        </div>
+
+        <div style={css.space}>
+          For this reason, it comes with some cool pre-tweaked selectors:
+          <Code code={examples.subsets}/>
+          you can see all of them in the <a href='https://nlp-expo.firebaseapp.com/docs'>api documentation</a>
+        </div>
+
+        <div style={css.space}>
+          These subsets return more-specific methods to call:
+          <Code code={examples.functions}/>
+        </div>
+
+        <div style={css.space}>
           These subsets help clear-up the api. They also let methods overload, so:
           <Code code={examples.overloaded}/>
-        </p>
-        <p>
+        </div>
+
+        <div style={css.space}>
           There will ofcourse never be a perfect subset for every use. To dig into a more specifc part, try a <b>.match()</b>:
           <Code code={examples.match}/>
           in some ways, this resembles a regular-expression, but with grammatical information available 🎈
-        </p>
+        </div>
       </div>
     </div>
   )

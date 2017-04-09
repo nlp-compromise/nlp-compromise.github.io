@@ -15,6 +15,8 @@ words:
   text-align:left
 indent:
   marginLeft:80
+space:
+  marginTop:15
 `
 
 const examples = {
@@ -52,30 +54,37 @@ function doc(props) {
   return (
     <div style={css.container}>
       <div style={css.words}>
-        <b>compromise</b> lets you find, and then operate-on, any part of the document, as easily as possible.
-        <p>
-         This involves a custom (but easy) syntax for looking-up terms, based partly on <b>regular-expressions</b>:
-         <Code code={examples.match1}/>
-         you find more details about the syntax <a href='https://github.com/nlp-compromise/compromise/wiki/Match-syntax'>here</a>
-        </p>
-        <p>
+        <div style={css.space}>
+          <b>compromise</b> lets you find, and then operate-on, any part of the document, as easily as possible.
+        </div>
+
+        <div style={css.space}>
+           This involves a custom (but easy) syntax for looking-up terms, based partly on <b>regular-expressions</b>:
+           <Code code={examples.match1}/>
+           you find more details about the syntax <a href='https://github.com/nlp-compromise/compromise/wiki/Match-syntax'>here</a>
+        </div>
+
+        <div style={css.space}>
           <b>.match()</b> statements can also be used like a filter with <b>.has()</b>
           <br/>
            <Code code={examples.filter}/>
-         </p>
-        <p>
+         </div>
+
+        <div style={css.space}>
           <b>.match()</b> works well with the <b>.replace()</b> and <b>.remove()</b> methods:
           <br/>
            <Code code={examples.replace}/>
-         </p>
-        <p>
+         </div>
+
+        <div style={css.space}>
           <b>.match()</b> also works nicely with the <b>.tag()</b> method:
           <br/>
            <Code code={examples.tag}/>
            <b>tag()</b> will accept anything,
            <br/>
            but the built-in tags will perform additional logical operations, like ensuring a <b>Noun</b> is never a <b>Verb</b>, and so on.
-         </p>
+         </div>
+         
       </div>
     </div>
   )
