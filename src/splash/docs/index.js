@@ -13,6 +13,7 @@ import Basic from './basic.js';
 import Subset from './subset.js';
 import Match from './match.js';
 import Extend from './extend.js';
+import Api from './api.js';
 
 const style = styler`
 container:
@@ -24,7 +25,7 @@ class TheTabs extends React.Component {
   constructor() {
     super();
     this.state = {
-      tab: 0
+      tab: 5
     };
     this.css = style;
     this.changeTab = this.changeTab.bind(this)
@@ -34,6 +35,7 @@ class TheTabs extends React.Component {
       <Subset />,
       <Match/>,
       <Extend />,
+      <Api />,
       <Links />,
     ]
   }
@@ -52,6 +54,7 @@ class TheTabs extends React.Component {
               <Tab>Subsets</Tab>
               <Tab>Matches</Tab>
               <Tab>Extending</Tab>
+              <Tab>Api</Tab>
               <Tab>Links</Tab>
           </Tabs>
           <div>

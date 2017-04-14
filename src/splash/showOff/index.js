@@ -48,10 +48,6 @@ aside:
   color:silver
   font-size:20
   marginTop:100
-dirt:
-  color:steelblue
-noDirt:
-  color:lightsteelblue
 table:
   width:90%
   border-spacing: 10
@@ -60,7 +56,11 @@ table:
 `
 const printTerms = function(r) {
   let dirt = {
-    color: '#b37291'
+    color: '#b37291',
+    lineSpacing: '110%',
+    fontStyle: 'italic',
+    fontSize: '90%'
+  // borderBottom: '1px dashed #b37291'
   }
   let noDirt = {
     color: 'steelblue'
@@ -160,7 +160,7 @@ class Demo extends Component {
           { '’' }
         </div>
         <div style={ css.center }>
-          <Down size={40}/> becomes
+          <Down size={40}/> becomes:
         </div>
         <div style={ css.demo }>
           <Result result={ state.result } />

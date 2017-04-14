@@ -68,7 +68,7 @@ function doc(props) {
         </div>
 
         <div style={css.space}>
-         or, you can always change the tags <i>'in post'</i>:
+         or, you can always change the tags afterwards, <i>'in post'</i>:
          <Code code={examples.posthoc}/>
         </div>
 
