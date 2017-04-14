@@ -72,7 +72,7 @@ return r.if('#Value')`,
   var nouns= r.nouns()
 
   //add a bit of a blacklist
-  nouns.not(['dice', 'mirror'])
+  nouns = nouns.not(['dice', 'mirror'])
 
   //render the results
   return nouns.out('array')

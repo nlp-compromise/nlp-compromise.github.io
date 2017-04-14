@@ -75,7 +75,7 @@ class Main extends React.Component {
         <Logo />
         <div style={css.container}>
           <div style={css.headline}>
-            {'cuz language is cõmplicated'}
+            {'cuz language is cѳmplicaťed.'}
           </div>
           <div style={css.headline2}>
             {'\'and there\'s a gazillion words'}
