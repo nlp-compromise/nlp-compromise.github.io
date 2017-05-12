@@ -167,7 +167,7 @@ class Demo extends Component {
         </div>
         <p></p>
         <div style={css.aside}>
-          { 'then you can chuck things around:' }
+          { 'then you can throw things around:' }
         </div>
         <table style={css.table}>
           <tbody>

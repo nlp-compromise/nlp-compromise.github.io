@@ -22,19 +22,18 @@ class Diff extends React.Component {
 
   render() {
     let {props, css} = this
-    let result=props.result.clone()
-    let html=result.list.map((ts,i)=>{
-      let terms=ts.terms.map((t,o)=>{
-        let style={}
-        console.log(t.dirty)
-        if(t.dirty){
-          style={
-            color:'steelblue'
+    let result = props.result.clone()
+    let html = result.list.map((ts, i) => {
+      let terms = ts.terms.map((t, o) => {
+        let style = {}
+        if (t.dirty) {
+          style = {
+            color: 'steelblue'
           }
         }
         return (
-          <span key={i+''+o} style={style}>
-            {t.whitespace.before+t.text+t.whitespace.after}
+          <span key={i + '' + o} style={style}>
+            {t.whitespace.before + t.text + t.whitespace.after}
           </span>
         )
       })

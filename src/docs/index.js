@@ -124,7 +124,6 @@ class Docs extends React.Component {
     })
   }
   showOne(str) {
-    console.log(str)
     this.state.show[str] = !!!this.state.show[str]
     this.setState(this.state)
   }

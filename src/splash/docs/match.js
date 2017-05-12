@@ -44,7 +44,7 @@ polite.replace('you perhaps? (can|may|could)', 'you better')
 polite.match('#Adjective').append('as hell')
 polite.match('in my #Adjective? opinion').remove()`,
 
-  tag: `doc.match('captain of the {2,5} team').tag('#Person')
+  tag: `doc.match('captain of the .{2,5} team').tag('#Person')
 
 doc.match('who is on #Ordinal').firstTerm().tag('#Person')
 
@@ -84,7 +84,7 @@ function doc(props) {
            <br/>
            but the built-in tags will perform additional logical operations, like ensuring a <b>Noun</b> is never a <b>Verb</b>, and so on.
          </div>
-         
+
       </div>
     </div>
   )

@@ -2,9 +2,45 @@
 import React from 'react';
 import Radium from 'radium';
 import styler from 'react-styling';
-import { docs } from '../../shared/nlp';
+import { docs, version } from '../../shared/nlp';
+import Codemirror from 'react-codemirror'
+import 'codemirror/mode/javascript/javascript'
+import 'codemirror/mode/htmlmixed/htmlmixed'
+import '../../shared/codemirror/codemirror.css';
+import '../../shared/codemirror/mytheme.css';
+
+docs.generic.subsets = docs.subsets
 
 const style = styler`
+border
+  border:1px solid whitesmoke
+each:
+  marginLeft:15
+  height:100px;
+  paddingBottom:10
+  paddingTop:10
+  paddingLeft:25
+  borderLeft:2px dotted lightsteelblue
+  margin:40
+about
+  width:100%;
+  display:flex
+  flex-flow:space-between
+desc:
+  flex:2
+  flex-basis:80px
+  color:grey
+  margin-left:20
+  padding-right:30
+title:
+  color:steelblue
+  text-decoration:none;
+  font-weight:600
+  font-size:20
+return:
+  color:lightgrey
+  font-size:12
+  flex:1
 section:
   display:block
   position:relative;
@@ -14,13 +50,13 @@ section:
     marginLeft:50
   title:
     display:inline-block
-    marginTop:15
+    marginTop:25
     marginLeft:25
     paddingBottom:10
     paddingLeft:10
     borderLeft:2px dotted lightsteelblue
     font-size:18px;
-    width:80
+    width:200
 showing:
   marginLeft:80
   text-align:left
@@ -28,7 +64,7 @@ showing:
   paddingBottom:20
   height:5
 method:
-  width:150px
+  width:250px
   height:40
   color:silver
   text-align:center
@@ -87,10 +123,29 @@ class Api extends React.Component {
 
   drawFn(obj, k) {
     let {state, css} = this
-    if (state[k]) {
+    let options = {
+      readOnly: true,
+      mode: 'javascript',
+      theme: 'spencertheme',
+      tabSize: 2,
+      lint: false
+    };
+    if (state[k] && docs.generic[k]) {
+      let doc = docs.generic[k][state[k]]
+      console.log(doc)
       return (
-        <div style={css.showing}>
-          {state[k]}
+        <div style={[css.showing, css.each]}>
+          <div style={css.title}>{state[k]}</div>
+          <div style={css.about}>
+            <span style={css.desc}>{doc.desc}</span>
+            <div style={css.return}>
+              {'returns: '}
+              <span style={css.class}>{doc.returns}</span>
+            </div>
+          </div>
+          <div style={css.border}>
+            <Codemirror style={css.code} value={doc.example} options={options}/>
+          </div>
         </div>
       )
     }
@@ -113,14 +168,10 @@ class Api extends React.Component {
   render() {
     let css = this.css
     let api = Object.keys(docs.generic).map((k) => this.section(docs.generic, k))
-    let subsets = Object.keys(docs.subsets).map((k) => this.section(docs.subsets, k))
     return (
       <div style={css.container}>
-        api:
+        <i>v{version} api:</i>
         {api}
-        <hr/>
-        subsets:
-        {subsets}
       </div>
     )
   }
