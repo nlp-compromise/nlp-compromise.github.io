@@ -43,7 +43,7 @@ class Links extends React.Component {
               </a>
             </td>
             <td>
-              <a style={css.table.href} href='https://www.twitter.com/compromisejs'>
+              <a style={css.table.href} href='https://www.twitter.com/nlp_compromise'>
                 <Twitter size={50}/>
                 <div style={css.table.link}>twitter</div>
               </a>
@@ -64,6 +64,7 @@ class Links extends React.Component {
       <p style={css.left}>
         compromise was made by <a href='http://spencermounta.in'>spencer kelly</a> and <a href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
       </p>
+      MIT
       </div>
     )
   }

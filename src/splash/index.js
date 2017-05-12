@@ -69,7 +69,6 @@ class Main extends React.Component {
           <span style={css.top.byline}>
             {'text is really just data - '}
           </span>
-          <a style={css.top.href} href='./docs'>docs</a>
           <a style={css.top.href} href='https://github.com/nlp-compromise/compromise'>github</a>
         </div>
         <Logo />
