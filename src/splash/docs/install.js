@@ -27,6 +27,11 @@ mode:
   border:1px solid lightgrey
   color:lightgrey
   width:50%
+demos:
+  color: steelblue;
+  fontWeight: 600;
+blue:
+  color: steelblue;  
 `
 
 const examples = {
@@ -101,7 +106,16 @@ class Install extends Component {
             </tr>
           </tbody>
         </table>
-
+        <div style={css.spacer}/>
+        <div style={css.blue}>
+          <i>
+            {' ... but really,'}
+          </i>
+          {' you should just see '}
+          <a href='./demos' style={css.demos}>
+            {'the demos >'}
+          </a>
+        </div>
       </div>
     )
   }

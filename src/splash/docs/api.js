@@ -12,14 +12,25 @@ import '../../shared/codemirror/mytheme.css';
 docs.generic.subsets = docs.subsets
 
 const style = styler`
+container:
+  position:relative;
+  margin-top:50
+  margin-left:50
+heading
+  font-size:30px;
+  color:steelblue;
 border
   border:1px solid whitesmoke
+subset:
+  color:lightsteelblue;
+  font-weight:300;
 each:
   marginLeft:15
   height:100px;
   paddingBottom:10
   paddingTop:10
-  paddingLeft:25
+  paddingLeft:20
+  marginLeft:80
   borderLeft:2px dotted lightsteelblue
   margin:40
 about
@@ -96,6 +107,7 @@ class Api extends React.Component {
     this.method = this.method.bind(this)
     this.showMethod = this.showMethod.bind(this)
     this.drawFn = this.drawFn.bind(this)
+    this.drawFns = this.drawFns.bind(this)
   }
   showMethod(fn, k) {
     if (this.state[k] === fn) {
@@ -121,7 +133,20 @@ class Api extends React.Component {
     )
   }
 
-  drawFn(obj, k) {
+  drawFns(obj, k) {
+    let {state} = this
+    if (state[k] && docs.generic[k]) {
+      let doc = docs.generic[k][state[k]]
+      if (doc.data && typeof doc.data === 'object') {
+        console.log(doc)
+        let subset = '.' + state[k] + '()'
+        return Object.keys(doc).map((name) => this.drawFn(doc[name], name, subset))
+      }
+      return this.drawFn(doc, k, '')
+    }
+  }
+
+  drawFn(doc, k, subset) {
     let {state, css} = this
     let options = {
       readOnly: true,
@@ -130,12 +155,12 @@ class Api extends React.Component {
       tabSize: 2,
       lint: false
     };
-    if (state[k] && docs.generic[k]) {
-      let doc = docs.generic[k][state[k]]
-      console.log(doc)
-      return (
-        <div style={[css.showing, css.each]}>
-          <div style={css.title}>{state[k]}</div>
+    subset = <span style={css.subset}>{subset || ''}</span>
+    return (
+      <div key={k} style={[css.showing, css.each]}>
+          <div style={css.title}>
+            {subset}
+            {'.' + (state[k] || k) + '()'}</div>
           <div style={css.about}>
             <span style={css.desc}>{doc.desc}</span>
             <div style={css.return}>
@@ -147,8 +172,7 @@ class Api extends React.Component {
             <Codemirror style={css.code} value={doc.example} options={options}/>
           </div>
         </div>
-      )
-    }
+    )
   }
   section(obj, k) {
     let section = this.css.section
@@ -161,7 +185,7 @@ class Api extends React.Component {
         <div style={section.methods}>
           {methods}
         </div>
-        {this.drawFn(obj, k)}
+        {this.drawFns(obj, k)}
       </div>
     )
   }
@@ -170,7 +194,7 @@ class Api extends React.Component {
     let api = Object.keys(docs.generic).map((k) => this.section(docs.generic, k))
     return (
       <div style={css.container}>
-        <i>v{version} api:</i>
+        <b style={css.heading}>api:</b> <i>(latest)</i>
         {api}
       </div>
     )

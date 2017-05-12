@@ -58,8 +58,9 @@ class Links extends React.Component {
         </tbody>
       </table>
       <p>
-        <a href='https://github.com/nlp-compromise/compromise/wiki/Contributing'>YOU SHOULD ALSO COME AND HACK, {'WE\'RE'} COOL</a>
+        <a href='https://github.com/nlp-compromise/compromise/wiki/Contributing'>YOU SHOULD ALSO COME AND HELP</a>
       </p>
+      we're cool, and it's a big-time project.
       <p style={css.left}>
         compromise was made by <a href='http://spencermounta.in'>spencer kelly</a> and <a href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
       </p>
