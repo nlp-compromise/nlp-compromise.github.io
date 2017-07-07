@@ -4,8 +4,9 @@ import Radium from 'radium';
 import Logo from '../shared/logo';
 import ShowOff from './showOff';
 import styler from 'react-styling';
-import Tabs from './docs'
-import '../shared/index.css'
+import Tabs from './docs';
+import Tags from './tags/index';
+import '../shared/index.css';
 
 const style = styler`
 container
@@ -50,8 +51,7 @@ top:
   byline:
     marginRight:90
     color:silver
-`
-
+`;
 
 class Main extends React.Component {
   constructor() {
@@ -62,14 +62,15 @@ class Main extends React.Component {
     this.css = style;
   }
   render() {
-    let {css} = this;
+    let { css } = this;
     return (
       <div>
+        {/* <Tags /> */}
         <div style={css.top}>
           <span style={css.top.byline}>
             {'text is really just data - '}
           </span>
-          <a style={css.top.href} href='https://github.com/nlp-compromise/compromise'>github</a>
+          <a style={css.top.href} href="https://github.com/nlp-compromise/compromise">github</a>
         </div>
         <Logo />
         <div style={css.container}>
@@ -77,7 +78,7 @@ class Main extends React.Component {
             {'cuz language is cѳmplicaťed.'}
           </div>
           <div style={css.headline2}>
-            {'\'and there\'s a gazillion words'}
+            {"'and there's a gazillion words"}
           </div>
           <div style={css.headline}>
             <span style={css.orange}>{'compromise'}</span>
@@ -93,22 +94,22 @@ class Main extends React.Component {
             <ShowOff />
           </div>
 
-          <div style={css.spacer}/>
+          <div style={css.spacer} />
 
           <div style={css.title}>
             {'This is the '}
-            <img alt='beans' src='https://twemoji.maxcdn.com/36x36/2728.png'/>
+            <img alt="beans" src="https://twemoji.maxcdn.com/36x36/2728.png" />
             {':'}
           </div>
-          <p></p>
+          <p />
 
           <Tabs />
 
-          <div style={css.spacer}/>
+          <div style={css.spacer} />
         </div>
       </div>
-      );
+    );
   }
 }
 Main = Radium(Main);
-module.exports = Main
+module.exports = Main;
