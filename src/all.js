@@ -2,6 +2,7 @@ import React from 'react';
 import styler from 'react-styling';
 import Header from './header';
 import Intro from './intro';
+import Small from './small';
 import './index.css';
 const style = styler`
 container
@@ -24,6 +25,7 @@ class All extends React.Component {
       <div style={css.container}>
         <Header />
         <Intro />
+        <Small />
       </div>
     );
   }

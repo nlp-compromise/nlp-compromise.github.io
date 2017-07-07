@@ -1,5 +1,4 @@
 import React from 'react';
-import Radium from 'radium';
 import styler from 'react-styling';
 const style = styler`
 container
@@ -42,5 +41,4 @@ class Header extends React.Component {
     );
   }
 }
-Header = Radium(Header);
 module.exports = Header;

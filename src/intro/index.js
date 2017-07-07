@@ -9,7 +9,6 @@ container
   position:relative;
   font-size:15
   justify-content:space-around;
-  border:1px solid red;
   font-family: Raleway,serif;
 main:
   color:steelblue;
@@ -56,7 +55,7 @@ class Main extends React.Component {
         <div>
           <div style={{ ...css.main }}>
             <span style={css.small}>{'yaknow, '}</span>
-            <img src="https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png" />
+            <img alt="logo" src="https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png" />
             <br />
             {' language is cѳmplicated.'}
           </div>
