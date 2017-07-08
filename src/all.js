@@ -3,6 +3,8 @@ import styler from 'react-styling';
 import Header from './header';
 import Intro from './intro';
 import Small from './small';
+import Big from './big';
+import Footer from './footer';
 import './index.css';
 const style = styler`
 container
@@ -26,6 +28,8 @@ class All extends React.Component {
         <Header />
         <Intro />
         <Small />
+        <Big />
+        <Footer />
       </div>
     );
   }

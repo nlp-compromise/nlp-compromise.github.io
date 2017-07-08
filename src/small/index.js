@@ -8,6 +8,7 @@ container
   display:block;
   position:relative;
   padding:50
+  min-height:200
   text-align:center;
 inputContainer:
   position:relative;

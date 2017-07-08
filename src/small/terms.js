@@ -74,9 +74,9 @@ class Terms extends React.Component {
     let terms = the.terms;
     return (
       <div style={css.demo}>
-        {props.result.list.map(ts => {
+        {props.result.list.map((ts, i) => {
           return (
-            <span>
+            <span key={i}>
               {ts.terms.map(this.doTerm)}
             </span>
           );
