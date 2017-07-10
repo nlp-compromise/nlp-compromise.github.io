@@ -71,7 +71,6 @@ class Terms extends React.Component {
     if (!the) {
       return null;
     }
-    let terms = the.terms;
     return (
       <div style={css.demo}>
         {props.result.list.map((ts, i) => {

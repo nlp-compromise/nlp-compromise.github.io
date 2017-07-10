@@ -1,5 +1,6 @@
 import React from 'react';
 import Radium from 'radium';
+import CodeMirror from '../../lib/codemirror';
 import styler from 'react-styling';
 const style = styler`
 container
@@ -38,7 +39,7 @@ class Code extends React.Component {
     let { css } = this;
     return (
       <div style={css.container}>
-        <textarea resize="none" style={css.code}> </textarea>
+        <CodeMirror code={'var x=3'} type={'js'} />
         <i style={css.runButton}>⚡</i>
         <textarea style={css.result}> </textarea>
       </div>

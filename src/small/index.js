@@ -8,8 +8,11 @@ container
   display:block;
   position:relative;
   padding:50
+  marginTop:25
+  marginBottom:50
   min-height:200
   text-align:center;
+  border-left:5px solid #b3d3c6
 inputContainer:
   position:relative;
   text-align:center
@@ -36,7 +39,7 @@ loader:
   position:relative;
   top:-7
   z-index:2
-  background-color:#5c87ac
+  background-color:lightsteelblue
   height:3
 `;
 
@@ -88,7 +91,7 @@ class Small extends React.Component {
       'it was the blurst of times?',
       'Careful! They’re RUFFLED!!'
     ];
-    this.wait = 4500;
+    this.wait = 6500;
     this.setState({
       index: state.index + 1,
       text: arr[state.index % arr.length]
