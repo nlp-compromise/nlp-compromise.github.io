@@ -2,8 +2,33 @@ import React from 'react';
 import Radium from 'radium';
 import CodeMirror from '../../lib/codemirror';
 import styler from 'react-styling';
+import demos from './demos';
 const style = styler`
 container
+  display:flex;
+  flex-direction:row
+demoList:
+  border: '1px solid grey',
+  width: 150
+  text-align:right
+  font-family:helvetica
+  color:slategrey
+  font-size:12
+  marginRight:10
+demo:
+  marginTop:6
+  position:relative;
+  cursor:pointer
+  display:inline-block
+  user-select: none;
+  padding: 5
+  border-radius:2
+  &:hover:
+    color:cornflowerblue
+chosenTab:
+  backgroundColor: steelblue
+  color: white
+column
   display:flex;
   flex-direction:column
   width:400px
@@ -19,29 +44,53 @@ runButton:
   background-color:coral
   color:white
   border-radius:0px 0px 7px 7px
-result:
-  min-height:30
-  max-height:250
-  border-radius:7px 7px 7px 7px
-  padding:8
-  color:grey
-  border:1px solid linen
-  margin-left:5
 `;
 
 class Code extends React.Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      demo: demos[0]
+    };
     this.css = style;
+    this.demoList = this.demoList.bind(this);
+    this.onClick = this.onClick.bind(this);
+  }
+  onClick(d) {
+    this.setState({ demo: d });
+  }
+  demoList() {
+    let { css, state } = this;
+    return demos.map((d, i) => {
+      let style = {};
+      let more = null;
+      if (state.demo.title === d.title) {
+        style = css.chosenTab;
+        more = (
+          <span style={{ position: 'absolute', right: -8, color: 'steelblue' }}>
+            {'▶'}
+          </span>
+        );
+      }
+      return (
+        <div onClick={() => this.onClick(d)} style={{ ...css.demo, ...style }} key={i}>
+          {d.title}
+          {more}
+        </div>
+      );
+    });
   }
   render() {
-    let { css } = this;
+    let { css, state } = this;
     return (
       <div style={css.container}>
-        <CodeMirror code={'var x=3'} type={'js'} />
-        <i style={css.runButton}>⚡</i>
-        <textarea style={css.result}> </textarea>
+        <div style={css.demoList}>
+          {this.demoList()}
+        </div>
+        <div style={css.column}>
+          <CodeMirror code={state.demo.code} type={'js'} />
+          <i style={css.runButton}>⚡</i>
+        </div>
       </div>
     );
   }
