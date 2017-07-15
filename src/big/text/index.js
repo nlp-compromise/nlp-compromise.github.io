@@ -1,10 +1,10 @@
 import React from 'react';
-import Radium from 'radium';
 import styler from 'react-styling';
 import texts from './texts';
 const style = styler`
 container
   display:flex;
+  position:relative;
   min-width:350
   max-width:900
   text-align:left;
@@ -22,12 +22,12 @@ text:
   padding-bottom:10
   color:grey
   margin-left:5
-  padding-right:120
+  padding-right:160
 inside:
-  position:relative;
+  position:absolute;
   width:150px
   max-width:150px
-  left:-120
+  right:25
   z-index:4
   text-align:left
   display:flex
@@ -58,26 +58,6 @@ inside:
   user-select: none;
   &:hover
     color:cadetblue
-
-// .tab:
-//   font-size:12
-//   display:block
-//   text-align:center
-//   color:lightsteelblue
-//   cursor:pointer
-//   padding-top:10
-//   padding-bottom:10
-//   border-bottom:2px solid linen
-//   text-transform: capitalize
-//   &:hover
-//     border-bottom:2px solid lightsteelblue
-//     color:steelblue
-// .selected:
-//   border-radius:0px 5px 5px 0px
-//   border:2px solid lightsteelblue
-//   color:steelblue
-//   &::before
-//     ◀️
 `;
 
 class Text extends React.Component {
@@ -89,6 +69,12 @@ class Text extends React.Component {
       text: texts[defaultText]
     };
     this.css = style;
+    this.onClick = this.onClick.bind(this);
+  }
+  onClick(k) {
+    let { props } = this;
+    this.setState({ title: k, text: texts[k] });
+    props.cmp.eval();
   }
   makeChoice() {
     let { css, state } = this;
@@ -113,7 +99,7 @@ class Text extends React.Component {
           }
           return (
             <div key={i} style={css.other}>
-              <div onClick={() => this.setState({ title: k, text: texts[k] })}>
+              <div onClick={() => this.onClick(k)}>
                 {k.replace(/_/g, ' ')}
               </div>
             </div>

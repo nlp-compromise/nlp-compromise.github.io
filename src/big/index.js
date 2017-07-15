@@ -37,11 +37,12 @@ result:
   textAlign:left
   position:relative
   min-height:20
-  width:50%;
   max-height:400px
   overflow:auto
   border-bottom:1px solid linen;
-  margin-left:25%;
+  width:60%;
+  margin-left:20%;
+  min-width:200
   overflow:auto;
 `;
 
@@ -54,8 +55,12 @@ class Big extends React.Component {
     this.css = style;
     this.eval = this.eval.bind(this);
   }
-  eval(code) {
+  componentDidMount() {
+    this.eval();
+  }
+  eval() {
     let text = this.refs.text.state.text;
+    let code = this.refs.code.state.code;
     exec({ text: text, code: code }, (r, err) => {
       if (err) {
         console.log(err);
@@ -81,7 +86,7 @@ class Big extends React.Component {
         <div style={css.container}>
           <div style={css.header}>kick it around a bit:</div>
           <div style={css.flex}>
-            <Code eval={this.eval} cmp={this} />
+            <Code ref="code" cmp={this} />
             <Text ref="text" cmp={this} />
           </div>
         </div>

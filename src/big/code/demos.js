@@ -6,7 +6,7 @@ module.exports = [
 var r = nlp(myText)
 
 //grab the people..
-var p=r.people()
+var p = r.people()
 
 //cleanup case, punctuation...
 p.normalize()
@@ -15,8 +15,7 @@ p.normalize()
 p.sort('frequency').unique()
 
 //output as an array
-return p.out('array')
-    `
+return p.out('array')`
   },
   {
     title: 'Grab the places',
@@ -25,14 +24,13 @@ return p.out('array')
 var r = nlp(myText)
 
 //grab the mentioned locations
-var places= r.places()
+var places = r.places()
 
 //sort them alphabetically
 places.sort('alpha')
 
 //render them an array
-return places.out('freq')
-    `
+return places.out('freq')`
   },
   {
     title: 'Uppercase all verbs',
@@ -47,8 +45,7 @@ var verbs=r.match('#Verb')
 verbs.toUpperCase()
 
 //return the whole thing
-return r
-    `
+return r`
   },
   {
     title: 'Parse all the numbers',
@@ -69,14 +66,13 @@ return r.if('#Value')`
 var r = nlp(myText)
 
 //grab the noun-phrases
-var nouns= r.nouns()
+var nouns = r.nouns()
 
 //add a bit of a blacklist
 nouns = nouns.not(['dice', 'mirror'])
 
 //render the results
-return nouns.out('array')
-    `
+return nouns.out('array')`
   },
   {
     title: 'Named-entity-recognition',
@@ -84,33 +80,32 @@ return nouns.out('array')
     code: `//parse the text
 var r = nlp(myText)
 
-//grab the people/places/organizations
-var topics=r.topics()
+//grab the people/places/orgs
+var topics = r.topics()
 
 //remove any possessives
-topics=topics.not('#Possessive')
+topics = topics.not('#Possessive')
 
 //output them as an array
-return topics.out('array')
-    `
+return topics.out('array')`
   },
-  //   {
-  //     title: 'custom POS-tagging',
-  //     description: 'coerce specific words into the tags you prefer',
-  //     code: `var lexicon={
-  //       'brillig':'Jabberwocky',
-  //       'slithy toves':'Jabberwocky',
-  //     }
-  //
-  // //pass in your lexicon to compromise
-  // var r = nlp(myText, lexicon)
-  //
-  // //query on your custom tags
-  // var mine = r.match('#Jabberwocky and .? #Jabberwocky')
-  //
-  // return mine`,
-  //     text: 'twas brillig and the slithy toves did gyre and gimble'
-  //   },
+  {
+    title: 'Custom POS-tagging',
+    description: 'coerce specific words into the tags you prefer',
+    code: `//coerce tags for given words
+var lexicon={
+  'may':'Month',
+}
+
+//pass in your lexicon to compromise
+var r = nlp(myText, lexicon)
+
+//query on your custom tags
+var mine = r.match('#Month')
+
+return mine`,
+    text: 'twas brillig and the slithy toves did gyre and gimble'
+  },
   {
     title: 'Change sentence tense',
     description: 'change a sentence to the past-tense',
@@ -134,12 +129,11 @@ return s
 var r = nlp(myText)
 
 //grab the first sentence
-var s=r.sentences(0)
+var s = r.sentences(0)
 
 //make it say the opposite
 s.toNegative()
 
-return s
-    `
+return s`
   }
 ];

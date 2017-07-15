@@ -51,14 +51,19 @@ class Code extends React.Component {
   constructor() {
     super();
     this.state = {
-      demo: demos[0]
+      demo: demos[0],
+      code: demos[0].code
     };
     this.css = style;
     this.demoList = this.demoList.bind(this);
     this.onClick = this.onClick.bind(this);
   }
   onClick(d) {
-    this.setState({ demo: d });
+    let { props } = this;
+    this.setState({ demo: d, code: d.code });
+    setTimeout(() => {
+      props.cmp.eval();
+    }, 100);
   }
   demoList() {
     let { css, state } = this;
@@ -90,7 +95,7 @@ class Code extends React.Component {
         </div>
         <div style={css.column}>
           <CodeMirror code={state.demo.code} type={'js'} />
-          <i style={css.runButton} onClick={() => props.eval(state.demo.code)}>
+          <i style={css.runButton} onClick={() => props.cmp.eval()}>
             ⚡
           </i>
         </div>

@@ -2,9 +2,9 @@ import React from 'react';
 import styler from 'react-styling';
 import Header from './header';
 import Intro from './intro';
-// import Small from './small';
+import Small from './small';
 import Big from './big';
-// import Install from './install';
+import Install from './install';
 import Footer from './footer';
 import './index.css';
 const style = styler`
@@ -28,8 +28,8 @@ class All extends React.Component {
       <div style={css.container}>
         <Header />
         <Intro />
-        {/* <Small /> */}
-        {/* <Install /> */}
+        <Small />
+        <Install />
         <Big />
         <Footer />
       </div>

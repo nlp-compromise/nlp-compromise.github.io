@@ -1,9 +1,6 @@
-'use strict';
 import nlp from 'compromise';
 
 module.exports = (obj, callback) => {
-  console.log('eval');
-  console.log(obj);
   //variables accessable to the eval'd code
   window.myText = obj.text || '';
   window.nlp = nlp;
