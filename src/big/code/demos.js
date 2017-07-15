@@ -31,7 +31,7 @@ var places= r.places()
 places.sort('alpha')
 
 //render them an array
-return places.out('array')
+return places.out('freq')
     `
   },
   {
@@ -51,11 +51,15 @@ return r
     `
   },
   {
-    title: 'parse all the numbers',
+    title: 'Parse all the numbers',
     description: 'use the `.values()` method to collect and parse all numbers in the text',
     code: `//parse the text
 var r = nlp(myText)
+
+//turn 'eight' into '8'
 r.values().toNumber()
+
+//return sentences with numbers
 return r.if('#Value')`
   },
   {
@@ -83,7 +87,7 @@ var r = nlp(myText)
 //grab the people/places/organizations
 var topics=r.topics()
 
-//remove any possessives like "joey's"
+//remove any possessives
 topics=topics.not('#Possessive')
 
 //output them as an array

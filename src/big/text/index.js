@@ -5,8 +5,15 @@ import texts from './texts';
 const style = styler`
 container
   display:flex;
+  min-width:350
+  max-width:900
+  text-align:left;
+  align-content: flex-start;
+  flex:1
+  // maxWidth: 480
 text:
-  width:250px
+  position:relative;
+  width:100%
   min-height:200
   font-size:12
   border-radius:8
@@ -15,12 +22,12 @@ text:
   padding-bottom:10
   color:grey
   margin-left:5
-  padding-right:150
+  padding-right:120
 inside:
   position:relative;
-  width:130px
-  max-width:130px
-  left:-150
+  width:150px
+  max-width:150px
+  left:-120
   z-index:4
   text-align:left
   display:flex
@@ -76,8 +83,10 @@ inside:
 class Text extends React.Component {
   constructor() {
     super();
+    let defaultText = 'fresh_prince';
     this.state = {
-      text: 'fresh_prince'
+      title: defaultText,
+      text: texts[defaultText]
     };
     this.css = style;
   }
@@ -89,7 +98,7 @@ class Text extends React.Component {
           {'◀️ '}
         </span>
         <span style={css.choice}>
-          {state.text.replace(/_/g, ' ')}
+          {state.title.replace(/_/g, ' ')}
         </span>
       </div>
     );
@@ -99,12 +108,12 @@ class Text extends React.Component {
     return (
       <div style={css.tabs}>
         {Object.keys(texts).map((k, i) => {
-          if (k === state.text) {
+          if (k === state.title) {
             return null;
           }
           return (
             <div key={i} style={css.other}>
-              <div onClick={() => this.setState({ text: k })}>
+              <div onClick={() => this.setState({ title: k, text: texts[k] })}>
                 {k.replace(/_/g, ' ')}
               </div>
             </div>
@@ -117,7 +126,7 @@ class Text extends React.Component {
     let { css, state } = this;
     return (
       <div style={css.container}>
-        <textarea style={css.text} value={texts[state.text]} />
+        <textarea style={css.text} value={texts[state.title]} />
         <div style={css.inside}>
           {this.makeChoice()}
           {this.makeOthers()}
@@ -126,5 +135,5 @@ class Text extends React.Component {
     );
   }
 }
-Text = Radium(Text);
+// Text = Radium(Text);
 module.exports = Text;

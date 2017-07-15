@@ -1,8 +1,9 @@
 'use strict';
-import { nlp } from '../shared/nlp';
+import nlp from 'compromise';
 
-const exec = (obj, callback) => {
+module.exports = (obj, callback) => {
   console.log('eval');
+  console.log(obj);
   //variables accessable to the eval'd code
   window.myText = obj.text || '';
   window.nlp = nlp;
@@ -21,4 +22,3 @@ const exec = (obj, callback) => {
     callback(null, e);
   }
 };
-module.exports = exec;

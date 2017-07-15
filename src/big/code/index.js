@@ -6,6 +6,7 @@ import demos from './demos';
 const style = styler`
 container
   display:flex;
+  flex:0.5
   flex-direction:row
 demoList:
   border: '1px solid grey',
@@ -81,7 +82,7 @@ class Code extends React.Component {
     });
   }
   render() {
-    let { css, state } = this;
+    let { css, state, props } = this;
     return (
       <div style={css.container}>
         <div style={css.demoList}>
@@ -89,7 +90,9 @@ class Code extends React.Component {
         </div>
         <div style={css.column}>
           <CodeMirror code={state.demo.code} type={'js'} />
-          <i style={css.runButton}>⚡</i>
+          <i style={css.runButton} onClick={() => props.eval(state.demo.code)}>
+            ⚡
+          </i>
         </div>
       </div>
     );
