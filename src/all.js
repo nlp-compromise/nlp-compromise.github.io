@@ -28,12 +28,12 @@ class All extends React.Component {
     return (
       <div style={css.container}>
         <Header />
-        { /* <Intro /> */ }
-        { /* <Small /> */ }
-        <Graphs />
-        { /* <Install /> */ }
-        { /* <Big /> */ }
-        { /* <Footer /> */ }
+         <Intro />
+         <Small />
+         <Graphs />
+         <Install />
+         <Big />
+         <Footer />
       </div>
       );
   }

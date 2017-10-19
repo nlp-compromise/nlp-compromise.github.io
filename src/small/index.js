@@ -9,7 +9,7 @@ container
   position:relative;
   padding:50
   marginTop:25
-  marginBottom:50
+  marginBottom:0
   min-height:200
   text-align:center;
   border-left:5px solid #b3d3c6
@@ -59,11 +59,11 @@ class Small extends React.Component {
     this.duration = 4000;
     this.wait = 3000;
     this.state = {
-      text: 'That he doesn\'t really understand', //'Wee-ooh, i look just like Buddy Holly',
+      text: 'Wee-ooh, i look just like Buddy Holly', //'Wee-ooh, i look just like Buddy Holly',
       started: null,
       index: 0,
       progress: 0,
-      dirty: true,
+      dirty: false,
       raf: null
     };
     this.css = style;

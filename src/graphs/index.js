@@ -5,11 +5,12 @@ container
 	flex:1;
 	display:flex;
 	flex-direction: column;
+	position: relative
 	color:grey;
 	justify-content: center;
 	align-items: center;
 	margin-top:80px;
-	margin-bottom:80px;
+	margin-bottom:20px;
 hero:
 	font-size:30px;
 	margin-bottom:50px;
@@ -22,7 +23,7 @@ graph:
 	margin-bottom:50px;
 	display:flex;
 bigger:
-	color:steelblue;
+	color:lightsteelblue;
 	font-size:30px;
 	margin-bottom:5px;
 number:
@@ -87,6 +88,7 @@ class Graphs extends React.Component {
 						<i style={css.tricky}>– tricky stuff –</i>
 					</div>
 				</div>
+
 				<div >
 					<div style={css.smaller}>
 						<i style={{
@@ -114,11 +116,79 @@ class Graphs extends React.Component {
       }}/>
 			  </div>
 				<div style={{
-        color: 'lightgrey',
+        position: 'relative',
       }}>
-					but that can mean terabytes, or linear-algebra, or prolog.
+			<div style={{
+        color: 'lightgrey',
+        marginBottom: 25
+      }}>
+					with terabytes of data,
+						remembering your linear-algebra,
+							or worse, lisp!
 				</div>
+				</div>
+
+				<div >
+					<div style={css.smaller}>
+						<i style={{
+        marginTop: 10,
+        color: '#8e96a0'
+      }}>
+							 – when you already know your users –
+						</i>
+					<br/>
+						<i style={{
+        color: '#be82d6',
+        fontSize: '25px'
+      }}>10% cheating </i>
+			<i style={{
+        color: '#8e96a0',
+        fontSize: '22px'
+      }}>is practical.</i>
+			<i>
+			</i>
+					</div>
+				</div>
+					<div style={css.graph}>
+						<div style={{
+        flex: 80,
+        borderBottom: '6px solid lightsteelblue'
+      }}/>
+						<div style={{
+        flex: 10,
+        borderBottom: '6px solid #be82d6'
+      }}/>
+						<div style={{
+        flex: 10,
+        borderBottom: '6px solid lightgrey'
+      }}/>
+			  </div>
+			<div style={{
+        position: 'relative',
+        top: -25,
+        left: -25,
+        color: 'lightgrey'
+      }}>
+			{'with '}
+					<a href='' style={{
+        color: '#d2ace2',
+        textDecoration: 'none'
+      }}>config, plugins, and customization.</a>
+			<ul>
+				which we've taken seriously.
+			</ul>
+			<div style={{
+        color: 'darkgrey',
+        'font-size': 14,
+        position: 'relative',
+        paddingLeft: 150
+      }}>
+		<i>(<b style={{
+        color: 'grey'
+      }}>compromise!</b>)</i>
       </div>
+		</div>
+    </div>
       );
   }
 }

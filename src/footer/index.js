@@ -57,7 +57,7 @@ class Footer extends React.Component {
         <p> </p>
         <div style={css.space} />
         <p>
-          {'we\'re cool!    promise!'}
+          {'we\'re cool!    promise'}
           <br />
           <a style={{
         ...css.link,

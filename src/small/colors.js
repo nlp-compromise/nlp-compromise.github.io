@@ -28,8 +28,8 @@ const chooseTag = t => {
       return colors[i];
     }
   }
-  console.log('no color for:');
-  console.log(t.tags);
+  // console.log('no color for:');
+  // console.log(t.tags);
   return [];
 };
 module.exports = chooseTag;
