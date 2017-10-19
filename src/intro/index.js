@@ -3,8 +3,8 @@ import styler from 'react-styling';
 const style = styler`
 container
   flex:1;
-  padding-top:200
-  padding-bottom:100
+  padding-top:180
+  padding-bottom:80
   display:flex;
   position:relative;
   font-size:15

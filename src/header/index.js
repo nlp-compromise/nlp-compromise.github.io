@@ -6,6 +6,7 @@ container
   display:flex;
   width:100%;
   font-size:15
+  margin-top:5px;
   justify-content:space-around;
   font-family: Raleway,serif;
 href:
@@ -24,21 +25,26 @@ class Header extends React.Component {
     this.css = style;
   }
   render() {
-    let { css } = this;
+    let {css} = this;
     return (
       <div style={css.container}>
         <span style={css.byline}>
           <img
-            alt="beans"
-            style={{ width: 20, marginRight: 10, position: 'relative', top: 5 }}
-            src="https://twemoji.maxcdn.com/36x36/2728.png"
-          />
+      alt='beans'
+      style={{
+        width: 20,
+        marginRight: 10,
+        position: 'relative',
+        top: 5
+      }}
+      src='https://twemoji.maxcdn.com/36x36/2728.png'
+      />
           {'words 👉 data'}
         </span>
-        <a style={css.href} href="https://github.com/nlp-compromise/compromise/wiki">wiki</a>
-        <a style={css.href} href="https://github.com/nlp-compromise/compromise">github</a>
+        <a style={css.href} href='https://github.com/nlp-compromise/compromise/wiki'> - wiki - </a>
+        <a style={css.href} href='https://github.com/nlp-compromise/compromise'>- github -</a>
       </div>
-    );
+      );
   }
 }
 module.exports = Header;

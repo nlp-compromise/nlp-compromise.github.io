@@ -1,7 +1,7 @@
 import React from 'react';
 import nlp from 'compromise';
 import styler from 'react-styling';
-import Terms from './terms';
+import Term from './term';
 
 const style = styler`
 container
@@ -41,6 +41,16 @@ loader:
   z-index:2
   background-color:lightsteelblue
   height:3
+terms
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+  marginTop:0
+  padding:0
+  color:#b4adad
+  text-align:center;
+  font-family:Inconsolata
+  fontSize:27
 `;
 
 class Small extends React.Component {
@@ -49,7 +59,7 @@ class Small extends React.Component {
     this.duration = 4000;
     this.wait = 3000;
     this.state = {
-      text: 'Wee-ooh, i like just like Buddy Holly',
+      text: 'That he doesn\'t really understand', //'Wee-ooh, i look just like Buddy Holly',
       started: null,
       index: 0,
       progress: 0,
@@ -142,6 +152,10 @@ class Small extends React.Component {
     if (state.text.length > 40) {
       height = 60;
     }
+    let terms = []
+    doc.list.forEach((ts) => {
+      ts.terms.forEach((t) => terms.push(t))
+    })
     return (
       <div style={css.container}>
         <div style={css.inputContainer}>
@@ -163,7 +177,9 @@ class Small extends React.Component {
             <path d="m28.6 29q0.2 0.4-0.1 0.8l-7.9 8.6q-0.2 0.2-0.5 0.2-0.3 0-0.5-0.2l-7.9-8.6q-0.3-0.4-0.1-0.8 0.2-0.4 0.6-0.4h5v-27.9q0-0.3 0.2-0.5t0.5-0.2h4.3q0.3 0 0.5 0.2t0.2 0.5v27.9h5q0.5 0 0.7 0.4z" />
           </g>
         </svg> */ }
-        <Terms result={doc} />
+        <div style={css.terms}>
+          {terms.map((term, i) => <Term term={term} i={i}/>)}
+        </div>
       </div>
       );
   }

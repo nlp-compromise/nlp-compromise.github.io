@@ -20,15 +20,16 @@ const chooseTag = t => {
     ['Acronym', 'violet'],
     ['Possessive', '#7990d6'],
     ['Noun', '#7990d6'],
-    ['Expression', '#b3d3c6']
+    ['Expression', '#b3d3c6'],
+    ['Negative', '#b4adad']
   ];
   for (let i = 0; i < colors.length; i++) {
     if (t.tags[colors[i][0]]) {
       return colors[i];
     }
   }
-  // console.log('no color for:');
-  // console.log(t.tags);
+  console.log('no color for:');
+  console.log(t.tags);
   return [];
 };
 module.exports = chooseTag;

@@ -6,6 +6,7 @@ import Small from './small';
 import Big from './big';
 import Install from './install';
 import Footer from './footer';
+import Graphs from './graphs';
 import './index.css';
 const style = styler`
 container
@@ -23,17 +24,18 @@ class All extends React.Component {
     this.css = style;
   }
   render() {
-    let { css } = this;
+    let {css} = this;
     return (
       <div style={css.container}>
         <Header />
-        <Intro />
-        <Small />
-        <Install />
-        <Big />
-        <Footer />
+        { /* <Intro /> */ }
+        { /* <Small /> */ }
+        <Graphs />
+        { /* <Install /> */ }
+        { /* <Big /> */ }
+        { /* <Footer /> */ }
       </div>
-    );
+      );
   }
 }
 module.exports = All;
