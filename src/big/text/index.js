@@ -6,10 +6,11 @@ container
   display:flex;
   position:relative;
   min-width:350
-  max-width:900
+  max-width:700
   text-align:left;
-  align-content: flex-start;
+  align-self: flex-start;
   flex:1
+  min-height:300px;
   // maxWidth: 480
 text:
   position:relative;
@@ -20,7 +21,7 @@ text:
   padding-top:10
   padding-left:10
   padding-bottom:10
-  color:grey
+  color:#C9CBD8;
   margin-left:5
   padding-right:160
 inside:
@@ -72,44 +73,49 @@ class Text extends React.Component {
     this.onClick = this.onClick.bind(this);
   }
   onClick(k) {
-    let { props } = this;
-    this.setState({ title: k, text: texts[k] });
+    let {props} = this;
+    this.setState({
+      title: k,
+      text: texts[k]
+    });
     props.cmp.eval();
   }
   makeChoice() {
-    let { css, state } = this;
+    let {css, state} = this;
     return (
-      <div style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', left: 2, top: 17, color: 'steelblue' }}>
+      <div style={{
+        position: 'relative'
+      }}>
+        { /* <span style={{ position: 'absolute', left: 2, top: 17, color: 'steelblue' }}>
           {'◀️ '}
-        </span>
+        </span> */ }
         <span style={css.choice}>
           {state.title.replace(/_/g, ' ')}
         </span>
       </div>
-    );
+      );
   }
   makeOthers() {
-    let { css, state } = this;
+    let {css, state} = this;
     return (
       <div style={css.tabs}>
         {Object.keys(texts).map((k, i) => {
-          if (k === state.title) {
-            return null;
-          }
-          return (
-            <div key={i} style={css.other}>
+        if (k === state.title) {
+          return null;
+        }
+        return (
+          <div key={i} style={css.other}>
               <div onClick={() => this.onClick(k)}>
                 {k.replace(/_/g, ' ')}
               </div>
             </div>
           );
-        })}
+      })}
       </div>
-    );
+      );
   }
   render() {
-    let { css, state } = this;
+    let {css, state} = this;
     return (
       <div style={css.container}>
         <textarea style={css.text} value={texts[state.title]} />
@@ -118,7 +124,7 @@ class Text extends React.Component {
           {this.makeOthers()}
         </div>
       </div>
-    );
+      );
   }
 }
 // Text = Radium(Text);

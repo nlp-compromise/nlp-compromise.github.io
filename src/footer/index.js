@@ -29,6 +29,8 @@ table:
   diplay:block
 space
   height:30
+left:
+  font-size:15px;
 `;
 
 class Footer extends React.Component {
@@ -38,42 +40,45 @@ class Footer extends React.Component {
     this.css = style;
   }
   render() {
-    let { css } = this;
+    let {css} = this;
     return (
       <div style={css.container}>
         <div style={css.table}>
-          <a style={css.link} href="https://github.com/nlp-compromise/compromise">
+          <a style={css.link} href='https://github.com/nlp-compromise/compromise'>
             {' github '}
           </a>
-          <a style={css.link} href="https://www.twitter.com/nlp_compromise">
+          <a style={css.link} href='https://www.twitter.com/nlp_compromise'>
             twitter
           </a>
-          <a style={css.link} href="http://slack.compromise.cool">
+          <a style={css.link} href='http://slack.compromise.cool'>
             slack
           </a>
         </div>
         <p> </p>
         <div style={css.space} />
         <p>
-          we're cool!
+          {'we\'re cool!    promise!'}
           <br />
-          <a style={{ ...css.link, color: 'palevioletred' }} href="https://github.com/nlp-compromise/compromise/wiki/Contributing">
+          <a style={{
+        ...css.link,
+        color: 'palevioletred'
+      }} href='https://github.com/nlp-compromise/compromise/wiki/Contributing'>
             Contributing
           </a>
         </p>
         <p> </p>
         <p> </p>
         <div style={css.left}>
-          compromise was made by:
+          nlp-compromise was made by:
           <br />
-          <a style={css.who} href="http://spencermounta.in">spencer kelly</a>
+          <a style={css.who} href='http://spencermounta.in'>spencer kelly</a>
           {' and '}
-          <a style={css.who} href="https://github.com/nlp-compromise/compromise/graphs/contributors">contributors</a>
+          <a style={css.who} href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
         </div>
         <p> </p>
         MIT
       </div>
-    );
+      );
   }
 }
 module.exports = Footer;

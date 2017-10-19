@@ -58,10 +58,12 @@ class Install extends Component {
     this.css = style;
   }
   render() {
-    let { css } = this;
+    let {css} = this;
     return (
       <div style={css.container}>
-        <span style={{ fontSize: 25 }}>🙌 </span> only
+        <span style={{
+        fontSize: 25
+      }}>🙌 </span>
         <span style={css.console}>npm install compromise</span>
         <div style={css.both}>
           <div>
@@ -74,10 +76,10 @@ class Install extends Component {
           </div>
         </div>
         <div style={css.right}>
-          install in <a style={css.link} href="https://github.com/nlp-compromise/compromise/wiki/QuickStart">funnier-places</a>
+          install in <a style={css.link} href='https://github.com/nlp-compromise/compromise/wiki/QuickStart'>funnier-places</a>
         </div>
       </div>
-    );
+      );
   }
 }
 Install = Radium(Install);

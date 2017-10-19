@@ -4,17 +4,20 @@ import styler from 'react-styling/flat';
 import chooseTag from './colors';
 
 const style = styler`
-container:
+term:
   position:relative
+  margin:5px;
+  border:1px solid grey
 tagName:
   position:absolute
   bottom:-20
   right:15
   fontSize:11
-demo
+terms
   color:#b4adad
   marginTop:0
   padding:0
+  display:flex;
   text-align:center;
   font-family:Inconsolata
   fontSize:27
@@ -29,7 +32,7 @@ class Terms extends React.Component {
   }
 
   doTerm(t, i) {
-    let { css } = this;
+    let {css} = this;
     let a = chooseTag(t);
     let tag = a[0];
     let color = a[1] || 'dimgrey';
@@ -43,17 +46,14 @@ class Terms extends React.Component {
       color: color,
       marginLeft: 10
     };
-    if (t.silent_term && !t.text) {
-      tag = '';
-    }
-    if (t.text.length <= 2) {
-      bottom.right = 10;
-      bottom.bottom = -30;
+    let text = t.text.trim()
+    if (t.silent_term) {
+      text = t.silent_term
     }
     return (
-      <span key={i} style={css.container}>
+      <span key={i} style={css.term}>
         <span style={highlight}>
-          {t.text.trim()}
+          {text}
         </span>
         <span style={space}>
           {' '}
@@ -62,26 +62,26 @@ class Terms extends React.Component {
           {tag}
         </span>
       </span>
-    );
+      );
   }
 
   render() {
-    let { props, css } = this;
+    let {props, css} = this;
     let the = props.result.flatten().list[0];
     if (!the) {
       return null;
     }
     return (
-      <div style={css.demo}>
+      <div style={css.terms}>
         {props.result.list.map((ts, i) => {
-          return (
-            <span key={i}>
+        return (
+          <span key={i}>
               {ts.terms.map(this.doTerm)}
             </span>
           );
-        })}
+      })}
       </div>
-    );
+      );
   }
 }
 Terms = Radium(Terms);

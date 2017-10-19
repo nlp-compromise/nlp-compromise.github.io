@@ -6,7 +6,6 @@ import demos from './demos';
 const style = styler`
 container
   display:flex;
-  flex:0.5
   flex-direction:row
 demoList:
   border: '1px solid grey',
@@ -44,6 +43,8 @@ runButton:
   text-align:center
   background-color:coral
   color:white
+  padding-bottom:5px;
+  cursor:pointer;
   border-radius:0px 0px 7px 7px
 `;
 
@@ -59,35 +60,44 @@ class Code extends React.Component {
     this.onClick = this.onClick.bind(this);
   }
   onClick(d) {
-    let { props } = this;
-    this.setState({ demo: d, code: d.code });
+    let {props} = this;
+    this.setState({
+      demo: d,
+      code: d.code
+    });
     setTimeout(() => {
       props.cmp.eval();
     }, 100);
   }
   demoList() {
-    let { css, state } = this;
+    let {css, state} = this;
     return demos.map((d, i) => {
       let style = {};
       let more = null;
       if (state.demo.title === d.title) {
         style = css.chosenTab;
         more = (
-          <span style={{ position: 'absolute', right: -8, color: 'steelblue' }}>
+          <span style={{
+            position: 'absolute',
+            right: -8,
+            color: 'steelblue'
+          }}>
             {'▶'}
           </span>
         );
       }
       return (
-        <div onClick={() => this.onClick(d)} style={{ ...css.demo, ...style }} key={i}>
+        <div onClick={() => this.onClick(d)} style={{
+          ...css.demo, ...style
+        }} key={i}>
           {d.title}
           {more}
         </div>
-      );
+        );
     });
   }
   render() {
-    let { css, state, props } = this;
+    let {css, state, props} = this;
     return (
       <div style={css.container}>
         <div style={css.demoList}>
@@ -96,11 +106,11 @@ class Code extends React.Component {
         <div style={css.column}>
           <CodeMirror code={state.demo.code} type={'js'} />
           <i style={css.runButton} onClick={() => props.cmp.eval()}>
-            ⚡
+            run ⚡
           </i>
         </div>
       </div>
-    );
+      );
   }
 }
 Code = Radium(Code);

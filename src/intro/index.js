@@ -49,20 +49,26 @@ class Main extends React.Component {
     this.css = style;
   }
   render() {
-    let { css } = this;
+    let {css} = this;
     return (
       <div style={css.container}>
         <div>
-          <div style={{ ...css.main }}>
-            <span style={css.small}>{'yaknow, '}</span>
-            <img alt="logo" src="https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png" />
+          <div style={{
+        ...css.main
+      }}>
+            <span style={css.small}>{'yah, '}</span>
+            <img alt='logo' src='https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png' />
             <br />
             {' language is cѳmplicated.'}
           </div>
-          <div style={{ ...css.sub, ...css.grey }}>
-            {"and there's a gazillion words."}
+          <div style={{
+        ...css.sub, ...css.grey
+      }}>
+            {'and there\'s a gazillion words.'}
           </div>
-          <div style={{ ...css.main }}>
+          <div style={{
+        ...css.main
+      }}>
             <span style={css.name}>{'compromise'}</span>
             {' is a '}
             <span style={{}}>{'javascript library'}</span>
@@ -71,15 +77,21 @@ class Main extends React.Component {
             <b style={css.red}>{'pre-parses'}</b>
             {' english.'}
           </div>
-          <ul style={{ ...css.main, ...css.orange, fontSize: 20, textAlign: 'center', ...css.mono }}>
+          <ul style={{
+        ...css.main, ...css.orange,
+        fontSize: 20,
+        textAlign: 'center', ...css.mono
+      }}>
             - and makes some reasonable decisions -
           </ul>
-          <div style={{ ...css.sub, ...css.red }}>
-            {'so things are easier'}
+          <div style={{
+        ...css.sub, ...css.red
+      }}>
+            {'so things are way easier.'}
           </div>
         </div>
       </div>
-    );
+      );
   }
 }
 module.exports = Main;
