@@ -18,8 +18,10 @@ container
   box-sizing: border-box;
 header:
   margin:10
-  color:silver
-  font-size:30
+  color:dimgrey
+  text-align:left;
+  margin-left:25px;
+  font-size:15
 footer:
   margin:10
   color:silver

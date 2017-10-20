@@ -20,7 +20,7 @@ heroNumber:
 graph:
 	width:50%;
 	text-align:center;
-	margin-bottom:50px;
+	margin-bottom:15px;
 	display:flex;
 bigger:
 	color:lightsteelblue;
@@ -34,6 +34,8 @@ smaller:
 	color:lightgrey;
 	font-size:17px;
 	margin-bottom:15px;
+darker:
+	color:grey
 tricky:
 	color:#f7b2b9;
 	font-size:15px;
@@ -61,135 +63,235 @@ class Graphs extends React.Component {
     this.css = style;
   }
   render() {
-    let {css} = this;
+    let { css } = this;
     return (
       <div style={css.container}>
-				<div style={css.hero}>
-					<div style={css.smaller}>
-						{'it\'s '}
-						<a style={css.link} href='https://en.wikipedia.org/wiki/Zipf%27s_law'>
-						  {'easy to forget,'}
-					  </a>
-						 {' that'}
-					 </div>
-					<div>the top <b style={css.heroNumber}> 1,000 </b> words</div>
-					<div> do
-						<b style={css.heroNumber}> 80% </b>
-						of english
-					</div>
-				</div>
-				<div style={css.graph}>
-					<div style={css.left}>
-						<div style={css.bigger}> – easy – </div>
-						<div style={css.smaller}>unambiguous, common speech</div>
-					</div>
-					<div style={css.right}>
-						<div style={css.number}> 20% </div>
-						<i style={css.tricky}>– tricky stuff –</i>
-					</div>
-				</div>
+        <div style={css.hero}>
+          <div style={css.smaller}>
+            {"it's "}
+            <a style={css.link} href="https://en.wikipedia.org/wiki/Zipf%27s_law">
+              {'easy to forget,'}
+            </a>
+            {' that'}
+          </div>
+          <div>
+            the top <b style={css.heroNumber}> 1,000 </b> words
+          </div>
+          <div>
+            {' '}
+            are
+            <b style={css.heroNumber}> 80% </b>
+            of english
+          </div>
+        </div>
+        <div style={css.graph}>
+          <div style={css.left}>
+            <div style={css.bigger}> – easy – </div>
+            <div style={css.smaller}>unambiguous, common speech</div>
+          </div>
+          <div style={css.right}>
+            <div style={css.number}> 20% </div>
+            <i style={css.tricky}>– tricky stuff –</i>
+          </div>
+        </div>
 
-				<div >
-					<div style={css.smaller}>
-						<i style={{
-        color: '#f7b2b9',
-        fontSize: '20px'
-      }}>~15% </i>
-			<i>have solutions in some </i>
-			<i style={{
-        color: '#f7b2b9',
-      }}>complex computer science 💪</i>
-					</div>
-				</div>
-					<div style={css.graph}>
-						<div style={{
-        flex: 80,
-        borderBottom: '6px solid lightsteelblue'
-      }}/>
-						<div style={{
-        flex: 15,
-        borderBottom: '6px solid #DE6169'
-      }}/>
-						<div style={{
-        flex: 5,
-        borderBottom: '6px solid lightgrey'
-      }}/>
-			  </div>
-				<div style={{
-        position: 'relative',
-      }}>
-			<div style={{
-        color: 'lightgrey',
-        marginBottom: 25
-      }}>
-					with terabytes of data,
-						remembering your linear-algebra,
-							or worse, lisp!
-				</div>
-				</div>
+        <div>
+          <div
+            style={
+              ([css.smaller],
+              {
+                marginTop: 25,
+                marginBottom: 5
+              })
+            }
+          >
+            <i
+              style={{
+                color: '#f7b2b9',
+                fontSize: '20px'
+              }}
+            >
+              ~15%{' '}
+            </i>
+            <i
+              style={{
+                color: '#afb5bc'
+              }}
+            >
+              have solutions with some{' '}
+            </i>
+            <i
+              style={{
+                color: '#f7b2b9'
+              }}
+            >
+              complex computer science
+            </i>
+          </div>
+        </div>
+        <div style={css.graph}>
+          <div
+            style={{
+              flex: 80,
+              borderBottom: '6px solid lightsteelblue'
+            }}
+          />
+          <div
+            style={{
+              flex: 15,
+              borderBottom: '6px solid #DE6169'
+            }}
+          />
+          <div
+            style={{
+              flex: 5,
+              borderBottom: '6px solid lightgrey'
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'relative'
+          }}
+        >
+          <div
+            style={{
+              color: '#afb5bc',
+              marginTop: 5,
+              fontSize: 15,
+              marginBottom: 45
+            }}
+          >
+            <b style={css.darker}>gigabytes</b> of data, remembering <b style={css.darker}>linear-algebra</b>, or worse,{' '}
+            <b style={css.darker}>lisp</b>!
+          </div>
+        </div>
 
-				<div >
-					<div style={css.smaller}>
-						<i style={{
-        marginTop: 10,
-        color: '#8e96a0'
-      }}>
-							 – when you already know your users –
-						</i>
-					<br/>
-						<i style={{
-        color: '#be82d6',
-        fontSize: '25px'
-      }}>10% cheating </i>
-			<i style={{
-        color: '#8e96a0',
-        fontSize: '22px'
-      }}>is practical.</i>
-			<i>
-			</i>
-					</div>
-				</div>
-					<div style={css.graph}>
-						<div style={{
-        flex: 80,
-        borderBottom: '6px solid lightsteelblue'
-      }}/>
-						<div style={{
-        flex: 10,
-        borderBottom: '6px solid #be82d6'
-      }}/>
-						<div style={{
-        flex: 10,
-        borderBottom: '6px solid lightgrey'
-      }}/>
-			  </div>
-			<div style={{
-        position: 'relative',
-        top: -25,
-        left: -25,
-        color: 'lightgrey'
-      }}>
-			{'with '}
-					<a href='' style={{
-        color: '#d2ace2',
-        textDecoration: 'none'
-      }}>config, plugins, and customization.</a>
-			<ul>
-				which we've taken seriously.
-			</ul>
-			<div style={{
-        color: 'darkgrey',
-        'font-size': 14,
-        position: 'relative',
-        paddingLeft: 150
-      }}>
-		<i>(<b style={{
-        color: 'grey'
-      }}>compromise!</b>)</i>
+        <div
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          <div style={[css.smaller]}>
+            <i
+              style={{
+                marginTop: 25,
+                color: '#8e96a0'
+              }}
+            >
+              – but if you know at least something about your text –
+            </i>
+            <br />
+            <i
+              style={{
+                marginTop: 20,
+                color: '#afb5bc',
+                textAlign: 'center',
+                fontSize: 14
+              }}
+            >
+              the locale, context, subject, assumptions ...
+            </i>
+            <br />
+            <div
+              style={{
+                marginTop: 15,
+                marginBottom: 10
+              }}
+            >
+              <i
+                style={{
+                  color: '#8e96a0',
+                  fontSize: '18px'
+                }}
+              >
+                a{' '}
+              </i>
+              <i
+                style={{
+                  color: '#be82d6',
+                  fontSize: '25px'
+                }}
+              >
+                10% bump{' '}
+              </i>
+              <i
+                style={{
+                  color: '#8e96a0',
+                  fontSize: '22px'
+                }}
+              >
+                is practical
+              </i>
+            </div>
+          </div>
+        </div>
+        <div style={css.graph}>
+          <div
+            style={{
+              flex: 80,
+              borderBottom: '6px solid lightsteelblue'
+            }}
+          />
+          <div
+            style={{
+              flex: 10,
+              borderBottom: '6px solid #be82d6'
+            }}
+          />
+          <div
+            style={{
+              flex: 10,
+              borderBottom: '6px solid lightgrey'
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: 'relative',
+            top: 0,
+            left: -25,
+            color: 'lightgrey'
+          }}
+        >
+          {'with '}
+          <a
+            href=""
+            style={{
+              color: '#d2ace2',
+              textDecoration: 'none'
+            }}
+          >
+            config, plugins, and customization.
+          </a>
+          <ul
+            style={{
+              color: '#8e96a0'
+            }}
+          >
+            we've taken this part seriously.
+          </ul>
+          <div
+            style={{
+              color: 'darkgrey',
+              'font-size': 14,
+              position: 'relative',
+              paddingLeft: 150
+            }}
+          >
+            <i>
+              <b
+                style={{
+                  color: 'lightsteelblue'
+                }}
+              >
+                (compromise!)
+              </b>
+            </i>
+          </div>
+        </div>
       </div>
-		</div>
-    </div>
-      );
+    );
   }
 }
 export default Graphs;

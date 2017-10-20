@@ -7,6 +7,7 @@ import Big from './big';
 import Install from './install';
 import Footer from './footer';
 import Graphs from './graphs';
+import Shows from './shows';
 import './index.css';
 const style = styler`
 container
@@ -15,7 +16,23 @@ container
   flex-direction: column;
   width:100%;
   font-family: Raleway,serif;
+spacer
+  flex: 1,
+  margin-top: 40px
+  margin-bottom: 40px
+  marginLeft: 25%
+  marginRight: 25%
+hr
+  border: 0;
+  border-bottom: 2px solid #ccc;
+  background: lightgrey;
 `;
+
+const Spacer = function() {
+  return (<div style={style.spacer}>
+    <hr style={style.hr}/>
+  </div>)
+}
 
 class All extends React.Component {
   constructor() {
@@ -31,6 +48,8 @@ class All extends React.Component {
          <Intro />
          <Small />
          <Graphs />
+         <Shows />
+         <Spacer />
          <Install />
          <Big />
          <Footer />
