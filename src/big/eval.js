@@ -1,13 +1,12 @@
 import nlp from 'compromise';
 
-module.exports = (obj, callback) => {
+const evalFn = (obj, callback) => {
   //variables accessable to the eval'd code
   window.myText = obj.text || '';
   window.nlp = nlp;
   try {
     let code = obj.code || '';
-    code =
-      `(function(){
+    code = `(function(){
       ` +
       code +
       `
@@ -19,3 +18,4 @@ module.exports = (obj, callback) => {
     callback(null, e);
   }
 };
+export default evalFn

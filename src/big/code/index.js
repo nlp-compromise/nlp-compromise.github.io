@@ -114,4 +114,4 @@ class Code extends React.Component {
   }
 }
 Code = Radium(Code);
-module.exports = Code;
+export default Code;

@@ -38,4 +38,4 @@ class All extends React.Component {
       );
   }
 }
-module.exports = All;
+export default All;

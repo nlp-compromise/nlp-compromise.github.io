@@ -5,7 +5,7 @@ import fleetwood_mac from './fleetwood_mac';
 import friends from './friends';
 import beatles from './beatles';
 import NAFTA from './NAFTA';
-module.exports = {
+export default {
   fresh_prince: fresh_prince,
   weezer: weezer,
   friends: friends,

@@ -36,7 +36,7 @@ class Code extends Component {
     };
   }
   render() {
-    let { css, props } = this;
+    let {css, props} = this;
     let options = this.js;
     if (props.type === 'html') {
       options = this.html;
@@ -45,8 +45,8 @@ class Code extends Component {
       <div style={css.code}>
         <Codemirror options={options} value={props.code} />
       </div>
-    );
+      );
   }
 }
 Code = Radium(Code);
-module.exports = Code;
+export default Code;

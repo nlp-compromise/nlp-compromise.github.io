@@ -184,4 +184,4 @@ class Small extends React.Component {
       );
   }
 }
-module.exports = Small;
+export default Small;

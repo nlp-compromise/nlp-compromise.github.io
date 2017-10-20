@@ -10,6 +10,7 @@ container:
 both:
   display:flex
   margin:20
+  justify-content: center;
 console:
   color:dimgrey
   display:inline
@@ -84,4 +85,4 @@ class Install extends Component {
 }
 Install = Radium(Install);
 
-module.exports = Install;
+export default Install;

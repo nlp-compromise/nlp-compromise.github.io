@@ -192,7 +192,7 @@ class Graphs extends React.Component {
       );
   }
 }
-module.exports = Graphs;
+export default Graphs;
 
 {
   /* <div style={{

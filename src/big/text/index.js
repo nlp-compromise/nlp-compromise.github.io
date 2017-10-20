@@ -128,4 +128,4 @@ class Text extends React.Component {
   }
 }
 // Text = Radium(Text);
-module.exports = Text;
+export default Text;

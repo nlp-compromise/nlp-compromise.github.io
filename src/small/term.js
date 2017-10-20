@@ -60,4 +60,4 @@ class Terms extends React.Component {
   }
 }
 // Terms = Radium(Terms);
-module.exports = Terms;
+export default Terms;
