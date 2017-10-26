@@ -10,7 +10,7 @@ container
 	color:grey;
 	justify-content: center;
 	align-items: center;
-	margin-top:80px;
+	margin-top:50px;
 	margin-bottom:20px;
 hero:
 	font-size:30px;
@@ -101,8 +101,8 @@ const graphs = {
 const makeGraph = function(arr) {
   return (
     <div style={style.graph}>
-			{arr.map((o) => {
-      return <div style={{
+			{arr.map((o, i) => {
+      return <div key={i} style={{
           flex: o.num,
           borderBottom: '6px solid ' + o.color
         }}/>
@@ -153,14 +153,14 @@ class Graphs extends React.Component {
 					<Zipf/>
 				</div>
         <div>
-					  <div style={css.hero}>People are obsessed with that last bit →</div>
+					  <div style={css.hero}>People get obsessed with that end bit →</div>
           <div
       style={
-      ([css.smaller],
+      [css.smaller],
       {
         marginTop: 25,
         marginBottom: 5
-      })
+      }
       }
       >
 				<i
@@ -168,7 +168,7 @@ class Graphs extends React.Component {
         color: '#afb5bc'
       }}
       >
-				{'with some clever'}
+				{'with clever'}
 				<i
       style={{
         color: '#f7b2b9'
@@ -200,34 +200,42 @@ class Graphs extends React.Component {
         marginBottom: 45
       }}
       >
-            but with <b style={css.darker}>gigabyte</b> models, doing <b style={css.darker}>linear-algebra</b>, and{' '}
+            by using <b style={css.darker}>gigabyte</b> models, doing <b style={css.darker}>linear-algebra</b>, or{' '}
             <b style={css.darker}>lisp!</b> (no offence)
           </div>
 
 				<div style={{
-        fontSize: 30,
+        fontSize: 22,
         marginBottom: 5
       }}>
-					Realistically though -
+					Really though,
 					<br/>
 					<span style={{
         fontSize: 15,
-        color: 'grey'
+        color: 'darkgrey'
       }}>{'eg. - '}</span>
 					<span style={{
-        fontSize: 25,
+        fontSize: 20,
         color: 'lightgrey'
-      }}>"The pope's baby steps on gays"</span>
+      }}>{'“The pope\'s baby steps on gays”'}</span>
 			<div style={{
         fontSize: 17,
-        color: 'grey',
+        color: '#afb5bc',
         marginTop: 5
       }}>{'- '}
 			<b style={{
         fontSize: 21,
         color: '#ff0000'
       }}>~10%</b>
-			{' of text is just gonna be kinda ambiguous -'}</div>
+			{' of text is just gonna be kinda '}
+			{'involved'}
+			{' -'}</div>
+				</div>
+				<div style={{
+        color: '#afb5bc',
+        fontSize: 14
+      }}>
+					- even for smart people -
 				</div>
 				<div style={{
         fontSize: 12,
@@ -238,7 +246,12 @@ class Graphs extends React.Component {
         marginTop: 5
       }}>{'- context, locale, slang, typos, subject-matter, sloppiness, time-period, class, audience, innuendo, ESL, word-play ... -'}</div>
 				{makeGraph(graphs.three)}
-
+				{ /* <div style={{
+        color: '#afb5bc',
+        fontSize: 14
+      }}>
+					over-fitting for tests just sucks.
+				</div> */ }
         <div
       style={{
         textAlign: 'center'
@@ -252,7 +265,7 @@ class Graphs extends React.Component {
         color: '#8e96a0'
       }}
       >
-              – but when you know <b>at least</b> something about your text –
+              – but if you know <b>at least</b> something about your text –
             </i>
             <br />
             <i
@@ -313,7 +326,7 @@ class Graphs extends React.Component {
         fontSize: '22px'
       }}
       >
-                in accuracy is practical.
+                in accuracy is realistic
               </i>
             </div>
 						{'with '}
@@ -346,26 +359,34 @@ class Graphs extends React.Component {
       >
             we've taken that part seriously.
           </ul>
-          <div
+
+					<div style={{
+        fontSize: 22,
+        marginBottom: 5,
+        color: 'grey'
+      }}>
+						This way, the whole thing is <b>~200kb</b>.
+						<div style={{
+        fontSize: 15
+      }}>(about the same as jQuery)</div>
+					</div>
+					<div
       style={{
         color: 'darkgrey',
-        'font-size': 14,
         position: 'relative',
         paddingLeft: 150
       }}
       >
-            <i>
-              <b
+					<i>
+					<b
       style={{
         color: 'lightsteelblue'
       }}
       >
-                compromise !
-							<br/>
-							{ /* it's not the best! */ }
-              </b>
-            </i>
-          </div>
+						compromise !
+					</b>
+					</i>
+					</div>
         </div>
       </div>
       );

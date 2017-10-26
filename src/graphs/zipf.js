@@ -50,7 +50,7 @@ class Zipf extends React.Component {
         sum: sum
       })
     }
-    console.log(arr)
+    // console.log(arr)
     let lines = [
       {
         i: 100,
@@ -70,14 +70,14 @@ class Zipf extends React.Component {
         percent: 80
       }
     ]
-    lines = lines.map((o) => {
+    lines = lines.map((o, i) => {
       let x = xScale(o.i)
-      return (<g>
-				<text x={x - 10} y={45} fontSize='18' stroke='none' fill='darkgrey' text-anchor='middle'>{o.text || o.i}</text>
-				<text x={x - 10} y={57} fontSize='10' stroke='none' fill='darkgrey' text-anchor='middle'>{'words'}</text>
-				<text x={x + 5} y={90} fontSize='14' stroke='none' fill='darkgrey' text-anchor='middle'>{o.percent + '%'}</text>
-				<text x={x + 8} y={105} fontSize='10' stroke='none' fill='darkgrey' text-anchor='middle'>of english</text>
-				<text x={x + 5} y={118} fontSize='12' stroke='none' fill='darkgrey' text-anchor='middle'>{'←'}</text>
+      return (<g key={i}>
+				<text x={x - 10} y={45} fontSize='18' stroke='none' fill='darkgrey' >{o.text || o.i}</text>
+				<text x={x - 10} y={57} fontSize='10' stroke='none' fill='darkgrey' >{'words'}</text>
+				<text x={x + 5} y={90} fontSize='14' stroke='none' fill='darkgrey' >{o.percent + '%'}</text>
+				<text x={x + 8} y={105} fontSize='10' stroke='none' fill='darkgrey'>of english</text>
+				<text x={x + 5} y={118} fontSize='12' stroke='none' fill='darkgrey'>{'←'}</text>
 				<line stroke='lightgrey' x1={x} y1='42%' x2={x} y2='90%'/>
 			</g>
       )
@@ -87,27 +87,27 @@ class Zipf extends React.Component {
     return (
       <div style={css.container}>
 				<i style={css.pullOver}>
-					honestly,
-					<br/>
-					this graph is silly when you think about it -</i>
+					{ /* honestly, */ }
+					{ /* <br/> */ }
+					this graph is silly, when you think about it -</i>
 				<div>
 					<svg width={width} height={height} style={{
         overflow: 'visible'
       }}>
 						{lines}
-						<line stroke='darkgrey' x1='0' y1='0' x2='0' y2='100%'/>
+						<line stroke='grey' x1='0' y1='0' x2='0' y2='100%'/>
 						<text x={'-33'} y={yScale(9)} fontSize='14' stroke='none' fill='lightgrey'>{'7% -'}</text>
 						<text x={'-33'} y={yScale(5)} fontSize='14' stroke='none' fill='lightgrey'>{'5% -'}</text>
 						{ /* <text x={'-35'} y={yScale(2.5)} fontSize='14' stroke='none' fill='darkgrey'>{'2.5 %'}</text> */ }
 						<path d={path} stroke={'#2ebfe8'} strokeWidth={3} fill='none' shapeRendering='auto' />
-						<line stroke='darkgrey' x1='0' y1='100%' x2='100%' y2='100%'/>
+						<line stroke='grey' x1='0' y1='100%' x2='100%' y2='100%'/>
 					</svg>
 				</div>
 				<div>
 					<i style={css.middle}>{'← common words'}</i>
 					<i style={{
         marginLeft: '30%'
-      }}>{'rare ones →'}</i>
+      }}>{'rare words →'}</i>
 				</div>
   		</div>
       );

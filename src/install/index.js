@@ -4,12 +4,13 @@ import CodeMirror from '../lib/codemirror';
 import styler from 'react-styling';
 const style = styler`
 container:
-  padding:50
   color:grey
+  flex:1;
   border-left:5px solid #f39c73
 both:
   display:flex
-  margin:20
+  // margin:20
+  flex-wrap: wrap;
   justify-content: center;
 console:
   color:dimgrey
@@ -17,7 +18,6 @@ console:
   padding:2px 7px 2px 7px
   position:relative
   marginLeft:15
-  // top:10
   font-size:22
   background-color:whitesmoke
   border:1px solid lightgrey;
@@ -27,7 +27,8 @@ link:
   text-decoration:none;
 right:
   position:relative
-  right:0
+  right:50px
+  margin-top:20px;
   float:right
   top:-20
 `;
@@ -63,7 +64,8 @@ class Install extends Component {
     return (
       <div style={css.container}>
         <span style={{
-        fontSize: 25
+        fontSize: 25,
+        paddingLeft: 50
       }}>🙌 </span>
         <span style={css.console}>npm install compromise</span>
         <div style={css.both}>
