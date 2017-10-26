@@ -17,7 +17,7 @@ pullOver:
 	margin-left:-30px;
 	margin-bottom:15px;
 middle:
-	margin-left:75px;
+	margin-left:15%;
 	font-size:15px;
 `;
 
@@ -58,7 +58,7 @@ class Zipf extends React.Component {
       },
       {
         i: 300,
-        percent: 63
+        percent: 65
       },
       {
         i: 600,
@@ -89,21 +89,26 @@ class Zipf extends React.Component {
 				<i style={css.pullOver}>
 					honestly,
 					<br/>
-					this graph is silly:</i>
+					this graph is silly when you think about it -</i>
 				<div>
 					<svg width={width} height={height} style={{
         overflow: 'visible'
       }}>
 						{lines}
 						<line stroke='darkgrey' x1='0' y1='0' x2='0' y2='100%'/>
-						<text x={'-33'} y={yScale(9)} fontSize='14' stroke='none' fill='darkgrey'>{'7% -'}</text>
-						<text x={'-33'} y={yScale(5)} fontSize='14' stroke='none' fill='darkgrey'>{'5% -'}</text>
+						<text x={'-33'} y={yScale(9)} fontSize='14' stroke='none' fill='lightgrey'>{'7% -'}</text>
+						<text x={'-33'} y={yScale(5)} fontSize='14' stroke='none' fill='lightgrey'>{'5% -'}</text>
 						{ /* <text x={'-35'} y={yScale(2.5)} fontSize='14' stroke='none' fill='darkgrey'>{'2.5 %'}</text> */ }
 						<path d={path} stroke={'#2ebfe8'} strokeWidth={3} fill='none' shapeRendering='auto' />
 						<line stroke='darkgrey' x1='0' y1='100%' x2='100%' y2='100%'/>
 					</svg>
 				</div>
-				<i style={css.middle}>{'← common words'}</i>
+				<div>
+					<i style={css.middle}>{'← common words'}</i>
+					<i style={{
+        marginLeft: '30%'
+      }}>{'rare ones →'}</i>
+				</div>
   		</div>
       );
   }
