@@ -49,9 +49,9 @@ class All extends React.Component {
          <Small />
          <Graphs />
          <Shows />
-         { /* <Spacer /> */ }
          <Install />
-         { /* <Big /> */ }
+         <Spacer />
+          <Big />
          <Footer />
       </div>
       );

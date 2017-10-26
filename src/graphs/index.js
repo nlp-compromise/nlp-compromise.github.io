@@ -210,14 +210,14 @@ class Graphs extends React.Component {
       }}>
 					Really though,
 					<br/>
-					<span style={{
+					{ /* <span style={{
         fontSize: 15,
         color: 'darkgrey'
       }}>{'eg. - '}</span>
 					<span style={{
         fontSize: 20,
         color: 'lightgrey'
-      }}>{'“The pope\'s baby steps on gays”'}</span>
+      }}>{'“The pope\'s baby steps on gays”'}</span> */ }
 			<div style={{
         fontSize: 17,
         color: '#afb5bc',
@@ -244,7 +244,7 @@ class Graphs extends React.Component {
         justifyContent: 'space-around',
         color: '#ff0000',
         marginTop: 5
-      }}>{'- context, locale, slang, typos, subject-matter, sloppiness, time-period, class, audience, innuendo, ESL, word-play ... -'}</div>
+      }}>{'- context, locale, slang, typos, subject, sloppiness, time-period, class, audience, innuendo, ESL ... -'}</div>
 				{makeGraph(graphs.three)}
 				{ /* <div style={{
         color: '#afb5bc',

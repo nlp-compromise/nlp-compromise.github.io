@@ -1,123 +1,196 @@
 import React from 'react';
-import Text from './text/index';
-import Code from './code';
-import exec from './eval';
-
-import CodeMirror from '../lib/codemirror';
+import nlp from 'compromise';
 import styler from 'react-styling';
+import texts from './texts';
 const style = styler`
-main
-  margin-top:50
-  margin-bottom:50
-  padding:50
 container
-  flex:1;
-  width:100%;
-  text-align:center
-  border-left:3px solid #6393b9
-  box-sizing: border-box;
-header:
-  margin:10
-  color:dimgrey
-  text-align:left;
-  margin-left:25px;
-  font-size:15
-footer:
-  margin:10
-  color:silver
-  text-align:right;
-  margin-right:10%
-  font-size:14
-link:
-  color:steelblue
-  text-decoration:none
-flex:
-  display:flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap:wrap
+	flex:1;
+	width:100%;
+	text-align:left;
+	display:flex;
+	justify-content: center;
+choices:
+	display:flex;
+	flex-direction: column;
+choice:
+	padding:10px;
+	text-decoration:underline
+	font-size:15
+	color:steelblue;
+	border-radius:2px;
+	cursor:pointer;
+	border:1px solid #ededed;
+	:hover
+		background-color:lightsteelblue;
+		color:white;
+select:
+	min-width:50%;
+	font-size:17px;
+left:
+	min-width:400px
+	max-width:700px
+textarea:
+	width:99%
+	min-height:200px
+	font-size:12
+	border-radius:8
+	color:#C9CBD8;
 result:
-  display:block
-  textAlign:left
-  position:relative
-  min-height:20
-  max-height:400px
-  overflow:auto
-  border-bottom:1px solid linen;
-  width:60%;
-  margin-left:20%;
-  min-width:200
-  overflow:auto;
+	width:90%
+	min-height:50px
+	max-height:214px
+	overflow:scroll;
+	border:1px solid lightgrey;
+	padding-left:10%
+	font-family:helvetica
+	font-size:12
+	border-radius:8
+	color:palevioletred;
+count:
+	font-size:18px;
+	color:lightgrey;
+code:
+	font-size:18px;
+	margin-left:25px;
+	margin-top:5px;
+	margin-bottom:5px;
+	color:palevioletred;
+thing:
+	font-size:18px;
+	color:steelblue;
+blue:
+	color:#f46979;
 `;
+const options = [
+  {
+    label: 'Will Smith Lyrics',
+    value: 'will_smith'
+  },
+  {
+    label: 'Friends Episode Transcript',
+    value: 'friends'
+  },
+  {
+    label: 'Weezer lyrics',
+    value: 'weezer'
+  },
+  {
+    label: 'State of the Union \'05',
+    value: 'state_of_the_union'
+  },
+]
+
+const subsets = [
+  {
+    label: 'Topics',
+    value: 'topics'
+  },
+  {
+    label: 'Noun-phrases',
+    value: 'nouns'
+  },
+  {
+    label: 'Dates',
+    value: 'dates'
+  },
+  {
+    label: 'People',
+    value: 'people'
+  },
+  {
+    label: 'Verb-phrases',
+    value: 'verbs'
+  },
+  {
+    label: 'Values',
+    value: 'values'
+  },
+]
 
 class Big extends React.Component {
   constructor() {
     super();
     this.state = {
-      result: '',
-      running: false
+      text: options[0].value,
+      subset: subsets[0].value,
+      result: []
     };
     this.css = style;
-    this.eval = this.eval.bind(this);
+    this.changeText = this.changeText.bind(this)
+    this.changeSubset = this.changeSubset.bind(this)
   }
   componentDidMount() {
-    this.eval();
+    this.doit()
   }
-  eval() {
-    let text = this.refs.text.state.text;
-    let code = this.refs.code.state.code;
+  changeText(e) {
     this.setState({
-      running: true
-    });
-    exec({
-      text: text,
-      code: code
-    }, (r, err) => {
-      if (err) {
-        console.log(err);
-      }
-      if (r) {
-        if (r.isA === 'Text') {
-          if (r.length > 100) {
-            r = r.slice(0, 100);
-          }
-          r = r.out('array');
-        // console.log(r.length);
-        // r.push('[-truncated result to 100-]');
-        }
-        r = JSON.stringify(r, null, 2);
-      }
-      this.setState({
-        result: r,
-        running: false
-      });
-    });
+      text: e.target.value
+    }, () => {
+      this.doit()
+    })
+  }
+  changeSubset(e) {
+    this.setState({
+      subset: e.target.id
+    }, () => {
+      this.doit()
+    })
+  }
+  doit() {
+    let {css, state} = this;
+    let doc = nlp(texts[state.text])
+    let result = doc[state.subset]().slice(0, 50).out('frequency')
+    this.setState({
+      result: result
+    })
   }
   render() {
     let {css, state} = this;
-    let bottom = Object.assign({}, css.result)
-    if (state.running) {
-      bottom.opacity = 0.3
-      console.log('running!')
-    }
     return (
-      <div>
-        <div style={css.container}>
-          <div style={css.header}>kick it around a bit:</div>
-          <div style={css.flex}>
-            <Code ref='code' cmp={this} />
-            <Text ref='text' cmp={this} />
-          </div>
-        </div>
-        <div style={bottom}>
-          <CodeMirror code={state.result} readOnly={true} />
-        </div>
-        <div style={css.footer}>
-          {'see the '}
-          <a style={css.link} href='https://github.com/nlp-compromise/compromise/wiki/Accuracy'>
-            results on tests
-          </a>
-        </div>
+      <div style={css.container}>
+      <div style={css.left}>
+				<select style={css.select} onChange={this.changeText}>
+					{options.map((o) => <option value={o.value}>{o.label}</option>)}
+				</select>
+				<textarea style={css.textarea} value={texts[state.text]}/>
+				<div style={css.code}>
+					{'nlp('}
+					<i style={css.blue}>{'\'text\''}</i>
+				{').' + state.subset + '().slice('}
+				<i style={css.blue}>{'0, 50'}</i>
+				{').out('}
+					<i style={css.blue}>{'\'frequency\''}</i>
+			{')'}
+				</div>
+				<div style={css.result}>
+				<table><tbody>{state.result.map(o => {
+        let count = o.count
+        if (count !== 1) {
+          count = 'x' + count
+        } else {
+          count = ''
+        }
+        return (<tr>
+					<td style={css.thing}>
+						<li><i>{o.normal}</i></li>
+					</td>
+					<td style={css.count}>
+						{count }
+					</td>
+				</tr>)
+      })}</tbody></table>
+			</div>
+			</div>
+			<div style={css.choices}>
+				<div style={{
+        fontSize: 14,
+        marginTop: 8,
+        color: 'lightgrey'
+      }}>grab the:</div>
+				{subsets.map((o) => {
+        return <div style={css.choice} id={o.value} onClick={this.changeSubset}>{o.label}</div>
+      })}
+			</div>
       </div>
       );
   }

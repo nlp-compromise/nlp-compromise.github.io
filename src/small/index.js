@@ -159,7 +159,7 @@ class Small extends React.Component {
     return (
       <div style={css.container}>
         <div style={css.inputContainer}>
-          <textarea ref='input' style={{
+          <textarea spellcheck='false' ref='input' style={{
         ...css.input,
         height: height
       }} value={state.text} onChange={this.onType} onClick={this.onClick}/>
