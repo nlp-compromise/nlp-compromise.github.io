@@ -8,6 +8,7 @@ import Install from './install';
 import Footer from './footer';
 import Graphs from './graphs';
 import Shows from './shows';
+import Docs from './docs';
 import './index.css';
 const style = styler`
 container
@@ -52,6 +53,7 @@ class All extends React.Component {
          <Install />
          <Spacer />
           <Big />
+          <Docs />
          <Footer />
       </div>
       );

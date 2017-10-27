@@ -98,10 +98,14 @@ class Small extends React.Component {
  Woo woo woo!`,
       'Lisa needs braces. Dental plan!',
       'I am the very model of a modern major general.',
-      'sex cauldron? I thought they closed that place down.',
       'And how come Batman doesn\'t dance anymore?\n Remember the Batusi?',
+      'we should all be more like little Ruttiger',
       'it was the blurst of times?',
-      'Careful! They’re RUFFLED!!'
+      'The bong-rattling bass of Mel Schacher? The competent drum work of Don Brewer?',
+      'Who controls the British crown? Who keeps the metric system down?',
+      'my name is Otto, and i love to get blotto',
+      'sex cauldron? I thought they closed that place down.',
+      'Careful! They’re RUFFLED!!',
     ];
     this.wait = 6500;
     this.setState({
