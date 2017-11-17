@@ -45,16 +45,16 @@ class All extends React.Component {
     let {css} = this;
     return (
       <div style={css.container}>
-        <Header />
-         { /* <Intro />
-          <Small />
-         <Graphs />
-         <Shows />
-         <Install />
-         <Spacer />
-          <Big />*/ }
-           <Docs />
-         <Footer /> 
+       <Header />
+       <Intro />
+       <Small />
+       <Graphs />
+       <Shows />
+       <Install />
+       <Spacer />
+       <Big />
+       <Docs />
+       <Footer />
       </div>
       );
   }

@@ -3,10 +3,13 @@ import React from 'react';
 import styler from 'react-styling';
 import docs from './docs';
 const style = styler`
+top
+	margin-top:60
 container
 	flex:1;
 	margin-left:50
 	margin-right:50
+	margin-top:10
 	display:flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -56,7 +59,7 @@ class Docs extends React.Component {
   render() {
     let {css} = this;
     return (
-      <div >
+      <div style={css.top}>
 				<span style={css.heading}>API:</span>
 	      <div style={css.container}>
 	      	{this.makeCol(docs.match, 'Matching')}

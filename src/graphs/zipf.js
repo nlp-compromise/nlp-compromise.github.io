@@ -30,7 +30,9 @@ class Zipf extends React.Component {
   render() {
     let {css} = this;
     let width = window.innerWidth || 550
-    console.log(width)
+    if (width > 600) {
+      width = 600
+    }
     let height = 150
     let len = 1200
     let yScale = scaleLinear().range([height, 0]).domain([0, 11])
