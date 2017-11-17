@@ -13,11 +13,12 @@ container
 	font-family: Raleway,serif;
 row
 	display:flex;
+	flex-wrap: wrap;
 	justify-content:space-around;
 	flex-direction: row;
 section
-	height:140px
-	min-width:340px
+	min-height:140px
+	width:400px
 `;
 
 class Shows extends React.Component {

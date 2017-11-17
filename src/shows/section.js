@@ -5,7 +5,7 @@ container
 	flex:1;
 	display:flex;
 	flex-direction: column;
-	width:100%;
+	margin-right:50px;
 	justify-content:space-around;
 	font-family: Raleway,serif;
 heading:
@@ -20,7 +20,7 @@ input
 	width:100%
 	border-radius:4
 	color:grey
-	font-size:20
+	font-size:19px
 	font-family:Inconsolata
 	border-bottom:3px solid #e0dada
 	padding:10

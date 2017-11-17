@@ -47,14 +47,14 @@ class All extends React.Component {
       <div style={css.container}>
         <Header />
          { /* <Intro />
-          <Small />*/ }
+          <Small />
          <Graphs />
-        { /*  <Shows />
+         <Shows />
          <Install />
          <Spacer />
-          <Big />
-          <Docs />
-         <Footer /> */ }
+          <Big />*/ }
+           <Docs />
+         <Footer /> 
       </div>
       );
   }

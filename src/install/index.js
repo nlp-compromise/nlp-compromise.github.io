@@ -7,6 +7,7 @@ container:
   color:grey
   flex:1;
   border-left:5px solid #f39c73
+  min-width:550px;
 both:
   display:flex
   // margin:20
@@ -43,7 +44,7 @@ console.log(doc.out('text'));
 // 'dinosaurs'
 `,
 
-  html: `<script src="https://unpkg.com/compromise/builds/compromise.min.js"></script>
+  html: `<script src="https://unpkg.com/compromise"></script>
 <script>
   var doc = window.nlp('five-hundred and twenty')
 

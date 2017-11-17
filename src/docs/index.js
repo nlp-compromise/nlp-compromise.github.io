@@ -13,9 +13,10 @@ container
 	text-align:center
 	justify-content: center;
 list:
-	display:flex;
 	flex-shrink:1
-	border:1px solid grey
+	border:1px solid grey;
+	max-height:260px;
+	overflow-y:scroll;
 	flex-direction: column;
 	flex-wrap: wrap;
 	text-align:left
@@ -30,6 +31,9 @@ heading:
 	margin-left:150px
 	margin-top:150px
 	margin-bottom:5
+title:
+	text-decoration:underline;
+	font-weight:500;
 `;
 
 class Docs extends React.Component {
@@ -39,12 +43,15 @@ class Docs extends React.Component {
     this.css = style;
     this.makeCol = this.makeCol.bind(this)
   }
-  makeCol(obj) {
+  makeCol(obj, title) {
     let {css} = this;
     let list = Object.keys(obj).map((k, i) => {
       return <div key={i} style={css.doc}>{k}</div>
     })
-    return <div style={css.list}>{list}</div>
+    return (<div style={css.list}>
+			<div style={css.title}>{title}</div>
+			{list}
+		</div>)
   }
   render() {
     let {css} = this;
@@ -52,15 +59,16 @@ class Docs extends React.Component {
       <div >
 				<span style={css.heading}>API:</span>
 	      <div style={css.container}>
-	      	{this.makeCol(docs.match)}
-	      	{this.makeCol(docs.array)}
-					{this.makeCol(docs.misc)}
-	      	{this.makeCol(docs.nouns)}
-	      	{this.makeCol(docs.sentences)}
-	      	{this.makeCol(docs.values)}
-	      	{this.makeCol(docs.verbs)}
-	      	{this.makeCol(docs.parts)}
-	      	{this.makeCol(docs.others)}
+	      	{this.makeCol(docs.match, 'Matching')}
+	      	{this.makeCol(docs.array, 'Array')}
+					{this.makeCol(docs.misc, 'Changes')}
+	      	{this.makeCol(docs.nouns, 'Nouns')}
+	      	{this.makeCol(docs.sentences, 'Sentences')}
+	      	{this.makeCol(docs.values, 'Values')}
+					{this.makeCol(docs.contractions, 'Contractions')}
+	      	{this.makeCol(docs.verbs, 'Verbs')}
+	      	{this.makeCol(docs.ngrams, 'Ngrams')}
+	      	{this.makeCol(docs.others, 'Others')}
 	      </div>
       </div>
       );

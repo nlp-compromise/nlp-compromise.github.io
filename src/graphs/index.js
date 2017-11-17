@@ -5,7 +5,6 @@ const style = styler`
 container
 	flex:1;
 	display:flex;
-	min-width:650px;
 	flex-direction: column;
 	position: relative
 	color:grey;
@@ -13,6 +12,8 @@ container
 	align-items: center;
 	margin-top:50px;
 	margin-bottom:20px;
+	margin-left:5px
+	margin-right:5px
 hero:
 	font-size:30px;
 	margin-bottom:50px;
@@ -21,6 +22,7 @@ heroNumber:
 	color:steelblue;
 graph:
 	width:50%;
+	min-width:250px;
 	text-align:center;
 	margin-top:10px;
 	margin-bottom:15px;
@@ -347,8 +349,8 @@ class Graphs extends React.Component {
         <div
       style={{
         position: 'relative',
+        minWidth: 300,
         top: 0,
-        left: -25,
         color: 'lightgrey'
       }}
       >

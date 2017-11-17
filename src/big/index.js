@@ -1,5 +1,6 @@
 import React from 'react';
 import nlp from 'compromise';
+import Radium from 'radium';
 import styler from 'react-styling';
 import texts from './texts';
 const style = styler`
@@ -7,6 +8,7 @@ container
 	flex:1;
 	width:100%;
 	text-align:left;
+	flex-wrap:wrap;
 	display:flex;
 	justify-content: center;
 choices:
@@ -14,50 +16,54 @@ choices:
 	flex-direction: column;
 choice:
 	padding:10px;
-	text-decoration:underline
 	font-size:15
 	color:steelblue;
 	border-radius:2px;
 	cursor:pointer;
 	border:1px solid #ededed;
 	:hover
-		background-color:lightsteelblue;
-		color:white;
+		color:palevioletred;
 select:
 	min-width:50%;
 	font-size:17px;
 left:
+	width:500px
 	min-width:400px
 	max-width:700px
 textarea:
-	width:99%
+	width:99%;
+	max-width:700px
+	min-width:200px
 	min-height:200px
 	font-size:12
 	border-radius:8
 	color:#C9CBD8;
 result:
-	width:90%
 	min-height:50px
-	max-height:214px
+	width:175px;
+	max-height:245px
+	padding-top:10px
+	margin-top:25px;
 	overflow:scroll;
 	border:1px solid lightgrey;
-	padding-left:10%
 	font-family:helvetica
 	font-size:12
 	border-radius:8
 	color:palevioletred;
 count:
-	font-size:18px;
-	color:lightgrey;
+	font-size:15px;
+	padding-right:15px;
+	color:lightsteelblue;
 code:
 	font-size:18px;
-	margin-left:25px;
-	margin-top:5px;
-	margin-bottom:5px;
 	color:palevioletred;
+	padding:6px;
+	border:1px solid palevioletred;
+	border-radius:5px;
 thing:
 	font-size:18px;
-	color:steelblue;
+	padding-left:10px;
+	color:palevioletred;
 blue:
 	color:#f46979;
 `;
@@ -140,7 +146,7 @@ class Big extends React.Component {
   doit() {
     let {state} = this;
     let doc = nlp(state.text)
-    let result = doc[state.subset]().slice(0, 50).out('frequency')
+    let result = doc[state.subset]().slice(0, 100).out('frequency')
     this.setState({
       result: result
     })
@@ -151,10 +157,48 @@ class Big extends React.Component {
     });
     this.doit()
   }
+  result() {
+    let {css, state} = this;
+    return (
+      <div style={css.result}>
+			<table><tbody>{state.result.map((o, i) => {
+        let count = o.count
+        if (count !== 1) {
+          count = 'x' + count
+        } else {
+          count = ''
+        }
+        return (<tr key={i}>
+				<td style={css.thing}>
+					<div>{o.normal}</div>
+				</td>
+				<td style={css.count}>
+					<i>{count}</i>
+				</td>
+			</tr>)
+      })}</tbody></table>
+		</div>
+    )
+  }
   render() {
     let {css, state} = this;
     return (
       <div style={css.container}>
+				<div style={css.choices}>
+					<div style={{
+        fontSize: 14,
+        marginTop: 8,
+        color: 'lightgrey'
+      }}>grab the:</div>
+					{subsets.map((o, i) => {
+        let style = Object.assign({}, css.choice)
+        if (state.subset === o.value) {
+          style.color = 'palevioletred'
+          style.border = '1px solid palevioletred'
+        }
+        return <div key={i} style={style} id={o.value} onClick={this.changeSubset}>{o.label}</div>
+      })}
+				</div>
       <div style={css.left}>
 				<select style={css.select} onChange={this.changeText}>
 					{options.map((o, i) => <option key={i} value={o.value}>{o.label}</option>)}
@@ -169,37 +213,12 @@ class Big extends React.Component {
 					<i style={css.blue}>{'\'frequency\''}</i>
 			{')'}
 				</div>
-				<div style={css.result}>
-				<table><tbody>{state.result.map((o, i) => {
-        let count = o.count
-        if (count !== 1) {
-          count = 'x' + count
-        } else {
-          count = ''
-        }
-        return (<tr key={i}>
-					<td style={css.thing}>
-						<li><i>{o.normal}</i></li>
-					</td>
-					<td style={css.count}>
-						{count }
-					</td>
-				</tr>)
-      })}</tbody></table>
 			</div>
-			</div>
-			<div style={css.choices}>
-				<div style={{
-        fontSize: 14,
-        marginTop: 8,
-        color: 'lightgrey'
-      }}>grab the:</div>
-				{subsets.map((o, i) => {
-        return <div key={i} style={css.choice} id={o.value} onClick={this.changeSubset}>{o.label}</div>
-      })}
-			</div>
+			{this.result()}
+
       </div>
       );
   }
 }
+Big = Radium(Big)
 export default Big;

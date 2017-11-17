@@ -29,11 +29,12 @@ class Zipf extends React.Component {
   }
   render() {
     let {css} = this;
-    let width = 550
+    let width = window.innerWidth || 550
+    console.log(width)
     let height = 150
     let len = 1200
     let yScale = scaleLinear().range([height, 0]).domain([0, 11])
-    let xScale = scaleLinear().range([0, width]).domain([1, len])
+    let xScale = scaleLinear().range([0, width - 50]).domain([1, len])
 
     //https://www.britannica.com/topic/Zipfs-law
     const zipf = function(r) {

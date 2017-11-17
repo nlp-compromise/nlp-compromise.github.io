@@ -537,7 +537,7 @@ module.exports = {
       example: 'nlp(\'strain\').verbs().asAdjective()\n//strenuous'
     },
   },
-  parts: {
+  ngrams: {
     'ngrams()': {
       desc: 'return a handy array of meta-data for the n-grams in this text. accepts an obj with `max` or `size` number',
       example: 'nlp(\'love love me do.\').ngrams({max:3}).data()\n//[{text:\'love\', count:2, size:1}..]',
@@ -563,6 +563,18 @@ module.exports = {
       returns: 'Text',
       example: 'nlp(\'i scream, you scream, we all scream for icecream.\').ngrams().sort().first().out()\n//scream'
     },
+    'startGrams()': {
+      desc: 'return an array of subsequences beginning at the start of each sentence or match',
+      example: 'nlp(\'Who controls the British crown? Who keeps the metric system down?\').startGrams().data()\n//[{normal:\'who\', size:1, count:2}...]',
+      returns: 'array'
+    },
+    'endGrams()': {
+      desc: 'return an array of subsequences ending at the end of each sentence or match',
+      example: 'nlp(\'you think that’s a knife? I’ll show you a knife.\').endGrams().data()\n//[{normal:\'knife\', count:2, size:1}...]',
+      returns: 'array'
+    },
+  },
+  contractions: {
     'contractions()': {
       desc: 'return a handy array of meta-data for this the contractions in this text',
       example: 'nlp(\' I’d like to request seventeen dollars for a push broom rebristling\').contractions().data()\n//[{text:\'I\'d\'}]',
@@ -613,16 +625,6 @@ module.exports = {
     'hashTags()': {
       desc: 'return an array of parsed hashtags used in the text',
       example: 'nlp(\'oh, but where is the #anykey\').hashTags().data()\n//[{normal:\'anykey\'}]',
-      returns: 'array'
-    },
-    'startGrams()': {
-      desc: 'return an array of subsequences beginning at the start of each sentence or match',
-      example: 'nlp(\'Who controls the British crown? Who keeps the metric system down?\').startGrams().data()\n//[{normal:\'who\', size:1, count:2}...]',
-      returns: 'array'
-    },
-    'endGrams()': {
-      desc: 'return an array of subsequences ending at the end of each sentence or match',
-      example: 'nlp(\'you think that’s a knife? I’ll show you a knife.\').endGrams().data()\n//[{normal:\'knife\', count:2, size:1}...]',
       returns: 'array'
     },
     'phoneNumbers()': {
