@@ -156,11 +156,11 @@ class Graphs extends React.Component {
 					  <div style={css.hero}>People get obsessed with that end bit →</div>
           <div
       style={
-      [css.smaller],
-      {
-        marginTop: 25,
-        marginBottom: 5
-      }
+      [css.smaller,
+        {
+          marginTop: 25,
+          marginBottom: 5
+        }]
       }
       >
 				<i
@@ -393,19 +393,3 @@ class Graphs extends React.Component {
   }
 }
 export default Graphs;
-
-{
-  /* <div style={{
-  width: '100%',
-  borderRadius: 5,
-  paddingRight: 5,
-  backgroundColor: 'steelblue'
-  }}/> */
-}
-{
-  /* <div style={{
-  flex: 1,
-  borderRadius: 5,
-  backgroundColor: 'lightgrey'
-  }}/> */
-}

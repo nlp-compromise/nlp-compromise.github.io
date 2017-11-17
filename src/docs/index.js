@@ -41,8 +41,8 @@ class Docs extends React.Component {
   }
   makeCol(obj) {
     let {css} = this;
-    let list = Object.keys(obj).map((k) => {
-      return <div style={css.doc}>{k}</div>
+    let list = Object.keys(obj).map((k, i) => {
+      return <div key={i} style={css.doc}>{k}</div>
     })
     return <div style={css.list}>{list}</div>
   }

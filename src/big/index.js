@@ -111,20 +111,21 @@ class Big extends React.Component {
   constructor() {
     super();
     this.state = {
-      text: options[0].value,
+      text: texts[options[0].value],
       subset: subsets[0].value,
       result: []
     };
     this.css = style;
     this.changeText = this.changeText.bind(this)
     this.changeSubset = this.changeSubset.bind(this)
+    this.onType = this.onType.bind(this)
   }
   componentDidMount() {
     this.doit()
   }
   changeText(e) {
     this.setState({
-      text: e.target.value
+      text: texts[e.target.value] || this.state.text
     }, () => {
       this.doit()
     })
@@ -137,12 +138,18 @@ class Big extends React.Component {
     })
   }
   doit() {
-    let {css, state} = this;
-    let doc = nlp(texts[state.text])
+    let {state} = this;
+    let doc = nlp(state.text)
     let result = doc[state.subset]().slice(0, 50).out('frequency')
     this.setState({
       result: result
     })
+  }
+  onType(e) {
+    this.setState({
+      text: e.target.value,
+    });
+    this.doit()
   }
   render() {
     let {css, state} = this;
@@ -150,9 +157,9 @@ class Big extends React.Component {
       <div style={css.container}>
       <div style={css.left}>
 				<select style={css.select} onChange={this.changeText}>
-					{options.map((o) => <option value={o.value}>{o.label}</option>)}
+					{options.map((o, i) => <option key={i} value={o.value}>{o.label}</option>)}
 				</select>
-				<textarea style={css.textarea} value={texts[state.text]}/>
+				<textarea style={css.textarea} onChange={this.onType} value={state.text}/>
 				<div style={css.code}>
 					{'nlp('}
 					<i style={css.blue}>{'\'text\''}</i>
@@ -163,14 +170,14 @@ class Big extends React.Component {
 			{')'}
 				</div>
 				<div style={css.result}>
-				<table><tbody>{state.result.map(o => {
+				<table><tbody>{state.result.map((o, i) => {
         let count = o.count
         if (count !== 1) {
           count = 'x' + count
         } else {
           count = ''
         }
-        return (<tr>
+        return (<tr key={i}>
 					<td style={css.thing}>
 						<li><i>{o.normal}</i></li>
 					</td>
@@ -187,8 +194,8 @@ class Big extends React.Component {
         marginTop: 8,
         color: 'lightgrey'
       }}>grab the:</div>
-				{subsets.map((o) => {
-        return <div style={css.choice} id={o.value} onClick={this.changeSubset}>{o.label}</div>
+				{subsets.map((o, i) => {
+        return <div key={i} style={css.choice} id={o.value} onClick={this.changeSubset}>{o.label}</div>
       })}
 			</div>
       </div>

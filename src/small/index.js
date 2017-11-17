@@ -96,14 +96,24 @@ class Small extends React.Component {
     let arr = [
       `Wayne's world! Party time! Excellent!
  Woo woo woo!`,
-      'Lisa needs braces. Dental plan!',
+      'So I tied an onion to my belt, which was the style at the time.',
+      'We understand Homer, after all we are from the land of chocolate.',
+      'And I say England\'s greatest Prime Minister was Lord Palmerston!',
       'I am the very model of a modern major general.',
       'And how come Batman doesn\'t dance anymore?\n Remember the Batusi?',
       'we should all be more like little Ruttiger',
       'it was the blurst of times?',
+      'Marge, is Lisa at Camp Granada?',
+      'The Aurora Borealis? At this time of year?',
+      'There\'s a 4:30 in the morning now?',
+      'You got anything written from the vampire\'s point of view?',
+      'Lisa needs braces. Dental plan!',
+      'Anytime I hear the wind blow it will whisper the name...Edna',
       'The bong-rattling bass of Mel Schacher? The competent drum work of Don Brewer?',
       'Who controls the British crown? Who keeps the metric system down?',
+      'That may not sound impressive, but keep in mind it is a very big canyon.',
       'my name is Otto, and i love to get blotto',
+      'staring at my sandals, oh you better believe that\'s a paddlin\'',
       'sex cauldron? I thought they closed that place down.',
       'Careful! They’re RUFFLED!!',
     ];
@@ -163,7 +173,7 @@ class Small extends React.Component {
     return (
       <div style={css.container}>
         <div style={css.inputContainer}>
-          <textarea spellcheck='false' ref='input' style={{
+          <textarea spellCheck='false' ref='input' style={{
         ...css.input,
         height: height
       }} value={state.text} onChange={this.onType} onClick={this.onClick}/>
@@ -175,14 +185,14 @@ class Small extends React.Component {
         <div style={{
         fontSize: 35,
         color: '#cc9696'
-      }}>👇</div>
+      }}>{'👇'}</div>
         { /* <svg fill="steelblue" height="40" width="30" viewBox="0 0 40 40" style={{ verticalAlign: 'middle' }}>
           <g>
             <path d="m28.6 29q0.2 0.4-0.1 0.8l-7.9 8.6q-0.2 0.2-0.5 0.2-0.3 0-0.5-0.2l-7.9-8.6q-0.3-0.4-0.1-0.8 0.2-0.4 0.6-0.4h5v-27.9q0-0.3 0.2-0.5t0.5-0.2h4.3q0.3 0 0.5 0.2t0.2 0.5v27.9h5q0.5 0 0.7 0.4z" />
           </g>
         </svg> */ }
         <div style={css.terms}>
-          {terms.map((term, i) => <Term term={term} i={i}/>)}
+          {terms.map((term, i) => <Term key={i} term={term} i={i}/>)}
         </div>
       </div>
       );

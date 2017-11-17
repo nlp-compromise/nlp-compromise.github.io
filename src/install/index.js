@@ -66,7 +66,7 @@ class Install extends Component {
         <span style={{
         fontSize: 25,
         paddingLeft: 50
-      }}>🙌 </span>
+      }}>{'🙌'} </span>
         <span style={css.console}>npm install compromise</span>
         <div style={css.both}>
           <div>

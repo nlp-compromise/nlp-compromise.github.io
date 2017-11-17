@@ -1,5 +1,4 @@
 import React from 'react';
-import Radium from 'radium';
 import styler from 'react-styling/flat';
 import chooseTag from './colors';
 
