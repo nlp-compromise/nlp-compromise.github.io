@@ -6,13 +6,15 @@ container
   padding-top:180
   padding-bottom:80
   display:flex;
+  margin-left:5px;
+  margin-right:5px;
   position:relative;
   font-size:15
   justify-content:space-around;
   font-family: Raleway,serif;
 main:
   color:steelblue;
-  white-space:nowrap;
+  // white-space:nowrap;
   font-size:34
   line-height:105%
 mono:
@@ -25,7 +27,7 @@ name:
   font-size:34
   color:#f39c73;
 sub:
-  white-space:nowrap;
+  // white-space:nowrap;
   font-size:30
   line-height:105%
 grey:

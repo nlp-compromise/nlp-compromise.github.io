@@ -7,31 +7,37 @@ const style = styler`
 container
   display:block;
   position:relative;
-  padding:50
+  padding-top:25px
+  padding-left:5px
+  padding-right:5px
   marginTop:25
   marginBottom:0
+  justify-content: center;
   min-height:200
   text-align:center;
   border-left:5px solid #b3d3c6
 inputContainer:
   position:relative;
   text-align:center
-  width:70%
-  margin-left:15%
-  min-width:600
-input:
+  align-self: center;
   text-align:center;
+  min-width:300px
+input:
+  max-width:800px
+  text-align:center;
+  align-self: center;
   border:1px solid whitesmoke;
   outline:none;
-  height:30px;
-  overflow:hidden
-  width:100%
+  min-height:30px;
+  margin-left:5%
+  margin-right:5%
+  width:90%
   border-radius:4
   color:dimgrey
   font-size:30
   font-family:Inconsolata
   border-bottom:3px dotted #e0dada
-  padding:10
+  padding:12
   background-color:#fdfeff
   resize: none;
 loader:
@@ -45,6 +51,8 @@ terms
   display:flex;
   flex-direction: row;
   justify-content: center;
+  max-width:100%;
+  flex-wrap:wrap;
   marginTop:0
   padding:0
   color:#b4adad
@@ -63,7 +71,7 @@ class Small extends React.Component {
       started: null,
       index: 0,
       progress: 0,
-      dirty: false,
+      dirty: true,
       raf: null
     };
     this.css = style;
@@ -173,7 +181,7 @@ class Small extends React.Component {
     return (
       <div style={css.container}>
         <div style={css.inputContainer}>
-          <textarea spellCheck='false' ref='input' style={{
+          <textarea className='resizer' spellCheck='false' ref='input' style={{
         ...css.input,
         height: height
       }} value={state.text} onChange={this.onType} onClick={this.onClick}/>

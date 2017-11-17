@@ -12,10 +12,13 @@ container
 href:
   text-decoration:none
   color:steelblue
-  marginLeft:25
 byline:
-  marginRight:90
   color:silver
+img:
+  min-width: 20px,
+  marginRight: 10px,
+  position: relative,
+  top: 5px
 `;
 
 class Header extends React.Component {
@@ -31,12 +34,7 @@ class Header extends React.Component {
         <span style={css.byline}>
           <img
       alt='beans'
-      style={{
-        width: 20,
-        marginRight: 10,
-        position: 'relative',
-        top: 5
-      }}
+      style={css.img}
       src='https://twemoji.maxcdn.com/36x36/2728.png'
       />
           {'words 👉 data'}

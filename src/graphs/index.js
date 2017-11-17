@@ -5,6 +5,7 @@ const style = styler`
 container
 	flex:1;
 	display:flex;
+	min-width:650px;
 	flex-direction: column;
 	position: relative
 	color:grey;
@@ -155,13 +156,12 @@ class Graphs extends React.Component {
         <div>
 					  <div style={css.hero}>People get obsessed with that end bit →</div>
           <div
-      style={
-      [css.smaller,
-        {
-          marginTop: 25,
-          marginBottom: 5
-        }]
-      }
+      style={{
+        color: 'lightgrey',
+        fontSize: 17,
+        marginTop: 25,
+        marginBottom: 5
+      }}
       >
 				<i
       style={{
