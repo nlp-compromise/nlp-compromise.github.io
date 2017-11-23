@@ -152,11 +152,11 @@ class Graphs extends React.Component {
             <i style={css.tricky}>( harder stuff )</i>
           </div>
         </div>
+				<div style={css.hero}>People get obsessed with that end bit →</div>
 				<div>
 					<Zipf/>
 				</div>
         <div>
-					  <div style={css.hero}>People get obsessed with that end bit →</div>
           <div
       style={{
         color: 'lightgrey',
@@ -202,8 +202,8 @@ class Graphs extends React.Component {
         marginBottom: 45
       }}
       >
-            by using <b style={css.darker}>gigabyte</b> models, doing <b style={css.darker}>linear-algebra</b>, or{' '}
-            <b style={css.darker}>lisp!</b> (no offence)
+            by using <b style={css.darker}>gigabyte</b> models, <b style={css.darker}>linear-algebra</b>, or{' '}
+            <b style={css.darker}>lisp</b>! (no offence)
           </div>
 
 				<div style={{
@@ -224,30 +224,32 @@ class Graphs extends React.Component {
         fontSize: 17,
         color: '#afb5bc',
         marginTop: 5
-      }}>{'- '}
+      }}>{'- bout '}
 			<b style={{
         fontSize: 21,
         color: '#ff0000'
       }}>~10%</b>
-			{' of text is just gonna be kinda '}
-			{'involved'}
-			{' -'}</div>
+			{' of it is just gonna be hard, even for clever people'}
+			</div>
 				</div>
 				<div style={{
         color: '#afb5bc',
         fontSize: 14
       }}>
-					- even for smart people -
+					- and most solutions are <i>outside the text</i> -
 				</div>
+				{makeGraph(graphs.three)}
 				<div style={{
         fontSize: 12,
         flex: 1,
         display: 'flex',
         justifyContent: 'space-around',
-        color: '#ff0000',
-        marginTop: 5
-      }}>{'- context, locale, slang, typos, subject, sloppiness, time-period, class, audience, innuendo, ESL ... -'}</div>
-				{makeGraph(graphs.three)}
+        color: '#f7b2b9',
+        fontStyle: 'italic',
+        marginTop: 1
+      }}>
+			{'( locale, slang, subject, typos, sloppiness, time-period, class, audience, innuendo, ESL )'}
+		</div>
 				{ /* <div style={{
         color: '#afb5bc',
         fontSize: 14
@@ -267,13 +269,17 @@ class Graphs extends React.Component {
         color: '#8e96a0'
       }}
       >
-              – but if you know <b>at least</b> something about your text –
+              – <span style={{
+        fontSize: 25,
+        color: 'grey'
+      }}>but,</span> if you know <b>at least</b> something about your text –
             </i>
             <br />
             <i
       style={{
         marginTop: 20,
         color: '#afb5bc',
+        marginRight: -150,
         textAlign: 'center',
         fontSize: 14
       }}
@@ -287,18 +293,19 @@ class Graphs extends React.Component {
         color: '#8e96a0'
       }}
       >
-						- or how your users are instructed -
+						- or what your users are expecting -
 						</i>
 						<br />
 						<i
       style={{
         marginTop: 20,
         color: '#afb5bc',
+        marginRight: -200,
         textAlign: 'center',
         fontSize: 14
       }}
       >
-							that's an even bigger deal.
+							(that's an even bigger deal.)
 						</i>
             <div
       style={{
@@ -328,12 +335,12 @@ class Graphs extends React.Component {
         fontSize: '22px'
       }}
       >
-                in accuracy is realistic
+                in accuracy is realistic.
               </i>
             </div>
-						{'with '}
+						{'using '}
 						<a
-      href=''
+      href='https://github.com/nlp-compromise/compromise/wiki/plugins'
       style={{
         color: '#be82d6',
         marginBottom: 15,
@@ -359,7 +366,7 @@ class Graphs extends React.Component {
         color: '#8e96a0'
       }}
       >
-            we've taken that part seriously.
+            and we've taken that part seriously.
           </ul>
 
 					<div style={{

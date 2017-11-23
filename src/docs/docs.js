@@ -97,7 +97,7 @@ module.exports = {
   },
   match: {
     'match()': {
-      desc: 'zoom-in to a subset of the text, using a [regex-like syntax](https:\n//github.com/nlp-compromise/compromise/wiki/Match-syntax)',
+      desc: 'zoom-in to a subset of the text, using a regex-like match statement',
       returns: 'Text',
       example: 'nlp(\'we understand, we are from the land of chocolate.\').match(\'land of #Noun\').out()\n//land of chocolate'
     },

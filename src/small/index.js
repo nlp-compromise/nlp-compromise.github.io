@@ -14,14 +14,17 @@ container
   marginBottom:0
   justify-content: center;
   min-height:200
+  align-content: center;
   text-align:center;
   border-left:5px solid #b3d3c6
 inputContainer:
   position:relative;
+  display:flex
+  justify-content: center;
   text-align:center
   align-self: center;
-  text-align:center;
   min-width:300px
+  flex-direction:column;
 input:
   max-width:800px
   text-align:center;
@@ -40,6 +43,14 @@ input:
   padding:12
   background-color:#fdfeff
   resize: none;
+loaderContainer:
+  max-width:800px;
+  text-align:center
+  align-self: center;
+  width:90%;
+  margin-left:5%
+  margin-right:5%
+  position:relative;
 loader:
   display:block;
   position:relative;
@@ -71,7 +82,7 @@ class Small extends React.Component {
       started: null,
       index: 0,
       progress: 0,
-      dirty: true,
+      dirty: false,
       raf: null
     };
     this.css = style;
@@ -185,20 +196,17 @@ class Small extends React.Component {
         ...css.input,
         height: height
       }} value={state.text} onChange={this.onType} onClick={this.onClick}/>
+        <div style={css.loaderContainer}>
           <div style={{
         ...css.loader,
         width: state.progress * 100 + '%'
       }} />
+          </div>
         </div>
         <div style={{
         fontSize: 35,
         color: '#cc9696'
       }}>{'👇'}</div>
-        { /* <svg fill="steelblue" height="40" width="30" viewBox="0 0 40 40" style={{ verticalAlign: 'middle' }}>
-          <g>
-            <path d="m28.6 29q0.2 0.4-0.1 0.8l-7.9 8.6q-0.2 0.2-0.5 0.2-0.3 0-0.5-0.2l-7.9-8.6q-0.3-0.4-0.1-0.8 0.2-0.4 0.6-0.4h5v-27.9q0-0.3 0.2-0.5t0.5-0.2h4.3q0.3 0 0.5 0.2t0.2 0.5v27.9h5q0.5 0 0.7 0.4z" />
-          </g>
-        </svg> */ }
         <div style={css.terms}>
           {terms.map((term, i) => <Term key={i} term={term} i={i}/>)}
         </div>

@@ -1,11 +1,13 @@
 import React from 'react';
 import styler from 'react-styling';
 import tags from './tags'
+import CodeMirror from '../lib/codemirror';
 const style = styler`
 main
 	flex:1;
 	display:flex;
 	flex-direction: row;
+	flex-wrap:wrap;
 	margin-left:50
 row
 	display:flex;
@@ -36,6 +38,8 @@ right:
 	max-width:300px;
 	font-size:10px
 	margin-left:100
+	margin-top:40
+	margin-bottom:40
 	align-self: center;
 	color:steelblue
 rightOne:
@@ -46,6 +50,13 @@ underline:
 	font-size:12px
 	margin-bottom:10px
 	border-bottom:1px solid steelblue
+byline:
+	margin-top:20
+	margin-left:20
+	color:grey
+clever:
+	color:lightgrey
+	font-size:17px
 `;
 
 class Tagset extends React.Component {
@@ -74,13 +85,29 @@ class Tagset extends React.Component {
   }
   render() {
     let {css} = this;
+    let example = `var doc = nlp('foot')
+
+doc.tag('Foo')
+doc.out('tags')
+// Noun, Singular, Foo
+
+doc.tag('PresentTense')
+doc.out('tags')
+// Verb, PresentTense, Foo`
     return (
-      <div style={css.main}>
-				{this.makeList(tags.left)}
-				<div style={css.right}>
-					<div style={css.underline}>Other tags:</div>
-					{Object.keys(tags.rest).map((t) => <div style={css.rightOne}>{t}</div>)}
-				</div>
+      <div>
+				<div style={css.byline}>These are the things it can figure out on its own:</div>
+	      <div style={css.main}>
+					{this.makeList(tags.left)}
+					<div style={css.right}>
+						<div style={css.underline}>Other tags:</div>
+						{Object.keys(tags.rest).map((t) => <div style={css.rightOne}>{t}</div>)}
+					</div>
+					<div style={css.right}>
+						<div style={css.clever}>and it's clever about this stuff:</div>
+					  <CodeMirror type={'js'} readOnly={true} code={example} />
+					</div>
+	      </div>
       </div>
       );
   }
