@@ -9,6 +9,7 @@ import Footer from './footer';
 import Graphs from './graphs';
 import Shows from './shows';
 import Docs from './docs';
+import Tagset from './tagset';
 import './index.css';
 const style = styler`
 container
@@ -46,15 +47,16 @@ class All extends React.Component {
     return (
       <div style={css.container}>
        <Header />
-       <Intro />
+       { /* <Intro />
        <Small />
        <Graphs />
        <Shows />
        <Install />
        <Spacer />
-       <Big />
-       <Docs />
-       <Footer />
+       <Big /> */ }
+       <Tagset/>
+       { /* <Docs /> */ }
+       { /* <Footer /> */ }
       </div>
       );
   }

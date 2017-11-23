@@ -8,6 +8,7 @@ container:
   flex:1;
   border-left:5px solid #f39c73
   min-width:550px;
+  text-align:center
 both:
   display:flex
   // margin:20
@@ -18,6 +19,7 @@ console:
   display:inline
   padding:2px 7px 2px 7px
   position:relative
+  marginBottom:10
   marginLeft:15
   font-size:22
   background-color:whitesmoke
