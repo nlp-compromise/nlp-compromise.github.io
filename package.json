@@ -8,9 +8,9 @@
   },
   "homepage": "http://nlp-compromise.github.io",
   "dependencies": {
-    "codemirror": "^5.31.0",
-    "compromise": "^11.1.0",
-    "d3-scale": "^1.0.6",
+    "codemirror": "^5.32.0",
+    "compromise": "^11.2.1",
+    "d3-scale": "^1.0.7",
     "d3-shape": "^1.2.0",
     "highlight.js": "^9.12.0",
     "history": "^4.7.2",

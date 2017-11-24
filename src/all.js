@@ -1,11 +1,11 @@
 import React from 'react';
 import styler from 'react-styling';
 // import Header from './header';
+// import Footer from './footer';
 import Intro from './intro';
 import Small from './small';
 import Big from './big';
 import Install from './install';
-import Footer from './footer';
 import Graphs from './graphs';
 import Shows from './shows';
 import Docs from './docs';
@@ -51,7 +51,6 @@ class All extends React.Component {
        <Tagset/>
        <Spacer />
        <Docs />
-       <Footer />
       </div>
       );
   }
