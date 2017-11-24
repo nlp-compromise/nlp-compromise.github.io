@@ -1,6 +1,6 @@
 import React from 'react';
 import styler from 'react-styling';
-import Header from './header';
+// import Header from './header';
 import Intro from './intro';
 import Small from './small';
 import Big from './big';
@@ -12,12 +12,6 @@ import Docs from './docs';
 import Tagset from './tagset';
 import './index.css';
 const style = styler`
-container
-  position:relative;
-  display:flex;
-  flex-direction: column;
-  width:100%;
-  font-family: Raleway,serif;
 spacer
   flex: 1,
   margin-top: 40px
@@ -45,8 +39,7 @@ class All extends React.Component {
   render() {
     let {css} = this;
     return (
-      <div style={css.container}>
-       <Header />
+      <div>
        <Intro />
        <Small />
        <Graphs />

@@ -44,9 +44,11 @@ class Section extends React.Component {
     this.onType = this.onType.bind(this)
   }
   onType() {
-    let result = this.props.callback(this.refs.input.value)
+    let text = this.refs.input.value || ''
+    let result = this.props.callback(text)
     this.setState({
-      result: result
+      result: result,
+      text: text
     })
   }
   componentDidMount() {

@@ -73,7 +73,7 @@ class Tagset extends React.Component {
         return <div style={css.elOne}>{k}</div>
       }
       return (
-        <div style={css.row}>
+        <div id='tags' style={css.row}>
 					<div style={css.el}>{k}</div>
 					<div style={css.elOne}>{this.makeList(obj[k])}</div>
 					<svg style={css.svg}>

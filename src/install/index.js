@@ -65,7 +65,7 @@ class Install extends Component {
   render() {
     let {css} = this;
     return (
-      <div style={css.container}>
+      <div id='install' style={css.container}>
         <span style={{
         fontSize: 25,
         paddingLeft: 50

@@ -32,12 +32,22 @@ class Header extends React.Component {
     return (
       <div style={css.container}>
         <span style={css.byline}>
-          <img
+          <a style={{
+        textDecoration: 'none',
+      }} href='./'>
+        <img
       alt='beans'
       style={css.img}
       src='https://twemoji.maxcdn.com/36x36/2728.png'
       />
-          {'words 👉 data'}
+      </a>
+        <a style={{
+        textDecoration: 'none',
+        color: 'lightsteelblue'
+      }} href='./'>nlp-compromise</a><br/>
+        <div style={{
+        marginLeft: 30
+      }}>{'words 👉 data'}</div>
         </span>
         <a style={css.href} href='https://github.com/nlp-compromise/compromise/wiki'> - wiki - </a>
         <a style={css.href} href='https://github.com/nlp-compromise/compromise'>- github -</a>

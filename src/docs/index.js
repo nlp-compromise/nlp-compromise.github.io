@@ -120,13 +120,13 @@ nlp(str).match('land of #Noun').out('text')
   render() {
     let {css, state} = this;
     return (
-      <div style={css.top}>
+      <div id='docs' style={css.top}>
 				<span style={css.heading}>API:</span>
 	      <div style={css.container}>
 		      <div style={css.left}>
 		      	{this.makeCol(docs.match, 'Matching')}
-		      	{this.makeCol(docs.array, 'Array')}
-						{this.makeCol(docs.misc, 'Changes')}
+		      	{this.makeCol(docs.array, 'Arrays')}
+						{this.makeCol(docs.misc, 'Transformation')}
 		      	{this.makeCol(docs.nouns, 'Nouns')}
 		      	{this.makeCol(docs.sentences, 'Sentences')}
 		      	{this.makeCol(docs.values, 'Values')}
