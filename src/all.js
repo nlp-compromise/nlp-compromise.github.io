@@ -39,17 +39,17 @@ class All extends React.Component {
   render() {
     return (
       <div>
-       { /* <Intro />
+       <Intro />
        <Small />
        <Graphs />
        <Shows />
        <Install />
        <Spacer />
        <Big />
-       <Spacer /> */ }
+       <Spacer />
        <Tagset/>
-       { /* <Spacer />
-       <Docs /> */ }
+       <Spacer />
+       <Docs />
       </div>
       );
   }
