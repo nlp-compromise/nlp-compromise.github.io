@@ -44,13 +44,13 @@ class Footer extends React.Component {
     return (
       <div style={css.container}>
         <div style={css.table}>
-          <a style={css.link} href='https://github.com/nlp-compromise/compromise'>
+          <a target='_parent' style={css.link} href='https://github.com/nlp-compromise/compromise'>
             {' github '}
           </a>
-          <a style={css.link} href='https://www.twitter.com/nlp_compromise'>
+          <a target='_parent' style={css.link} href='https://www.twitter.com/nlp_compromise'>
             twitter
           </a>
-          <a style={css.link} href='http://slack.compromise.cool'>
+          <a target='_parent' style={css.link} href='http://slack.compromise.cool'>
             slack
           </a>
         </div>
@@ -59,7 +59,7 @@ class Footer extends React.Component {
         <p>
           {'we\'re cool!    promise'}
           <br />
-          <a style={{
+          <a target='_parent' style={{
         ...css.link,
         color: 'palevioletred'
       }} href='https://github.com/nlp-compromise/compromise/wiki/Contributing'>
@@ -71,9 +71,9 @@ class Footer extends React.Component {
         <div style={css.left}>
           nlp-compromise was made by:
           <br />
-          <a style={css.who} href='http://spencermounta.in'>spencer kelly</a>
+          <a target='_parent' style={css.who} href='http://spencermounta.in'>spencer kelly</a>
           {' and '}
-          <a style={css.who} href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
+          <a target='_parent' style={css.who} href='https://github.com/nlp-compromise/compromise/graphs/contributors'>contributors</a>
         </div>
         <p> </p>
         MIT

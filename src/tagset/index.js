@@ -14,11 +14,15 @@ row
 	flex-direction: row;
 	align-items: center;
 	margin-top:10px;
+	margin-bottom:10px;
+	// padding-bottom:5px;
 	position:relative;
 	// border-left:1px solid lightsteelblue;
 el:
 	color:steelblue;
-	padding-left:5
+	// padding-left:5
+	// padding-left:5
+	margin-bottom:5
 	text-align:left;
 	min-width:70px;
 	font-size:11px
@@ -27,6 +31,8 @@ el:
 elOne:
 	color:#98b8e0;
 	padding-left:5
+	padding-top:2
+	padding-bottom:2
 	text-align:left;
 	min-width:70px;
 	font-size:10px
@@ -78,6 +84,8 @@ class Tagset extends React.Component {
 					<div style={css.elOne}>{this.makeList(obj[k])}</div>
 					<svg style={css.svg}>
 						<line x1={'80px'} x2={'80px'} y1={'0%'} y2={'100%'} stroke={'lightsteelblue'} />
+						<line x1={'80px'} x2={'90px'} y1={'100%'} y2={'100%'} stroke={'lightsteelblue'} />
+						<line x1={'80px'} x2={'90px'} y1={'0%'} y2={'0%'} stroke={'lightsteelblue'} />
 					</svg>
 				</div>
       )

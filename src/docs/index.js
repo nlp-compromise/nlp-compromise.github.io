@@ -34,6 +34,7 @@ list:
 	flex-direction: column;
 	flex-wrap: wrap;
 	text-align:left
+	overflow-x: hidden;
 doc:
 	margin:10
 	font-size:12px;
@@ -107,11 +108,12 @@ nlp(str).match('land of #Noun').out('text')
     })
     let style = Object.assign({}, css.list)
     if (state.current === title) {
-      style.height = null
-    // style.textDecoration = 'underline'
+      style.minHeight = 340
+    } else {
+      list = null
     }
     return (
-      <div style={style}>
+      <div key={title} className='doc' style={style}>
 				<div style={css.title} onClick={() => this.clickTitle(title)}>{title}</div>
 				{list}
 			</div>

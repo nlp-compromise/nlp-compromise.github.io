@@ -34,7 +34,7 @@ class Header extends React.Component {
         <span style={css.byline}>
           <a style={{
         textDecoration: 'none',
-      }} href='./'>
+      }} target='_parent' href='./'>
         <img
       alt='beans'
       style={css.img}
@@ -44,13 +44,13 @@ class Header extends React.Component {
         <a style={{
         textDecoration: 'none',
         color: 'lightsteelblue'
-      }} href='./'>nlp-compromise</a><br/>
+      }} target='_parent' href='./'>nlp-compromise</a><br/>
         <div style={{
         marginLeft: 30
       }}>{'words 👉 data'}</div>
         </span>
-        <a style={css.href} href='https://github.com/nlp-compromise/compromise/wiki'> - wiki - </a>
-        <a style={css.href} href='https://github.com/nlp-compromise/compromise'>- github -</a>
+        <a target='_parent' style={css.href} href='https://github.com/nlp-compromise/compromise/wiki'> - wiki - </a>
+        <a target='_parent' style={css.href} href='https://github.com/nlp-compromise/compromise'>- github -</a>
       </div>
       );
   }

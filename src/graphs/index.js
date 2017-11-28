@@ -127,7 +127,7 @@ class Graphs extends React.Component {
         <div style={css.hero}>
           <div style={css.smaller}>
             {'it\'s '}
-            <a style={css.link} href='https://en.wikipedia.org/wiki/Zipf%27s_law'>
+            <a target='_parent' style={css.link} href='https://en.wikipedia.org/wiki/Zipf%27s_law'>
               {'easy to forget,'}
             </a>
             {' that'}

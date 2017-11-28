@@ -82,7 +82,7 @@ class Install extends Component {
           </div>
         </div>
         <div style={css.right}>
-          install in <a style={css.link} href='https://github.com/nlp-compromise/compromise/wiki/QuickStart'>funnier-places</a>
+          install in <a style={css.link} target='_parent' href='https://github.com/nlp-compromise/compromise/wiki/QuickStart'>funnier-places</a>
         </div>
       </div>
       );

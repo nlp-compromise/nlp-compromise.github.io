@@ -37,20 +37,19 @@ class All extends React.Component {
     this.css = style;
   }
   render() {
-    let {css} = this;
     return (
       <div>
-       <Intro />
+       { /* <Intro />
        <Small />
        <Graphs />
        <Shows />
        <Install />
        <Spacer />
        <Big />
-       <Spacer />
+       <Spacer /> */ }
        <Tagset/>
-       <Spacer />
-       <Docs />
+       { /* <Spacer />
+       <Docs /> */ }
       </div>
       );
   }
