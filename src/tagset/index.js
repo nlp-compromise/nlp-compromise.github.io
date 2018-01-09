@@ -74,9 +74,9 @@ class Tagset extends React.Component {
   }
   makeList(obj) {
     let {css} = this;
-    return Object.keys(obj).map((k) => {
+    return Object.keys(obj).map((k, i) => {
       if (obj[k] === true) {
-        return <div style={css.elOne}>{k}</div>
+        return <div key={i} style={css.elOne}>{k}</div>
       }
       return (
         <div id='tags' style={css.row}>
