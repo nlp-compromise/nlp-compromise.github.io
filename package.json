@@ -1,6 +1,6 @@
 {
   "name": "nlp-expo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "devDependencies": {
     "gh-pages": "1.0.0",
@@ -9,7 +9,6 @@
   "homepage": "http://nlp-compromise.github.io",
   "dependencies": {
     "codemirror": "^5.33.0",
-    "compromise": "^11.2.2",
     "d3-scale": "^1.0.7",
     "d3-shape": "^1.2.0",
     "highlight.js": "^9.12.0",
@@ -31,6 +30,6 @@
     "eject": "react-scripts eject",
     "deploy:github": "gh-pages -d build --branch master",
     "deploy:firebase": "./node_modules/.bin/firebase deploy",
-    "deploy": "npm run deploy:github && npm run deploy:firebase"
+    "deploy": "npm run deploy:github"
   }
 }

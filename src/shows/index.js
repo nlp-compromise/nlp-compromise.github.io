@@ -1,7 +1,8 @@
-import nlp from 'compromise';
 import React from 'react';
 import styler from 'react-styling';
 import Section from './section';
+// import nlp from 'compromise';
+const nlp = window.nlp
 const style = styler`
 container
 	flex:1;

@@ -71,15 +71,17 @@ class Tagset extends React.Component {
     this.state = {};
     this.css = style;
     this.makeList = this.makeList.bind(this)
+    this.count = 0
   }
   makeList(obj) {
     let {css} = this;
     return Object.keys(obj).map((k, i) => {
+      this.count += 1
       if (obj[k] === true) {
-        return <div key={i} style={css.elOne}>{k}</div>
+        return <div key={this.count} style={css.elOne}>{k}</div>
       }
       return (
-        <div id='tags' style={css.row}>
+        <div key={this.count} id='tags' style={css.row}>
 					<div style={css.el}>{k}</div>
 					<div style={css.elOne}>{this.makeList(obj[k])}</div>
 					<svg style={css.svg}>
@@ -109,7 +111,7 @@ doc.out('tags')
 					{this.makeList(tags.left)}
 					<div style={css.right}>
 						<div style={css.underline}>Other tags:</div>
-						{Object.keys(tags.rest).map((t) => <div style={css.rightOne}>{t}</div>)}
+						{Object.keys(tags.rest).map((t, i) => <div key={i} style={css.rightOne}>{t}</div>)}
 					</div>
 					<div style={css.right}>
 						<div style={css.clever}>and it's clever about this stuff:</div>

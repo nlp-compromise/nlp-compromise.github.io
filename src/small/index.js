@@ -1,7 +1,8 @@
 import React from 'react';
-import nlp from 'compromise';
 import styler from 'react-styling';
 import Term from './term';
+// import nlp from 'compromise';
+const nlp = window.nlp
 
 const style = styler`
 container
@@ -156,7 +157,6 @@ class Small extends React.Component {
         progress: alpha
       });
     } else {
-      console.log('done-');
       this.setState({
         progress: 0
       });

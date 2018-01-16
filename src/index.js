@@ -31,3 +31,5 @@ render((
     </div>
   </BrowserRouter>
   ), document.getElementById('root'));
+
+console.log('using compromise v. ' + window.nlp.version)

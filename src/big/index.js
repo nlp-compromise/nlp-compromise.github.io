@@ -1,8 +1,9 @@
 import React from 'react';
-import nlp from 'compromise';
 import Radium from 'radium';
 import styler from 'react-styling';
 import texts from './texts';
+// import nlp from 'compromise';
+const nlp = window.nlp
 const style = styler`
 container
 	flex:1;
