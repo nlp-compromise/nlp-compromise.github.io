@@ -26,6 +26,21 @@ html
         padding-bottom:0.25rem;
         padding-left:1.5rem;
       }
+      .space {
+        margin-left:0.3rem;
+        margin-right:0.3rem;
+      }
+
+      #results td:nth-child(2) {
+        color: lightgrey;
+      }
+      #results td:nth-child(3) {
+        color: steelblue;
+        margin: 2rem;
+      }
+      #results td:nth-child(4) {
+        color: #f7b2b9;
+      }
 
   body.font
     .header.row
@@ -69,11 +84,82 @@ html
       .mt6
         .hr.w8
       .mb6
+
+      .col-middle
+        #rationale(style='font-size: 30px; margin-bottom: 50px;')
+          div(style='color: lightgrey; font-size: 17px; margin-bottom: 15px;')
+            span it's
+            a(target='_parent', href='https://en.wikipedia.org/wiki/Zipf%27s_law', style='color: lightsteelblue; text-decoration: none; margin-left:0.2rem; margin-right:0.2rem;') easy to forget,
+            span that
+          div
+            span the top
+            b(style='font-size: 40px; color: steelblue; margin:0.3rem;')  1,000 
+            span words
+          div
+            span are
+            b(style='font-size: 40px; color: steelblue; margin:0.3rem;')  80% 
+            span of english
+
+      .col-middle
+        #graph1
+          div(style='width: 100%;  text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; display: flex; flex-direction: column; border-bottom: 6px solid steelblue;')
+              div(style='color: lightsteelblue; font-size: 30px; margin-bottom: 5px;')  – easy – 
+              div(style='color: lightgrey; font-size: 17px; margin-bottom: 15px;') unambiguous, common speech
+            div(style='flex: 20 1 0%; display: flex; flex-direction: column; justify-content: flex-end; border-bottom: 6px solid lightgrey;')
+              div(style='color: lightgrey; font-size: 30px; margin-bottom: 5px;')  20% 
+              i(style='color: rgb(247, 178, 185); font-size: 15px; margin-bottom: 5px;') ( harder stuff )
+          div.ml2.grey people get obsessed with that end bit →
+
+          .mt5(style='color: lightgrey; font-size: 17px;')
+            i(style='color: rgb(175, 181, 188);')
+              span with clever
+              i(style='color: #f7b2b9;')  computer science, 
+              span(style="margin:0.2rem;") a good
+              i(style='color: #f7b2b9; font-size: 25px;')
+                span.space +15%
+                span accuracy is possible -
+          div(style='width: 100%;  text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; border-bottom: 6px solid steelblue;')
+            div(style='flex: 15 1 0%; border-bottom: 6px solid rgb(247, 178, 185);')
+            div(style='flex: 5 1 0%; border-bottom: 6px solid lightgrey;')
+          div.ml2(style='color: rgb(175, 181, 188); margin-top: 5px; font-size: 15px; margin-bottom: 45px;')
+            span by using
+            b.space(style='color: rgb(247, 178, 185);') gigabyte
+            span models,
+            b.space(style='color: rgb(247, 178, 185);') linear-algebra,
+            span or
+            b.space(style='color: rgb(247, 178, 185);') lisp!
+            span.i.space (no offence!)
+
+          .mt5
+            i(style='color: rgb(142, 150, 160);')
+              span –
+              span(style='font-size: 25px; color: grey;') but, really.
+            .ml3(style='margin-top: 15px; margin-bottom: 10px;')
+              i(style='color: rgb(142, 150, 160); font-size: 18px;') a
+              i.space.purple(style='font-size: 25px;') 10%-12% bump
+              i(style='color: rgb(142, 150, 160); font-size: 22px;') in accuracy is realistic.
+
+          div(style='width: 100%; text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; border-bottom: 6px solid steelblue;')
+            div(style='flex: 12 1 0%; border-bottom: 6px solid rgb(190, 130, 214);')
+            div(style='flex: 8 1 0%; border-bottom: 6px solid lightgrey;')
+          
+          span.ml3.grey using
+          a.space(href='https://github.com/nlp-compromise/compromise/wiki/plugins', style='color: rgb(190, 130, 214); margin-bottom: 15px; text-decoration: none;') config, plugins, and customization.
+
+          div.f2.purple.mt5.ml4.i ... compromise!
+
+      .mt6
+        .hr.w8
+      .mb6
+
       div.grey
         div compromise works by compressing a large list of words, 
         div and then expanding them at runtime.
         .mv5.ml3 how big is the word-list?
-      #zipf-chart.w10
+      #zipf-chart.maxw10
       .mt4.ml5.col-middle
         div
           table.w8.mt2.center.f1.grey
@@ -113,7 +199,7 @@ html
           div <img src="./assets/jesus.gif"/> this gif is <b>133kb</b>
 
       .row.mt5
-        #size-chart.w10
+        #size-chart.maxw10
 
       .mt6
         .hr.w8
@@ -121,14 +207,16 @@ html
 
       .mt3.grey compromise is fast-enough to run <span class="purple">on keypress:</span>
       .row.mt5
-        #speed-chart.w10
+        #speed-chart.maxw10
       #stress-test.mt5.grey don't take my word for it,
         .f2.ml3 try it on <span class="navy">every State of the Union Address:</span>
-          .m2 
-            button.rounded.shadow.slate.f4() run
-            span.i.f1.ml1 (should take ~10s)
-    
-
+          .m2.row-middle
+            button.rounded.shadow.slate.f4(id="run-button" disabled) run
+            div.i.f1.ml1.left
+              div loaded <span id="filesize">0kb</span> of text
+              div (should take ~10s)
+        table.w10.grey(id="results")
+          tbody
       
       #tags.mv8.f1
         h2.dark tags:

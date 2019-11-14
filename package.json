@@ -12,7 +12,10 @@
     "build": "browserify index.js -t [ babelify --presets [ @babel/preset-env ] ] | derequire > ./assets/bundle.js"
   },
   "dependencies": {
-    "somehow": "0.3.4"
+    "htm": "^2.2.1",
+    "somehow": "0.3.4",
+    "superagent": "^5.1.0",
+    "vhtml": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.6.4",
