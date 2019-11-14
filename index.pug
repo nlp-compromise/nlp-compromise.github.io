@@ -1,0 +1,246 @@
+html
+  head
+    - title="Thoughts on compromise"
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width,initial-scale=1')
+    title #{title}
+    link(href='./assets/spencer.min.css' rel='stylesheet')
+    link(href='./assets/spencer-blog.css' rel='stylesheet')
+    style.
+      .tag {
+        color:cornflowerblue;
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:1.5rem;
+        border-left:1px solid #9eb8e8;
+      }
+      .top {
+        color:cornflowerblue;
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:0.5rem;
+        text-decoration:underline;
+      }
+      .ul {
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:1.5rem;
+      }
+
+  body.font
+    .header.row
+      .sky <img class="h2" src="./assets/sparkle.png"/>compromise
+      div.f1 <a class="clean ulblue" href="https://observablehq.com/collection/@spencermountain/nlp-compromise">demos</a>
+      div.f1 <a class="clean ulblue" href="https://github.com/spencermountain/compromise/">github</a>
+    .top#top
+    .main
+      .mv5
+
+
+      //- hero section -
+      #hero
+        div(style='color: steelblue; font-size: 34px; line-height: 105%;')
+          span(style='line-height: 90%; font-size: 14px; margin-right: -4px;') yah, 
+          img(alt='logo', src='https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png')
+          div language is cѳmplicated.
+        div(style='font-size: 30px; line-height: 105%; color: lightgrey; margin-top: 10px; margin-bottom: 15px; margin-left: 25%;') and there's a gazillion words.
+        div(style='color: steelblue; font-size: 34px; line-height: 105%;')
+          span(style='font-size: 34px; color: rgb(243, 156, 115);') compromise
+          span.m1 is a
+          span javascript library
+          br
+          span that interprets and
+          b.m1(style='color: palevioletred;') pre-parses
+          span text.
+        ul(style='color: rgb(243, 156, 115); font-size: 20px; line-height: 105%; text-align: center; letter-spacing: 3px;') - and makes some reasonable decisions -
+        div(style='font-size: 30px; line-height: 105%; color: palevioletred;') so things are way easier.
+
+
+
+      .mt6
+        .hr.w8
+      .mb6
+
+      div(style='position: relative; display: flex; justify-content: center; text-align: center; align-self: center; min-width: 300px; flex-direction: column;')
+        textarea.resizer(spellcheck='false', style='max-width: 800px; text-align: center; align-self: center; border-color: whitesmoke whitesmoke rgb(224, 218, 218); border-style: solid solid dotted; border-width: 1px 1px 3px; border-image: none 100% / 1 / 0 stretch; outline: currentcolor none medium; min-height: 30px; margin-left: 5%; margin-right: 5%; width: 90%; border-radius: 4px; color: dimgrey; font-size: 30px; font-family: Inconsolata; padding: 12px; background-color: rgb(253, 254, 255); resize: none; height: 70px;') it was the blurst of times?
+        div(style='max-width: 800px; text-align: center; align-self: center; width: 90%; margin-left: 5%; margin-right: 5%; position: relative;')
+          div(style='display: block; position: relative; top: -7px; z-index: 2; background-color: lightsteelblue; height: 3px; width: 83.725%;')
+
+      .mt6
+        .hr.w8
+      .mb6
+      div.grey
+        div compromise works by compressing a large list of words, 
+        div and then expanding them at runtime.
+        .mv5.ml3 how big is the word-list?
+      #zipf-chart.w10
+      .mt4.ml5.col-middle
+        div
+          table.w8.mt2.center.f1.grey
+            tr.b
+              td.blue # of words
+              td.red % coverage
+            tr
+              td 1
+              td 10%
+            tr
+              td 100
+              td 50%
+            tr
+              td 300
+              td 65%
+            tr
+              td 600
+              td 70%
+            tr
+              td 1,000
+              td 80%
+            tr
+              td 5,000
+              td 90%
+            tr
+              td 10,000
+              td 98%
+            tr
+              td 14,000
+              td 99.99%
+        div.f2.mt2.i.green.left (big enough!)
+       
+
+      .mh4.mv4.f2
+        .mv6 the final size of the lexicon is <b>40kb</b>.
+        .row
+          div <img src="./assets/jesus.gif"/> this gif is <b>133kb</b>
+
+      .row.mt5
+        #size-chart.w10
+
+      .mt6
+        .hr.w8
+      .mb6
+
+      .mt3.grey compromise is fast-enough to run <span class="purple">on keypress:</span>
+      .row.mt5
+        #speed-chart.w10
+      #stress-test.mt5.grey don't take my word for it,
+        .f2.ml3 try it on <span class="navy">every State of the Union Address:</span>
+          .m2 
+            button.rounded.shadow.slate.f4() run
+            span.i.f1.ml1 (should take ~10s)
+    
+
+      
+      #tags.mv8.f1
+        h2.dark tags:
+        //- tagset -
+        div
+          .top #Noun
+          .ul
+              .tag #Singular
+              .tag
+                .tag #Person
+                .tag
+                  .tag #FirstName
+                  .tag
+                    .tag #MaleName
+                    .tag #FemaleName
+                  .tag #LastName
+                .tag #Place
+                .tag #Organization
+              .tag #ProperNoun
+              .tag #Honorific
+              .tag #Plural
+              .tag #Uncountable
+              .tag #Pronoun
+              .tag #Actor
+              .tag #Activity
+              .tag #Unit
+              .tag #Demonym
+              .tag #Possessive
+   
+          .top #Place
+          .ul
+            .tag #Country
+            .tag #City
+            .tag #Region
+            .tag #Address
+          .top #Organization
+          .ul
+            .tag #SportsTeam
+            .tag #Company
+            .tag #School
+          .top #Verb
+          .ul
+            .tag #PresentTense
+              .tag #Infinitive
+              .tag #Gerund
+            .tag #PastTense
+            .tag #PerfectTense
+            .tag #FuturePerfect
+            .tag #Pluperfect
+            .tag #Copula
+            .tag #Modal
+            .tag #Participle
+            .tag #Particle
+            .tag #PhrasalVerb
+          .top #Value
+          .ul
+            .tag #Ordinal
+            .tag #Cardinal
+              .tag #RomanNumeral
+            .tag #Multiple
+            .tag #Fraction
+            .tag #TextValue
+            .tag #NumericValue
+            .tag #NiceNumber
+            .tag #Percent
+            .tag #Money
+          .top #Date
+          .ul
+            .tag #Month
+            .tag #WeekDay
+            .tag #RelativeDay
+            .tag #Year
+            .tag #Duration
+            .tag #Time
+            .tag #Holiday
+          .top #Adjective
+          .ul
+            .tag #Comparable
+            .tag #Comparative
+            .tag #Superlative
+          .top #Contraction
+          .top #Adverb
+          .top #Currency
+          .top #Determiner
+          .top #Conjunction
+          .top #Preposition
+          .top #QuestionWord
+          .top #Pronoun
+          .top #Expression
+          .top #Abbreviation
+          .top #Url
+          .top #HashTag
+          .top #PhoneNumber
+          .top #AtMention
+          .top #Emoji
+          .top #Emoticon
+          .top #Email
+          .top #Auxiliary
+          .top #Negative
+          .top #Acronym
+
+
+
+      
+      .mv8
+     
+     
+
+    
+   
+
+      div.mv5
+    .mv4.footer
+      a(href='http://twitter.com/spencermountain/') @spencermountain
+    script(src='./assets/bundle.js')         
