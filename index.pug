@@ -1,0 +1,392 @@
+html
+  head
+    - title=""
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width,initial-scale=1')
+    title #{title}
+    link(href='./assets/spencer.min.css' rel='stylesheet')
+    link(href='./assets/spencer-blog.css' rel='stylesheet')
+    style.
+      .tag {
+        color:cornflowerblue;
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:1.5rem;
+        border-left:1px solid #9eb8e8;
+      }
+      .top {
+        color:cornflowerblue;
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:0.5rem;
+        text-decoration:underline;
+      }
+      .ul {
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:1.5rem;
+      }
+      .space {
+        margin-left:0.3rem;
+        margin-right:0.3rem;
+      }
+
+      #results td:nth-child(2) {
+        color: lightgrey;
+      }
+      #results td:nth-child(3) {
+        color: steelblue;
+        margin: 2rem;
+      }
+      #results td:nth-child(4) {
+        color: #f7b2b9;
+      }
+      .grower{
+        width:80%;
+      }
+      @media (max-width: 800px) {
+        .grower{
+          width:100%;
+        }
+        #tag-demo{
+          font-size:18px;
+        }
+      }
+
+  body.font
+    .header.row
+      .sky <img class="h2" src="./assets/sparkle.png"/>compromise
+      div.f1 <a class="clean ulblue" href="https://observablehq.com/collection/@spencermountain/nlp-compromise">demos</a>
+      div.f1 <a class="clean ulblue" href="https://github.com/spencermountain/compromise/">github</a>
+    .top#top
+    .main
+      .mv5
+
+
+      //- hero section -
+      #hero
+        div(style='color: steelblue; font-size: 34px; line-height: 105%;')
+          span(style='line-height: 90%; font-size: 14px; margin-right: -4px;') yah, 
+          img(alt='logo', src='https://cloud.githubusercontent.com/assets/399657/23590290/ede73772-01aa-11e7-8915-181ef21027bc.png')
+          div language is cѳmplicated.
+        div(style='font-size: 30px; line-height: 105%; color: lightgrey; margin-top: 10px; margin-bottom: 15px; margin-left: 25%;') and there's a gazillion words.
+        div(style='color: steelblue; font-size: 34px; line-height: 105%;')
+          span(style='font-size: 34px; color: rgb(243, 156, 115);') compromise
+          span.m1 is a
+          span javascript library
+          br
+          span that interprets and
+          b.m1(style='color: palevioletred;') pre-parses
+          span text.
+        ul(style='color: rgb(243, 156, 115); font-size: 20px; line-height: 105%; text-align: center; letter-spacing: 3px;') - and makes some reasonable decisions -
+        div(style='font-size: 30px; line-height: 105%; color: palevioletred;') so things are way easier.
+
+
+
+      .mt6
+      .mb3
+
+      .col-middle.relative.grower(style='')
+        textarea.w100p(id="tag-demo" spellcheck='false' style='border-color: whitesmoke whitesmoke rgb(224, 218, 218); border-style: solid solid dotted; border-width: 1px 1px 3px; border-image: none 100% / 1 / 0 stretch; outline: currentcolor none medium; min-height: 30px; border-radius: 4px; color: dimgrey; font-size: 28px; font-family: Inconsolata; padding: 12px; background-color: rgb(253, 254, 255); resize: none; height: 60px;') it was the blurst of times?
+        div(style='max-width: 800px; text-align: center; margin-left: 5%; margin-right: 5%; position: relative;')
+          div(id="loading-bar" style='display: block; position: relative; top: -7px; z-index: 2; background-color: lightsteelblue; height: 3px; width: 100%;')
+      #tag-result.w100p.h3.row-middle.h5
+
+      .mt6
+      .mb3
+
+      .col-middle
+        #rationale(style='font-size: 30px; margin-bottom: 50px;')
+          div(style='color: lightgrey; font-size: 17px; margin-bottom: 15px;')
+            span it's
+            a(target='_parent', href='https://en.wikipedia.org/wiki/Zipf%27s_law', style='color: lightsteelblue; text-decoration: none; margin-left:0.2rem; margin-right:0.2rem;') easy to forget,
+            span that
+          div
+            span the top
+            b(style='font-size: 40px; color: steelblue; margin:0.3rem;')  1,000 
+            span words
+          div
+            span are
+            b(style='font-size: 40px; color: steelblue; margin:0.3rem;')  80% 
+            span of english
+
+      .col-middle
+        #graph1
+          div(style='width: 100%;  text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; display: flex; flex-direction: column; border-bottom: 6px solid steelblue;')
+              div(style='color: lightsteelblue; font-size: 30px; margin-bottom: 5px;')  – easy – 
+              div(style='color: lightgrey; font-size: 17px; margin-bottom: 15px;') unambiguous, common speech
+            div(style='flex: 20 1 0%; display: flex; flex-direction: column; justify-content: flex-end; border-bottom: 6px solid lightgrey;')
+              div(style='color: lightgrey; font-size: 30px; margin-bottom: 5px;')  20% 
+              i(style='color: rgb(247, 178, 185); font-size: 15px; margin-bottom: 5px;') ( harder stuff )
+          div.ml2.grey people get obsessed with that end bit →
+
+          .mt5(style='color: lightgrey; font-size: 17px;')
+            i(style='color: rgb(175, 181, 188);')
+              span with clever
+              i(style='color: #f7b2b9;')  computer science, 
+              span(style="margin:0.2rem;") a good
+              i(style='color: #f7b2b9; font-size: 25px;')
+                span.space +15%
+                span accuracy is possible -
+          div(style='width: 100%;  text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; border-bottom: 6px solid steelblue;')
+            div(style='flex: 15 1 0%; border-bottom: 6px solid rgb(247, 178, 185);')
+            div(style='flex: 5 1 0%; border-bottom: 6px solid lightgrey;')
+          div.ml2(style='color: rgb(175, 181, 188); margin-top: 5px; font-size: 15px; margin-bottom: 45px;')
+            span by using
+            b.space(style='color: rgb(247, 178, 185);') gigabyte
+            span models,
+            b.space(style='color: rgb(247, 178, 185);') linear-algebra,
+            span or
+            b.space(style='color: rgb(247, 178, 185);') lisp!
+            span.i.space (no offence!)
+
+          .mt5
+            i(style='color: rgb(142, 150, 160);')
+              span –
+              span(style='font-size: 25px; color: grey;') but, really.
+            .ml3(style='margin-top: 15px; margin-bottom: 10px;')
+              i(style='color: rgb(142, 150, 160); font-size: 18px;') a
+              i.space.purple(style='font-size: 25px;') 10%-12% bump
+              i(style='color: rgb(142, 150, 160); font-size: 22px;') in accuracy is realistic.
+
+          div(style='width: 100%; text-align: center; margin-top: 10px; margin-bottom: 15px; display: flex;')
+            div(style='flex: 80 1 0%; border-bottom: 6px solid steelblue;')
+            div(style='flex: 12 1 0%; border-bottom: 6px solid rgb(190, 130, 214);')
+            div(style='flex: 8 1 0%; border-bottom: 6px solid lightgrey;')
+          
+          span.ml3.grey using
+          a.space(href='https://github.com/nlp-compromise/compromise/wiki/plugins', style='color: rgb(190, 130, 214); margin-bottom: 15px; text-decoration: none;') config, plugins, and customization.
+
+          div.f2.purple.mt5.ml4.i ... compromise!
+
+      .mt7.maxw10
+        .hr
+
+      div.grey
+        div compromise works by compressing a large list of words, 
+        div and then expanding them at runtime.
+        .mv5.ml3 how big is the word-list?
+      #zipf-chart.maxw10
+      
+      .mt4.ml4.col-middle
+        div
+          table.w8.mt2.center.f1.grey
+            tr.b
+              td.blue # of words
+              td.red % coverage
+            tr
+              td 1
+              td 10%
+            tr
+              td 100
+              td 50%
+            tr
+              td 300
+              td 65%
+            tr
+              td 600
+              td 70%
+            tr
+              td 1,000
+              td 80%
+            tr
+              td 5,000
+              td 90%
+            tr
+              td 10,000
+              td 98%
+            tr
+              td 14,000
+              td 99.99%
+        div.f2.mt2.i.green.left (big enough!)
+       
+
+      .mh4.mv4.f2
+        .mv6 the final size of the lexicon is <b>40kb</b>.
+        .row
+          div <img src="./assets/jesus.gif"/> this gif is <b>133kb</b>
+
+      .row.mt5
+        #size-chart.maxw10.w100p
+
+      .mt8.maxw10
+        .hr
+
+      .mt1.grey compromise is fast-enough to run <span class="purple">on keypress:</span>
+      .row.mt5.h8
+        #speed-chart.maxw10.w100p
+      #stress-test.mt5.grey don't take my word for it,
+        .f2.ml3 try it on <span class="navy">every State of the Union Address:</span>
+          .m2.row-middle
+            button.rounded.shadow.slate.f4(id="run-button" disabled) run
+            div.i.f1.ml1.left
+              div loaded <span id="filesize">0kb</span> of text
+              div (should take ~10s)
+        table.maxw10.grey(id="results")
+          tbody
+      
+      #tags.mv7.f1
+        h2.dark tags:
+        //- tagset -
+        div
+          .top #Noun
+          .ul
+              .tag #Singular
+              .tag
+                .tag #Person
+                .tag
+                  .tag #FirstName
+                  .tag
+                    .tag #MaleName
+                    .tag #FemaleName
+                  .tag #LastName
+                .tag #Place
+                .tag #Organization
+              .tag #ProperNoun
+              .tag #Honorific
+              .tag #Plural
+              .tag #Uncountable
+              .tag #Pronoun
+              .tag #Actor
+              .tag #Activity
+              .tag #Unit
+              .tag #Demonym
+              .tag #Possessive
+   
+          .top #Place
+          .ul
+            .tag #Country
+            .tag #City
+            .tag #Region
+            .tag #Address
+          .top #Organization
+          .ul
+            .tag #SportsTeam
+            .tag #Company
+            .tag #School
+          .top #Verb
+          .ul
+            .tag #PresentTense
+              .tag #Infinitive
+              .tag #Gerund
+            .tag #PastTense
+            .tag #PerfectTense
+            .tag #FuturePerfect
+            .tag #Pluperfect
+            .tag #Copula
+            .tag #Modal
+            .tag #Participle
+            .tag #Particle
+            .tag #PhrasalVerb
+          .top #Value
+          .ul
+            .tag #Ordinal
+            .tag #Cardinal
+              .tag #RomanNumeral
+            .tag #Multiple
+            .tag #Fraction
+            .tag #TextValue
+            .tag #NumericValue
+            .tag #NiceNumber
+            .tag #Percent
+            .tag #Money
+          .top #Date
+          .ul
+            .tag #Month
+            .tag #WeekDay
+            .tag #RelativeDay
+            .tag #Year
+            .tag #Duration
+            .tag #Time
+            .tag #Holiday
+          .top #Adjective
+          .ul
+            .tag #Comparable
+            .tag #Comparative
+            .tag #Superlative
+          .top #Contraction
+          .top #Adverb
+          .top #Currency
+          .top #Determiner
+          .top #Conjunction
+          .top #Preposition
+          .top #QuestionWord
+          .top #Pronoun
+          .top #Expression
+          .top #Abbreviation
+          .top #Url
+          .top #HashTag
+          .top #PhoneNumber
+          .top #AtMention
+          .top #Emoji
+          .top #Emoticon
+          .top #Email
+          .top #Auxiliary
+          .top #Negative
+          .top #Acronym
+
+
+
+      
+      .mv3
+      h3 Docs:
+      #docs.row-top.wrap(style="align-self:flex-start;")
+        .minw7.minh4.mh2.nowrap(style="display:flex; flex-direction:column;")
+          .f2.ulred.grey.mv2 Overview
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-justification") justification
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-quickstart") quickstart
+          a.doc(href="https://observablehq.com/@spencermountain/tutorial-1") tutorial #1
+          a.doc(href="https://observablehq.com/@spencermountain/tutorial-2") tutorial #2
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-making-a-bot") making-a-bot
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-internals") internals
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-tokenization") tokenization
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-projects") projects
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-lexicon") lexicon
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-performance") performance
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-accuracy") accuracy
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-filesize") filesize
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-tags") tags
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-plugins") plugins
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-output") output
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-match-syntax") match-syntax
+
+        .minw7.minh4.mh2.nowrap(style="display:flex; flex-direction:column;")
+          .f2.ulred.grey.mv2 API
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-constructor-methods") constructor-methods
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-text") text
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-cache") cache
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-contractions") contractions
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-json") json
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-utils") utils
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-whitespace") whitespace
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-loops") loops
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-tagger") tagger
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-case") case
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-insert") insert
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-split") split
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-selections") selections
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-export") export
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-normalization") normalization
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-lists") lists
+
+        .minw7.minh4.mh2.nowrap(style="display:flex; flex-direction:column;")
+          .f2.ulred.grey.mv2 Plugins
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-adjectives") adjectives
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-syllables") syllables
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-paragraphs") paragraphs
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-dates") dates
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-ngrams") ngrams
+          a.doc(href="https://observablehq.com/@spencermountain/verbs") verbs
+          a.doc(href="https://observablehq.com/@spencermountain/nouns") nouns
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-values") numbers
+          a.doc(href="https://observablehq.com/@spencermountain/topics-named-entity-recognition") topics
+          a.doc(href="https://observablehq.com/@spencermountain/compromise-sentences") sentences
+    
+   
+
+      div.mv5
+    .mv4.footer
+      a(href='http://twitter.com/spencermountain/') @spencermountain
+    script(src='./assets/bundle.js')         
