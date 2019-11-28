@@ -289,8 +289,8 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       I = function I(e, t) {
     var n = Object.keys(e.tags),
         r = t.tags;
-    return n = (n = n.sort()).sort(function (e, t) {
-      return H[t] || !r[t] ? -1 : r[e] ? r[e].lineage.length > r[t].lineage.length ? 1 : -1 : 1;
+    return n = n.sort(function (e, t) {
+      return H[t] || !r[t] ? -1 : r[t] ? r[e] ? r[e].lineage.length > r[t].lineage.length ? 1 : r[e].isA.length > r[t].isA.length ? -1 : 0 : 0 : 1;
     });
   },
       M = {
@@ -4005,7 +4005,7 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
       }).map(function (e) {
         return e.text;
       });
-      if ("freq" === e) return Sn(this);
+      if ("freq" === e || "frequency" === e) return Sn(this);
 
       if ("terms" === e) {
         var t = [];
@@ -5951,8 +5951,6 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
   }, Pi.prototype.fromText = function (e) {
     var t = tt(e, this.world, this.pool());
     return this.buildFrom(t);
-  }, Pi.prototype.extend = function (e) {
-    return e(this), this;
   }, Object.assign(Pi.prototype, $i.misc), Object.assign(Pi.prototype, $i.selections), ki(Pi);
   var Gi = {
     untag: "unTag",
@@ -8868,13 +8866,6 @@ Doc.prototype.fromText = function (str) {
   var list = tokenize.fromText(str, this.world, this.pool());
   return this.buildFrom(list);
 };
-/** add new subclass methods */
-
-
-Doc.prototype.extend = function (fn) {
-  fn(this);
-  return this;
-};
 
 Object.assign(Doc.prototype, methods.misc);
 Object.assign(Doc.prototype, methods.selections); //add sub-classes
@@ -9747,7 +9738,7 @@ exports.find = function (fn) {
     return this;
   }
 
-  var p = this.list.find(function (p, i) {
+  var phrase = this.list.find(function (p, i) {
     var doc = _this4.buildFrom([p]);
 
     doc.from = null; //it's not a child/parent
@@ -9755,8 +9746,8 @@ exports.find = function (fn) {
     return fn(doc, i);
   });
 
-  if (p) {
-    return this.buildFrom([p]);
+  if (phrase) {
+    return this.buildFrom([phrase]);
   }
 
   return undefined;
@@ -10421,7 +10412,7 @@ exports.out = function (method) {
     });
   }
 
-  if (method === 'freq') {
+  if (method === 'freq' || method === 'frequency') {
     return topk(this);
   }
 
@@ -11286,11 +11277,10 @@ exports.join = function (str) {
 },{}],68:[function(_dereq_,module,exports){
 "use strict";
 
-var postPunct = /[,\)"';:\-–—\.…]/;
-var irregulars = {
-  'will not': "won't",
-  'i am': "i'm"
-};
+var postPunct = /[,\)"';:\-–—\.…]/; // const irregulars = {
+//   'will not': `won't`,
+//   'i am': `i'm`,
+// }
 
 var setContraction = function setContraction(m, suffix) {
   if (!m.found) {
@@ -15076,8 +15066,6 @@ var boringTags = {
 var rankTags = function rankTags(term, world) {
   var tags = Object.keys(term.tags);
   var tagSet = world.tags;
-  tags = tags.sort(); //alphabetical, first
-
   tags = tags.sort(function (a, b) {
     //bury the tags we dont want
     if (boringTags[b] || !tagSet[b]) {
@@ -15085,8 +15073,12 @@ var rankTags = function rankTags(term, world) {
     } // unknown tags are interesting
 
 
-    if (!tagSet[a]) {
+    if (!tagSet[b]) {
       return 1;
+    }
+
+    if (!tagSet[a]) {
+      return 0;
     } // then sort by #of parent tags (most-specific tags first)
 
 
@@ -15094,7 +15086,11 @@ var rankTags = function rankTags(term, world) {
       return 1;
     }
 
-    return -1;
+    if (tagSet[a].isA.length > tagSet[b].isA.length) {
+      return -1;
+    }
+
+    return 0;
   });
   return tags;
 };
