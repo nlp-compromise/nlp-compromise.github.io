@@ -11,28 +11,28 @@ const titles = {
   Bush_1991: '1991 (bush)',
   Bush_1992: '1992 (bush)',
   Clinton_1993: '1993 (clinton)',
-  Clinton_1994: '1994 (clinton)',
-  Clinton_1995: '1995 (clinton)',
-  Clinton_1996: '1996 (clinton)',
-  Clinton_1997: '1997 (clinton)',
-  Clinton_1998: '1998 (clinton)',
-  Clinton_1999: '1999 (clinton)',
-  Clinton_2000: '2000 (clinton)',
-  Bush_2001: '2001 (bush)',
-  Bush_2002: '2002 (bush)',
-  Bush_2003: '2003 (bush)',
-  Bush_2004: '2004 (bush)',
-  Bush_2005: '2005 (bush)',
-  Bush_2006: '2006 (bush)',
-  Bush_2007: '2007 (bush)',
-  Bush_2008: '2008 (bush)',
-  Obama_2009: '2009 (obama)',
-  Obama_2010: '2010 (obama)',
-  Obama_2011: '2011 (obama)',
-  Obama_2012: '2012 (obama)',
-  Obama_2013: '2013 (obama)',
-  Obama_2014: '2014 (obama)',
-  Obama_2015: '2015 (obama)'
+  Clinton_1994: '1994 (clinton)'
+  // Clinton_1995: '1995 (clinton)'
+  // Clinton_1996: '1996 (clinton)',
+  // Clinton_1997: '1997 (clinton)',
+  // Clinton_1998: '1998 (clinton)',
+  // Clinton_1999: '1999 (clinton)',
+  // Clinton_2000: '2000 (clinton)',
+  // Bush_2001: '2001 (bush)',
+  // Bush_2002: '2002 (bush)',
+  // Bush_2003: '2003 (bush)',
+  // Bush_2004: '2004 (bush)',
+  // Bush_2005: '2005 (bush)',
+  // Bush_2006: '2006 (bush)',
+  // Bush_2007: '2007 (bush)',
+  // Bush_2008: '2008 (bush)',
+  // Obama_2009: '2009 (obama)',
+  // Obama_2010: '2010 (obama)',
+  // Obama_2011: '2011 (obama)',
+  // Obama_2012: '2012 (obama)',
+  // Obama_2013: '2013 (obama)',
+  // Obama_2014: '2014 (obama)',
+  // Obama_2015: '2015 (obama)'
 }
 
 // fetch suto texts
@@ -59,6 +59,9 @@ const appendRow = function(name, words, duration, people, msPerSentence) {
   var nameNode = document.createTextNode(name)
   newRow.insertCell(0).appendChild(nameNode)
 
+  if (!duration) {
+    return
+  }
   var timeNode = document.createTextNode(duration.toLocaleString() + 'ms')
   newRow.insertCell(1).appendChild(timeNode)
 
@@ -92,6 +95,8 @@ run.onclick = function() {
     i += 1
     if (keys[i]) {
       setTimeout(doit, 1)
+    } else {
+      appendRow('---', null)
     }
   }
   doit()

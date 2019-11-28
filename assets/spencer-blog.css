@@ -92,16 +92,16 @@ body {
 small-screen:
   9.55% - 80.9% - 9.55% 
 */
-/* @media (max-width: 550px) {
+@media (max-width: 650px) {
   .main {
-    margin-left: 9.55%;
-    margin-right: 9.55%;
+    margin-left: 5%;
+    margin-right: 5%;
   }
   .header > .back {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
-} */
+}
 /* 
 wide-screens:
   28.65% - 42.7% - 28.65% 
