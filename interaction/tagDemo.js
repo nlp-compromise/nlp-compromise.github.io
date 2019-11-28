@@ -32,3 +32,4 @@ if (input.addEventListener) {
 
 // init
 showTags()
+console.log('compromise@' + nlp.version)
