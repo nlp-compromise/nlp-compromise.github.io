@@ -1,8 +1,4 @@
 const superagent = require('superagent')
-const nlp = require('/Users/spencer/mountain/compromise/src')
-const htm = require('htm')
-const vhtml = require('vhtml')
-const h = htm.bind(vhtml)
 
 const titles = {
   Reagan_1988: '1988 (reagan)',
@@ -11,10 +7,10 @@ const titles = {
   Bush_1991: '1991 (bush)',
   Bush_1992: '1992 (bush)',
   Clinton_1993: '1993 (clinton)',
-  Clinton_1994: '1994 (clinton)'
-  // Clinton_1995: '1995 (clinton)'
-  // Clinton_1996: '1996 (clinton)',
-  // Clinton_1997: '1997 (clinton)',
+  Clinton_1994: '1994 (clinton)',
+  Clinton_1995: '1995 (clinton)',
+  Clinton_1996: '1996 (clinton)',
+  Clinton_1997: '1997 (clinton)'
   // Clinton_1998: '1998 (clinton)',
   // Clinton_1999: '1999 (clinton)',
   // Clinton_2000: '2000 (clinton)',
@@ -86,7 +82,7 @@ run.onclick = function() {
     let name = titles[k]
     let str = window.sotu[k]
     let start = Date.now()
-    let doc = nlp(str)
+    let doc = window.nlp(str)
     let duration = Date.now() - start
     let words = doc.wordCount()
     let people = doc.clauses().match('#Person+').length

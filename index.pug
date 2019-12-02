@@ -21,6 +21,12 @@ html
         padding-left:0.5rem;
         text-decoration:underline;
       }
+      .topTwo{
+        color:cornflowerblue;
+        padding-top:0.25rem;
+        padding-bottom:0.25rem;
+        padding-left:0.5rem;
+      }
       .ul {
         padding-top:0.25rem;
         padding-bottom:0.25rem;
@@ -29,6 +35,11 @@ html
       .space {
         margin-left:0.3rem;
         margin-right:0.3rem;
+      }
+      .desc{
+        color:lightgrey;
+        margin-left:1rem;
+        font-style: italic;
       }
 
       #results td:nth-child(2) {
@@ -231,105 +242,93 @@ html
         h2.dark tags:
         //- tagset -
         div
-          .top #Noun
+          .topTwo #Noun  <span class="desc">- 'friendship'</span>
           .ul
-              .tag #Singular
+              .tag #Singular <span class="desc">- 'owl'</span>
               .tag
-                .tag #Person
+                .tag #Person  <span class="desc">- 'Jasper Beardly'</span>
                 .tag
-                  .tag #FirstName
+                  .tag #FirstName  <span class="desc">- 'troy'</span>
                   .tag
-                    .tag #MaleName
-                    .tag #FemaleName
-                  .tag #LastName
-                .tag #Place
-                .tag #Organization
-              .tag #ProperNoun
-              .tag #Honorific
-              .tag #Plural
-              .tag #Uncountable
-              .tag #Pronoun
-              .tag #Actor
-              .tag #Activity
-              .tag #Unit
-              .tag #Demonym
-              .tag #Possessive
-   
-          .top #Place
+                    .tag #MaleName  <span class="desc">- 'john'</span>
+                    .tag #FemaleName  <span class="desc">- 'jane'</span>
+                  .tag #LastName  <span class="desc">- 'mcclure'</span>
+                .tag #Place  <span class="desc">- 'Toronto, Ontario'</span>
+                .tag
+                  .tag #Country <span class="desc">- 'France'</span>
+                  .tag #City <span class="desc">- 'springfield'</span>
+                  .tag #Region <span class="desc">- 'Florida'</span>
+                  .tag #Address <span class="desc">- '742 evergreen terrace'</span>
+                .tag #Organization  <span class="desc">- 'St Michael's Church'</span>
+                .tag
+                  .tag #SportsTeam  <span class="desc">- 'Red Sox'</span>
+                  .tag #Company  <span class="desc">- 'Globex Corp'</span>
+                  .tag #School  <span class="desc">- 'Hillcrest highschool'</span>
+              .tag #ProperNoun <span class="desc">- 'France'</span>
+              .tag #Honorific  <span class="desc">- 'Dr.'</span>
+              .tag #Plural <span class="desc">- 'owls'</span>
+              .tag #Uncountable <span class="desc">- 'air'</span>
+              .tag #Pronoun <span class="desc">- 'he'</span>
+              .tag #Actor  <span class="desc">- 'bowler'</span>
+              .tag #Activity <span class="desc">- 'swimming'</span>
+              .tag #Unit <span class="desc">- 'kilos'</span>
+              .tag #Demonym <span class="desc">- 'canadians'</span>
+              .tag #Possessive <span class="desc">- 'Spencer's'</span>
+          .topTwo #Verb  <span class="desc">- 'would have walked'</span>
           .ul
-            .tag #Country
-            .tag #City
-            .tag #Region
-            .tag #Address
-          .top #Organization
+            .tag #PresentTense  <span class="desc">- 'walks'</span>
+              .tag #Infinitive <span class="desc">- 'walk'</span>
+              .tag #Gerund <span class="desc">- 'walking'</span>
+            .tag #PastTense <span class="desc">- 'walked'</span>
+            .tag #Copula <span class="desc">- 'is'</span>
+            .tag #Modal <span class="desc">- 'would'</span>
+            .tag #PerfectTense <span class="desc">- 'had walked'</span>
+            .tag
+              .tag #FuturePerfect <span class="desc">- 'will have walked'</span>
+              .tag #Pluperfect <span class="desc">- ''</span>
+            .tag #PhrasalVerb <span class="desc">- 'walk off'</span>
+            .tag
+              .tag #Particle  <span class="desc">- 'off' of 'walk off'</span>
+          .topTwo #Value
           .ul
-            .tag #SportsTeam
-            .tag #Company
-            .tag #School
-          .top #Verb
+            .tag #Cardinal <span class="desc">- '5'</span>
+            .tag #Ordinal <span class="desc">- '5th'</span>
+              .tag #RomanNumeral <span class="desc">- 'XLII'</span>
+            .tag #TextValue <span class="desc">- 'five'</span>
+            .tag #NumericValue <span class="desc">- '5'</span>
+            .tag #Percent <span class="desc">- '4.3%'</span>
+            .tag #Money <span class="desc">- '$5.20'</span>
+          .topTwo #Date <span class="desc">- 'june 2nd'</span>
           .ul
-            .tag #PresentTense
-              .tag #Infinitive
-              .tag #Gerund
-            .tag #PastTense
-            .tag #PerfectTense
-            .tag #FuturePerfect
-            .tag #Pluperfect
-            .tag #Copula
-            .tag #Modal
-            .tag #Participle
-            .tag #Particle
-            .tag #PhrasalVerb
-          .top #Value
+            .tag #Month <span class="desc">- 'june'</span>
+            .tag #WeekDay <span class="desc">- 'wednesday'</span>
+          .topTwo #Adjective  <span class="desc">- 'fast'</span>
           .ul
-            .tag #Ordinal
-            .tag #Cardinal
-              .tag #RomanNumeral
-            .tag #Multiple
-            .tag #Fraction
-            .tag #TextValue
-            .tag #NumericValue
-            .tag #NiceNumber
-            .tag #Percent
-            .tag #Money
-          .top #Date
-          .ul
-            .tag #Month
-            .tag #WeekDay
-            .tag #RelativeDay
-            .tag #Year
-            .tag #Duration
-            .tag #Time
-            .tag #Holiday
-          .top #Adjective
-          .ul
-            .tag #Comparable
-            .tag #Comparative
-            .tag #Superlative
-          .top #Contraction
-          .top #Adverb
-          .top #Currency
-          .top #Determiner
-          .top #Conjunction
-          .top #Preposition
-          .top #QuestionWord
-          .top #Pronoun
-          .top #Expression
-          .top #Abbreviation
-          .top #Url
-          .top #HashTag
-          .top #PhoneNumber
-          .top #AtMention
-          .top #Emoji
-          .top #Emoticon
-          .top #Email
-          .top #Auxiliary
-          .top #Negative
-          .top #Acronym
+            .tag #Comparable <span class="desc">- 'fast'</span>
+            .tag #Comparative <span class="desc">- 'faster'</span>
+            .tag #Superlative <span class="desc">- 'fastest'</span>
+          .topTwo #Contraction <span class="desc">- 'he's'</span>
+          .topTwo #Adverb <span class="desc">- 'quickly'</span>
+          .topTwo #Currency <span class="desc">- 'USD'</span>
+          .topTwo #Determiner <span class="desc">- 'the'</span>
+          .topTwo #Conjunction <span class="desc">- 'and'</span>
+          .topTwo #Preposition <span class="desc">- 'of'</span>
+          .topTwo #QuestionWord <span class="desc">- 'who'</span>
+          .topTwo #Pronoun <span class="desc">- 'he'</span>
+          .topTwo #Expression <span class="desc">- 'Gee'</span>
+          .topTwo #Url <span class="desc">- 'http://compromise.cool'</span>
+          .topTwo #HashTag <span class="desc">- '#nlp'</span>
+          .topTwo #PhoneNumber <span class="desc">- '(800) 555-0000'</span>
+          .topTwo #AtMention <span class="desc">- '@nlp_compromise'</span>
+          .topTwo #Emoji <span class="desc">- ':)'</span>
+          .topTwo #Emoticon <span class="desc">- '😊'</span>
+          .topTwo #Email <span class="desc">- 'hi@compromise.cool'</span>
+          .topTwo #Auxiliary <span class="desc">- 'would have had'</span>
+          .topTwo #Negative <span class="desc">- 'not'</span>
+          .topTwo #Abbreviation <span class="desc">- 'st.'</span>
+          .topTwo #Acronym <span class="desc">- 'CIA'</span>
 
 
-
-      
       .mv3
       h3 Docs:
       #docs.row-top.wrap(style="align-self:flex-start;")
@@ -389,4 +388,5 @@ html
       div.mv5
     .mv4.footer
       a(href='http://twitter.com/spencermountain/') @spencermountain
+    script(src='//unpkg.com/compromise')         
     script(src='./assets/bundle.js')         

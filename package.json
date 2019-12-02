@@ -13,16 +13,16 @@
   },
   "dependencies": {
     "htm": "^2.2.1",
-    "somehow": "0.3.4",
-    "superagent": "^5.1.0",
+    "somehow": "0.3.5",
+    "superagent": "5.1.2",
     "vhtml": "^2.1.0"
   },
   "devDependencies": {
-    "@babel/core": "7.6.4",
-    "@babel/preset-env": "7.6.3",
+    "@babel/core": "7.7.4",
+    "@babel/preset-env": "7.7.4",
     "babelify": "10.0.0",
     "budo": "11.6.3",
     "derequire": "2.0.6",
-    "terser": "4.3.9"
+    "terser": "4.4.2"
   }
 }
