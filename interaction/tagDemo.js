@@ -1,4 +1,3 @@
-const nlp = require('/Users/spencer/mountain/compromise/builds/compromise.min.js') //TODO:fixme
 const getColor = require('./_getColor')
 const htm = require('htm')
 const vhtml = require('vhtml')
@@ -8,7 +7,7 @@ let input = document.querySelector('#tag-demo')
 let result = document.querySelector('#tag-result')
 
 const showTags = function() {
-  let doc = nlp(input.value)
+  let doc = window.nlp(input.value)
   let terms = doc.join().json({ terms: { clean: true, bestTag: true } })[0]
     .terms
   terms = terms.map(t => {
@@ -31,5 +30,9 @@ if (input.addEventListener) {
 }
 
 // init
-showTags()
-console.log('compromise@' + nlp.version)
+window.addEventListener('load', function() {
+  setTimeout(() => {
+    console.log('compromise@' + window.nlp.version)
+    showTags()
+  }, 50)
+})
