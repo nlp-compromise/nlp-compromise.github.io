@@ -1,9 +1,15 @@
+### compromise.cool website
 
-#github hosted
-https://nlp-expo.firebaseapp.com/
 
-`gh-pages -d build --branch master`
+work on any not gh-pages branch, then run
+`gh-pages -d .`
+
+then visit:
+
+[nlp-compromise.github.io](nlp-compromise.github.io)
+
+or
+compromise.cool
 
 
 compromise is hot-loaded from unpkg cdn, so it should always be the latest version
-(breaking changes should require an update here, i guess)
