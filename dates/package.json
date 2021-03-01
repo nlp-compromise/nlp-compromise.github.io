@@ -1,0 +1,18 @@
+{
+  "name": "dates",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "npx spencer-svelte -w",
+    "build": "npx spencer-svelte -b"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "compromise": "^13.10.0",
+    "compromise-dates": "^1.4.1",
+    "compromise-numbers": "^1.2.0",
+    "spacetime": "^6.12.5"
+  }
+}
