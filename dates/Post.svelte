@@ -1,20 +1,19 @@
 <script>
   import CodeMirror from './CodeMirror/CodeMirror.svelte'
-  import {
-    Year,
-    Quarter,
-    Day
-  } from '/Users/spencer/mountain/somehow-calendar/src'
-  let text = 'two weeks from this friday'
+  import { Year } from '/Users/spencer/mountain/somehow-calendar/src'
+  let text = 'next weekend'
   import nlp from 'compromise'
   import nlpDates from 'compromise-dates'
   import spacetime from 'spacetime'
   import nlpNumbers from 'compromise-numbers'
+  import Align from './Align.svelte'
   nlp.plugin(nlpDates)
   nlp.plugin(nlpNumbers)
-  let days = []
-  let start = null
+  let days = {}
+  let start = spacetime()
   let end = null
+  let date = null
+  let from = null
 
   const highlight = function(str = '') {
     let dates = nlp(str).dates()
@@ -30,12 +29,18 @@
     if (json[0] && json[0].date) {
       start = spacetime(json[0].date.start)
       end = spacetime(json[0].date.end)
-      days = start
+      let show = start
         .minus(1, 'second')
         .every('day', end)
         .slice(0, 400)
-      days = days.map(s => s.format('iso-short'))
-      console.log('days', days)
+      // from = show[0]
+      // to = show[show.length - 1]
+      days = {}
+      show.forEach(s => {
+        let iso = s.format('iso-short')
+        days[iso] = 'blue'
+      })
+      from = Object.keys(days)[0]
     } else {
       days = []
     }
@@ -46,6 +51,12 @@
   const fmt = function(s) {
     if (s) {
       return s.format('{day-short} {month-short} {date-ordinal} {time}')
+    }
+    return '-'
+  }
+  const fmtYear = function(s) {
+    if (s) {
+      return s.format('{year}')
     }
     return '-'
   }
@@ -78,11 +89,24 @@
     flex-wrap: nowrap;
     align-self: stretch;
   }
+  .year {
+    font-size: 1.5;
+    font-weight: bold;
+  }
+  .link {
+    text-decoration: none;
+    color: steelblue;
+  }
 </style>
 
 <div>
   <div class="m3 col">
-    compromise-dates
+    <a
+      class="link"
+      href="https://github.com/spencermountain/compromise/tree/master/plugins/dates">
+      compromise-dates
+    </a>
+
     <CodeMirror bind:text {highlight} />
     <div>{text}</div>
     <div class="m3 row">
@@ -90,18 +114,22 @@
         <b>start:</b>
         {fmt(start)}
       </div>
+      <div class="year">{fmtYear(start)}</div>
       <div>
         <b>end:</b>
         {fmt(end)}
       </div>
     </div>
     <div class="months">
-      <Year date={days[0]}>
-        {#each days as d}
-          <Day date={d} color="blue" />
-        {/each}
-      </Year>
+      <!-- <Resize start={from} end={to} {days} /> -->
+      <Year date={start.format('iso-short')} {days} showToday={false} />
+    </div>
+    <!-- <pre>${JSON.stringify(days, null, 2)}</pre> -->
+  </div>
+  <div class="m3">
+    <hr />
+    <div class="m3">
+      <Align />
     </div>
   </div>
-
 </div>

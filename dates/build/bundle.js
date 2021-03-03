@@ -45,9 +45,6 @@ var app = (function () {
     function space() {
         return text(' ');
     }
-    function empty() {
-        return text('');
-    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -61,6 +58,9 @@ var app = (function () {
         data = '' + data;
         if (text.wholeText !== data)
             text.data = data;
+    }
+    function set_style(node, key, value, important) {
+        node.style.setProperty(key, value, important ? 'important' : '');
     }
 
     let current_component;
@@ -144,19 +144,6 @@ var app = (function () {
     }
     const outroing = new Set();
     let outros;
-    function group_outros() {
-        outros = {
-            r: 0,
-            c: [],
-            p: outros // parent group
-        };
-    }
-    function check_outros() {
-        if (!outros.r) {
-            run_all(outros.c);
-        }
-        outros = outros.p;
-    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -10249,16 +10236,6 @@ var app = (function () {
     function is_empty$1(obj) {
         return Object.keys(obj).length === 0;
     }
-    function subscribe(store, ...callbacks) {
-        if (store == null) {
-            return noop$1;
-        }
-        const unsub = store.subscribe(...callbacks);
-        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
-    }
-    function component_subscribe(component, store, callback) {
-        component.$$.on_destroy.push(subscribe(store, callback));
-    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -10295,10 +10272,6 @@ var app = (function () {
             slot.p(slot_context, slot_changes);
         }
     }
-    function set_store_value(store, ret, value = ret) {
-        store.set(value);
-        return ret;
-    }
 
     function append$1(target, node) {
         target.appendChild(node);
@@ -10324,7 +10297,7 @@ var app = (function () {
     function space$1() {
         return text$1(' ');
     }
-    function empty$1() {
+    function empty() {
         return text$1('');
     }
     function listen(node, event, handler, options) {
@@ -10345,7 +10318,7 @@ var app = (function () {
         if (text.wholeText !== data)
             text.data = data;
     }
-    function set_style(node, key, value, important) {
+    function set_style$1(node, key, value, important) {
         node.style.setProperty(key, value, important ? 'important' : '');
     }
     function toggle_class(element, name, toggle) {
@@ -10355,26 +10328,6 @@ var app = (function () {
     let current_component$1;
     function set_current_component$1(component) {
         current_component$1 = component;
-    }
-    function get_current_component$1() {
-        if (!current_component$1)
-            throw new Error('Function called outside component initialization');
-        return current_component$1;
-    }
-    function beforeUpdate(fn) {
-        get_current_component$1().$$.before_update.push(fn);
-    }
-    function afterUpdate(fn) {
-        get_current_component$1().$$.after_update.push(fn);
-    }
-    function onDestroy(fn) {
-        get_current_component$1().$$.on_destroy.push(fn);
-    }
-    function setContext(key, context) {
-        get_current_component$1().$$.context.set(key, context);
-    }
-    function getContext(key) {
-        return get_current_component$1().$$.context.get(key);
     }
 
     const dirty_components$1 = [];
@@ -10442,14 +10395,14 @@ var app = (function () {
     }
     const outroing$1 = new Set();
     let outros$1;
-    function group_outros$1() {
+    function group_outros() {
         outros$1 = {
             r: 0,
             c: [],
             p: outros$1 // parent group
         };
     }
-    function check_outros$1() {
+    function check_outros() {
         if (!outros$1.r) {
             run_all$1(outros$1.c);
         }
@@ -10604,7 +10557,23 @@ var app = (function () {
         }
     }
 
-    /* spencermountain/spacetime 6.12.5 Apache 2.0 */
+    /* spencermountain/spacetime 6.13.0 Apache 2.0 */
+    function _typeof(obj) {
+      "@babel/helpers - typeof";
+
+      if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+        _typeof = function (obj) {
+          return typeof obj;
+        };
+      } else {
+        _typeof = function (obj) {
+          return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+        };
+      }
+
+      return _typeof(obj);
+    }
+
     function _slicedToArray(arr, i) {
       return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
     }
@@ -10949,7 +10918,7 @@ var app = (function () {
       return null;
     };
 
-    var parseOffset = function parseOffset(tz) {
+    var parseOffset$1 = function parseOffset(tz) {
       // '+5hrs'
       var m = tz.match(isOffset);
 
@@ -10982,7 +10951,7 @@ var app = (function () {
       return null;
     };
 
-    var parseOffset_1 = parseOffset;
+    var parseOffset_1$1 = parseOffset$1;
 
     var local = guessTz_1(); //add all the city names by themselves
 
@@ -11040,7 +11009,7 @@ var app = (function () {
 
 
       if (/[0-9]/.test(tz) === true) {
-        var id = parseOffset_1(tz);
+        var id = parseOffset_1$1(tz);
 
         if (id) {
           return id;
@@ -11121,7 +11090,7 @@ var app = (function () {
     }; //find the desired date by a increment/check while loop
 
 
-    var units = {
+    var units$3 = {
       year: {
         valid: function valid(n) {
           return n > -4000 && n < 4000;
@@ -11208,7 +11177,7 @@ var app = (function () {
     };
 
     var walkTo = function walkTo(s, wants) {
-      var keys = Object.keys(units);
+      var keys = Object.keys(units$3);
       var old = s.clone();
 
       for (var i = 0; i < keys.length; i++) {
@@ -11224,7 +11193,7 @@ var app = (function () {
         } //make-sure it's valid
 
 
-        if (!units[k].valid(n)) {
+        if (!units$3[k].valid(n)) {
           s.epoch = null;
 
           if (s.silent === false) {
@@ -11234,7 +11203,7 @@ var app = (function () {
           return;
         }
 
-        units[k].walkTo(s, n);
+        units$3[k].walkTo(s, n);
       }
 
       return;
@@ -11262,7 +11231,7 @@ var app = (function () {
       return obj;
     }
 
-    var months = {
+    var months$1 = {
       "short": function short() {
         return shortMonths;
       },
@@ -11279,7 +11248,7 @@ var app = (function () {
     };
 
     //pull-apart ISO offsets, like "+0100"
-    var parseOffset$1 = function parseOffset(s, offset) {
+    var parseOffset = function parseOffset(s, offset) {
       if (!offset) {
         return s;
       } //this is a fancy-move
@@ -11337,7 +11306,7 @@ var app = (function () {
       return s;
     };
 
-    var parseOffset_1$1 = parseOffset$1;
+    var parseOffset_1 = parseOffset;
 
     var parseTime = function parseTime(s) {
       var str = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
@@ -11552,7 +11521,7 @@ var app = (function () {
     fns.beADate;
     fns.formatTimezone;
 
-    var isLeapYear = fns.isLeapYear; //given a month, return whether day number exists in it
+    var isLeapYear$2 = fns.isLeapYear; //given a month, return whether day number exists in it
 
     var hasDate = function hasDate(obj) {
       //invalid values
@@ -11562,7 +11531,7 @@ var app = (function () {
 
 
       if (obj.month === 1) {
-        if (isLeapYear(obj.year) && obj.date <= 29) {
+        if (isLeapYear$2(obj.year) && obj.date <= 29) {
           return true;
         } else {
           return obj.date <= 28;
@@ -11581,7 +11550,7 @@ var app = (function () {
 
     var hasDate_1 = hasDate;
 
-    var months$1 = months.mapping();
+    var months = months$1.mapping();
 
     var parseYear = function parseYear() {
       var str = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -11613,7 +11582,7 @@ var app = (function () {
           return s;
         }
 
-        parseOffset_1$1(s, arr[5]);
+        parseOffset_1(s, arr[5]);
         walk_1(s, obj);
         s = parseTime_1(s, arr[4]);
         return s;
@@ -11687,7 +11656,7 @@ var app = (function () {
           return s;
         }
 
-        parseOffset_1$1(s, arr[5]);
+        parseOffset_1(s, arr[5]);
         walk_1(s, obj);
         s = parseTime_1(s, arr[4]);
         return s;
@@ -11696,7 +11665,7 @@ var app = (function () {
     {
       reg: /^([0-9]{1,2})[\-\/]([a-z]+)[\-\/]?([0-9]{4})?$/i,
       parse: function parse(s, arr) {
-        var month = months$1[arr[2].toLowerCase()];
+        var month = months[arr[2].toLowerCase()];
         var year = parseYear(arr[3], s._today);
         var obj = {
           year: year,
@@ -11717,7 +11686,7 @@ var app = (function () {
     {
       reg: /^([a-z]+)[\-\/]([0-9]{1,2})[\-\/]?([0-9]{4})?$/i,
       parse: function parse(s, arr) {
-        var month = months$1[arr[1].toLowerCase()];
+        var month = months[arr[1].toLowerCase()];
         var year = parseYear(arr[3], s._today);
         var obj = {
           year: year,
@@ -11739,7 +11708,7 @@ var app = (function () {
     {
       reg: /^([a-z]+) ([0-9]{1,2}(?:st|nd|rd|th)?),?( [0-9]{4})?( ([0-9:]+( ?am| ?pm| ?gmt)?))?$/i,
       parse: function parse(s, arr) {
-        var month = months$1[arr[1].toLowerCase()];
+        var month = months[arr[1].toLowerCase()];
         var year = parseYear(arr[3], s._today);
         var obj = {
           year: year,
@@ -11760,7 +11729,7 @@ var app = (function () {
     {
       reg: /^([a-z]+) ([0-9]{4})$/i,
       parse: function parse(s, arr) {
-        var month = months$1[arr[1].toLowerCase()];
+        var month = months[arr[1].toLowerCase()];
         var year = parseYear(arr[2], s._today);
         var obj = {
           year: year,
@@ -11781,7 +11750,7 @@ var app = (function () {
     {
       reg: /^([0-9]{1,2}(?:st|nd|rd|th)?) ([a-z]+),?( [0-9]{4})?,? ?([0-9]{1,2}:[0-9]{2}:?[0-9]{0,2}? ?(am|pm|gmt))?$/i,
       parse: function parse(s, arr) {
-        var month = months$1[arr[2].toLowerCase()];
+        var month = months[arr[2].toLowerCase()];
 
         if (!month) {
           return null;
@@ -12137,7 +12106,16 @@ var app = (function () {
         longDays = i18n["long"] || longDays;
       },
       aliases: {
+        mo: 1,
+        tu: 2,
+        we: 3,
+        th: 4,
+        fr: 5,
+        sa: 6,
+        su: 7,
         tues: 2,
+        weds: 3,
+        wedn: 3,
         thur: 4,
         thurs: 4
       }
@@ -12200,7 +12178,7 @@ var app = (function () {
         return applyCaseFormat(s.monthName());
       },
       'month-short': function monthShort(s) {
-        return applyCaseFormat(months["short"]()[s.month()]);
+        return applyCaseFormat(months$1["short"]()[s.month()]);
       },
       'month-number': function monthNumber(s) {
         return s.month();
@@ -12339,16 +12317,16 @@ var app = (function () {
       },
       //i made these up
       nice: function nice(s) {
-        return "".concat(months["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.time());
+        return "".concat(months$1["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.time());
       },
       'nice-24': function nice24(s) {
-        return "".concat(months["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.hour24(), ":").concat(fns.zeroPad(s.minute()));
+        return "".concat(months$1["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.hour24(), ":").concat(fns.zeroPad(s.minute()));
       },
       'nice-year': function niceYear(s) {
-        return "".concat(months["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.year());
+        return "".concat(months$1["short"]()[s.month()], " ").concat(fns.ordinal(s.date()), ", ").concat(s.year());
       },
       'nice-day': function niceDay(s) {
-        return "".concat(days["short"]()[s.day()], " ").concat(applyCaseFormat(months["short"]()[s.month()]), " ").concat(fns.ordinal(s.date()));
+        return "".concat(days["short"]()[s.day()], " ").concat(applyCaseFormat(months$1["short"]()[s.month()]), " ").concat(fns.ordinal(s.date()));
       },
       'nice-full': function niceFull(s) {
         return "".concat(s.dayName(), " ").concat(applyCaseFormat(s.monthName()), " ").concat(fns.ordinal(s.date()), ", ").concat(s.time());
@@ -12724,7 +12702,7 @@ var app = (function () {
 
     var unixFmt_1 = unixFmt;
 
-    var units$1 = ['year', 'season', 'quarter', 'month', 'week', 'day', 'quarterHour', 'hour', 'minute'];
+    var units$2 = ['year', 'season', 'quarter', 'month', 'week', 'day', 'quarterHour', 'hour', 'minute'];
 
     var doUnit = function doUnit(s, k) {
       var start = s.clone().startOf(k);
@@ -12742,7 +12720,7 @@ var app = (function () {
       }
 
       var obj = {};
-      units$1.forEach(function (k) {
+      units$2.forEach(function (k) {
         obj[k] = doUnit(s, k);
       });
       return obj;
@@ -12825,7 +12803,7 @@ var app = (function () {
     // ... then ms-math for any very-small units
 
 
-    var diff = function diff(a, b) {
+    var diff$1 = function diff(a, b) {
       // an hour is always the same # of milliseconds
       // so these units can be 'pre-calculated'
       var msDiff = b.epoch - a.epoch;
@@ -12855,7 +12833,7 @@ var app = (function () {
       return obj;
     };
 
-    var waterfall = diff;
+    var waterfall = diff$1;
 
     var reverseDiff = function reverseDiff(obj) {
       Object.keys(obj).forEach(function (k) {
@@ -12867,7 +12845,7 @@ var app = (function () {
     // '1 year' means 366 days in a leap year
 
 
-    var main = function main(a, b, unit) {
+    var main$1 = function main(a, b, unit) {
       b = fns.beADate(b, a); //reverse values, if necessary
 
       var reversed = false;
@@ -12905,7 +12883,7 @@ var app = (function () {
       return obj;
     };
 
-    var diff$1 = main;
+    var diff = main$1;
 
     //our conceptual 'break-points' for each unit
 
@@ -13073,7 +13051,7 @@ var app = (function () {
     [9, 1] //oct 1
     ];
 
-    var units$2 = {
+    var units$1 = {
       minute: function minute(s) {
         walk_1(s, {
           second: 0,
@@ -13218,19 +13196,19 @@ var app = (function () {
         return s;
       }
     };
-    units$2.date = units$2.day;
+    units$1.date = units$1.day;
 
     var startOf = function startOf(a, unit) {
       var s = a.clone();
       unit = fns.normalize(unit);
 
-      if (units$2[unit]) {
-        return units$2[unit](s);
+      if (units$1[unit]) {
+        return units$1[unit](s);
       }
 
       if (unit === 'summer' || unit === 'winter') {
         s = s.season(unit);
-        return units$2.season(s);
+        return units$1.season(s);
       }
 
       return s;
@@ -13241,9 +13219,9 @@ var app = (function () {
       var s = a.clone();
       unit = fns.normalize(unit);
 
-      if (units$2[unit]) {
+      if (units$1[unit]) {
         // go to beginning, go to next one, step back 1ms
-        s = units$2[unit](s); // startof
+        s = units$1[unit](s); // startof
 
         s = s.add(1, unit);
         s = s.subtract(1, 'millisecond');
@@ -13408,9 +13386,9 @@ var app = (function () {
 
     var timezone_1 = timezone;
 
-    var units$3 = ['century', 'decade', 'year', 'month', 'date', 'day', 'hour', 'minute', 'second', 'millisecond']; //the spacetime instance methods (also, the API)
+    var units = ['century', 'decade', 'year', 'month', 'date', 'day', 'hour', 'minute', 'second', 'millisecond']; //the spacetime instance methods (also, the API)
 
-    var methods = {
+    var methods$4 = {
       set: function set(input$1, tz) {
         var s = this.clone();
         s = input(s, input$1, null);
@@ -13458,8 +13436,8 @@ var app = (function () {
       nearest: function nearest(unit) {
         return nearest_1(this, unit);
       },
-      diff: function diff(d, unit) {
-        return diff$1(this, d, unit);
+      diff: function diff$1(d, unit) {
+        return diff(this, d, unit);
       },
       since: function since(d) {
         if (!d) {
@@ -13494,6 +13472,13 @@ var app = (function () {
       },
       //get each week/month/day between a -> b
       every: function every(unit, to) {
+        // allow swapping these params:
+        if (_typeof(unit) === 'object' && typeof to === 'string') {
+          var tmp = to;
+          to = unit;
+          unit = tmp;
+        }
+
         return every_1(this, unit, to);
       },
       isAwake: function isAwake() {
@@ -13522,7 +13507,7 @@ var app = (function () {
       json: function json() {
         var _this = this;
 
-        return units$3.reduce(function (h, unit) {
+        return units.reduce(function (h, unit) {
           h[unit] = _this[unit]();
           return h;
         }, {});
@@ -13572,10 +13557,10 @@ var app = (function () {
       }
     }; // aliases
 
-    methods.inDST = methods.isDST;
-    methods.round = methods.nearest;
-    methods.each = methods.every;
-    var methods_1 = methods;
+    methods$4.inDST = methods$4.isDST;
+    methods$4.round = methods$4.nearest;
+    methods$4.each = methods$4.every;
+    var methods_1 = methods$4;
 
     //these methods wrap around them.
 
@@ -13590,11 +13575,11 @@ var app = (function () {
       return n;
     };
 
-    var order = ['year', 'month', 'date', 'hour', 'minute', 'second', 'millisecond']; //reduce hostile micro-changes when moving dates by millisecond
+    var order$1 = ['year', 'month', 'date', 'hour', 'minute', 'second', 'millisecond']; //reduce hostile micro-changes when moving dates by millisecond
 
     var confirm = function confirm(s, tmp, unit) {
-      var n = order.indexOf(unit);
-      var arr = order.slice(n, order.length);
+      var n = order$1.indexOf(unit);
+      var arr = order$1.slice(n, order$1.length);
 
       for (var i = 0; i < arr.length; i++) {
         var want = tmp[arr[i]]();
@@ -13746,7 +13731,7 @@ var app = (function () {
       //this one's tricky
       month: function month(s, n) {
         if (typeof n === 'string') {
-          n = months.mapping()[n.toLowerCase()];
+          n = months$1.mapping()[n.toLowerCase()];
         }
 
         n = validate(n); //don't go past december
@@ -13811,7 +13796,7 @@ var app = (function () {
       }
     };
 
-    var methods$1 = {
+    var methods$3 = {
       millisecond: function millisecond(num) {
         if (num !== undefined) {
           var s = this.clone();
@@ -14006,7 +13991,7 @@ var app = (function () {
         return this.format('iso');
       }
     };
-    var _01Time = methods$1;
+    var _01Time = methods$3;
 
     var methods$2 = {
       // # day in the month
@@ -14084,7 +14069,7 @@ var app = (function () {
       return s;
     };
 
-    var methods$3 = {
+    var methods$1 = {
       // day 0-366
       dayOfYear: function dayOfYear(num) {
         if (num !== undefined) {
@@ -14166,7 +14151,7 @@ var app = (function () {
         tmp.epoch += milliseconds.week * skipWeeks;
         i += skipWeeks;
 
-        for (; i < 52; i++) {
+        for (; i <= 52; i++) {
           if (tmp.epoch > thisOne) {
             return i + toAdd;
           }
@@ -14179,7 +14164,7 @@ var app = (function () {
       //'january'
       monthName: function monthName(input) {
         if (input === undefined) {
-          return months["long"]()[this.month()];
+          return months$1["long"]()[this.month()];
         }
 
         var s = this.clone();
@@ -14397,32 +14382,32 @@ var app = (function () {
         return num;
       }
     };
-    var _03Year = methods$3;
+    var _03Year = methods$1;
 
-    var methods$4 = Object.assign({}, _01Time, _02Date, _03Year); //aliases
+    var methods = Object.assign({}, _01Time, _02Date, _03Year); //aliases
 
-    methods$4.milliseconds = methods$4.millisecond;
-    methods$4.seconds = methods$4.second;
-    methods$4.minutes = methods$4.minute;
-    methods$4.hours = methods$4.hour;
-    methods$4.hour24 = methods$4.hour;
-    methods$4.h12 = methods$4.hour12;
-    methods$4.h24 = methods$4.hour24;
-    methods$4.days = methods$4.day;
+    methods.milliseconds = methods.millisecond;
+    methods.seconds = methods.second;
+    methods.minutes = methods.minute;
+    methods.hours = methods.hour;
+    methods.hour24 = methods.hour;
+    methods.h12 = methods.hour12;
+    methods.h24 = methods.hour24;
+    methods.days = methods.day;
 
-    var addMethods = function addMethods(Space) {
+    var addMethods$4 = function addMethods(Space) {
       //hook the methods into prototype
-      Object.keys(methods$4).forEach(function (k) {
-        Space.prototype[k] = methods$4[k];
+      Object.keys(methods).forEach(function (k) {
+        Space.prototype[k] = methods[k];
       });
     };
 
-    var query = addMethods;
+    var query = addMethods$4;
 
-    var isLeapYear$2 = fns.isLeapYear;
+    var isLeapYear = fns.isLeapYear;
 
     var getMonthLength = function getMonthLength(month, year) {
-      if (month === 1 && isLeapYear$2(year)) {
+      if (month === 1 && isLeapYear(year)) {
         return 29;
       }
 
@@ -14511,19 +14496,19 @@ var app = (function () {
     // we 'model' the calendar here only a little bit
     // and that usually works-out...
 
-    var order$1 = ['millisecond', 'second', 'minute', 'hour', 'date', 'month'];
+    var order = ['millisecond', 'second', 'minute', 'hour', 'date', 'month'];
     var keep = {
-      second: order$1.slice(0, 1),
-      minute: order$1.slice(0, 2),
-      quarterhour: order$1.slice(0, 2),
-      hour: order$1.slice(0, 3),
-      date: order$1.slice(0, 4),
-      month: order$1.slice(0, 4),
-      quarter: order$1.slice(0, 4),
-      season: order$1.slice(0, 4),
-      year: order$1,
-      decade: order$1,
-      century: order$1
+      second: order.slice(0, 1),
+      minute: order.slice(0, 2),
+      quarterhour: order.slice(0, 2),
+      hour: order.slice(0, 3),
+      date: order.slice(0, 4),
+      month: order.slice(0, 4),
+      quarter: order.slice(0, 4),
+      season: order.slice(0, 4),
+      year: order,
+      decade: order,
+      century: order
     };
     keep.week = keep.hour;
     keep.season = keep.date;
@@ -14544,7 +14529,7 @@ var app = (function () {
       year: true
     };
 
-    var addMethods$1 = function addMethods(SpaceTime) {
+    var addMethods$3 = function addMethods(SpaceTime) {
       SpaceTime.prototype.add = function (num, unit) {
         var s = this.clone();
 
@@ -14684,7 +14669,7 @@ var app = (function () {
       SpaceTime.prototype.plus = SpaceTime.prototype.add;
     };
 
-    var add = addMethods$1;
+    var add = addMethods$3;
 
     //make a string, for easy comparison between dates
     var print = {
@@ -14725,6 +14710,13 @@ var app = (function () {
 
         if (!unit) {
           return null;
+        } // support swapped params
+
+
+        if (typeof b === 'string' && _typeof(unit) === 'object') {
+          var tmp = b;
+          b = unit;
+          unit = tmp;
         }
 
         if (typeof b === 'string' || typeof b === 'number') {
@@ -14749,7 +14741,7 @@ var app = (function () {
 
     var same = addMethods$2;
 
-    var addMethods$3 = function addMethods(SpaceTime) {
+    var addMethods$1 = function addMethods(SpaceTime) {
       var methods = {
         isAfter: function isAfter(d) {
           d = fns.beADate(d, this);
@@ -14810,9 +14802,9 @@ var app = (function () {
       });
     };
 
-    var compare = addMethods$3;
+    var compare = addMethods$1;
 
-    var addMethods$4 = function addMethods(SpaceTime) {
+    var addMethods = function addMethods(SpaceTime) {
       var methods = {
         i18n: function i18n(data) {
           //change the day names
@@ -14822,7 +14814,7 @@ var app = (function () {
 
 
           if (fns.isObject(data.months)) {
-            months.set(data.months);
+            months$1.set(data.months);
           } // change the the display style of the month / day names
 
 
@@ -14837,7 +14829,7 @@ var app = (function () {
       });
     };
 
-    var i18n = addMethods$4;
+    var i18n = addMethods;
 
     var timezones = unpack; //fake timezone-support, for fakers (es5 class)
 
@@ -14965,9 +14957,9 @@ var app = (function () {
 
     var whereIts_1 = whereIts;
 
-    var _version = '6.12.5';
+    var _version = '6.13.0';
 
-    var main$1 = function main(input, tz, options) {
+    var main = function main(input, tz, options) {
       return new spacetime(input, tz, options);
     }; // set all properties of a given 'today' object
 
@@ -14981,105 +14973,48 @@ var app = (function () {
     }; //some helper functions on the main method
 
 
-    main$1.now = function (tz, options) {
+    main.now = function (tz, options) {
       var s = new spacetime(new Date().getTime(), tz, options);
       s = setToday(s);
       return s;
     };
 
-    main$1.today = function (tz, options) {
+    main.today = function (tz, options) {
       var s = new spacetime(new Date().getTime(), tz, options);
       s = setToday(s);
       return s.startOf('day');
     };
 
-    main$1.tomorrow = function (tz, options) {
+    main.tomorrow = function (tz, options) {
       var s = new spacetime(new Date().getTime(), tz, options);
       s = setToday(s);
       return s.add(1, 'day').startOf('day');
     };
 
-    main$1.yesterday = function (tz, options) {
+    main.yesterday = function (tz, options) {
       var s = new spacetime(new Date().getTime(), tz, options);
       s = setToday(s);
       return s.subtract(1, 'day').startOf('day');
     };
 
-    main$1.extend = function (obj) {
+    main.extend = function (obj) {
       Object.keys(obj).forEach(function (k) {
         spacetime.prototype[k] = obj[k];
       });
       return this;
     };
 
-    main$1.timezones = function () {
+    main.timezones = function () {
       var s = new spacetime();
       return s.timezones;
     }; //find tz by time
 
 
-    main$1.whereIts = whereIts_1;
-    main$1.version = _version; //aliases:
+    main.whereIts = whereIts_1;
+    main.version = _version; //aliases:
 
-    main$1.plugin = main$1.extend;
-    var src = main$1;
-
-    var spencerColor = createCommonjsModule(function (module, exports) {
-    !function(e){module.exports=e();}(function(){return function u(i,a,c){function f(r,e){if(!a[r]){if(!i[r]){var o="function"==typeof commonjsRequire&&commonjsRequire;if(!e&&o)return o(r,!0);if(d)return d(r,!0);var n=new Error("Cannot find module '"+r+"'");throw n.code="MODULE_NOT_FOUND",n}var t=a[r]={exports:{}};i[r][0].call(t.exports,function(e){return f(i[r][1][e]||e)},t,t.exports,u,i,a,c);}return a[r].exports}for(var d="function"==typeof commonjsRequire&&commonjsRequire,e=0;e<c.length;e++)f(c[e]);return f}({1:[function(e,r,o){r.exports={blue:"#6699cc",green:"#6accb2",yellow:"#e1e6b3",red:"#cc7066",pink:"#F2C0BB",brown:"#705E5C",orange:"#cc8a66",purple:"#d8b3e6",navy:"#335799",olive:"#7f9c6c",fuscia:"#735873",beige:"#e6d7b3",slate:"#8C8C88",suede:"#9c896c",burnt:"#603a39",sea:"#50617A",sky:"#2D85A8",night:"#303b50",rouge:"#914045",grey:"#838B91",mud:"#C4ABAB",royal:"#275291",cherry:"#cc6966",tulip:"#e6b3bc",rose:"#D68881",fire:"#AB5850",greyblue:"#72697D",greygreen:"#8BA3A2",greypurple:"#978BA3",burn:"#6D5685",slategrey:"#bfb0b3",light:"#a3a5a5",lighter:"#d7d5d2",fudge:"#4d4d4d",lightgrey:"#949a9e",white:"#fbfbfb",dimgrey:"#606c74",softblack:"#463D4F",dark:"#443d3d",black:"#333333"};},{}],2:[function(e,r,o){var n=e("./colors"),t={juno:["blue","mud","navy","slate","pink","burn"],barrow:["rouge","red","orange","burnt","brown","greygreen"],roma:["#8a849a","#b5b0bf","rose","lighter","greygreen","mud"],palmer:["red","navy","olive","pink","suede","sky"],mark:["#848f9a","#9aa4ac","slate","#b0b8bf","mud","grey"],salmon:["sky","sea","fuscia","slate","mud","fudge"],dupont:["green","brown","orange","red","olive","blue"],bloor:["night","navy","beige","rouge","mud","grey"],yukon:["mud","slate","brown","sky","beige","red"],david:["blue","green","yellow","red","pink","light"],neste:["mud","cherry","royal","rouge","greygreen","greypurple"],ken:["red","sky","#c67a53","greygreen","#dfb59f","mud"]};Object.keys(t).forEach(function(e){t[e]=t[e].map(function(e){return n[e]||e});}),r.exports=t;},{"./colors":1}],3:[function(e,r,o){var n=e("./colors"),t=e("./combos"),u={colors:n,list:Object.keys(n).map(function(e){return n[e]}),combos:t};r.exports=u;},{"./colors":1,"./combos":2}]},{},[3])(3)});
-    });
-
-    /* Users/spencer/mountain/somehow-calendar/src/Day.svelte generated by Svelte v3.32.3 */
-
-    function instance$1($$self, $$props, $$invalidate) {
-    	let $days;
-    	let { date = "" } = $$props;
-    	let { color = "blue" } = $$props;
-    	let { label = "" } = $$props;
-    	let old = null;
-    	let days = getContext("days");
-    	component_subscribe($$self, days, value => $$invalidate(5, $days = value));
-
-    	const setDate = function () {
-    		$$invalidate(2, color = spencerColor.colors[color] || color);
-    		$$invalidate(1, date = src(date));
-    		let iso = date.format("iso-short");
-
-    		days.update(obj => {
-    			if (old) {
-    				obj[old] = {};
-    			}
-
-    			obj[iso] = { color, label };
-    			return obj;
-    		});
-
-    		old = iso;
-    	};
-
-    	afterUpdate(() => {
-    		setDate();
-    	});
-
-    	onDestroy(() => {
-    		set_store_value(days, $days[old] = null, $days);
-    		days.set($days);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ("date" in $$props) $$invalidate(1, date = $$props.date);
-    		if ("color" in $$props) $$invalidate(2, color = $$props.color);
-    		if ("label" in $$props) $$invalidate(3, label = $$props.label);
-    	};
-
-    	return [days, date, color, label];
-    }
-
-    class Day extends SvelteComponent$1 {
-    	constructor(options) {
-    		super();
-    		init$1(this, options, instance$1, null, safe_not_equal$1, { date: 1, color: 2, label: 3 });
-    	}
-    }
+    main.plugin = main.extend;
+    var src = main;
 
     // create all day objects
     const calculate = function (date) {
@@ -15102,57 +15037,21 @@ var app = (function () {
       return weeks
     };
 
-    const subscriber_queue = [];
-    /**
-     * Create a `Writable` store that allows both updating and reading by subscription.
-     * @param {*=}value initial value
-     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
-     */
-    function writable(value, start = noop$1) {
-        let stop;
-        const subscribers = [];
-        function set(new_value) {
-            if (safe_not_equal$1(value, new_value)) {
-                value = new_value;
-                if (stop) { // store is ready
-                    const run_queue = !subscriber_queue.length;
-                    for (let i = 0; i < subscribers.length; i += 1) {
-                        const s = subscribers[i];
-                        s[1]();
-                        subscriber_queue.push(s, value);
-                    }
-                    if (run_queue) {
-                        for (let i = 0; i < subscriber_queue.length; i += 2) {
-                            subscriber_queue[i][0](subscriber_queue[i + 1]);
-                        }
-                        subscriber_queue.length = 0;
-                    }
-                }
-            }
-        }
-        function update(fn) {
-            set(fn(value));
-        }
-        function subscribe(run, invalidate = noop$1) {
-            const subscriber = [run, invalidate];
-            subscribers.push(subscriber);
-            if (subscribers.length === 1) {
-                stop = start(set) || noop$1;
-            }
-            run(value);
-            return () => {
-                const index = subscribers.indexOf(subscriber);
-                if (index !== -1) {
-                    subscribers.splice(index, 1);
-                }
-                if (subscribers.length === 0) {
-                    stop();
-                    stop = null;
-                }
-            };
-        }
-        return { set, update, subscribe };
-    }
+    var spencerColor = createCommonjsModule(function (module, exports) {
+    !function(e){module.exports=e();}(function(){return function u(i,a,c){function f(r,e){if(!a[r]){if(!i[r]){var o="function"==typeof commonjsRequire&&commonjsRequire;if(!e&&o)return o(r,!0);if(d)return d(r,!0);var n=new Error("Cannot find module '"+r+"'");throw n.code="MODULE_NOT_FOUND",n}var t=a[r]={exports:{}};i[r][0].call(t.exports,function(e){return f(i[r][1][e]||e)},t,t.exports,u,i,a,c);}return a[r].exports}for(var d="function"==typeof commonjsRequire&&commonjsRequire,e=0;e<c.length;e++)f(c[e]);return f}({1:[function(e,r,o){r.exports={blue:"#6699cc",green:"#6accb2",yellow:"#e1e6b3",red:"#cc7066",pink:"#F2C0BB",brown:"#705E5C",orange:"#cc8a66",purple:"#d8b3e6",navy:"#335799",olive:"#7f9c6c",fuscia:"#735873",beige:"#e6d7b3",slate:"#8C8C88",suede:"#9c896c",burnt:"#603a39",sea:"#50617A",sky:"#2D85A8",night:"#303b50",rouge:"#914045",grey:"#838B91",mud:"#C4ABAB",royal:"#275291",cherry:"#cc6966",tulip:"#e6b3bc",rose:"#D68881",fire:"#AB5850",greyblue:"#72697D",greygreen:"#8BA3A2",greypurple:"#978BA3",burn:"#6D5685",slategrey:"#bfb0b3",light:"#a3a5a5",lighter:"#d7d5d2",fudge:"#4d4d4d",lightgrey:"#949a9e",white:"#fbfbfb",dimgrey:"#606c74",softblack:"#463D4F",dark:"#443d3d",black:"#333333"};},{}],2:[function(e,r,o){var n=e("./colors"),t={juno:["blue","mud","navy","slate","pink","burn"],barrow:["rouge","red","orange","burnt","brown","greygreen"],roma:["#8a849a","#b5b0bf","rose","lighter","greygreen","mud"],palmer:["red","navy","olive","pink","suede","sky"],mark:["#848f9a","#9aa4ac","slate","#b0b8bf","mud","grey"],salmon:["sky","sea","fuscia","slate","mud","fudge"],dupont:["green","brown","orange","red","olive","blue"],bloor:["night","navy","beige","rouge","mud","grey"],yukon:["mud","slate","brown","sky","beige","red"],david:["blue","green","yellow","red","pink","light"],neste:["mud","cherry","royal","rouge","greygreen","greypurple"],ken:["red","sky","#c67a53","greygreen","#dfb59f","mud"]};Object.keys(t).forEach(function(e){t[e]=t[e].map(function(e){return n[e]||e});}),r.exports=t;},{"./colors":1}],3:[function(e,r,o){var n=e("./colors"),t=e("./combos"),u={colors:n,list:Object.keys(n).map(function(e){return n[e]}),combos:t};r.exports=u;},{"./colors":1,"./combos":2}]},{},[3])(3)});
+    });
+
+    const fmtDays = function (obj) {
+      let res = {};
+      Object.keys(obj).forEach((k) => {
+        let iso = src(k).format('iso-short');
+
+        let color = obj[k];
+        color = spencerColor.colors[color] || color;
+        res[iso] = color;
+      });
+      return res
+    };
 
     /* Users/spencer/mountain/somehow-calendar/src/Month.svelte generated by Svelte v3.32.3 */
 
@@ -15165,17 +15064,17 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[12] = list[i];
+    	child_ctx[13] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
+    	child_ctx[16] = list[i];
     	return child_ctx;
     }
 
-    // (152:8) {:else}
+    // (143:8) {:else}
     function create_else_block(ctx) {
     	let div;
 
@@ -15195,11 +15094,11 @@ var app = (function () {
     	};
     }
 
-    // (141:8) {#if d.isSame(date, 'month')}
+    // (132:8) {#if d.inMonth}
     function create_if_block(ctx) {
     	let div1;
     	let div0;
-    	let t_value = /*d*/ ctx[15].num + "";
+    	let t_value = /*d*/ ctx[16].num + "";
     	let t;
     	let div1_style_value;
     	let div1_title_value;
@@ -15207,7 +15106,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[10](/*d*/ ctx[15]);
+    		return /*click_handler*/ ctx[9](/*d*/ ctx[16]);
     	}
 
     	return {
@@ -15217,11 +15116,11 @@ var app = (function () {
     			t = text$1(t_value);
     			attr$1(div0, "class", "num svelte-1akvj8n");
     			attr$1(div1, "class", "day square svelte-1akvj8n");
-    			attr$1(div1, "style", div1_style_value = "background-color:" + /*d*/ ctx[15].color);
-    			attr$1(div1, "title", div1_title_value = /*d*/ ctx[15].iso);
-    			toggle_class(div1, "today", /*isToday*/ ctx[4](/*d*/ ctx[15]));
-    			toggle_class(div1, "weekend", /*isWeekend*/ ctx[5](/*d*/ ctx[15]));
-    			toggle_class(div1, "highlight", /*d*/ ctx[15].color !== "none");
+    			attr$1(div1, "style", div1_style_value = "background-color:" + /*d*/ ctx[16].color);
+    			attr$1(div1, "title", div1_title_value = /*d*/ ctx[16].iso);
+    			toggle_class(div1, "today", /*d*/ ctx[16].isToday);
+    			toggle_class(div1, "weekend", /*d*/ ctx[16].isWeekend);
+    			toggle_class(div1, "highlight", /*d*/ ctx[16].color !== "none");
     		},
     		m(target, anchor) {
     			insert$1(target, div1, anchor);
@@ -15235,26 +15134,26 @@ var app = (function () {
     		},
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty & /*getWeeks*/ 8 && t_value !== (t_value = /*d*/ ctx[15].num + "")) set_data$1(t, t_value);
+    			if (dirty & /*weeks*/ 4 && t_value !== (t_value = /*d*/ ctx[16].num + "")) set_data$1(t, t_value);
 
-    			if (dirty & /*getWeeks*/ 8 && div1_style_value !== (div1_style_value = "background-color:" + /*d*/ ctx[15].color)) {
+    			if (dirty & /*weeks*/ 4 && div1_style_value !== (div1_style_value = "background-color:" + /*d*/ ctx[16].color)) {
     				attr$1(div1, "style", div1_style_value);
     			}
 
-    			if (dirty & /*getWeeks*/ 8 && div1_title_value !== (div1_title_value = /*d*/ ctx[15].iso)) {
+    			if (dirty & /*weeks*/ 4 && div1_title_value !== (div1_title_value = /*d*/ ctx[16].iso)) {
     				attr$1(div1, "title", div1_title_value);
     			}
 
-    			if (dirty & /*isToday, getWeeks*/ 24) {
-    				toggle_class(div1, "today", /*isToday*/ ctx[4](/*d*/ ctx[15]));
+    			if (dirty & /*weeks*/ 4) {
+    				toggle_class(div1, "today", /*d*/ ctx[16].isToday);
     			}
 
-    			if (dirty & /*isWeekend, getWeeks*/ 40) {
-    				toggle_class(div1, "weekend", /*isWeekend*/ ctx[5](/*d*/ ctx[15]));
+    			if (dirty & /*weeks*/ 4) {
+    				toggle_class(div1, "weekend", /*d*/ ctx[16].isWeekend);
     			}
 
-    			if (dirty & /*getWeeks*/ 8) {
-    				toggle_class(div1, "highlight", /*d*/ ctx[15].color !== "none");
+    			if (dirty & /*weeks*/ 4) {
+    				toggle_class(div1, "highlight", /*d*/ ctx[16].color !== "none");
     			}
     		},
     		d(detaching) {
@@ -15265,31 +15164,29 @@ var app = (function () {
     	};
     }
 
-    // (140:6) {#each w as d}
+    // (131:6) {#each w as d}
     function create_each_block_1(ctx) {
-    	let show_if;
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (show_if == null || dirty & /*getWeeks, date*/ 9) show_if = !!/*d*/ ctx[15].isSame(/*date*/ ctx[0], "month");
-    		if (show_if) return create_if_block;
+    		if (/*d*/ ctx[16].inMonth) return create_if_block;
     		return create_else_block;
     	}
 
-    	let current_block_type = select_block_type(ctx, -1);
+    	let current_block_type = select_block_type(ctx);
     	let if_block = current_block_type(ctx);
 
     	return {
     		c() {
     			if_block.c();
-    			if_block_anchor = empty$1();
+    			if_block_anchor = empty();
     		},
     		m(target, anchor) {
     			if_block.m(target, anchor);
     			insert$1(target, if_block_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx, dirty)) && if_block) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
     				if_block.p(ctx, dirty);
     			} else {
     				if_block.d(1);
@@ -15308,11 +15205,11 @@ var app = (function () {
     	};
     }
 
-    // (138:2) {#each getWeeks() as w}
+    // (129:2) {#each weeks as w}
     function create_each_block(ctx) {
     	let div;
     	let t;
-    	let each_value_1 = /*w*/ ctx[12];
+    	let each_value_1 = /*w*/ ctx[13];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -15340,8 +15237,8 @@ var app = (function () {
     			append$1(div, t);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*getWeeks, isToday, isWeekend, onClick, date*/ 59) {
-    				each_value_1 = /*w*/ ctx[12];
+    			if (dirty & /*weeks, onClick*/ 6) {
+    				each_value_1 = /*w*/ ctx[13];
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
@@ -15378,15 +15275,15 @@ var app = (function () {
     	let t1;
     	let t2;
     	let current;
-    	let each_value = /*getWeeks*/ ctx[3]();
+    	let each_value = /*weeks*/ ctx[2];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     	}
 
-    	const default_slot_template = /*#slots*/ ctx[9].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[8], null);
+    	const default_slot_template = /*#slots*/ ctx[8].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], null);
 
     	return {
     		c() {
@@ -15403,7 +15300,7 @@ var app = (function () {
     			if (default_slot) default_slot.c();
     			attr$1(div0, "class", "monthName svelte-1akvj8n");
     			attr$1(div1, "class", "month");
-    			set_style(div1, "width", "100%");
+    			set_style$1(div1, "width", "100%");
     		},
     		m(target, anchor) {
     			insert$1(target, div1, anchor);
@@ -15426,8 +15323,8 @@ var app = (function () {
     		p(ctx, [dirty]) {
     			if ((!current || dirty & /*date*/ 1) && t0_value !== (t0_value = /*date*/ ctx[0].format("month") + "")) set_data$1(t0, t0_value);
 
-    			if (dirty & /*getWeeks, isToday, isWeekend, onClick, date*/ 59) {
-    				each_value = /*getWeeks*/ ctx[3]();
+    			if (dirty & /*weeks, onClick*/ 6) {
+    				each_value = /*weeks*/ ctx[2];
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -15450,8 +15347,8 @@ var app = (function () {
     			}
 
     			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 256) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[8], dirty, null, null);
+    				if (default_slot.p && dirty & /*$$scope*/ 128) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[7], dirty, null, null);
     				}
     			}
     		},
@@ -15473,23 +15370,12 @@ var app = (function () {
     	};
     }
 
-    function instance$2($$self, $$props, $$invalidate) {
-    	let getWeeks;
-
-    	let $days,
-    		$$unsubscribe_days = noop$1,
-    		$$subscribe_days = () => ($$unsubscribe_days(), $$unsubscribe_days = subscribe(days, $$value => $$invalidate(7, $days = $$value)), days);
-
-    	$$self.$$.on_destroy.push(() => $$unsubscribe_days());
+    function instance$1($$self, $$props, $$invalidate) {
+    	let setup;
+    	let colors;
+    	let weeks;
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	let days = getContext("days");
-    	$$subscribe_days();
-
-    	if (!days) {
-    		$$subscribe_days(days = writable({}));
-    		setContext("days", days);
-    	}
-
+    	let { days = {} } = $$props;
     	let { date = "" } = $$props;
 
     	let { onClick = () => {
@@ -15505,54 +15391,57 @@ var app = (function () {
     	};
 
     	const isWeekend = function (d) {
-    		let day = d.day();
-    		return day === 0 || day === 1;
+    		let day = d.dayName();
+    		return day === "saturday" || day === "sunday";
     	};
-
-    	beforeUpdate(() => {
-    		$$invalidate(0, date = src(date));
-    	});
 
     	const click_handler = d => onClick(d);
 
     	$$self.$$set = $$props => {
+    		if ("days" in $$props) $$invalidate(3, days = $$props.days);
     		if ("date" in $$props) $$invalidate(0, date = $$props.date);
     		if ("onClick" in $$props) $$invalidate(1, onClick = $$props.onClick);
-    		if ("showToday" in $$props) $$invalidate(6, showToday = $$props.showToday);
-    		if ("$$scope" in $$props) $$invalidate(8, $$scope = $$props.$$scope);
+    		if ("showToday" in $$props) $$invalidate(4, showToday = $$props.showToday);
+    		if ("$$scope" in $$props) $$invalidate(7, $$scope = $$props.$$scope);
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*date, $days*/ 129) {
-    			$$invalidate(3, getWeeks = () => {
-    				let weeks = calculate(date) || [];
+    		if ($$self.$$.dirty & /*date*/ 1) {
+    			$$invalidate(5, setup = calculate(date) || []);
+    		}
 
-    				return weeks.map(w => {
-    					return w.map(day => {
-    						day.iso = day.format("iso-short");
-    						day.color = "none";
+    		if ($$self.$$.dirty & /*days*/ 8) {
+    			$$invalidate(6, colors = fmtDays(days));
+    		}
 
-    						if ($days[day.iso]) {
-    							day.color = $days[day.iso].color || "none";
-    						}
+    		if ($$self.$$.dirty & /*setup, colors, date*/ 97) {
+    			$$invalidate(2, weeks = setup.map(w => {
+    				return w.map(day => {
+    					let iso = day.format("iso-short");
 
-    						day.num = day.format("{date}");
-    						return day;
-    					});
+    					let obj = {
+    						iso,
+    						color: colors[iso] || "none",
+    						num: day.format("{date}"),
+    						isToday: isToday(day),
+    						isWeekend: isWeekend(day),
+    						inMonth: day.isSame(date, "month")
+    					};
+
+    					return obj;
     				});
-    			});
+    			}));
     		}
     	};
 
     	return [
     		date,
     		onClick,
+    		weeks,
     		days,
-    		getWeeks,
-    		isToday,
-    		isWeekend,
     		showToday,
-    		$days,
+    		setup,
+    		colors,
     		$$scope,
     		slots,
     		click_handler
@@ -15563,7 +15452,13 @@ var app = (function () {
     	constructor(options) {
     		super();
     		if (!document.getElementById("svelte-1akvj8n-style")) add_css$1();
-    		init$1(this, options, instance$2, create_fragment$1, safe_not_equal$1, { date: 0, onClick: 1, showToday: 6 });
+
+    		init$1(this, options, instance$1, create_fragment$1, safe_not_equal$1, {
+    			days: 3,
+    			date: 0,
+    			onClick: 1,
+    			showToday: 4
+    		});
     	}
     }
 
@@ -15578,56 +15473,17 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[5] = list[i];
+    	child_ctx[6] = list[i];
     	return child_ctx;
     }
 
     function get_each_context_1$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[8] = list[i];
+    	child_ctx[9] = list[i];
     	return child_ctx;
     }
 
-    // (64:10) <Month date={m}>
-    function create_default_slot(ctx) {
-    	let current;
-    	const default_slot_template = /*#slots*/ ctx[3].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[4], null);
-
-    	return {
-    		c() {
-    			if (default_slot) default_slot.c();
-    		},
-    		m(target, anchor) {
-    			if (default_slot) {
-    				default_slot.m(target, anchor);
-    			}
-
-    			current = true;
-    		},
-    		p(ctx, dirty) {
-    			if (default_slot) {
-    				if (default_slot.p && dirty & /*$$scope*/ 16) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[4], dirty, null, null);
-    				}
-    			}
-    		},
-    		i(local) {
-    			if (current) return;
-    			transition_in$1(default_slot, local);
-    			current = true;
-    		},
-    		o(local) {
-    			transition_out$1(default_slot, local);
-    			current = false;
-    		},
-    		d(detaching) {
-    			if (default_slot) default_slot.d(detaching);
-    		}
-    	};
-    }
-
-    // (62:6) {#each quarter as m}
+    // (55:6) {#each quarter as m}
     function create_each_block_1$1(ctx) {
     	let div;
     	let month;
@@ -15635,9 +15491,9 @@ var app = (function () {
 
     	month = new Month({
     			props: {
-    				date: /*m*/ ctx[8],
-    				$$slots: { default: [create_default_slot] },
-    				$$scope: { ctx }
+    				date: /*m*/ ctx[9],
+    				days: /*days*/ ctx[0],
+    				showToday: /*showToday*/ ctx[1]
     			}
     		});
 
@@ -15654,12 +15510,8 @@ var app = (function () {
     		},
     		p(ctx, dirty) {
     			const month_changes = {};
-    			if (dirty & /*quarters*/ 1) month_changes.date = /*m*/ ctx[8];
-
-    			if (dirty & /*$$scope*/ 16) {
-    				month_changes.$$scope = { dirty, ctx };
-    			}
-
+    			if (dirty & /*days*/ 1) month_changes.days = /*days*/ ctx[0];
+    			if (dirty & /*showToday*/ 2) month_changes.showToday = /*showToday*/ ctx[1];
     			month.$set(month_changes);
     		},
     		i(local) {
@@ -15678,12 +15530,12 @@ var app = (function () {
     	};
     }
 
-    // (60:2) {#each quarters as quarter}
+    // (53:2) {#each quarters as quarter}
     function create_each_block$1(ctx) {
     	let div;
     	let t;
     	let current;
-    	let each_value_1 = /*quarter*/ ctx[5];
+    	let each_value_1 = /*quarter*/ ctx[6];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value_1.length; i += 1) {
@@ -15716,8 +15568,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*quarters, $$scope*/ 17) {
-    				each_value_1 = /*quarter*/ ctx[5];
+    			if (dirty & /*quarters, days, showToday*/ 7) {
+    				each_value_1 = /*quarter*/ ctx[6];
     				let i;
 
     				for (i = 0; i < each_value_1.length; i += 1) {
@@ -15734,13 +15586,13 @@ var app = (function () {
     					}
     				}
 
-    				group_outros$1();
+    				group_outros();
 
     				for (i = each_value_1.length; i < each_blocks.length; i += 1) {
     					out(i);
     				}
 
-    				check_outros$1();
+    				check_outros();
     			}
     		},
     		i(local) {
@@ -15771,7 +15623,7 @@ var app = (function () {
     function create_fragment$2(ctx) {
     	let div;
     	let current;
-    	let each_value = /*quarters*/ ctx[0];
+    	let each_value = /*quarters*/ ctx[2];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -15802,8 +15654,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*quarters, $$scope*/ 17) {
-    				each_value = /*quarters*/ ctx[0];
+    			if (dirty & /*quarters, days, showToday*/ 7) {
+    				each_value = /*quarters*/ ctx[2];
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -15820,13 +15672,13 @@ var app = (function () {
     					}
     				}
 
-    				group_outros$1();
+    				group_outros();
 
     				for (i = each_value.length; i < each_blocks.length; i += 1) {
     					out(i);
     				}
 
-    				check_outros$1();
+    				check_outros();
     			}
     		},
     		i(local) {
@@ -15854,58 +15706,53 @@ var app = (function () {
     	};
     }
 
-    function instance$3($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
+    function instance$2($$self, $$props, $$invalidate) {
     	let { date = "" } = $$props;
-    	let quarters = [];
-    	let { days = writable({}) } = $$props;
-    	setContext("days", days);
+    	let { days = {} } = $$props;
+    	let { showToday = true } = $$props;
+    	date = src(date);
+    	let start = date.startOf("year").minus(1, "second");
+    	let months = start.every("month", date.endOf("year"));
 
-    	beforeUpdate(() => {
-    		$$invalidate(1, date = src(date));
-    		let start = date.startOf("year").minus(1, "second");
-    		let months = start.every("month", date.endOf("year"));
-
-    		$$invalidate(0, quarters = [
-    			months.slice(0, 3),
-    			months.slice(3, 6),
-    			months.slice(6, 9),
-    			months.slice(9, 12)
-    		]);
-    	});
+    	let quarters = [
+    		months.slice(0, 3),
+    		months.slice(3, 6),
+    		months.slice(6, 9),
+    		months.slice(9, 12)
+    	];
 
     	$$self.$$set = $$props => {
-    		if ("date" in $$props) $$invalidate(1, date = $$props.date);
-    		if ("days" in $$props) $$invalidate(2, days = $$props.days);
-    		if ("$$scope" in $$props) $$invalidate(4, $$scope = $$props.$$scope);
+    		if ("date" in $$props) $$invalidate(3, date = $$props.date);
+    		if ("days" in $$props) $$invalidate(0, days = $$props.days);
+    		if ("showToday" in $$props) $$invalidate(1, showToday = $$props.showToday);
     	};
 
-    	return [quarters, date, days, slots, $$scope];
+    	return [days, showToday, quarters, date];
     }
 
     class Year extends SvelteComponent$1 {
     	constructor(options) {
     		super();
     		if (!document.getElementById("svelte-t5e0rj-style")) add_css$2();
-    		init$1(this, options, instance$3, create_fragment$2, safe_not_equal$1, { date: 1, days: 2 });
+    		init$1(this, options, instance$2, create_fragment$2, safe_not_equal$1, { date: 3, days: 0, showToday: 1 });
     	}
     }
 
     /* compromise 13.10.0 MIT */
-    function _typeof(obj) {
+    function _typeof$1(obj) {
       "@babel/helpers - typeof";
 
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-        _typeof = function (obj) {
+        _typeof$1 = function (obj) {
           return typeof obj;
         };
       } else {
-        _typeof = function (obj) {
+        _typeof$1 = function (obj) {
           return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
       }
 
-      return _typeof(obj);
+      return _typeof$1(obj);
     }
 
     function _classCallCheck(instance, Constructor) {
@@ -18955,14 +18802,14 @@ var app = (function () {
       } //try to support a ton of different formats:
 
 
-      if (_typeof(input) === 'object') {
+      if (_typeof$1(input) === 'object') {
         if (isArray$1(input)) {
           if (input.length === 0 || !input[0]) {
             return [];
           } //is it a pre-parsed reg-list?
 
 
-          if (_typeof(input[0]) === 'object') {
+          if (_typeof$1(input[0]) === 'object') {
             return input;
           } //support a flat array of normalized words
 
@@ -23139,7 +22986,7 @@ var app = (function () {
       } // if it is not a list of Phrase objects, then don't try to make a Doc object
 
 
-      if (_typeof(list[0]) !== 'object' || list[0].isA !== 'Phrase') {
+      if (_typeof$1(list[0]) !== 'object' || list[0].isA !== 'Phrase') {
         return list;
       }
 
@@ -23535,7 +23382,7 @@ var app = (function () {
 
         var newPhrases; // accept a Doc object to replace
 
-        if (input && _typeof(input) === 'object' && input.isA === 'Doc') {
+        if (input && _typeof$1(input) === 'object' && input.isA === 'Doc') {
           newPhrases = input.list;
 
           _this.pool().merge(input.pool());
@@ -23751,7 +23598,7 @@ var app = (function () {
       } // cache roots, if necessary
 
 
-      if (options === 'root' || _typeof(options) === 'object' && options.root) {
+      if (options === 'root' || _typeof$1(options) === 'object' && options.root) {
         this.list.forEach(function (p) {
           p.terms().forEach(function (t) {
             if (t.root === null) {
@@ -30712,7 +30559,7 @@ var app = (function () {
 
     var tiny = smallTagger;
 
-    function instance$4(worldInstance) {
+    function instance$3(worldInstance) {
       //blast-out our word-lists, just once
       var world = worldInstance;
       /** parse and tag text into a compromise object  */
@@ -30771,7 +30618,7 @@ var app = (function () {
 
 
       nlp.clone = function () {
-        return instance$4(world.clone());
+        return instance$3(world.clone());
       };
       /** log our decision-making for debugging */
 
@@ -30803,23 +30650,23 @@ var app = (function () {
       return nlp;
     }
 
-    var src$1 = instance$4(new World_1());
+    var src$1 = instance$3(new World_1());
 
     /* compromise-dates 1.4.1 MIT */
-    function _typeof$1(obj) {
+    function _typeof$2(obj) {
       "@babel/helpers - typeof";
 
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-        _typeof$1 = function (obj) {
+        _typeof$2 = function (obj) {
           return typeof obj;
         };
       } else {
-        _typeof$1 = function (obj) {
+        _typeof$2 = function (obj) {
           return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
         };
       }
 
-      return _typeof$1(obj);
+      return _typeof$2(obj);
     }
 
     function _classCallCheck$1(instance, Constructor) {
@@ -36320,7 +36167,7 @@ var app = (function () {
 
     var Unit_1 = Unit;
 
-    var Day$1 = /*#__PURE__*/function (_Unit) {
+    var Day = /*#__PURE__*/function (_Unit) {
       _inherits$1(Day, _Unit);
 
       var _super = _createSuper$1(Day);
@@ -36379,7 +36226,7 @@ var app = (function () {
       }]);
 
       return CalendarDate;
-    }(Day$1);
+    }(Day);
 
     var WeekDay = /*#__PURE__*/function (_Day2) {
       _inherits$1(WeekDay, _Day2);
@@ -36449,7 +36296,7 @@ var app = (function () {
       }]);
 
       return WeekDay;
-    }(Day$1); // like 'haloween'
+    }(Day); // like 'haloween'
 
 
     var Holiday = /*#__PURE__*/function (_CalendarDate) {
@@ -36476,7 +36323,7 @@ var app = (function () {
     }(CalendarDate);
 
     var _day = {
-      Day: Day$1,
+      Day: Day,
       WeekDay: WeekDay,
       CalendarDate: CalendarDate,
       Holiday: Holiday
@@ -37346,22 +37193,22 @@ var app = (function () {
 
     var _07Weekday = parseWeekday;
 
-    var Day$1$1 = units$4.Day,
+    var Day$1 = units$4.Day,
         Moment$1 = units$4.Moment;
     var knownWord = {
       today: function today(context) {
-        return new Day$1$1(context.today, null, context);
+        return new Day$1(context.today, null, context);
       },
       yesterday: function yesterday(context) {
-        return new Day$1$1(context.today.minus(1, 'day'), null, context);
+        return new Day$1(context.today.minus(1, 'day'), null, context);
       },
       tomorrow: function tomorrow(context) {
-        return new Day$1$1(context.today.plus(1, 'day'), null, context);
+        return new Day$1(context.today.plus(1, 'day'), null, context);
       },
       eom: function eom(context) {
         var d = context.today.endOf('month');
         d = d.startOf('day');
-        return new Day$1$1(d, null, context);
+        return new Day$1(d, null, context);
       },
       // eod: (context) => {
       //   let d = context.today.endOf('day')
@@ -37371,7 +37218,7 @@ var app = (function () {
       eoy: function eoy(context) {
         var d = context.today.endOf('year');
         d = d.startOf('day');
-        return new Day$1$1(d, null, context);
+        return new Day$1(d, null, context);
       }
     };
     knownWord.tommorrow = knownWord.tomorrow;
@@ -37391,7 +37238,7 @@ var app = (function () {
           if (section.shift.hour || section.shift.minute) {
             unit = new Moment$1(context.today, null, context); // choose now
           } else {
-            unit = new Day$1$1(context.today, null, context); // choose today
+            unit = new Day$1(context.today, null, context); // choose today
           }
         }
       } // today, yesterday, tomorrow
@@ -37419,7 +37266,7 @@ var app = (function () {
       })(commonjsGlobal$1, function (spacetime) {
 
         function _interopDefaultLegacy(e) {
-          return e && _typeof$1(e) === 'object' && 'default' in e ? e : {
+          return e && _typeof$2(e) === 'object' && 'default' in e ? e : {
             'default': e
           };
         }
@@ -39530,7 +39377,7 @@ var app = (function () {
       Doc.prototype.dates = function (n) {
         var context = {};
 
-        if (n && _typeof$1(n) === 'object') {
+        if (n && _typeof$2(n) === 'object') {
           context = n;
           n = null;
         }
@@ -46779,92 +46626,207 @@ var app = (function () {
 
     var src$4 = plugin;
 
-    /* Post.svelte generated by Svelte v3.32.3 */
+    let texts = [
+      `One Saturday he had been to market`,
+      `over in ten minutes who should he see waiting for him at the top but`,
+      `in 1 minute.`,
+      `since \'tis almost Christmas, and \'twill prevent angry passions rising,`,
+      `Be you going to market next Saturday?`,
+      `together; and their banns were put up the very next Sunday.`,
+      `''Twas on a frosty night in Christmas week, and among the folk invited`,
+      `When we had danced a few hours, and the crowns of we taller men were'`,
+      `And in another hour the second fiddler laid down his,`,
+      `advanced in years.`,
+      `courtship can dance; and it happened that as the evening wore on James`,
+      `Thus it happened that on the following Sunday`,
+      `morning, when the people were sitting in church with mouths wide open to`,
+      `'Well, the two couples lived on for 1 year or two ordinarily enough, till`,
+      `'So things remained till one fine summer day they went for their yearly`,
+      `This year they chose Budmouth-Regis as the place to spend`,
+      `As evening drew on they sat on one of the public seats upon the`,
+      `evening of their lives better than anybody else, having had much of it`,
+      `take their water-excursion of half an hour or so, till they should choose`,
+      `about, for the sea was as smooth as glass that evening, and`,
+      `not expect to have to sit so long in the evening air."`,
+      `leaving it in the morning.`,
+      `next morning they drove again to Casterbridge and entered the Budmouth`,
+      `the course of a few hours some young men testified to having seen such a`,
+      `In the evening the sea rose somewhat, and a`,
+      `and buried on one day.`,
+      `wife in the course of 1 year and a half; and the marriage proved in everythem all, and now a thing of old times--the Great Exhibition of 1851, in`,
+      `Hundredth to his true time than he could play the brazen serpent,' the`,
+      `on one spring evening, when, in passing through Lower Mellstock, she`,
+      `quietly, any evening after dark, in the house of her father, the parish`,
+      `of four years between himself and Stickleford had never been broken.`,
+      `Four years ago, she said with the greatest delicacy of which she was`,
+      `Stickleford, or even a few months ago; for the new railway into South`,
+      `responding that, having married her the morning after her arrival, he`,
+      `One early summer`,
+      `afternoon, accordingly, he came from his place of work, and hastened`,
+      `English June day can occasionally be, but as he waited on the platform in`,
+      `damp weather having set in with the afternoon, the unfortunate occupants`,
+      `early morning bemuddled and sodden, weariness on their faces, and fear of`,
+      `acquiesced in the fate that Heaven had sent him; and on the day of their`,
+      `One autumn Hipcroft found`,
+      `triumph which the world did not witness every day.`,
+      `formerly been customary at such an hour, and she learned that an auction`,
+      `of fat stock had been held near the spot that afternoon.`,
+      `quarter of an hour the only other woman in the figure dropped out`,
+      `upon himself without invitation to play that evening at the inn.`,
+      `backed by the Yalbury coppices--a place of Dantesque gloom at this hour,`,
+      `They were gone about twenty minutes altogether, returning without`,
+      `Next day she was calmer; but the fits were still upon her;`,
+      `one after a freak of 1 day or two; but time went on, and neither he nor`,
+      `Hipcroft with an intensity which would scarcely allow him time to pack`,
+      `business of his over-hours to stand about in by-streets in the hope of`,
+      `discovering her, and would start up in the night, saying, 'That rascal'sLess than 3 weeks ago, I joined you on the West Front of this very building and, looking over the monuments to our proud past, offered you my hand in filling the next page of American history with a story of extended prosperity and continued peace.`,
+      `And tonight I'm back to offer you my plans as well.`,
+      `Here, 22 years ago, I first raised my hand to be sworn into public life.`,
+      `So, tonight I feel as if I'm returning home to friends.`,
+      `And I intend, in the months and years to come, to give you what friends deserve: frankness, respect, and my best judgment about ways to improve America's future.`,
+      `The people didn't send us here to bicker, and it's time to govern.`,
+      `And 8 years ago, I sat in that very chair as President Reagan spoke of punishing inflation and devastatingly high interest rates and people out of work — American confidence on the wane.`,
+      `We're fortunate — a much changed landscape lies before us tonight.`,
+      `And so, tonight we must take a strong America and make it even better.`,
+      `Some people find that agenda impossible, but I'm presenting to you tonight a realistic plan for tackling it.`,
+      `Next year alone, thanks to economic growth, without any change in the law, the Federal Government will take in over $80 billion more than it does this year.`,
+      `We can afford to increase spending by a modest amount, but enough to invest in key priorities and still cut the deficit by almost 40 percent in 1 year.`,
+      `I make this pledge tonight: My team and I are ready to work with the Congress, to form a special leadership group, to negotiate in good faith, to work day and night — if that's what it takes — to meet the budget targets and to produce a budget on time.`,
+      // `And I ask the Congress tonight to approve several measures which will make budgeting more sensible.`,
+      // `Several principles describe the kind of America I hope to build with your help in the years ahead.`,
+      // `Three weeks ago, we celebrated the bicentennial inaugural, the 200th anniversary of the first Presidency.`,
+      // `We must take actions today that will ensure a better tomorrow.`,
+      // `I propose almost $2.2 billion for the National Science Foundation to promote basic research and keep us on track to double its budget by 1993.`,
+      // `I want to cut that dropout rate and make America a more literate nation, because what it really comes down to is this: The longer our graduation lines are today, the shorter our unemployment lines will be tomorrow.`,
+      // `So, tonight I'm proposing the following initiatives: the beginning of a $500 million program to reward America's best schools, merit schools; the creation of special Presidential awards for the best teachers in every State, because excellence should be rewarded; the establishment of a new program of National Science Scholars, one each year for every Member of the House and Senate, to give this generation of students a special incentive to excel in science and mathematics; the expanded use of magnet schools, which give families and students greater choice; and a new program to encourage alternative certification, which will let talented people from all fields teach in our classrooms.`,
+      // `And tonight, I'd ask you to join me by becoming the Education Congress.`,
+      // `Just last week, as I settled into this new office, I received a letter from a mother in Pennsylvania who had been struck by my message in the Inaugural Address.`,
+      // `Not 12 hours before, she wrote, my husband and I received word that our son was addicted to cocaine.`,
+      // `Over 23 million Americans used illegal drugs last year, at a staggering cost to our nation's well-being.`,
+      // `And I am asking tonight for an increase of almost a billion dollars in budget outlays to escalate the war against drugs.`,
+      // `Some will be used to cut the waiting time for treatment.`,
+      // `And so, tonight I'm calling for the indefinite postponement of three lease sales which have raised troubling questions, two off the coast of California and one which could threaten the Everglades in Florida.`,
+      // `There's another issue that I've decided to mention here tonight.`,
+      // `Earlier this week, I announced my support for a plan to restore the financial and moral integrity of our savings system.`,
+      // `I ask Congress to enact our reform proposals within 45 days.`,
+      // `We face a massive task in cleaning up the waste left from decades of environmental neglect at America's nuclear weapons plants.`,
+      // `We've been fortunate during these past 8 years.`,
+      // `America is a stronger nation than it was in 1980.`,
+      // `Most people don't realize that after the successful restoration of our strength, the Pentagon budget has actually been reduced in real terms for each of the last 4 years.`,
+      // `In light of the compelling need to reduce the deficit, however, I support a 1-year freeze in the military budget, something I proposed last fall in my flexible freeze plan.`,
+      // `And this freeze will apply for only 1 year, and after that, increases above inflation will be required.`,
+      // `I should be clear on the conditions attached to my recommendation for the coming year: The savings must be allocated to those priorities for investing in our future that I've spoken about tonight.`,
+      // `I've directed the National Security Council to review our national security and defense policies and report back to me within 90 days to ensure that our capabilities and resources meet our commitments and strategies.`,
+      // `Securing a more peaceful world is perhaps the most important priority I'd like to address tonight.`,
+      // `Never before in this century have our values of freedom, democracy, and economic opportunity been such a powerful and intellectual force around the globe.`,
+      // `Our diplomacy must work every day against the proliferation of nuclear weapons.`,
+      // `I've asked the Secretary of State to visit Europe next week and to consult with our allies on the wide range of challenges and opportunities we face together, including East-West relations.`,
+      // `When I served as our representative in China 14 or 15 years ago, few would have predicted the scope of the changes we've witnessed since then.`,
+      // `He was speaking of his country, decades ago, but his words speak to each of us in America tonight.`,
+      // `And to the young people of America, who sometimes feel left out, I ask you tonight to give us the benefit of your talent and energy through a new program called YES, for Youth Entering Service to America.`,
+      // `To the families of America watching tonight in your living rooms, hold fast to your dreams because ultimately America's future rests in your hands.`,
+      // `And tomorrow the debate on the plan I've put forward begins, and I ask the Congress to come forward with your own proposals.`,
+      // `Recalling anniversaries may not be my specialty in speeches but tonight is one of some note.'`,
+    ];
+
+    /* Align.svelte generated by Svelte v3.32.3 */
 
     function add_css$3() {
     	var style = element("style");
-    	style.id = "svelte-1fo5w4y-style";
-    	style.textContent = ".m3.svelte-1fo5w4y{margin:3rem}.col.svelte-1fo5w4y{display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch;width:100%}.months.svelte-1fo5w4y{width:100%;max-width:50rem}.row.svelte-1fo5w4y{display:flex;flex-direction:row;justify-content:space-around;align-items:center;text-align:center;flex-wrap:nowrap;align-self:stretch}";
+    	style.id = "svelte-4j42qi-style";
+    	style.textContent = ".col.svelte-4j42qi{display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}.row.svelte-4j42qi{display:flex;flex-direction:row;justify-content:center;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}.red.svelte-4j42qi{background-color:#ab5850;color:white;padding:5px;margin:5px;border-radius:5px}.side.svelte-4j42qi{width:200px;overflow:hidden;white-space:nowrap;flex:1 1 0}";
     	append(document.head, style);
     }
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[7] = list[i];
+    	child_ctx[1] = list[i];
     	return child_ctx;
     }
 
-    // (100:8) {#each days as d}
+    // (48:2) {#each list as a}
     function create_each_block$2(ctx) {
-    	let day;
-    	let current;
-
-    	day = new Day({
-    			props: { date: /*d*/ ctx[7], color: "blue" }
-    		});
+    	let div3;
+    	let div0;
+    	let t0_value = /*a*/ ctx[1][0] + "";
+    	let t0;
+    	let t1;
+    	let div1;
+    	let t2_value = /*a*/ ctx[1][1] + "";
+    	let t2;
+    	let t3;
+    	let div2;
+    	let t4_value = /*a*/ ctx[1][2] + "";
+    	let t4;
+    	let t5;
 
     	return {
     		c() {
-    			create_component(day.$$.fragment);
+    			div3 = element("div");
+    			div0 = element("div");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			div1 = element("div");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			div2 = element("div");
+    			t4 = text(t4_value);
+    			t5 = space();
+    			attr(div0, "class", "side svelte-4j42qi");
+    			set_style(div0, "text-align", "right");
+    			attr(div1, "class", "red svelte-4j42qi");
+    			attr(div2, "class", "side svelte-4j42qi");
+    			set_style(div2, "text-align", "left");
+    			attr(div3, "class", "row svelte-4j42qi");
     		},
     		m(target, anchor) {
-    			mount_component(day, target, anchor);
-    			current = true;
+    			insert(target, div3, anchor);
+    			append(div3, div0);
+    			append(div0, t0);
+    			append(div3, t1);
+    			append(div3, div1);
+    			append(div1, t2);
+    			append(div3, t3);
+    			append(div3, div2);
+    			append(div2, t4);
+    			append(div3, t5);
     		},
-    		p(ctx, dirty) {
-    			const day_changes = {};
-    			if (dirty & /*days*/ 2) day_changes.date = /*d*/ ctx[7];
-    			day.$set(day_changes);
-    		},
-    		i(local) {
-    			if (current) return;
-    			transition_in(day.$$.fragment, local);
-    			current = true;
-    		},
-    		o(local) {
-    			transition_out(day.$$.fragment, local);
-    			current = false;
-    		},
+    		p: noop,
     		d(detaching) {
-    			destroy_component(day, detaching);
+    			if (detaching) detach(div3);
     		}
     	};
     }
 
-    // (99:6) <Year date={days[0]}>
-    function create_default_slot$1(ctx) {
-    	let each_1_anchor;
-    	let current;
-    	let each_value = /*days*/ ctx[1];
+    function create_fragment$3(ctx) {
+    	let div;
+    	let each_value = /*list*/ ctx[0];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
     	}
 
-    	const out = i => transition_out(each_blocks[i], 1, 1, () => {
-    		each_blocks[i] = null;
-    	});
-
     	return {
     		c() {
+    			div = element("div");
+
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			each_1_anchor = empty();
+    			attr(div, "class", "col svelte-4j42qi");
     		},
     		m(target, anchor) {
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(target, anchor);
-    			}
+    			insert(target, div, anchor);
 
-    			insert(target, each_1_anchor, anchor);
-    			current = true;
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
     		},
-    		p(ctx, dirty) {
-    			if (dirty & /*days*/ 2) {
-    				each_value = /*days*/ ctx[1];
+    		p(ctx, [dirty]) {
+    			if (dirty & /*list*/ 1) {
+    				each_value = /*list*/ ctx[0];
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -46872,78 +46834,97 @@ var app = (function () {
 
     					if (each_blocks[i]) {
     						each_blocks[i].p(child_ctx, dirty);
-    						transition_in(each_blocks[i], 1);
     					} else {
     						each_blocks[i] = create_each_block$2(child_ctx);
     						each_blocks[i].c();
-    						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+    						each_blocks[i].m(div, null);
     					}
     				}
 
-    				group_outros();
-
-    				for (i = each_value.length; i < each_blocks.length; i += 1) {
-    					out(i);
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
     				}
 
-    				check_outros();
+    				each_blocks.length = each_value.length;
     			}
     		},
-    		i(local) {
-    			if (current) return;
-
-    			for (let i = 0; i < each_value.length; i += 1) {
-    				transition_in(each_blocks[i]);
-    			}
-
-    			current = true;
-    		},
-    		o(local) {
-    			each_blocks = each_blocks.filter(Boolean);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				transition_out(each_blocks[i]);
-    			}
-
-    			current = false;
-    		},
+    		i: noop,
+    		o: noop,
     		d(detaching) {
+    			if (detaching) detach(div);
     			destroy_each(each_blocks, detaching);
-    			if (detaching) detach(each_1_anchor);
     		}
     	};
     }
 
-    function create_fragment$3(ctx) {
+    function instance$4($$self) {
+    	let list = texts.map(txt => {
+    		let doc = src$1(txt).sentences(0);
+    		let date = doc.dates(0);
+    		let s = doc.splitOn(date);
+    		return [s.eq(0).text(), s.eq(1).text(), s.eq(2).text()];
+    	});
+
+    	return [list];
+    }
+
+    class Align extends SvelteComponent {
+    	constructor(options) {
+    		super();
+    		if (!document.getElementById("svelte-4j42qi-style")) add_css$3();
+    		init(this, options, instance$4, create_fragment$3, safe_not_equal, {});
+    	}
+    }
+
+    /* Post.svelte generated by Svelte v3.32.3 */
+
+    function add_css$4() {
+    	var style = element("style");
+    	style.id = "svelte-jq91tn-style";
+    	style.textContent = ".m3.svelte-jq91tn{margin:3rem}.col.svelte-jq91tn{display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch;width:100%}.months.svelte-jq91tn{width:100%;max-width:50rem}.row.svelte-jq91tn{display:flex;flex-direction:row;justify-content:space-around;align-items:center;text-align:center;flex-wrap:nowrap;align-self:stretch}.year.svelte-jq91tn{font-size:1.5;font-weight:bold}.link.svelte-jq91tn{text-decoration:none;color:steelblue}";
+    	append(document.head, style);
+    }
+
+    function create_fragment$4(ctx) {
+    	let div9;
     	let div6;
-    	let div5;
-    	let t0;
+    	let a;
+    	let t1;
     	let codemirror;
     	let updating_text;
-    	let t1;
-    	let div0;
     	let t2;
+    	let div0;
     	let t3;
-    	let div3;
+    	let t4;
+    	let div4;
     	let div1;
     	let b0;
-    	let t5;
-    	let t6_value = /*fmt*/ ctx[5](/*start*/ ctx[2]) + "";
     	let t6;
+    	let t7_value = /*fmt*/ ctx[5](/*start*/ ctx[2]) + "";
     	let t7;
+    	let t8;
     	let div2;
-    	let b1;
+    	let t9_value = /*fmtYear*/ ctx[6](/*start*/ ctx[2]) + "";
     	let t9;
-    	let t10_value = /*fmt*/ ctx[5](/*end*/ ctx[3]) + "";
     	let t10;
-    	let t11;
-    	let div4;
+    	let div3;
+    	let b1;
+    	let t12;
+    	let t13_value = /*fmt*/ ctx[5](/*end*/ ctx[3]) + "";
+    	let t13;
+    	let t14;
+    	let div5;
     	let year;
+    	let t15;
+    	let div8;
+    	let hr;
+    	let t16;
+    	let div7;
+    	let align;
     	let current;
 
     	function codemirror_text_binding(value) {
-    		/*codemirror_text_binding*/ ctx[6](value);
+    		/*codemirror_text_binding*/ ctx[7](value);
     	}
 
     	let codemirror_props = { highlight: /*highlight*/ ctx[4] };
@@ -46957,63 +46938,91 @@ var app = (function () {
 
     	year = new Year({
     			props: {
-    				date: /*days*/ ctx[1][0],
-    				$$slots: { default: [create_default_slot$1] },
-    				$$scope: { ctx }
+    				date: /*start*/ ctx[2].format("iso-short"),
+    				days: /*days*/ ctx[1],
+    				showToday: false
     			}
     		});
 
+    	align = new Align({});
+
     	return {
     		c() {
+    			div9 = element("div");
     			div6 = element("div");
-    			div5 = element("div");
-    			t0 = text("compromise-dates\n    ");
-    			create_component(codemirror.$$.fragment);
+    			a = element("a");
+    			a.textContent = "compromise-dates";
     			t1 = space();
+    			create_component(codemirror.$$.fragment);
+    			t2 = space();
     			div0 = element("div");
-    			t2 = text(/*text*/ ctx[0]);
-    			t3 = space();
-    			div3 = element("div");
+    			t3 = text(/*text*/ ctx[0]);
+    			t4 = space();
+    			div4 = element("div");
     			div1 = element("div");
     			b0 = element("b");
     			b0.textContent = "start:";
-    			t5 = space();
-    			t6 = text(t6_value);
-    			t7 = space();
+    			t6 = space();
+    			t7 = text(t7_value);
+    			t8 = space();
     			div2 = element("div");
+    			t9 = text(t9_value);
+    			t10 = space();
+    			div3 = element("div");
     			b1 = element("b");
     			b1.textContent = "end:";
-    			t9 = space();
-    			t10 = text(t10_value);
-    			t11 = space();
-    			div4 = element("div");
+    			t12 = space();
+    			t13 = text(t13_value);
+    			t14 = space();
+    			div5 = element("div");
     			create_component(year.$$.fragment);
-    			attr(div3, "class", "m3 row svelte-1fo5w4y");
-    			attr(div4, "class", "months svelte-1fo5w4y");
-    			attr(div5, "class", "m3 col svelte-1fo5w4y");
+    			t15 = space();
+    			div8 = element("div");
+    			hr = element("hr");
+    			t16 = space();
+    			div7 = element("div");
+    			create_component(align.$$.fragment);
+    			attr(a, "class", "link svelte-jq91tn");
+    			attr(a, "href", "https://github.com/spencermountain/compromise/tree/master/plugins/dates");
+    			attr(div2, "class", "year svelte-jq91tn");
+    			attr(div4, "class", "m3 row svelte-jq91tn");
+    			attr(div5, "class", "months svelte-jq91tn");
+    			attr(div6, "class", "m3 col svelte-jq91tn");
+    			attr(div7, "class", "m3 svelte-jq91tn");
+    			attr(div8, "class", "m3 svelte-jq91tn");
     		},
     		m(target, anchor) {
-    			insert(target, div6, anchor);
-    			append(div6, div5);
-    			append(div5, t0);
-    			mount_component(codemirror, div5, null);
-    			append(div5, t1);
-    			append(div5, div0);
-    			append(div0, t2);
-    			append(div5, t3);
-    			append(div5, div3);
-    			append(div3, div1);
+    			insert(target, div9, anchor);
+    			append(div9, div6);
+    			append(div6, a);
+    			append(div6, t1);
+    			mount_component(codemirror, div6, null);
+    			append(div6, t2);
+    			append(div6, div0);
+    			append(div0, t3);
+    			append(div6, t4);
+    			append(div6, div4);
+    			append(div4, div1);
     			append(div1, b0);
-    			append(div1, t5);
     			append(div1, t6);
-    			append(div3, t7);
-    			append(div3, div2);
-    			append(div2, b1);
+    			append(div1, t7);
+    			append(div4, t8);
+    			append(div4, div2);
     			append(div2, t9);
-    			append(div2, t10);
-    			append(div5, t11);
-    			append(div5, div4);
-    			mount_component(year, div4, null);
+    			append(div4, t10);
+    			append(div4, div3);
+    			append(div3, b1);
+    			append(div3, t12);
+    			append(div3, t13);
+    			append(div6, t14);
+    			append(div6, div5);
+    			mount_component(year, div5, null);
+    			append(div9, t15);
+    			append(div9, div8);
+    			append(div8, hr);
+    			append(div8, t16);
+    			append(div8, div7);
+    			mount_component(align, div7, null);
     			current = true;
     		},
     		p(ctx, [dirty]) {
@@ -47026,43 +47035,43 @@ var app = (function () {
     			}
 
     			codemirror.$set(codemirror_changes);
-    			if (!current || dirty & /*text*/ 1) set_data(t2, /*text*/ ctx[0]);
-    			if ((!current || dirty & /*start*/ 4) && t6_value !== (t6_value = /*fmt*/ ctx[5](/*start*/ ctx[2]) + "")) set_data(t6, t6_value);
-    			if ((!current || dirty & /*end*/ 8) && t10_value !== (t10_value = /*fmt*/ ctx[5](/*end*/ ctx[3]) + "")) set_data(t10, t10_value);
+    			if (!current || dirty & /*text*/ 1) set_data(t3, /*text*/ ctx[0]);
+    			if ((!current || dirty & /*start*/ 4) && t7_value !== (t7_value = /*fmt*/ ctx[5](/*start*/ ctx[2]) + "")) set_data(t7, t7_value);
+    			if ((!current || dirty & /*start*/ 4) && t9_value !== (t9_value = /*fmtYear*/ ctx[6](/*start*/ ctx[2]) + "")) set_data(t9, t9_value);
+    			if ((!current || dirty & /*end*/ 8) && t13_value !== (t13_value = /*fmt*/ ctx[5](/*end*/ ctx[3]) + "")) set_data(t13, t13_value);
     			const year_changes = {};
-    			if (dirty & /*days*/ 2) year_changes.date = /*days*/ ctx[1][0];
-
-    			if (dirty & /*$$scope, days*/ 1026) {
-    				year_changes.$$scope = { dirty, ctx };
-    			}
-
+    			if (dirty & /*start*/ 4) year_changes.date = /*start*/ ctx[2].format("iso-short");
+    			if (dirty & /*days*/ 2) year_changes.days = /*days*/ ctx[1];
     			year.$set(year_changes);
     		},
     		i(local) {
     			if (current) return;
     			transition_in(codemirror.$$.fragment, local);
     			transition_in(year.$$.fragment, local);
+    			transition_in(align.$$.fragment, local);
     			current = true;
     		},
     		o(local) {
     			transition_out(codemirror.$$.fragment, local);
     			transition_out(year.$$.fragment, local);
+    			transition_out(align.$$.fragment, local);
     			current = false;
     		},
     		d(detaching) {
-    			if (detaching) detach(div6);
+    			if (detaching) detach(div9);
     			destroy_component(codemirror);
     			destroy_component(year);
+    			destroy_component(align);
     		}
     	};
     }
 
     function instance$5($$self, $$props, $$invalidate) {
-    	let text = "two weeks from this friday";
+    	let text = "next weekend";
     	src$1.plugin(src$2);
     	src$1.plugin(src$4);
-    	let days = [];
-    	let start = null;
+    	let days = {};
+    	let start = src$3();
     	let end = null;
 
     	const highlight = function (str = "") {
@@ -47082,9 +47091,18 @@ var app = (function () {
     		if (json[0] && json[0].date) {
     			$$invalidate(2, start = src$3(json[0].date.start));
     			$$invalidate(3, end = src$3(json[0].date.end));
-    			$$invalidate(1, days = start.minus(1, "second").every("day", end).slice(0, 400));
-    			$$invalidate(1, days = days.map(s => s.format("iso-short")));
-    			console.log("days", days);
+    			let show = start.minus(1, "second").every("day", end).slice(0, 400);
+
+    			// from = show[0]
+    			// to = show[show.length - 1]
+    			$$invalidate(1, days = {});
+
+    			show.forEach(s => {
+    				let iso = s.format("iso-short");
+    				$$invalidate(1, days[iso] = "blue", days);
+    			});
+
+    			Object.keys(days)[0];
     		} else {
     			$$invalidate(1, days = []);
     		}
@@ -47100,19 +47118,27 @@ var app = (function () {
     		return "-";
     	};
 
+    	const fmtYear = function (s) {
+    		if (s) {
+    			return s.format("{year}");
+    		}
+
+    		return "-";
+    	};
+
     	function codemirror_text_binding(value) {
     		text = value;
     		$$invalidate(0, text);
     	}
 
-    	return [text, days, start, end, highlight, fmt, codemirror_text_binding];
+    	return [text, days, start, end, highlight, fmt, fmtYear, codemirror_text_binding];
     }
 
     class Post extends SvelteComponent {
     	constructor(options) {
     		super();
-    		if (!document.getElementById("svelte-1fo5w4y-style")) add_css$3();
-    		init(this, options, instance$5, create_fragment$3, safe_not_equal, {});
+    		if (!document.getElementById("svelte-jq91tn-style")) add_css$4();
+    		init(this, options, instance$5, create_fragment$4, safe_not_equal, {});
     	}
     }
 
