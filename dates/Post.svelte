@@ -1,14 +1,19 @@
 <script>
+  let nlp=window.nlp
+  nlp.plugin(window.compromiseDates)
+  nlp.plugin(window.compromiseNumbers)
   import CodeMirror from './CodeMirror/CodeMirror.svelte'
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src'
   let text = 'next weekend'
-  import nlp from 'compromise'
-  import nlpDates from 'compromise-dates'
+  // import nlp from 'compromise'
+  // import nlpDates from 'compromise-dates'
+  // import nlpNumbers from 'compromise-numbers'
+
+
   import spacetime from 'spacetime'
-  import nlpNumbers from 'compromise-numbers'
   import Align from './Align.svelte'
-  nlp.plugin(nlpDates)
-  nlp.plugin(nlpNumbers)
+  // nlp.plugin(nlpDates)
+  // nlp.plugin(nlpNumbers)
   let days = {}
   let start = spacetime()
   let end = null
@@ -26,9 +31,9 @@
         tag: 'tag'
       }
     })
-    if (json[0] && json[0].date) {
-      start = spacetime(json[0].date.start)
-      end = spacetime(json[0].date.end)
+    if (json[0] && json[0]) {
+      start = spacetime(json[0].start)
+      end = spacetime(json[0].end)
       let show = start
         .minus(1, 'second')
         .every('day', end)

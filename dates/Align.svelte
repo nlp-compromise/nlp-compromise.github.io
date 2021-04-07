@@ -1,6 +1,9 @@
 <script>
   import texts from './data/dates'
-  import nlp from 'compromise'
+  // import nlp from 'compromise'
+  let nlp=window.nlp
+  nlp.plugin(window.compromiseDates)
+  nlp.plugin(window.compromiseNumbers)
   // export let text =
   let list = texts.map(txt => {
     let doc = nlp(txt).sentences(0)

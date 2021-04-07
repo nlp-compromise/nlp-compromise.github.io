@@ -15,6 +15,7 @@
     "htm": "^2.2.1",
     "somehow": "0.3.5",
     "superagent": "5.1.2",
+    "svelte": "^3.34.0",
     "vhtml": "^2.1.0"
   },
   "devDependencies": {
