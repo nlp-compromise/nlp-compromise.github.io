@@ -19995,7 +19995,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (51:2) {#each list as a}
+    // (80:2) {#each list as a}
     function create_each_block$2(ctx) {
     	let div3;
     	let div0;
@@ -20042,7 +20042,11 @@ var app = (function () {
     			append(div2, t4);
     			append(div3, t5);
     		},
-    		p: noop,
+    		p(ctx, dirty) {
+    			if (dirty & /*list*/ 1 && t0_value !== (t0_value = /*a*/ ctx[2][0] + "")) set_data(t0, t0_value);
+    			if (dirty & /*list*/ 1 && t2_value !== (t2_value = /*a*/ ctx[2][1] + "")) set_data(t2, t2_value);
+    			if (dirty & /*list*/ 1 && t4_value !== (t4_value = /*a*/ ctx[2][2] + "")) set_data(t4, t4_value);
+    		},
     		d(detaching) {
     			if (detaching) detach(div3);
     		}
@@ -20108,7 +20112,9 @@ var app = (function () {
     	};
     }
 
-    function instance$3($$self) {
+    const max = 80;
+
+    function instance$3($$self, $$props, $$invalidate) {
     	let nlp = window.nlp;
     	nlp.plugin(window.compromiseDates);
     	nlp.plugin(window.compromiseNumbers);
@@ -20117,8 +20123,45 @@ var app = (function () {
     	let list = texts.map(txt => {
     		let doc = nlp(txt).sentences(0);
     		let date = doc.dates(0);
+
+    		if (!date.found) {
+    			return null;
+    		}
+
     		let s = doc.splitOn(date);
+
+    		// console.log(s.out('array'))
+    		if (s.length < 2) {
+    			return null;
+    		}
+
+    		if (s.length === 2) {
+    			if (s.eq(1).has("^#Date+$")) {
+    				return [s.eq(0).text(), s.eq(1).text(), ""];
+    			} else {
+    				return ["", s.eq(0).text(), s.eq(1).text()];
+    			}
+    		}
+
     		return [s.eq(0).text(), s.eq(1).text(), s.eq(2).text()];
+    	});
+
+    	list = list.filter(l => l);
+
+    	list = list.map(a => {
+    		if (a[0].length > max) {
+    			a[0] = a[0].substr(a[0].length - max, a[0].length);
+    		}
+
+    		if (a[1].length > max) {
+    			a[1] = a[1].substr(0, max);
+    		}
+
+    		if (a[2].length > max) {
+    			a[2] = a[2].substr(0, max);
+    		}
+
+    		return a;
     	});
 
     	return [list];

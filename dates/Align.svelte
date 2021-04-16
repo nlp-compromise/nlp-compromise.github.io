@@ -8,8 +8,37 @@
   let list = texts.map(txt => {
     let doc = nlp(txt).sentences(0)
     let date = doc.dates(0)
+    if(!date.found){
+      return null
+    }
     let s = doc.splitOn(date)
+    // console.log(s.out('array'))
+    if(s.length<2){
+      return null
+    }
+    if(s.length===2){
+      if(s.eq(1).has('^#Date+$')){
+        return [s.eq(0).text(), s.eq(1).text(), '']
+      }else{
+        return ['', s.eq(0).text(), s.eq(1).text()]
+      }
+    }
     return [s.eq(0).text(), s.eq(1).text(), s.eq(2).text()]
+  })
+  list=list.filter(l => l)
+  // truncate strings on both sides
+  const max=80
+  list=list.map(a => {
+    if(a[0].length>max){
+      a[0]=a[0].substr(a[0].length-max, a[0].length)
+    }
+    if(a[1].length>max){
+      a[1]=a[1].substr(0,max)
+    }
+    if(a[2].length>max){
+      a[2]=a[2].substr(0,max)
+    }
+    return a
   })
 </script>
 
