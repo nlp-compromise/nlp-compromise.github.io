@@ -22,6 +22,10 @@ doc.match('{plug/stop} (a|the) #Noun')
 </script>
 
 <Page>
+  <Block color="#6699cc" />
+</Page>
+
+<Page>
   <Left>
     <div class="tab">
       <h2>Step 4: -</h2>

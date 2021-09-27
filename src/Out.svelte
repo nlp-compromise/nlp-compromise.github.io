@@ -19,8 +19,8 @@
     </div>
     <div class="tab">paid work often shows up <a href="">in our public discord</a>.</div>
     <div class="down">PRs are <a href="">well-considered</a> and respected 🔵</div>
-    <div class="down">Web-assembly <b>&lt;should happen&gt;</b></div>
-    <div class="down">Languages other than english &lt;are happening slowly&gt;:</div>
+    <div class="down">Web-assembly <b>&lt;should definetly happen&gt;</b></div>
+    <div class="down">Non-english languages &lt;are happening slowly&gt;:</div>
   </One>
   <One />
 

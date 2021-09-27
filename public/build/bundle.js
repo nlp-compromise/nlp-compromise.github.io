@@ -2108,7 +2108,7 @@ var app = (function () {
     }
 
     // (23:2) <Left>
-    function create_default_slot_4$3(ctx) {
+    function create_default_slot_4$4(ctx) {
     	let div2;
     	let t0;
     	let div1;
@@ -2143,7 +2143,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$3.name,
+    		id: create_default_slot_4$4.name,
     		type: "slot",
     		source: "(23:2) <Left>",
     		ctx
@@ -2197,7 +2197,7 @@ var app = (function () {
     			li2 = element("li");
     			t11 = text("ways to make typing-interfaces\n        ");
     			div5 = element("div");
-    			div5.textContent = "and make them actually good";
+    			div5.textContent = "make them actually good";
     			attr_dev(div0, "class", "space");
     			add_location(div0, file$7, 32, 4, 1042);
     			add_location(div1, file$7, 33, 4, 1068);
@@ -2316,36 +2316,36 @@ var app = (function () {
     			t16 = text("that's the best way to build\n      ");
     			div8 = element("div");
     			div8.textContent = "a crazy set of things.";
-    			add_location(i, file$7, 52, 13, 1694);
-    			add_location(br, file$7, 53, 4, 1736);
+    			add_location(i, file$7, 52, 13, 1690);
+    			add_location(br, file$7, 53, 4, 1732);
     			attr_dev(a, "href", "https://github.com/spencermountain/compromise/graphs/contributors");
-    			add_location(a, file$7, 54, 10, 1753);
+    			add_location(a, file$7, 54, 10, 1749);
     			attr_dev(div0, "class", "down f2 fuscia tab");
-    			add_location(div0, file$7, 56, 4, 1879);
+    			add_location(div0, file$7, 56, 4, 1875);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 58, 6, 2028);
+    			add_location(div1, file$7, 58, 6, 2024);
     			attr_dev(div2, "class", "down f2 tulip");
     			set_style(div2, "margin-top", "100px");
     			set_style(div2, "margin-left", "250px");
-    			add_location(div2, file$7, 57, 4, 1949);
+    			add_location(div2, file$7, 57, 4, 1945);
     			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$7, 61, 6, 2170);
+    			add_location(div3, file$7, 61, 6, 2166);
     			attr_dev(div4, "class", "down f2 sky");
     			set_style(div4, "margin-top", "100px");
     			set_style(div4, "margin-left", "100px");
-    			add_location(div4, file$7, 60, 4, 2093);
+    			add_location(div4, file$7, 60, 4, 2089);
     			attr_dev(div5, "class", "tab f2 blue");
-    			add_location(div5, file$7, 65, 6, 2308);
+    			add_location(div5, file$7, 65, 6, 2304);
     			attr_dev(div6, "class", "down ");
     			set_style(div6, "margin-top", "100px");
     			set_style(div6, "margin-left", "100px");
-    			add_location(div6, file$7, 63, 4, 2226);
+    			add_location(div6, file$7, 63, 4, 2222);
     			set_style(div7, "margin-top", "100px");
-    			add_location(div7, file$7, 67, 4, 2377);
+    			add_location(div7, file$7, 67, 4, 2373);
     			attr_dev(div8, "class", "tab");
-    			add_location(div8, file$7, 70, 6, 2479);
+    			add_location(div8, file$7, 70, 6, 2475);
     			attr_dev(div9, "class", "down tab");
-    			add_location(div9, file$7, 68, 4, 2415);
+    			add_location(div9, file$7, 68, 4, 2411);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -2446,11 +2446,11 @@ var app = (function () {
     			t6 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(div0, "class", "sea f09");
-    			add_location(div0, file$7, 76, 6, 2622);
-    			add_location(kbd0, file$7, 77, 6, 2667);
-    			add_location(kbd1, file$7, 78, 6, 2749);
+    			add_location(div0, file$7, 76, 6, 2618);
+    			add_location(kbd0, file$7, 77, 6, 2663);
+    			add_location(kbd1, file$7, 78, 6, 2745);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 75, 4, 2598);
+    			add_location(div1, file$7, 75, 4, 2594);
     		},
     		m: function mount(target, anchor) {
     			mount_component(grid0, target, anchor);
@@ -2523,7 +2523,7 @@ var app = (function () {
 
     	left0 = new Left({
     			props: {
-    				$$slots: { default: [create_default_slot_4$3] },
+    				$$slots: { default: [create_default_slot_4$4] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -2906,7 +2906,7 @@ var app = (function () {
     }
 
     // (14:2) <Left>
-    function create_default_slot_4$2(ctx) {
+    function create_default_slot_4$3(ctx) {
     	let h2;
     	let t1;
     	let div;
@@ -2940,7 +2940,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$2.name,
+    		id: create_default_slot_4$3.name,
     		type: "slot",
     		source: "(14:2) <Left>",
     		ctx
@@ -2959,23 +2959,27 @@ var app = (function () {
     	let t4;
     	let span1;
     	let t6;
-    	let t7;
-    	let div2;
+    	let span2;
+    	let t8;
     	let t9;
-    	let div3;
+    	let div2;
     	let t11;
-    	let div4;
+    	let div3;
     	let t13;
-    	let div5;
+    	let div4;
     	let t15;
-    	let div6;
+    	let div5;
     	let t17;
-    	let div7;
+    	let div6;
     	let t19;
-    	let div8;
+    	let div7;
     	let t21;
     	let div9;
-    	let t23;
+    	let t22;
+    	let div8;
+    	let t24;
+    	let div10;
+    	let t26;
     	let i;
 
     	const block = {
@@ -2990,59 +2994,68 @@ var app = (function () {
     			t4 = text(" and ");
     			span1 = element("span");
     			span1.textContent = "words";
-    			t6 = text(".");
-    			t7 = space();
+    			t6 = text(" and\n      ");
+    			span2 = element("span");
+    			span2.textContent = "punctuation";
+    			t8 = text(".");
+    			t9 = space();
     			div2 = element("div");
     			div2.textContent = "it's been refined over 8 ruthless github-years";
-    			t9 = space();
+    			t11 = space();
     			div3 = element("div");
     			div3.textContent = "and is running at the UN, government orgs, banks, and many software companies.";
-    			t11 = space();
+    			t13 = space();
     			div4 = element("div");
     			div4.textContent = "it actually just works.";
-    			t13 = space();
+    			t15 = space();
     			div5 = element("div");
     			div5.textContent = "you're allowed to be suspicious of it, though.";
-    			t15 = space();
+    			t17 = space();
     			div6 = element("div");
     			div6.textContent = "but, you can";
-    			t17 = space();
+    			t19 = space();
     			div7 = element("div");
     			div7.textContent = "turn your novel into JSON";
-    			t19 = space();
-    			div8 = element("div");
-    			div8.textContent = "with a one-liner-";
     			t21 = space();
     			div9 = element("div");
-    			div9.textContent = "when someone tells you it's impossible, give a polite shrug";
-    			t23 = space();
+    			t22 = text("with a one-liner-\n\n      ");
+    			div8 = element("div");
+    			div8.textContent = "in a couple milliseconds";
+    			t24 = space();
+    			div10 = element("div");
+    			div10.textContent = "when someone tells you it's impossible, give a polite shrug";
+    			t26 = space();
     			i = element("i");
     			i.textContent = "haha, i dunno man!";
     			add_location(div0, file$5, 21, 4, 485);
     			attr_dev(span0, "class", "cherry");
-    			add_location(span0, file$5, 22, 40, 569);
+    			add_location(span0, file$5, 23, 25, 576);
     			attr_dev(span1, "class", "rose");
-    			add_location(span1, file$5, 22, 82, 611);
+    			add_location(span1, file$5, 23, 67, 618);
+    			attr_dev(span2, "class", "sky");
+    			add_location(span2, file$5, 24, 6, 660);
     			attr_dev(div1, "class", "tab");
     			add_location(div1, file$5, 22, 4, 533);
     			attr_dev(div2, "class", "down");
-    			add_location(div2, file$5, 23, 4, 654);
+    			add_location(div2, file$5, 26, 4, 713);
     			attr_dev(div3, "class", "tab f09");
-    			add_location(div3, file$5, 24, 4, 729);
+    			add_location(div3, file$5, 27, 4, 788);
     			attr_dev(div4, "class", "down f09");
-    			add_location(div4, file$5, 27, 4, 926);
+    			add_location(div4, file$5, 30, 4, 985);
     			attr_dev(div5, "class", "f09");
-    			add_location(div5, file$5, 28, 4, 982);
+    			add_location(div5, file$5, 31, 4, 1041);
     			attr_dev(div6, "class", "down f09");
-    			add_location(div6, file$5, 29, 4, 1057);
+    			add_location(div6, file$5, 32, 4, 1116);
     			attr_dev(div7, "class", "down f2 tab");
-    			add_location(div7, file$5, 30, 4, 1102);
+    			add_location(div7, file$5, 33, 4, 1161);
     			attr_dev(div8, "class", "tab");
-    			add_location(div8, file$5, 31, 4, 1163);
-    			attr_dev(div9, "class", "tab down f09");
-    			add_location(div9, file$5, 32, 4, 1208);
+    			add_location(div8, file$5, 37, 6, 1271);
+    			attr_dev(div9, "class", "tab");
+    			add_location(div9, file$5, 34, 4, 1222);
+    			attr_dev(div10, "class", "tab down f09");
+    			add_location(div10, file$5, 39, 4, 1334);
     			attr_dev(i, "class", "tab f09");
-    			add_location(i, file$5, 33, 4, 1304);
+    			add_location(i, file$5, 40, 4, 1430);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -3053,46 +3066,50 @@ var app = (function () {
     			append_dev(div1, t4);
     			append_dev(div1, span1);
     			append_dev(div1, t6);
-    			insert_dev(target, t7, anchor);
-    			insert_dev(target, div2, anchor);
+    			append_dev(div1, span2);
+    			append_dev(div1, t8);
     			insert_dev(target, t9, anchor);
-    			insert_dev(target, div3, anchor);
+    			insert_dev(target, div2, anchor);
     			insert_dev(target, t11, anchor);
-    			insert_dev(target, div4, anchor);
+    			insert_dev(target, div3, anchor);
     			insert_dev(target, t13, anchor);
-    			insert_dev(target, div5, anchor);
+    			insert_dev(target, div4, anchor);
     			insert_dev(target, t15, anchor);
-    			insert_dev(target, div6, anchor);
+    			insert_dev(target, div5, anchor);
     			insert_dev(target, t17, anchor);
-    			insert_dev(target, div7, anchor);
+    			insert_dev(target, div6, anchor);
     			insert_dev(target, t19, anchor);
-    			insert_dev(target, div8, anchor);
+    			insert_dev(target, div7, anchor);
     			insert_dev(target, t21, anchor);
     			insert_dev(target, div9, anchor);
-    			insert_dev(target, t23, anchor);
+    			append_dev(div9, t22);
+    			append_dev(div9, div8);
+    			insert_dev(target, t24, anchor);
+    			insert_dev(target, div10, anchor);
+    			insert_dev(target, t26, anchor);
     			insert_dev(target, i, anchor);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div0);
     			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t7);
-    			if (detaching) detach_dev(div2);
     			if (detaching) detach_dev(t9);
-    			if (detaching) detach_dev(div3);
+    			if (detaching) detach_dev(div2);
     			if (detaching) detach_dev(t11);
-    			if (detaching) detach_dev(div4);
+    			if (detaching) detach_dev(div3);
     			if (detaching) detach_dev(t13);
-    			if (detaching) detach_dev(div5);
+    			if (detaching) detach_dev(div4);
     			if (detaching) detach_dev(t15);
-    			if (detaching) detach_dev(div6);
+    			if (detaching) detach_dev(div5);
     			if (detaching) detach_dev(t17);
-    			if (detaching) detach_dev(div7);
+    			if (detaching) detach_dev(div6);
     			if (detaching) detach_dev(t19);
-    			if (detaching) detach_dev(div8);
+    			if (detaching) detach_dev(div7);
     			if (detaching) detach_dev(t21);
     			if (detaching) detach_dev(div9);
-    			if (detaching) detach_dev(t23);
+    			if (detaching) detach_dev(t24);
+    			if (detaching) detach_dev(div10);
+    			if (detaching) detach_dev(t26);
     			if (detaching) detach_dev(i);
     		}
     	};
@@ -3108,7 +3125,7 @@ var app = (function () {
     	return block;
     }
 
-    // (37:2) <One>
+    // (44:2) <One>
     function create_default_slot_2$3(ctx) {
     	let div;
     	let kbd;
@@ -3120,8 +3137,8 @@ var app = (function () {
     			kbd = element("kbd");
     			kbd.textContent = "compromise/one";
     			t1 = text(" is like 20kb of javascript:");
-    			add_location(kbd, file$5, 37, 9, 1373);
-    			add_location(div, file$5, 37, 4, 1368);
+    			add_location(kbd, file$5, 44, 9, 1499);
+    			add_location(div, file$5, 44, 4, 1494);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -3137,14 +3154,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$3.name,
     		type: "slot",
-    		source: "(37:2) <One>",
+    		source: "(44:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (48:2) <One>
+    // (55:2) <One>
     function create_default_slot_1$4(ctx) {
     	let div0;
     	let t1;
@@ -3216,31 +3233,31 @@ var app = (function () {
     			span3.textContent = "Indexing and lookup";
     			t14 = space();
     			create_component(caret3.$$.fragment);
-    			add_location(div0, file$5, 48, 4, 1605);
+    			add_location(div0, file$5, 55, 4, 1731);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 49, 4, 1653);
+    			add_location(div1, file$5, 56, 4, 1779);
     			attr_dev(span0, "class", "choose");
-    			add_location(span0, file$5, 51, 22, 1754);
+    			add_location(span0, file$5, 58, 22, 1880);
     			attr_dev(a0, "href", "#");
-    			add_location(a0, file$5, 51, 10, 1742);
-    			add_location(li0, file$5, 51, 6, 1738);
+    			add_location(a0, file$5, 58, 10, 1868);
+    			add_location(li0, file$5, 58, 6, 1864);
     			attr_dev(span1, "class", "choose");
-    			add_location(span1, file$5, 52, 22, 1836);
+    			add_location(span1, file$5, 59, 22, 1962);
     			attr_dev(a1, "href", "#");
-    			add_location(a1, file$5, 52, 10, 1824);
-    			add_location(li1, file$5, 52, 6, 1820);
+    			add_location(a1, file$5, 59, 10, 1950);
+    			add_location(li1, file$5, 59, 6, 1946);
     			attr_dev(span2, "class", "choose");
-    			add_location(span2, file$5, 53, 31, 1925);
+    			add_location(span2, file$5, 60, 31, 2051);
     			attr_dev(a2, "href", "#syllables");
-    			add_location(a2, file$5, 53, 10, 1904);
-    			add_location(li2, file$5, 53, 6, 1900);
+    			add_location(a2, file$5, 60, 10, 2030);
+    			add_location(li2, file$5, 60, 6, 2026);
     			attr_dev(span3, "class", "choose");
-    			add_location(span3, file$5, 54, 22, 2011);
+    			add_location(span3, file$5, 61, 22, 2137);
     			attr_dev(a3, "href", "#");
-    			add_location(a3, file$5, 54, 10, 1999);
-    			add_location(li3, file$5, 54, 6, 1995);
+    			add_location(a3, file$5, 61, 10, 2125);
+    			add_location(li3, file$5, 61, 6, 2121);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$5, 50, 4, 1709);
+    			add_location(ul, file$5, 57, 4, 1835);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -3305,7 +3322,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$4.name,
     		type: "slot",
-    		source: "(48:2) <One>",
+    		source: "(55:2) <One>",
     		ctx
     	});
 
@@ -3327,7 +3344,7 @@ var app = (function () {
 
     	left = new Left({
     			props: {
-    				$$slots: { default: [create_default_slot_4$2] },
+    				$$slots: { default: [create_default_slot_4$3] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -3370,7 +3387,7 @@ var app = (function () {
     			div = element("div");
     			div.textContent = "or take a bigger bite ↓";
     			attr_dev(div, "class", "m2 slate down f09");
-    			add_location(div, file$5, 57, 2, 2099);
+    			add_location(div, file$5, 64, 2, 2225);
     		},
     		m: function mount(target, anchor) {
     			mount_component(left, target, anchor);
@@ -3804,7 +3821,7 @@ var app = (function () {
     }
 
     // (37:2) <One>
-    function create_default_slot_4$1(ctx) {
+    function create_default_slot_4$2(ctx) {
     	let div0;
     	let t1;
     	let div1;
@@ -3878,7 +3895,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$1.name,
+    		id: create_default_slot_4$2.name,
     		type: "slot",
     		source: "(37:2) <One>",
     		ctx
@@ -4166,7 +4183,7 @@ var app = (function () {
 
     	one1 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_4$1] },
+    				$$slots: { default: [create_default_slot_4$2] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -4494,15 +4511,15 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			h2 = element("h2");
-    			h2.textContent = "Step 3: Phrases";
+    			h2.textContent = "Step 3: Chunking";
     			t1 = space();
     			div = element("div");
     			kbd = element("kbd");
     			kbd.textContent = "compromise/three";
-    			add_location(h2, file$3, 15, 4, 314);
-    			add_location(kbd, file$3, 17, 6, 367);
+    			add_location(h2, file$3, 15, 4, 318);
+    			add_location(kbd, file$3, 17, 6, 372);
     			attr_dev(div, "class", "tab");
-    			add_location(div, file$3, 16, 4, 343);
+    			add_location(div, file$3, 16, 4, 348);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, h2, anchor);
@@ -4540,22 +4557,24 @@ var app = (function () {
     	let span1;
     	let t5;
     	let div2;
-    	let t7;
-    	let div3;
-    	let t8;
+    	let t6;
     	let span2;
-    	let t10;
+    	let t8;
+    	let div3;
+    	let t9;
+    	let span3;
     	let t11;
-    	let div5;
     	let t12;
+    	let div5;
+    	let t13;
     	let div9;
     	let div6;
-    	let t14;
-    	let div7;
     	let t15;
-    	let br;
+    	let div7;
     	let t16;
+    	let br;
     	let t17;
+    	let t18;
     	let div8;
 
     	const block = {
@@ -4572,51 +4591,55 @@ var app = (function () {
     			span1.textContent = "'jet skiing'";
     			t5 = space();
     			div2 = element("div");
-    			div2.textContent = "'breaking up'";
-    			t7 = space();
-    			div3 = element("div");
-    			t8 = text("and ");
+    			t6 = text("and also ");
     			span2 = element("span");
-    			span2.textContent = "'Calgary, Alberta'";
-    			t10 = text(".");
-    			t11 = space();
-    			div5 = element("div");
+    			span2.textContent = "'breaking up'";
+    			t8 = space();
+    			div3 = element("div");
+    			t9 = text("and ");
+    			span3 = element("span");
+    			span3.textContent = "'Calgary Alberta'";
+    			t11 = text(".");
     			t12 = space();
+    			div5 = element("div");
+    			t13 = space();
     			div9 = element("div");
     			div6 = element("div");
     			div6.textContent = "it's too bad -";
-    			t14 = space();
+    			t15 = space();
     			div7 = element("div");
-    			t15 = text("sometimes a word is two things, ");
+    			t16 = text("a word can be two things, ");
     			br = element("br");
-    			t16 = text("sometimes a third of a thing.");
-    			t17 = space();
+    			t17 = text("or sometimes 1/3rd of a thing.");
+    			t18 = space();
     			div8 = element("div");
     			div8.textContent = "words are tricky.";
     			attr_dev(span0, "class", "blue");
-    			add_location(span0, file$3, 22, 22, 456);
+    			add_location(span0, file$3, 22, 22, 461);
     			attr_dev(div0, "class", "f2");
-    			add_location(div0, file$3, 22, 6, 440);
+    			add_location(div0, file$3, 22, 6, 445);
     			attr_dev(span1, "class", "blue i");
-    			add_location(span1, file$3, 23, 30, 563);
+    			add_location(span1, file$3, 23, 30, 568);
     			attr_dev(div1, "class", "down");
-    			add_location(div1, file$3, 23, 6, 539);
-    			attr_dev(div2, "class", "down blue i");
-    			add_location(div2, file$3, 24, 6, 616);
+    			add_location(div1, file$3, 23, 6, 544);
     			attr_dev(span2, "class", "blue i");
-    			add_location(span2, file$3, 25, 29, 690);
-    			attr_dev(div3, "class", "down ");
-    			add_location(div3, file$3, 25, 6, 667);
-    			add_location(div4, file$3, 21, 4, 428);
+    			add_location(span2, file$3, 24, 33, 648);
+    			attr_dev(div2, "class", "down");
+    			add_location(div2, file$3, 24, 6, 621);
+    			attr_dev(span3, "class", "blue i");
+    			add_location(span3, file$3, 25, 28, 724);
+    			attr_dev(div3, "class", "down");
+    			add_location(div3, file$3, 25, 6, 702);
+    			add_location(div4, file$3, 21, 4, 433);
     			attr_dev(div5, "class", "mt4");
-    			add_location(div5, file$3, 27, 4, 759);
-    			add_location(div6, file$3, 29, 6, 808);
-    			add_location(br, file$3, 30, 55, 889);
+    			add_location(div5, file$3, 27, 4, 792);
+    			add_location(div6, file$3, 29, 6, 841);
+    			add_location(br, file$3, 30, 49, 916);
     			attr_dev(div7, "class", "tab");
-    			add_location(div7, file$3, 30, 6, 840);
-    			add_location(div8, file$3, 31, 6, 937);
+    			add_location(div7, file$3, 30, 6, 873);
+    			add_location(div8, file$3, 31, 6, 965);
     			attr_dev(div9, "class", "tab");
-    			add_location(div9, file$3, 28, 4, 783);
+    			add_location(div9, file$3, 28, 4, 816);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div4, anchor);
@@ -4629,29 +4652,31 @@ var app = (function () {
     			append_dev(div1, span1);
     			append_dev(div4, t5);
     			append_dev(div4, div2);
-    			append_dev(div4, t7);
+    			append_dev(div2, t6);
+    			append_dev(div2, span2);
+    			append_dev(div4, t8);
     			append_dev(div4, div3);
-    			append_dev(div3, t8);
-    			append_dev(div3, span2);
-    			append_dev(div3, t10);
-    			insert_dev(target, t11, anchor);
-    			insert_dev(target, div5, anchor);
+    			append_dev(div3, t9);
+    			append_dev(div3, span3);
+    			append_dev(div3, t11);
     			insert_dev(target, t12, anchor);
+    			insert_dev(target, div5, anchor);
+    			insert_dev(target, t13, anchor);
     			insert_dev(target, div9, anchor);
     			append_dev(div9, div6);
-    			append_dev(div9, t14);
+    			append_dev(div9, t15);
     			append_dev(div9, div7);
-    			append_dev(div7, t15);
-    			append_dev(div7, br);
     			append_dev(div7, t16);
-    			append_dev(div9, t17);
+    			append_dev(div7, br);
+    			append_dev(div7, t17);
+    			append_dev(div9, t18);
     			append_dev(div9, div8);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t11);
-    			if (detaching) detach_dev(div5);
     			if (detaching) detach_dev(t12);
+    			if (detaching) detach_dev(div5);
+    			if (detaching) detach_dev(t13);
     			if (detaching) detach_dev(div9);
     		}
     	};
@@ -4668,17 +4693,17 @@ var app = (function () {
     }
 
     // (35:2) <One>
-    function create_default_slot_4(ctx) {
+    function create_default_slot_4$1(ctx) {
     	let div0;
     	let t1;
-    	let div1;
-    	let t3;
     	let div2;
-    	let t5;
+    	let t2;
+    	let div1;
+    	let t4;
     	let div3;
-    	let t7;
+    	let t6;
     	let div4;
-    	let t9;
+    	let t8;
     	let div5;
 
     	const block = {
@@ -4686,62 +4711,59 @@ var app = (function () {
     			div0 = element("div");
     			div0.textContent = "in practice, people want a phrase, a clause, or a chunk of words -";
     			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "that do one thing.";
-    			t3 = space();
     			div2 = element("div");
-    			div2.textContent = "people don't wanna trip-over some adverb.";
-    			t5 = space();
+    			t2 = text("that do one thing.\n      ");
+    			div1 = element("div");
+    			div1.textContent = "and not trip-over some random adverb.";
+    			t4 = space();
     			div3 = element("div");
     			div3.textContent = "this is a harder, more-goofy task";
-    			t7 = space();
+    			t6 = space();
     			div4 = element("div");
     			div4.textContent = "but it is not impossible.";
-    			t9 = space();
+    			t8 = space();
     			div5 = element("div");
     			div5.textContent = "it allows a lot of neat things to happen";
-    			add_location(div0, file$3, 35, 4, 998);
-    			attr_dev(div1, "class", "tab i");
-    			add_location(div1, file$3, 36, 4, 1080);
-    			attr_dev(div2, "class", "down f09");
-    			add_location(div2, file$3, 37, 4, 1128);
+    			add_location(div0, file$3, 35, 4, 1026);
+    			attr_dev(div1, "class", "down f09");
+    			add_location(div1, file$3, 38, 6, 1159);
+    			attr_dev(div2, "class", "tab i");
+    			add_location(div2, file$3, 36, 4, 1108);
     			attr_dev(div3, "class", "down");
-    			add_location(div3, file$3, 38, 4, 1202);
-    			add_location(div4, file$3, 39, 4, 1264);
+    			add_location(div3, file$3, 40, 4, 1240);
+    			add_location(div4, file$3, 41, 4, 1302);
     			attr_dev(div5, "class", "down");
-    			add_location(div5, file$3, 40, 4, 1305);
+    			add_location(div5, file$3, 42, 4, 1343);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
     			insert_dev(target, t1, anchor);
-    			insert_dev(target, div1, anchor);
-    			insert_dev(target, t3, anchor);
     			insert_dev(target, div2, anchor);
-    			insert_dev(target, t5, anchor);
+    			append_dev(div2, t2);
+    			append_dev(div2, div1);
+    			insert_dev(target, t4, anchor);
     			insert_dev(target, div3, anchor);
-    			insert_dev(target, t7, anchor);
+    			insert_dev(target, t6, anchor);
     			insert_dev(target, div4, anchor);
-    			insert_dev(target, t9, anchor);
+    			insert_dev(target, t8, anchor);
     			insert_dev(target, div5, anchor);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div0);
     			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t3);
     			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t5);
+    			if (detaching) detach_dev(t4);
     			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t7);
+    			if (detaching) detach_dev(t6);
     			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t9);
+    			if (detaching) detach_dev(t8);
     			if (detaching) detach_dev(div5);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4.name,
+    		id: create_default_slot_4$1.name,
     		type: "slot",
     		source: "(35:2) <One>",
     		ctx
@@ -4750,7 +4772,7 @@ var app = (function () {
     	return block;
     }
 
-    // (43:2) <Left>
+    // (45:2) <Left>
     function create_default_slot_3$1(ctx) {
     	let div1;
     	let div0;
@@ -4765,21 +4787,33 @@ var app = (function () {
     		c: function create() {
     			div1 = element("div");
     			div0 = element("div");
-    			div0.textContent = "turn 'four hundred and five' into '405'";
+    			div0.textContent = "parse numbers:";
     			t1 = space();
     			div3 = element("div");
     			div2 = element("div");
-    			div2.textContent = "pull-out the details -";
+    			div2.textContent = "pluck-out the details:";
     			t3 = space();
     			div5 = element("div");
     			div4 = element("div");
-    			div4.textContent = "or throw a tense around";
-    			add_location(div0, file$3, 44, 6, 1404);
-    			add_location(div1, file$3, 43, 4, 1392);
-    			add_location(div2, file$3, 48, 6, 1506);
-    			add_location(div3, file$3, 47, 4, 1494);
-    			add_location(div4, file$3, 52, 6, 1591);
-    			add_location(div5, file$3, 51, 4, 1579);
+    			div4.textContent = "convert tense:";
+    			attr_dev(div0, "class", "tab f2 tulip");
+    			add_location(div0, file$3, 46, 6, 1501);
+    			attr_dev(div1, "class", "down ");
+    			set_style(div1, "margin-top", "100px");
+    			set_style(div1, "margin-left", "250px");
+    			add_location(div1, file$3, 45, 4, 1430);
+    			attr_dev(div2, "class", "tab f2 blue");
+    			add_location(div2, file$3, 50, 6, 1635);
+    			attr_dev(div3, "class", "down ");
+    			set_style(div3, "margin-top", "100px");
+    			set_style(div3, "margin-left", "100px");
+    			add_location(div3, file$3, 49, 4, 1564);
+    			attr_dev(div4, "class", "tab");
+    			add_location(div4, file$3, 54, 6, 1782);
+    			attr_dev(div5, "class", "down f2 sky");
+    			set_style(div5, "margin-top", "100px");
+    			set_style(div5, "margin-left", "200px");
+    			add_location(div5, file$3, 53, 4, 1705);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -4804,48 +4838,100 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$1.name,
     		type: "slot",
-    		source: "(43:2) <Left>",
+    		source: "(45:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (57:2) <Two>
+    // (58:2) <Two>
     function create_default_slot_2$1(ctx) {
+    	let div;
+    	let t1;
     	let ul;
     	let li0;
-    	let t1;
-    	let li1;
+    	let a0;
+    	let span0;
     	let t3;
-    	let li2;
+    	let caret0;
+    	let t4;
+    	let li1;
+    	let a1;
+    	let span1;
+    	let t6;
+    	let caret1;
+    	let current;
+    	caret0 = new Caret({ $$inline: true });
+    	caret1 = new Caret({ $$inline: true });
 
     	const block = {
     		c: function create() {
+    			div = element("div");
+    			div.textContent = "see also:";
+    			t1 = space();
     			ul = element("ul");
     			li0 = element("li");
-    			li0.textContent = "date parsing";
-    			t1 = space();
-    			li1 = element("li");
-    			li1.textContent = "redaction";
+    			a0 = element("a");
+    			span0 = element("span");
+    			span0.textContent = "Date parsing";
     			t3 = space();
-    			li2 = element("li");
-    			li2.textContent = "verb-conjugation";
-    			add_location(li0, file$3, 58, 6, 1694);
-    			add_location(li1, file$3, 59, 6, 1722);
-    			add_location(li2, file$3, 60, 6, 1747);
-    			add_location(ul, file$3, 57, 4, 1683);
+    			create_component(caret0.$$.fragment);
+    			t4 = space();
+    			li1 = element("li");
+    			a1 = element("a");
+    			span1 = element("span");
+    			span1.textContent = "Redaction";
+    			t6 = space();
+    			create_component(caret1.$$.fragment);
+    			add_location(div, file$3, 58, 4, 1853);
+    			attr_dev(span0, "class", "choose");
+    			add_location(span0, file$3, 60, 22, 1923);
+    			attr_dev(a0, "href", "#");
+    			add_location(a0, file$3, 60, 10, 1911);
+    			add_location(li0, file$3, 60, 6, 1907);
+    			attr_dev(span1, "class", "choose");
+    			add_location(span1, file$3, 61, 22, 2005);
+    			attr_dev(a1, "href", "#");
+    			add_location(a1, file$3, 61, 10, 1993);
+    			add_location(li1, file$3, 61, 6, 1989);
+    			attr_dev(ul, "class", "list down");
+    			add_location(ul, file$3, 59, 4, 1878);
     		},
     		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			insert_dev(target, t1, anchor);
     			insert_dev(target, ul, anchor);
     			append_dev(ul, li0);
-    			append_dev(ul, t1);
+    			append_dev(li0, a0);
+    			append_dev(a0, span0);
+    			append_dev(a0, t3);
+    			mount_component(caret0, a0, null);
+    			append_dev(ul, t4);
     			append_dev(ul, li1);
-    			append_dev(ul, t3);
-    			append_dev(ul, li2);
+    			append_dev(li1, a1);
+    			append_dev(a1, span1);
+    			append_dev(a1, t6);
+    			mount_component(caret1, a1, null);
+    			current = true;
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(caret0.$$.fragment, local);
+    			transition_in(caret1.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(caret0.$$.fragment, local);
+    			transition_out(caret1.$$.fragment, local);
+    			current = false;
     		},
     		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(ul);
+    			destroy_component(caret0);
+    			destroy_component(caret1);
     		}
     	};
 
@@ -4853,14 +4939,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$1.name,
     		type: "slot",
-    		source: "(57:2) <Two>",
+    		source: "(58:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (64:2) <One>
+    // (65:2) <One>
     function create_default_slot_1$2(ctx) {
     	let t0;
     	let div0;
@@ -4907,23 +4993,23 @@ var app = (function () {
     			t13 = text(".");
     			t14 = space();
     			div4 = element("div");
-    			div4.textContent = "that's a big problem, but still ahead ↓";
-    			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$3, 65, 4, 1857);
-    			add_location(div1, file$3, 66, 4, 1905);
+    			div4.textContent = "that's the big problem, and it's still ahead ↓";
+    			attr_dev(div0, "class", "tab grey");
+    			add_location(div0, file$3, 66, 4, 2146);
+    			add_location(div1, file$3, 67, 4, 2199);
     			attr_dev(span0, "class", "blue i");
-    			add_location(span0, file$3, 68, 6, 1963);
+    			add_location(span0, file$3, 69, 6, 2257);
     			attr_dev(span1, "class", "rose i");
-    			add_location(span1, file$3, 68, 49, 2006);
+    			add_location(span1, file$3, 69, 49, 2300);
     			attr_dev(span2, "class", "red i");
-    			add_location(span2, file$3, 69, 6, 2048);
-    			add_location(b, file$3, 71, 31, 2138);
+    			add_location(span2, file$3, 70, 6, 2342);
+    			add_location(b, file$3, 72, 31, 2432);
     			attr_dev(div2, "class", "down");
-    			add_location(div2, file$3, 70, 6, 2088);
+    			add_location(div2, file$3, 71, 6, 2382);
     			attr_dev(div3, "class", "f2 down");
-    			add_location(div3, file$3, 67, 4, 1935);
+    			add_location(div3, file$3, 68, 4, 2229);
     			attr_dev(div4, "class", "down");
-    			add_location(div4, file$3, 74, 4, 2185);
+    			add_location(div4, file$3, 75, 4, 2479);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -4961,7 +5047,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$2.name,
     		type: "slot",
-    		source: "(64:2) <One>",
+    		source: "(65:2) <One>",
     		ctx
     	});
 
@@ -5001,7 +5087,7 @@ var app = (function () {
 
     	one1 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_4] },
+    				$$slots: { default: [create_default_slot_4$1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -5239,7 +5325,7 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Three> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Page, One, Two, Left, Row, Block });
+    	$$self.$capture_state = () => ({ Page, One, Two, Left, Caret, Block });
     	return [];
     }
 
@@ -5480,7 +5566,51 @@ var app = (function () {
     /* src/Four.svelte generated by Svelte v3.43.0 */
     const file$1 = "src/Four.svelte";
 
-    // (25:2) <Left>
+    // (24:0) <Page>
+    function create_default_slot_4(ctx) {
+    	let block;
+    	let current;
+
+    	block = new Block({
+    			props: { color: "#6699cc" },
+    			$$inline: true
+    		});
+
+    	const block_1 = {
+    		c: function create() {
+    			create_component(block.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(block, target, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(block.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(block.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(block, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block: block_1,
+    		id: create_default_slot_4.name,
+    		type: "slot",
+    		source: "(24:0) <Page>",
+    		ctx
+    	});
+
+    	return block_1;
+    }
+
+    // (29:2) <Left>
     function create_default_slot_3(ctx) {
     	let div1;
     	let h2;
@@ -5497,12 +5627,12 @@ var app = (function () {
     			div0 = element("div");
     			kbd = element("kbd");
     			kbd.textContent = "compromise/<four>";
-    			add_location(h2, file$1, 26, 6, 662);
-    			add_location(kbd, file$1, 28, 8, 713);
+    			add_location(h2, file$1, 30, 6, 706);
+    			add_location(kbd, file$1, 32, 8, 757);
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$1, 27, 6, 687);
+    			add_location(div0, file$1, 31, 6, 731);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$1, 25, 4, 638);
+    			add_location(div1, file$1, 29, 4, 682);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -5520,14 +5650,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3.name,
     		type: "slot",
-    		source: "(25:2) <Left>",
+    		source: "(29:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (33:2) <One>
+    // (37:2) <One>
     function create_default_slot_2(ctx) {
     	let t0;
     	let div0;
@@ -5557,8 +5687,8 @@ var app = (function () {
     			t4 = space();
     			create_component(textarea.$$.fragment);
     			attr_dev(div0, "class", "down");
-    			add_location(div0, file$1, 34, 4, 844);
-    			add_location(div1, file$1, 35, 4, 899);
+    			add_location(div0, file$1, 38, 4, 888);
+    			add_location(div1, file$1, 39, 4, 943);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -5593,14 +5723,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(33:2) <One>",
+    		source: "(37:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:2) <Two>
+    // (43:2) <Two>
     function create_default_slot_1$1(ctx) {
     	let div0;
     	let t1;
@@ -5613,8 +5743,8 @@ var app = (function () {
     			t1 = space();
     			div1 = element("div");
     			div1.textContent = "This is planned for 2022.";
-    			add_location(div0, file$1, 39, 4, 998);
-    			add_location(div1, file$1, 40, 4, 1064);
+    			add_location(div0, file$1, 43, 4, 1042);
+    			add_location(div1, file$1, 44, 4, 1108);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -5632,14 +5762,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$1.name,
     		type: "slot",
-    		source: "(39:2) <Two>",
+    		source: "(43:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:0) <Page>
+    // (28:0) <Page>
     function create_default_slot$1(ctx) {
     	let left;
     	let t0;
@@ -5737,7 +5867,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$1.name,
     		type: "slot",
-    		source: "(24:0) <Page>",
+    		source: "(28:0) <Page>",
     		ctx
     	});
 
@@ -5745,10 +5875,20 @@ var app = (function () {
     }
 
     function create_fragment$2(ctx) {
-    	let page;
+    	let page0;
+    	let t;
+    	let page1;
     	let current;
 
-    	page = new Page({
+    	page0 = new Page({
+    			props: {
+    				$$slots: { default: [create_default_slot_4] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	page1 = new Page({
     			props: {
     				$$slots: { default: [create_default_slot$1] },
     				$$scope: { ctx }
@@ -5758,35 +5898,50 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			create_component(page.$$.fragment);
+    			create_component(page0.$$.fragment);
+    			t = space();
+    			create_component(page1.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page, target, anchor);
+    			mount_component(page0, target, anchor);
+    			insert_dev(target, t, anchor);
+    			mount_component(page1, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
+    			const page0_changes = {};
 
     			if (dirty & /*$$scope*/ 2) {
-    				page_changes.$$scope = { dirty, ctx };
+    				page0_changes.$$scope = { dirty, ctx };
     			}
 
-    			page.$set(page_changes);
+    			page0.$set(page0_changes);
+    			const page1_changes = {};
+
+    			if (dirty & /*$$scope*/ 2) {
+    				page1_changes.$$scope = { dirty, ctx };
+    			}
+
+    			page1.$set(page1_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(page.$$.fragment, local);
+    			transition_in(page0.$$.fragment, local);
+    			transition_in(page1.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(page.$$.fragment, local);
+    			transition_out(page0.$$.fragment, local);
+    			transition_out(page1.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(page, detaching);
+    			destroy_component(page0, detaching);
+    			if (detaching) detach_dev(t);
+    			destroy_component(page1, detaching);
     		}
     	};
 
@@ -5918,10 +6073,10 @@ doc.match('{plug/stop} (a|the) #Noun')
     			div5 = element("div");
     			t15 = text("Web-assembly ");
     			b = element("b");
-    			b.textContent = "<should happen>";
+    			b.textContent = "<should definetly happen>";
     			t17 = space();
     			div6 = element("div");
-    			div6.textContent = "Languages other than english <are happening slowly>:";
+    			div6.textContent = "Non-english languages <are happening slowly>:";
     			add_location(div0, file, 14, 4, 316);
     			attr_dev(div1, "class", "tab");
     			add_location(div1, file, 15, 4, 364);
@@ -5942,7 +6097,7 @@ doc.match('{plug/stop} (a|the) #Noun')
     			attr_dev(div5, "class", "down");
     			add_location(div5, file, 21, 4, 760);
     			attr_dev(div6, "class", "down");
-    			add_location(div6, file, 22, 4, 830);
+    			add_location(div6, file, 22, 4, 840);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -6081,31 +6236,31 @@ doc.match('{plug/stop} (a|the) #Noun')
     			create_component(left.$$.fragment);
     			if (!src_url_equal(img0.src, img0_src_value = "")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file, 30, 8, 1114);
+    			add_location(img0, file, 30, 8, 1117);
     			attr_dev(a0, "href", "https://github.com/spencermountain/compromise/");
-    			add_location(a0, file, 29, 6, 1048);
-    			add_location(div0, file, 28, 4, 1036);
+    			add_location(a0, file, 29, 6, 1051);
+    			add_location(div0, file, 28, 4, 1039);
     			if (!src_url_equal(img1.src, img1_src_value = "")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file, 36, 8, 1243);
+    			add_location(img1, file, 36, 8, 1246);
     			attr_dev(a1, "href", "https://twitter.com/nlp_compromise");
-    			add_location(a1, file, 35, 6, 1189);
-    			add_location(div1, file, 34, 4, 1177);
+    			add_location(a1, file, 35, 6, 1192);
+    			add_location(div1, file, 34, 4, 1180);
     			if (!src_url_equal(img2.src, img2_src_value = "")) attr_dev(img2, "src", img2_src_value);
     			attr_dev(img2, "alt", "");
-    			add_location(img2, file, 42, 8, 1339);
+    			add_location(img2, file, 42, 8, 1342);
     			attr_dev(a2, "href", "");
-    			add_location(a2, file, 41, 6, 1319);
-    			add_location(div2, file, 40, 4, 1307);
+    			add_location(a2, file, 41, 6, 1322);
+    			add_location(div2, file, 40, 4, 1310);
     			if (!src_url_equal(img3.src, img3_src_value = "")) attr_dev(img3, "src", img3_src_value);
     			attr_dev(img3, "alt", "");
-    			add_location(img3, file, 48, 8, 1491);
+    			add_location(img3, file, 48, 8, 1494);
     			attr_dev(a3, "href", "https://observablehq.com/@spencermountain/nlp-compromise");
-    			add_location(a3, file, 47, 6, 1415);
-    			add_location(div3, file, 46, 4, 1403);
+    			add_location(a3, file, 47, 6, 1418);
+    			add_location(div3, file, 46, 4, 1406);
     			attr_dev(div4, "class", "row ");
     			set_style(div4, "font-size", "1.5rem");
-    			add_location(div4, file, 27, 2, 987);
+    			add_location(div4, file, 27, 2, 990);
     		},
     		m: function mount(target, anchor) {
     			mount_component(block, target, anchor);
@@ -6278,10 +6433,19 @@ doc.match('{plug/stop} (a|the) #Noun')
     	let one;
     	let t1;
     	let two;
+    	let t2;
+    	let three;
+    	let t3;
+    	let four;
+    	let t4;
+    	let out;
     	let current;
     	intro = new Intro({ $$inline: true });
     	one = new One_1({ $$inline: true });
     	two = new Two_1({ $$inline: true });
+    	three = new Three({ $$inline: true });
+    	four = new Four({ $$inline: true });
+    	out = new Out({ $$inline: true });
 
     	const block = {
     		c: function create() {
@@ -6290,6 +6454,12 @@ doc.match('{plug/stop} (a|the) #Noun')
     			create_component(one.$$.fragment);
     			t1 = space();
     			create_component(two.$$.fragment);
+    			t2 = space();
+    			create_component(three.$$.fragment);
+    			t3 = space();
+    			create_component(four.$$.fragment);
+    			t4 = space();
+    			create_component(out.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -6300,6 +6470,12 @@ doc.match('{plug/stop} (a|the) #Noun')
     			mount_component(one, target, anchor);
     			insert_dev(target, t1, anchor);
     			mount_component(two, target, anchor);
+    			insert_dev(target, t2, anchor);
+    			mount_component(three, target, anchor);
+    			insert_dev(target, t3, anchor);
+    			mount_component(four, target, anchor);
+    			insert_dev(target, t4, anchor);
+    			mount_component(out, target, anchor);
     			current = true;
     		},
     		p: noop,
@@ -6308,12 +6484,18 @@ doc.match('{plug/stop} (a|the) #Noun')
     			transition_in(intro.$$.fragment, local);
     			transition_in(one.$$.fragment, local);
     			transition_in(two.$$.fragment, local);
+    			transition_in(three.$$.fragment, local);
+    			transition_in(four.$$.fragment, local);
+    			transition_in(out.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(intro.$$.fragment, local);
     			transition_out(one.$$.fragment, local);
     			transition_out(two.$$.fragment, local);
+    			transition_out(three.$$.fragment, local);
+    			transition_out(four.$$.fragment, local);
+    			transition_out(out.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -6322,6 +6504,12 @@ doc.match('{plug/stop} (a|the) #Noun')
     			destroy_component(one, detaching);
     			if (detaching) detach_dev(t1);
     			destroy_component(two, detaching);
+    			if (detaching) detach_dev(t2);
+    			destroy_component(three, detaching);
+    			if (detaching) detach_dev(t3);
+    			destroy_component(four, detaching);
+    			if (detaching) detach_dev(t4);
+    			destroy_component(out, detaching);
     		}
     	};
 

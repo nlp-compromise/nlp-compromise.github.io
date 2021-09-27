@@ -45,7 +45,7 @@
       </li>
       <li>
         ways to make typing-interfaces
-        <div class="i grey f09 tab2">and make them actually good</div>
+        <div class="i grey f09 tab2">make them actually good</div>
       </li>
     </ul>
   </One>
