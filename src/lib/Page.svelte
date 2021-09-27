@@ -31,7 +31,7 @@
 
 <style>
   .container {
-    min-height: 1000px;
+    min-height: 200px;
     box-shadow: 3px 12px 36px 1px rgba(0, 0, 0, 0.2);
     margin-left: 55px;
     margin-right: 55px;
