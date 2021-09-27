@@ -9,11 +9,21 @@
   })
   export let width = '60%'
   export let height = '162px'
-  export let size = '2.2rem'
-  const callback = function(e) {
+  export let size = '1.2rem'
+  const callback = function (e) {
     cb(e.target.value)
   }
 </script>
+
+<textarea
+  class="input"
+  on:input={callback}
+  style="width:{width}; height:{height}; font-size:{size};"
+  spellcheck="false"
+  type="text"
+  bind:value
+  bind:this={el}
+/>
 
 <style>
   .input {
@@ -41,12 +51,3 @@
     /* overflow: auto; */
   }
 </style>
-
-<textarea
-  class="input"
-  on:input={callback}
-  style="width:{width}; height:{height}; font-size:{size};"
-  spellcheck="false"
-  type="text"
-  bind:value
-  bind:this={el} />

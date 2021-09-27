@@ -3,7 +3,7 @@
   import One from './lib/One.svelte'
   import Two from './lib/Two.svelte'
   import Left from './lib/Left.svelte'
-  import Row from './lib/Row.svelte'
+  import Caret from './lib/Caret.svelte'
   import Block from './lib/Block.svelte'
 </script>
 
@@ -13,7 +13,7 @@
 <Page>
   <Left>
     <div class="tab">
-      <h2>Step 2: Tagging</h2>
+      <h2>Step 2: Light grammar</h2>
       <div class="tab">
         <kbd>compromise/two</kbd>
       </div>
@@ -30,13 +30,16 @@
       <kbd class="blue f2 i">simon says #Verb+ the? #Noun+</kbd>
       <kbd class="blue f2 i">#FirstName is on #Ordinal</kbd>
     </ul>
+    <div class="tab">
+      <a href="https://observablehq.com/@spencermountain/compromise-match-syntax"> - match docs</a>
+    </div>
   </Two>
   <One>
     <div>creating these match-templates -</div>
     <div class="tab i">to scoop-up information -</div>
-    <div class="tab sky i">like it's in some kind of little database</div>
+    <div class="tab sky i">like it's some kind of little database -</div>
     <div class="down">it surprising how helpful this is.</div>
-    <div class="down">your matches can be clumsy, ad-hoc,</div>
+    <div class="down">your matches can be clumsy, ad-hoc</div>
     <div class="tab">they can be written by product designers.</div>
   </One>
   <Two>
@@ -44,12 +47,12 @@
       solutions like this can do a lot of leg-work -
       <div class="tab f2">before some crazy <span class="red ">AI-thing</span> -</div>
       <br />
-      or more-often, some person's tired eyes.
+      or more-often, some tired person's eyes
     </div>
-    <ul>
-      <li>bot-interfaces</li>
-      <li>redaction</li>
-      <li>contractions</li>
+    <ul class="list down">
+      <li><a href="#"><span class="choose">Match-syntax</span> <Caret /></a></li>
+      <li><a href="#"><span class="choose">Automatic Redaction</span> <Caret /></a></li>
+      <li><a href="#"><span class="choose">Chat bots</span> <Caret /></a></li>
     </ul>
   </Two>
 

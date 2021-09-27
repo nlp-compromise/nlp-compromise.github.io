@@ -13,7 +13,7 @@
   <Block color="#bfb0b3" />
   <One>
     <div>Compromise was created in 2010 -</div>
-    <div class="tab">we have published a release every 10 days or so.</div>
+    <div class="tab">we have published > 100 releases.</div>
     <div class="down">
       <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a> is the benevolent dictator and territorial benefactor.
     </div>
@@ -27,13 +27,13 @@
   <!-- [graphic of one/two/three lang-coverage] -->
   <div class="row " style="font-size:1.5rem;">
     <div>
-      <a href="">
+      <a href="https://github.com/spencermountain/compromise/">
         <img src="" alt="" />
         Github
       </a>
     </div>
     <div>
-      <a href="">
+      <a href="https://twitter.com/nlp_compromise">
         <img src="" alt="" />
         Twitter
       </a>

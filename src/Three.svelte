@@ -35,9 +35,9 @@
   <One>
     <div>in practice, people want a phrase, a clause, or a chunk of words -</div>
     <div class="tab i">that do one thing.</div>
-    <div class="down">
-      this is a harder, more-goofy task <div>but not impossible.</div>
-    </div>
+    <div class="down f09">people don't wanna trip-over some adverb.</div>
+    <div class="down">this is a harder, more-goofy task</div>
+    <div>but it is not impossible.</div>
     <div class="down">it allows a lot of neat things to happen</div>
   </One>
   <Left>
@@ -66,12 +66,12 @@
     <div class="tab">you are very clever.</div>
     <div>but remember -</div>
     <div class="f2 down">
-      when <span class="blue i">"ripped"</span> means <span class="rose i">torn</span> or
+      <span class="blue i">"ripped"</span> means <span class="rose i">torn</span> or
       <span class="red i">drunk</span>,
       <div class="down">
-        both times it is still an <b>#Adjective</b>.
+        but both times it's an <b>#Adjective</b>.
       </div>
     </div>
-    <div class="down">that's a big problem, but still ahead.</div>
+    <div class="down">that's a big problem, but still ahead ↓</div>
   </One>
 </Page>
