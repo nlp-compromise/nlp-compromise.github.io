@@ -1,29 +1,23 @@
 {
-  "name": "nlp-expo",
-  "description": "",
-  "version": "0.0.1",
-  "licence": "CC-BY-4.0",
+  "name": "svelte-app",
+  "version": "1.0.0",
   "private": true,
-  "author": "Spencer Kelly (spencermountain)",
-  "homepage": "https://github.com/spencermountain/frown#readme",
   "scripts": {
-    "start": "budo index.js:assets/bundle.js --live",
-    "watch": "pug ./ --watch",
-    "build": "browserify index.js -t [ babelify --presets [ @babel/preset-env ] ] | derequire > ./assets/bundle.js"
-  },
-  "dependencies": {
-    "htm": "^2.2.1",
-    "somehow": "0.3.5",
-    "superagent": "5.1.2",
-    "svelte": "^3.34.0",
-    "vhtml": "^2.1.0"
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "start": "sirv public --no-clear"
   },
   "devDependencies": {
-    "@babel/core": "7.7.4",
-    "@babel/preset-env": "7.7.4",
-    "babelify": "10.0.0",
-    "budo": "11.6.3",
-    "derequire": "2.0.6",
-    "terser": "4.4.2"
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.0.0"
+  },
+  "dependencies": {
+    "sirv-cli": "^1.0.0"
   }
 }

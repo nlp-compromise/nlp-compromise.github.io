@@ -13,6 +13,7 @@
     "compromise": "^13.10.0",
     "compromise-dates": "^1.4.1",
     "compromise-numbers": "^1.2.0",
-    "spacetime": "^6.12.5"
+    "spacetime": "^6.12.5",
+    "svelte": "^3.42.2"
   }
 }
