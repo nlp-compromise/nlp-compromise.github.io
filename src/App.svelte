@@ -7,14 +7,17 @@
   import Out from './Out.svelte'
 </script>
 
-<!-- <Intro /> -->
+<Intro />
 <One />
 
 <Two />
 
-<!-- 
 <Three />
+
 <Four />
-<Out /> -->
+<Out />
+
+<!-- 
+-->
 <style>
 </style>

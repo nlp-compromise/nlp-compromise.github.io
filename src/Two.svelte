@@ -2,10 +2,12 @@
   import Page from './lib/Page.svelte'
   import One from './lib/One.svelte'
   import Two from './lib/Two.svelte'
+  import Three from './lib/Three.svelte'
   import Left from './lib/Left.svelte'
   import Caret from './lib/Caret.svelte'
   import Block from './lib/Block.svelte'
   import Tagger from './demos/Tagger.svelte'
+  import Grid from './lib/Grid/Grid.svelte'
 </script>
 
 <Page>
@@ -60,12 +62,12 @@
     <div class="tab">they can be written by non-programmers.</div>
   </One>
   <Two>
-    <div>
+    <div style="margin-bottom:3rem;">
       this can do helpful -
       <div class="tab f2">before some crazy <span class="red ">AI-thing</span> -</div>
       <div class="tab">just does it all,</div>
       <br />
-      or more often, some person's tired eyes -
+      or more often, some person's tired eyes:
     </div>
     <ul class="list down">
       <li><a href="#"><span class="choose down" style="color:white;">Match-syntax</span> <Caret /></a></li>
@@ -87,4 +89,8 @@
     <div class="i">so is this gif</div>
     <img src="./assets/jesus.gif" alt="jesus gif" />
   </Two>
+  <Three>
+    <div style="width:200px;" />
+    <Grid seed="76b36bcb2b4e1fec394" />
+  </Three>
 </Page>

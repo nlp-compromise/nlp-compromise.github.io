@@ -19,17 +19,18 @@
     <div class="tab down f09">and we can <i class="sea">search</i>&nbsp; it, and <i class="sea">read</i>&nbsp; it-</div>
     <div class="down">
       <span class="f09">but we can't really </span>
-      <div class="tab"><i class="sea">get</i>&nbsp; our <i class="sea b">information</i> -</div>
-      <div class="down tab blue i " style="font-size:2.0rem;">... back out ?</div>
+      <div class="tab"><i class="sea">get</i>&nbsp; the <i class="sea b">information</i> -</div>
+      <div class="down tab cherry i " style="font-size:2.0rem;">... back out ?</div>
     </div>
     <div style="margin-top:3rem;" />
-    <div class="down f09">ideas get <i class="rose b">trapped</i>&nbsp; -</div>
+    <div class="down" style="font-size:1.4rem;">things get <i class="sky b">trapped</i>&nbsp; -</div>
     <div class="tab down f09">
-      a <i class="sea b">single sentence</i>&nbsp; just bungles it all up
-      <div class="tab f09 i">in ambiguities.</div>
+      a <i class="sea b">single sentence</i>&nbsp; bungles it all up
+      <div class="tab f09 i">in ambiguities</div>
     </div>
-    <div class="tab down f09">words are one-way interfaces,</div>
-    <div class="tab f09">and text is the dead-end.</div>
+    <div class="tab down f09">words are one-way things,</div>
+    <div class="tab f09">and text is a dead-end,</div>
+    <div class="tab f09">for information.</div>
     <div class="tab down f09">which is weird actually.</div>
     <!-- <div class="f09 ">this seems like a small issue.</div> -->
     <Grid seed="6daf3fd1a93ca04509c" />
@@ -39,9 +40,13 @@
   <Two>
     <div class="f09">and people</div>
     <div class="i sea tab">keep typing</div>
-    <div class="f09 tab">even more of it.</div>
+    <div class="f09 tab">even more of it</div>
   </Two>
 
+  <Two>
+    <div style="width:250px;" />
+    <Grid seed="1a30de68df4ea7e7bef" />
+  </Two>
   <Left>
     <div class="tab down">
       <!-- and there doesn't seem to be a plan to get it back. -->
@@ -52,17 +57,16 @@
       </div>
     </div>
   </Left>
-  <Two>
-    <div style="width:250px;" />
-    <Grid seed="1a30de68df4ea7e7bef" />
-  </Two>
   <One>
     <div class="space" />
-    <div><b class="sea">compromise</b> is a loose set of tools and standards,</div>
+    <div>
+      <b class="sky f2">compromise</b>&nbsp; is a loose set
+      <div class="tab">of tools and standards,</div>
+    </div>
     <!-- <div class="tab">trying to build clever ways:</div> -->
     <ul>
       <div>
-        - to flip text around, and mess with it.
+        to flip text around, and mess with it.
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
@@ -72,21 +76,22 @@
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
       </div>
       <div class="down">- or bounce random queries off -</div>
-      <div class="down f09">and understand words, a little.</div>
+      <div class="down f09">and understand the words, a little.</div>
       <!-- <li>
         ways to make typing-interfaces
         <div class="i grey f09 tab2">make them actually good</div>
       </li> -->
     </ul>
+    <div class="down" />
   </One>
 
   <Left accent="steelblue">
-    <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem;" />
+    <div class="down" />
+    <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem; margin-top:4rem;" />
     we think that &nbsp;<i>open-source, web-focused</i>&nbsp; tools
     <div class="tab f09 down">
-      and a <a class="sea b i" href="https://github.com/spencermountain/compromise/graphs/contributors"
-        >stupidly-good group of contributers</a
-      > -
+      and a <a class="sea b i" href="https://github.com/spencermountain/compromise/graphs/contributors">stupidly-good</a
+      >&nbsp; group of contributers -
     </div>
     <div class="down f2 fuscia tab">focusing on configurability</div>
     <div class="down f2 tulip" style="margin-top:100px; margin-left:250px;">

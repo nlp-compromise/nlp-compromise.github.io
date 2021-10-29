@@ -17,14 +17,13 @@
     <kbd style="font-size:2rem; line-height:2rem">compromise/one</kbd><span class="f2">:</span>
     <div style="margin-top:2rem;" />
     <div class="tab" style="font-size:1.8rem; ">
-      - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; just - splitting - it - up &nbsp;</span
-      > -
+      - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div>
-    <div class="down tab">turn your novel into JSON.</div>
+    <div class="down tab">turn your novel into JSON -</div>
+    <div class="" style="margin-top:4.5rem;">
+      <Tokenize />
+    </div>
   </Left>
-  <One>
-    <Tokenize />
-  </One>
   <One>
     <!-- <div class="f09">promise -</div> -->
     <!-- <div><kbd>compromise/one</kbd> is a completely uncontroversial way</div> -->
@@ -41,14 +40,17 @@
   </One>
 
   <One>
-    <div class="down">the tokenizer's been refined over 8 ruthless github-years</div>
+    <div class="down">the tokenizer's been refined over 10 ruthless github-years</div>
     <!-- <div class="tab f09">and is running at the UN, government orgs, banks, and many software companies.</div> -->
     <!-- <div>this basic thing has been refined for 8 ruthless github-years</div> -->
 
     <!-- <div class="down f09">it actually just works.</div>
     <div class=" f09">you're allowed to be suspicious of it, though.</div> -->
-    <div class="tab down f09">when someone tells you it's impossible, give a polite shrug</div>
-    <i class="tab f09">haha, i dunno man!</i>
+    <div class="tab down f09">
+      when someone tells you it's impossible,
+      <div class="tab">give a polite shrug.</div>
+      <div class="tab i f09 down">haha, i dunno man!</div>
+    </div>
   </One>
 
   <One>
@@ -64,20 +66,18 @@
       <div>+ symmetric tools</div>
     </Row>
   </Left> -->
-
-  <One>
-    <div class="tab">you can do:</div>
-    <ul class="list down f2 blue tab">
-      <div class="down">•<a href="#" class="demo"><span class="f2 blue m2">Contractions <Caret /></span></a></div>
-      <div class="down">•<a href="#" class="demo"><span class="f2 blue m2">Syllable parsing<Caret /></span> </a></div>
-      <div class="down">
-        •<a href="#" class="demo"><span class="f2 blue m2">Lookup <Caret /></span> </a>
-      </div>
-      <div class="down">•<a href="#" class="demo"><span class=" f2 blue m2">Type-ahead <Caret /></span></a></div>
+  <Two>
+    <div class="down f09">you can do:</div>
+    <ul class="list down">
+      <li><a href="#"><span class="choose" style="color:white;">Contractions</span> <Caret /></a></li>
+      <li class="down"><a href="#"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a></li>
+      <li class="down"><a href="#"><span class="choose" style="color:white;">Lookup</span> <Caret /></a></li>
+      <li class="down"><a href="#"><span class="choose" style="color:white;">Type-ahead</span> <Caret /></a></li>
     </ul>
-  </One>
+  </Two>
+
   <div>sometimes just splitting things up is enough.</div>
-  <div class="m2 sea down f09">or you can swing harder ↓</div>
+  <div class="m2 sea down f09">or swing harder ↓</div>
 </Page>
 
 <style>
