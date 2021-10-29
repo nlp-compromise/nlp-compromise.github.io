@@ -12,31 +12,31 @@
 </Page>
 <Page>
   <Left>
-    <h2>Step 1: Splitting up text</h2>
-    <div class="tab">
-      <kbd>compromise/one</kbd>
-    </div>
+    <kbd style="font-size:3rem; line-height:3rem">compromise/one</kbd>
+    <h2>
+      <div class="tab">Splitting up text</div>
+    </h2>
   </Left>
   <One>
     <!-- <div class="f09">promise -</div> -->
-    <div>a completely uncontroversial way</div>
-    <div class="tab">
-      to split text into <span class="cherry">sentences</span> and <span class="rose">words</span> and
-      <span class="sky">punctuation</span>.
-    </div>
-    <div class="down">it's been refined over 8 ruthless github-years</div>
-    <div class="tab f09">and is running at the UN, government orgs, banks, and many software companies.</div>
-    <!-- <div>this basic thing has been refined for 8 ruthless github-years</div> -->
-
-    <div class="down f09">it actually just works.</div>
-    <div class=" f09">you're allowed to be suspicious of it, though.</div>
-    <div class="down f09">but, you can</div>
+    <!-- <div><kbd>compromise/one</kbd> is a completely uncontroversial way</div> -->
+    <div class="f09">you can</div>
     <div class="down f2 tab">turn your novel into JSON</div>
     <div class="tab">
       with a one-liner-
 
       <div class="tab">in a couple milliseconds</div>
     </div>
+    <div class="tab">
+      split text into <span class="cherry">sentences</span> and <span class="rose">words</span> and
+      <span class="sky">punctuation</span>.
+    </div>
+    <div class="down">it's been refined over 8 ruthless github-years</div>
+    <!-- <div class="tab f09">and is running at the UN, government orgs, banks, and many software companies.</div> -->
+    <!-- <div>this basic thing has been refined for 8 ruthless github-years</div> -->
+
+    <!-- <div class="down f09">it actually just works.</div>
+    <div class=" f09">you're allowed to be suspicious of it, though.</div> -->
     <div class="tab down f09">when someone tells you it's impossible, give a polite shrug</div>
     <i class="tab f09">haha, i dunno man!</i>
   </One>
