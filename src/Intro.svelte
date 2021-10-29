@@ -81,7 +81,6 @@
   </One>
 
   <Left accent="steelblue">
-    <!-- <Grid seed="1645e30c3c09ed478e5" /> -->
     <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem;" />
     we think that &nbsp;<i>open-source, web-focused</i>&nbsp; tools
     <div class="tab f09 down">
