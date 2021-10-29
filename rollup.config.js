@@ -5,6 +5,14 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 
+const dir = process.argv[4] || 'home'
+let out = 'public/build/bundle.js'
+if (dir !== 'home') {
+  out = `public/${dir}/build/bundle.js`
+}
+console.log(dir)
+
+
 const production = !process.env.ROLLUP_WATCH
 
 function serve() {
@@ -29,12 +37,12 @@ function serve() {
 }
 
 export default {
-  input: 'src/main.js',
+  input: dir + '/main.js',
   output: {
     sourcemap: true,
     format: 'iife',
     name: 'app',
-    file: 'public/build/bundle.js',
+    file: out,
   },
   plugins: [
     svelte({
