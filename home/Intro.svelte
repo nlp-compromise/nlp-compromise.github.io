@@ -12,23 +12,23 @@
 <Page>
   <One />
   <One>
-    <div class="f09">okay consider that -</div>
+    <div class="f09">okay consider -</div>
     <div class="more f2 m1">all of our information</div>
     <div class="tab i f2 rose">is in text.</div>
     <div style="margin-top:3rem;" />
-    <div class="tab down f09">and we can <i class="sea">search</i>&nbsp; it, and <i class="sea">read</i>&nbsp; it-</div>
+    <div class="tab down f09">and we can <i class="sky">search</i>&nbsp; it, and <i class="sky">read</i>&nbsp; it-</div>
     <div class="down">
-      <span class="f09">but we can't really </span>
-      <div class="tab"><i class="sea">get</i>&nbsp; the <i class="sea b">information</i> -</div>
-      <div class="down tab cherry i " style="font-size:2.0rem;">... back out ?</div>
+      <span class="f09">but we can't </span>
+      <div class="tab"><i class="sea">get</i>&nbsp; this <i class="sea b">information</i> -</div>
+      <div class="down tab cherry i " style="font-size:2.0rem;">... back out.</div>
     </div>
-    <div style="margin-top:3rem;" />
-    <div class="down" style="font-size:1.4rem;">things get <i class="sky b">trapped</i>&nbsp; -</div>
+    <div style="margin-top:6rem;" />
+    <div class="down" style="font-size:1.4rem;">things are <i class="sky b">trapped</i>&nbsp; -</div>
     <div class="tab down f09">
       a <i class="sea b">single sentence</i>&nbsp; bungles it all up
-      <div class="tab f09 i">in ambiguities</div>
+      <div class="tab f09 i">into ambiguities</div>
     </div>
-    <div class="tab down f09">words are one-way things,</div>
+    <div class="tab f09" style="margin-top:6rem;">words are one-way things,</div>
     <div class="tab f09">and text is a dead-end,</div>
     <div class="tab f09">for information.</div>
     <div class="tab down f09">which is weird actually.</div>
@@ -61,7 +61,7 @@
     <div class="space" />
     <div>
       <b class="sky f2">compromise</b>&nbsp; is a loose set
-      <div class="tab">of tools and standards,</div>
+      <div class="tab" style="margin-top:1.4rem;">of tools and standards -</div>
     </div>
     <!-- <div class="tab">trying to build clever ways:</div> -->
     <ul>
@@ -70,12 +70,12 @@
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
-      <div class="sea down tab f2">like a crowbar, for text.</div>
+      <div class="sea down tab f2">like a crowbar, for text</div>
       <div class="f09 i down">
-        so you can pull information out.
+        you can pull your information out.
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
       </div>
-      <div class="down">- or bounce random queries off -</div>
+      <div class="down">- and bounce random queries off -</div>
       <div class="down f09">and understand the words, a little.</div>
       <!-- <li>
         ways to make typing-interfaces
@@ -94,7 +94,7 @@
       >&nbsp; group of contributers -
     </div>
     <div class="down f2 fuscia tab">focusing on configurability</div>
-    <div class="down f2 tulip" style="margin-top:100px; margin-left:250px;">
+    <div class="down f2 tulip" style="margin-top:100px; margin-left:25%;">
       <div class="tab">avoiding fancy engineering</div>
     </div>
     <div class="down " style="margin-top:100px; margin-left:100px;">
@@ -106,7 +106,7 @@
     </div> -->
     <div style="margin-top:100px;" />
     <div class="down tab">
-      is the best way to build this.
+      that's the best way to build this.
       <!-- <div class="tab">a crazy set of things.</div> -->
     </div>
   </Left>

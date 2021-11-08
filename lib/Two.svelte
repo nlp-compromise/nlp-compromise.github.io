@@ -1,11 +1,18 @@
 <script>
+  export let accent = ''
   export let left = 'none'
+  import colors from './_colors.js'
+  left = colors[left] || left
+  accent = colors[accent] || accent
 </script>
 
 <div class="column">
   <div />
   <div class="box">
     <div class="body" style="border-left:3px solid {left};">
+      {#if accent}
+        <div class="line" style="background-color:{accent};" />
+      {/if}
       <slot />
     </div>
   </div>
@@ -28,6 +35,7 @@
     display: inline-block;
     text-align: left;
     padding-left: 1.8rem;
+    padding-right: 1.8rem;
   }
   .line {
     width: 33.3%;
@@ -36,13 +44,7 @@
     margin-bottom: 15px;
   }
   /* medium */
-  @media (max-width: 1100px) {
-    .column {
-      grid-template-columns: 1fr;
-    }
-  }
-  /* small */
-  @media (max-width: 500px) {
+  @media (max-width: 900px) {
     .column {
       grid-template-columns: 1fr;
     }

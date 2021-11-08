@@ -1,12 +1,17 @@
 <script>
+  export let accent = ''
   export let left = 'none'
+  import colors from './_colors'
+  left = colors[left] || left
+  accent = colors[accent] || accent
 </script>
 
 <div class="column">
-  <div class="box">
-    <div class="body" style="border-left:3px solid {left};">
-      <slot />
-    </div>
+  <div class="body" style="border-left:3px solid {left};">
+    {#if accent}
+      <div class="line" style="background-color:{accent};" />
+    {/if}
+    <slot />
     <div />
   </div>
 </div>
@@ -15,30 +20,29 @@
   .column {
     text-align: left;
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; /* 2/3rds */
     width: 100%;
     margin-top: 150px;
     margin-bottom: 150px;
   }
-  .box {
-    /* border: 1px solid grey; */
-    text-align: center;
-  }
   .body {
+    /* border: 1px solid grey; */
     display: inline-block;
     text-align: left;
-    padding-left: 1.8rem;
+    margin-left: 0.9rem;
+    padding-left: 0.9rem;
+    padding-right: 1.8rem;
   }
-  /* medium */
-  @media (max-width: 900px) {
-    .column {
-      grid-template-columns: 1fr 1fr;
-    }
+  .line {
+    width: 38.2%;
+    height: 5px;
+    border-radius: 5px;
+    margin-bottom: 15px;
   }
-  /* small */
-  @media (max-width: 500px) {
+  /* very-small */
+  @media (max-width: 600px) {
     .column {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr; /* full-thing */
     }
   }
 </style>

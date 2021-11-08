@@ -16,7 +16,7 @@
   <Left>
     <kbd style="font-size:2rem; line-height:2rem">compromise/one</kbd><span class="f2">:</span>
     <div style="margin-top:2rem;" />
-    <div class="tab" style="font-size:1.8rem; ">
+    <div class="tab" style="font-size:1rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div>
     <div class="down tab">turn your novel into JSON -</div>

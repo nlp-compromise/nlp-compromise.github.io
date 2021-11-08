@@ -1,30 +1,14 @@
 <script>
-  import { onMount } from 'svelte'
-  export let bottom = '140px'
+  import colors from './_colors'
+  export let color = null
+  color = colors[color] || color
+
   let cmp
-  onMount(() => {
-    let options = {
-      root: null,
-      rootMargin: '20px',
-      threshold: 1.0,
-    }
-    // const cb = function (entries) {
-    //   if (entries[0].intersectionRatio > 0.2) {
-    //     if (history.pushState) {
-    //       history.pushState(null, null, '#' + name)
-    //     } else {
-    //       location.hash = '#' + name
-    //     }
-    //   }
-    // }
-    // let observer = new IntersectionObserver(cb, options)
-    // observer.observe(cmp)
-  })
 </script>
 
 <div class="row">
   <div class="side" />
-  <div class="container" style="margin-bottom: {bottom}">
+  <div class="container">
     <slot />
   </div>
   <div class="side" />
@@ -38,6 +22,7 @@
     margin-right: 55px;
     margin-bottom: 140px;
     flex-basis: 1200px;
+    overflow-x: scroll;
   }
   .side {
     flex: 1;
