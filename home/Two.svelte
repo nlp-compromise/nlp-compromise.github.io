@@ -87,7 +87,7 @@
   <Two>
     <!-- <div>knowing what's a Noun, or a Verb - this is more-handy, and less-nerdy than you'd think.</div> -->
     <div class="i">so is this gif</div>
-    <img src="./assets/jesus.gif" alt="jesus gif" />
+    <img src="./build/assets/jesus.gif" alt="jesus gif" />
   </Two>
   <Three>
     <div style="width:200px;" />

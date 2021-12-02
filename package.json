@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "build": "rollup -c",
-    "watch": "PAGE=demo/typeahead rollup -c -w home",
-    "watch:dates": "rollup -c -w demo/dates",
-    "watch:redact": "rollup -c -w demo/redact",
-    "watch:contractions": "rollup -c -w demo/contractions",
-    "start": "sirv public --no-clear"
+    "watch": "rollup -c -w",
+    "watch:dates": "PAGE=dates rollup -c -w",
+    "watch:redact": "PAGE=redact rollup -c -w",
+    "watch:contractions": "PAGE=contractions rollup -c -w",
+    "start": "sirv --no-clear"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

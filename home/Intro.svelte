@@ -10,9 +10,7 @@
 </script>
 
 <Page>
-  <Two>
-    <!-- <Grid /> -->
-  </Two>
+  <Two />
 
   <One>
     <div class="f09">okay consider -</div>
@@ -151,7 +149,4 @@
 </Page>
 
 <style>
-  .tab2 {
-    margin-left: 6rem;
-  }
 </style>

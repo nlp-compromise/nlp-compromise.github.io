@@ -1,10 +1,10 @@
 <script>
-  import Page from '../../lib/Page.svelte'
-  import One from '../../lib/One.svelte'
-  import Left from '../../lib/Left.svelte'
-  import Three from '../../lib/Three.svelte'
-  import Back from '../../lib/Back.svelte'
-  import Textarea from '../../lib/TextArea.svelte'
+  import Page from '../lib/Page.svelte'
+  import One from '../lib/One.svelte'
+  import Left from '../lib/Left.svelte'
+  import Three from '../lib/Three.svelte'
+  import Back from '../lib/Back.svelte'
+  import Textarea from '../lib/TextArea.svelte'
   import nlp from '/Users/spencer/mountain/compromise/src/one.js'
   let text = `Like the time I caught the ferry over to Shelbyville - I needed a new heel for my shoe, so I decided to go to Morganville which is what they called Shelbyville in those days. So, I tied an onion to my belt which was the style at the time. Now, to take the ferry cost a nickel. And in those days, nickels had pictures of bumblebees on ‘em.`
   let res = nlp(text).text()

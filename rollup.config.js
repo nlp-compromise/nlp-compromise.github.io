@@ -5,17 +5,12 @@ import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 
-const dir = process.argv[4] || 'home'
-let out = 'public/build/bundle.js'
-if (dir !== 'home') {
-  out = `public/${dir}/build/bundle.js`
-}
-console.log(dir)
 
+let dir = process.env.PAGE || '.'
+let out = `${dir}/build/bundle.js`
+let input = dir + '/main.js'
 
 const production = !process.env.ROLLUP_WATCH
-
-console.log(process.env.PAGE)
 
 function serve() {
   let server
@@ -27,7 +22,10 @@ function serve() {
   return {
     writeBundle() {
       if (server) return
-      server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+      if (dir === '.') {
+        dir = './'
+      }
+      server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
         stdio: ['ignore', 'inherit', 'inherit'],
         shell: true,
       })
@@ -39,7 +37,7 @@ function serve() {
 }
 
 export default {
-  input: dir + '/main.js',
+  input: input,
   output: {
     sourcemap: true,
     format: 'iife',
@@ -74,7 +72,7 @@ export default {
 
     // Watch the `public` directory and refresh the
     // browser on changes when not in production
-    !production && livereload('public'),
+    !production && livereload('build'),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify
