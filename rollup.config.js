@@ -15,6 +15,8 @@ console.log(dir)
 
 const production = !process.env.ROLLUP_WATCH
 
+console.log(process.env.PAGE)
+
 function serve() {
   let server
 

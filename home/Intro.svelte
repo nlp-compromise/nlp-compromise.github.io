@@ -10,28 +10,64 @@
 </script>
 
 <Page>
-  <One />
+  <Two>
+    <!-- <Grid /> -->
+  </Two>
+
   <One>
     <div class="f09">okay consider -</div>
-    <div class="more f2 m1">all of our information</div>
-    <div class="tab i f2 rose">is in text.</div>
+    <div class="more m1">
+      <div class="i" style="font-size:1.8rem; line-height:2rem;">almost all</div>
+      <div class="tab f2">of our information</div>
+    </div>
+    <div class="tab i f2 rose">is in text</div>
     <div style="margin-top:3rem;" />
-    <div class="tab down f09">and we can <i class="sky">search</i>&nbsp; it, and <i class="sky">read</i>&nbsp; it-</div>
-    <div class="down">
-      <span class="f09">but we can't </span>
-      <div class="tab"><i class="sea">get</i>&nbsp; this <i class="sea b">information</i> -</div>
-      <div class="down tab cherry i " style="font-size:2.0rem;">... back out.</div>
+    <div class="margin-left:15rem;">
+      <Grid seed="45ea07497996cea6af4" />
     </div>
-    <div style="margin-top:6rem;" />
-    <div class="down" style="font-size:1.4rem;">things are <i class="sky b">trapped</i>&nbsp; -</div>
+  </One>
+  <Two>
     <div class="tab down f09">
-      a <i class="sea b">single sentence</i>&nbsp; bungles it all up
-      <div class="tab f09 i">into ambiguities</div>
+      <div style="max-width:180px; margin-bottom:1rem;">
+        <Grid seed="8935149fa5750c247c9" />
+      </div>
+      and we can
+      <span class="sky"> search</span>
+      it, and <span class="sky">read</span> it-
     </div>
-    <div class="tab f09" style="margin-top:6rem;">words are one-way things,</div>
-    <div class="tab f09">and text is a dead-end,</div>
-    <div class="tab f09">for information.</div>
+  </Two>
+  <One>
+    <div style="margin-left:10rem;">
+      <span class="down i">but we can't </span>
+      <div class="tab ">
+        <div class="sea i f2 sky">get</div>
+        <div style="position:relative; margin-top:1.2rem;">
+          <span class="red "> the </span>
+          <span class="red f09 i"> actual </span>
+          <span class="sea b i f2" style="top:22px; left:32px; position:absolute;">information</span>
+        </div>
+      </div>
+      <div class=" sky i " style="font-size:2.0rem; margin-left:20px; margin-top:2.3rem;">
+        <sup style="font-size:12px;  ">-◡</sup>
+        back
+        <sub style="font-size:1.1rem;">&nbsp;?</sub>
+        <span style="margin-left:0.4rem; font-size:12px;">◜</span>
+        <!-- <span style="font-size:1.5rem;" class="cherry">out</span> -->
+        <span style="font-size:12px;">-◡</span>
+      </div>
+      <Grid seed="d6ba2837558e747e314" />
+    </div>
+    <div style="margin-top:3rem;" />
+    <!-- <div class="down" style="font-size:1.4rem;">things are <i class="sky b">trapped</i>&nbsp; -</div> -->
     <div class="tab down f09">which is weird actually.</div>
+    <div class="tab down f09">
+      <!-- even in a <i class="sea b">single sentence</i> - -->
+      <!-- <div class="tab f09 i">into ambiguities</div> -->
+    </div>
+    <!-- <div class="tab f09" >words are one-way things,</div> -->
+    <div style="margin-top:2rem;" class="tab f09">text is a dead-end.</div>
+
+    <!-- <div class="tab f09">for information.</div> -->
     <!-- <div class="f09 ">this seems like a small issue.</div> -->
     <Grid seed="6daf3fd1a93ca04509c" />
   </One>
@@ -47,30 +83,23 @@
     <div style="width:250px;" />
     <Grid seed="1a30de68df4ea7e7bef" />
   </Two>
-  <Left>
-    <div class="tab down">
-      <!-- and there doesn't seem to be a plan to get it back. -->
-      <div class="tab down">
-        and this seems like an issue,
-        <div class="f09">or maybe it isn't.</div>
-        <!-- <div class="f09">i don't know</div> -->
-      </div>
-    </div>
-  </Left>
+
   <One>
     <div class="space" />
     <div>
-      <b class="sky f2">compromise</b>&nbsp; is a loose set
+      <b class="sky f2">compromise</b>&nbsp; is a set
       <div class="tab" style="margin-top:1.4rem;">of tools and standards -</div>
     </div>
     <!-- <div class="tab">trying to build clever ways:</div> -->
     <ul>
       <div>
-        to flip text around, and mess with it.
+        to mess with it.
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
-      <div class="sea down tab f2">like a crowbar, for text</div>
+      <div class="sea down tab f2 " style="position:relative;">
+        like a crowbar, <div style="position:absolute; top:50px;">for text</div>
+      </div>
       <div class="f09 i down">
         you can pull your information out.
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
