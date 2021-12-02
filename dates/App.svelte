@@ -1,10 +1,5 @@
 <script>
-  import Page from '../lib/Page.svelte'
-  import One from '../lib/One.svelte'
-  import Left from '../lib/Left.svelte'
-  import Three from '../lib/Three.svelte'
-  import Back from '../lib/Back.svelte'
-  import CodeMirror from '../lib/CodeMirror/CodeMirror.svelte'
+  import { Page, Back, One, Two, Three, Left, CodeMirror } from '../lib/index.js'
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src'
   let text = 'next weekend'
   // import Textarea from '../../lib/TextArea.svelte'

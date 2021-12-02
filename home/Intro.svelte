@@ -1,12 +1,5 @@
 <script>
-  import Page from '../lib/Page.svelte'
-  import One from '../lib/One.svelte'
-  import Two from '../lib/Two.svelte'
-  import Three from '../lib/Three.svelte'
-  import Left from '../lib/Left.svelte'
-  import Row from '../lib/Row.svelte'
-  import Block from '../lib/Block.svelte'
-  import Grid from '../lib/Grid/Grid.svelte'
+  import { Page, One, Two, Three, Left, Grid } from '../lib/index.js'
 </script>
 
 <Page>
