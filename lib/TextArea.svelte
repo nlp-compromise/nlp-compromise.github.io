@@ -3,11 +3,11 @@
   export let value = ''
   let el
   export let cb = () => {}
-
   // onMount(() => {
   //   el.focus()
   // })
   export let width = '60%'
+  export let readonly = undefined
   export let height = '142px'
   export let size = '1.2rem'
   const callback = function (e) {
@@ -17,8 +17,9 @@
 
 <textarea
   class="input"
+  {readonly}
   on:input={callback}
-  style="width:{width}; height:{height}; font-size:{size};"
+  style="width:{width}; height:{height}; font-size:{size}; line-height:1.5rem;"
   spellcheck="false"
   type="text"
   bind:value
