@@ -8,10 +8,10 @@
   <One>
     <div class="f09">okay consider -</div>
     <div class="more m1">
-      <div class="i" style="font-size:1.8rem; line-height:2rem;">almost all</div>
-      <div class="tab f2">of our information</div>
+      <div class="i" style="font-size:1.8rem; line-height:2rem;">we put</div>
+      <div class="tab f2">all of our information</div>
     </div>
-    <div class="tab i f2 rose">is in text</div>
+    <div class="tab i f2 rose">in text</div>
     <div style="margin-top:3rem;" />
     <div class="margin-left:15rem;">
       <Grid seed="45ea07497996cea6af4" />
@@ -24,7 +24,7 @@
       </div>
       and we can
       <span class="sky"> search</span>
-      it, and <span class="sky">read</span> it-
+      it, or <span class="sky">read</span> it-
     </div>
   </Two>
   <One>
@@ -46,6 +46,7 @@
         <!-- <span style="font-size:1.5rem;" class="cherry">out</span> -->
         <span style="font-size:12px;">-◡</span>
       </div>
+      <div class="tab down f09"><span style="font-size:12px;">like</span>, to <i>use it</i>&nbsp; again.</div>
       <Grid seed="d6ba2837558e747e314" />
     </div>
     <div style="margin-top:3rem;" />
@@ -56,7 +57,7 @@
       <!-- <div class="tab f09 i">into ambiguities</div> -->
     </div>
     <!-- <div class="tab f09" >words are one-way things,</div> -->
-    <div style="margin-top:2rem;" class="tab f09">text is a dead-end.</div>
+    <!-- <div style="margin-top:2rem;" class="tab f09">text is a dead-end.</div> -->
 
     <!-- <div class="tab f09">for information.</div> -->
     <!-- <div class="f09 ">this seems like a small issue.</div> -->
@@ -74,6 +75,7 @@
     <div style="width:250px;" />
     <Grid seed="1a30de68df4ea7e7bef" />
   </Two>
+  <div>why does a sentence have to kill our information?</div>
 
   <One>
     <div class="space" />
@@ -88,15 +90,15 @@
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
-      <div class="sea down tab f2 " style="position:relative;">
-        like a crowbar, <div style="position:absolute; top:50px;">for text</div>
+      <div class="sea down tab f2 " style="position:relative; margin:4rem;">
+        like a crowbar, <div style="position:absolute; top:50px;">for text.</div>
       </div>
       <div class="f09 i down">
-        you can pull your information out.
+        so you can pull a chunk out, or
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
       </div>
-      <div class="down">- and bounce random queries off -</div>
-      <div class="down f09">and understand the words, a little.</div>
+      <div class="down">ask a question off of -</div>
+      <div class="down f09">and <i>get something back</i>, from words.</div>
       <!-- <li>
         ways to make typing-interfaces
         <div class="i grey f09 tab2">make them actually good</div>

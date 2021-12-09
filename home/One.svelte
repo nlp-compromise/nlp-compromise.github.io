@@ -67,16 +67,17 @@
     </Row>
   </Left> -->
   <Two>
-    <div class="down f09">you can do:</div>
+    <div class="down f09">so you can do:</div>
     <ul class="list down">
       <li><a href="#"><span class="choose" style="color:white;">Contractions</span> <Caret /></a></li>
       <li class="down"><a href="#"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Lookup</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Type-ahead</span> <Caret /></a></li>
+      <li class="down"><a href="#"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a></li>
+      <li class="down"><a href="#"><span class="choose" style="color:white;">TypeAhead</span> <Caret /></a></li>
     </ul>
   </Two>
 
   <div>sometimes just splitting things up is enough.</div>
+  <div class="m1">it feels like data now, a little.</div>
   <div class="m2 sea down f09">or swing harder ↓</div>
 </Page>
 

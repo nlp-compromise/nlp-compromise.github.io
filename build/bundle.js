@@ -494,7 +494,7 @@ var app = (function () {
         $inject_state() { }
     }
 
-    var colors = {
+    var colors$2 = {
       blue: '#6699cc',
       green: '#6accb2',
       yellow: '#e1e6b3',
@@ -640,7 +640,7 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Page', slots, ['default']);
     	let { color = null } = $$props;
-    	color = colors[color] || color;
+    	color = colors$2[color] || color;
     	let cmp;
     	const writable_props = ['color'];
 
@@ -653,7 +653,7 @@ var app = (function () {
     		if ('$$scope' in $$props) $$invalidate(1, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ colors, color, cmp });
+    	$$self.$capture_state = () => ({ colors: colors$2, color, cmp });
 
     	$$self.$inject_state = $$props => {
     		if ('color' in $$props) $$invalidate(0, color = $$props.color);
@@ -836,8 +836,8 @@ var app = (function () {
     	validate_slots('One', slots, ['default']);
     	let { accent = '' } = $$props;
     	let { left = 'none' } = $$props;
-    	left = colors[left] || left;
-    	accent = colors[accent] || accent;
+    	left = colors$2[left] || left;
+    	accent = colors$2[accent] || accent;
     	const writable_props = ['accent', 'left'];
 
     	Object.keys($$props).forEach(key => {
@@ -850,7 +850,7 @@ var app = (function () {
     		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ accent, left, colors });
+    	$$self.$capture_state = () => ({ accent, left, colors: colors$2 });
 
     	$$self.$inject_state = $$props => {
     		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
@@ -1046,8 +1046,8 @@ var app = (function () {
     	validate_slots('Two', slots, ['default']);
     	let { accent = '' } = $$props;
     	let { left = 'none' } = $$props;
-    	left = colors[left] || left;
-    	accent = colors[accent] || accent;
+    	left = colors$2[left] || left;
+    	accent = colors$2[accent] || accent;
     	const writable_props = ['accent', 'left'];
 
     	Object.keys($$props).forEach(key => {
@@ -1060,7 +1060,7 @@ var app = (function () {
     		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ accent, left, colors });
+    	$$self.$capture_state = () => ({ accent, left, colors: colors$2 });
 
     	$$self.$inject_state = $$props => {
     		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
@@ -1251,8 +1251,8 @@ var app = (function () {
     	validate_slots('Three', slots, ['default']);
     	let { accent } = $$props;
     	let { left = 'none' } = $$props;
-    	left = colors[left] || left;
-    	accent = colors[accent] || accent;
+    	left = colors$2[left] || left;
+    	accent = colors$2[accent] || accent;
     	const writable_props = ['accent', 'left'];
 
     	Object.keys($$props).forEach(key => {
@@ -1265,7 +1265,7 @@ var app = (function () {
     		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ accent, left, colors });
+    	$$self.$capture_state = () => ({ accent, left, colors: colors$2 });
 
     	$$self.$inject_state = $$props => {
     		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
@@ -1463,8 +1463,8 @@ var app = (function () {
     	validate_slots('Left', slots, ['default']);
     	let { accent } = $$props;
     	let { left = 'none' } = $$props;
-    	left = colors[left] || left;
-    	accent = colors[accent] || accent;
+    	left = colors$2[left] || left;
+    	accent = colors$2[accent] || accent;
     	const writable_props = ['accent', 'left'];
 
     	Object.keys($$props).forEach(key => {
@@ -1477,7 +1477,7 @@ var app = (function () {
     		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ accent, left, colors });
+    	$$self.$capture_state = () => ({ accent, left, colors: colors$2 });
 
     	$$self.$inject_state = $$props => {
     		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
@@ -12539,13 +12539,13 @@ var app = (function () {
     			t1 = space();
     			div3 = element("div");
     			div1 = element("div");
-    			div1.textContent = "almost all";
+    			div1.textContent = "we put";
     			t3 = space();
     			div2 = element("div");
-    			div2.textContent = "of our information";
+    			div2.textContent = "all of our information";
     			t5 = space();
     			div4 = element("div");
-    			div4.textContent = "is in text";
+    			div4.textContent = "in text";
     			t7 = space();
     			div5 = element("div");
     			t8 = space();
@@ -12558,15 +12558,15 @@ var app = (function () {
     			set_style(div1, "line-height", "2rem");
     			add_location(div1, file$9, 10, 6, 191);
     			attr_dev(div2, "class", "tab f2");
-    			add_location(div2, file$9, 11, 6, 273);
+    			add_location(div2, file$9, 11, 6, 269);
     			attr_dev(div3, "class", "more m1");
     			add_location(div3, file$9, 9, 4, 163);
     			attr_dev(div4, "class", "tab i f2 rose");
     			add_location(div4, file$9, 13, 4, 333);
     			set_style(div5, "margin-top", "3rem");
-    			add_location(div5, file$9, 14, 4, 381);
+    			add_location(div5, file$9, 14, 4, 378);
     			attr_dev(div6, "class", "margin-left:15rem;");
-    			add_location(div6, file$9, 15, 4, 418);
+    			add_location(div6, file$9, 15, 4, 415);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -12644,19 +12644,19 @@ var app = (function () {
     			t0 = text$1("\n      and we can\n      ");
     			span0 = element("span");
     			span0.textContent = "search";
-    			t2 = text$1("\n      it, and ");
+    			t2 = text$1("\n      it, or ");
     			span1 = element("span");
     			span1.textContent = "read";
     			t4 = text$1(" it-");
     			set_style(div0, "max-width", "180px");
     			set_style(div0, "margin-bottom", "1rem");
-    			add_location(div0, file$9, 21, 6, 558);
+    			add_location(div0, file$9, 21, 6, 555);
     			attr_dev(span0, "class", "sky");
-    			add_location(span0, file$9, 25, 6, 689);
+    			add_location(span0, file$9, 25, 6, 686);
     			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$9, 26, 14, 736);
+    			add_location(span1, file$9, 26, 13, 732);
     			attr_dev(div1, "class", "tab down f09");
-    			add_location(div1, file$9, 20, 4, 525);
+    			add_location(div1, file$9, 20, 4, 522);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -12698,7 +12698,7 @@ var app = (function () {
 
     // (30:2) <One>
     function create_default_slot_6$3(ctx) {
-    	let div4;
+    	let div5;
     	let span0;
     	let t1;
     	let div2;
@@ -12720,16 +12720,20 @@ var app = (function () {
     	let t15;
     	let span5;
     	let t17;
-    	let grid0;
-    	let t18;
-    	let div5;
+    	let div4;
+    	let span6;
     	let t19;
-    	let div6;
+    	let i;
     	let t21;
-    	let div7;
     	let t22;
-    	let div8;
+    	let grid0;
+    	let t23;
+    	let div6;
     	let t24;
+    	let div7;
+    	let t26;
+    	let div8;
+    	let t27;
     	let grid1;
     	let current;
 
@@ -12745,7 +12749,7 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			div4 = element("div");
+    			div5 = element("div");
     			span0 = element("span");
     			span0.textContent = "but we can't";
     			t1 = space();
@@ -12776,68 +12780,75 @@ var app = (function () {
     			span5 = element("span");
     			span5.textContent = "-◡";
     			t17 = space();
-    			create_component(grid0.$$.fragment);
-    			t18 = space();
-    			div5 = element("div");
-    			t19 = space();
-    			div6 = element("div");
-    			div6.textContent = "which is weird actually.";
-    			t21 = space();
-    			div7 = element("div");
+    			div4 = element("div");
+    			span6 = element("span");
+    			span6.textContent = "like";
+    			t19 = text$1(", to ");
+    			i = element("i");
+    			i.textContent = "use it";
+    			t21 = text$1("  again.");
     			t22 = space();
-    			div8 = element("div");
-    			div8.textContent = "text is a dead-end.";
+    			create_component(grid0.$$.fragment);
+    			t23 = space();
+    			div6 = element("div");
     			t24 = space();
+    			div7 = element("div");
+    			div7.textContent = "which is weird actually.";
+    			t26 = space();
+    			div8 = element("div");
+    			t27 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(span0, "class", "down i");
-    			add_location(span0, file$9, 31, 6, 841);
+    			add_location(span0, file$9, 31, 6, 837);
     			attr_dev(div0, "class", "sea i f2 sky");
-    			add_location(div0, file$9, 33, 8, 916);
+    			add_location(div0, file$9, 33, 8, 912);
     			attr_dev(span1, "class", "red ");
-    			add_location(span1, file$9, 35, 10, 1022);
+    			add_location(span1, file$9, 35, 10, 1018);
     			attr_dev(span2, "class", "red f09 i");
-    			add_location(span2, file$9, 36, 10, 1064);
+    			add_location(span2, file$9, 36, 10, 1060);
     			attr_dev(span3, "class", "sea b i f2");
     			set_style(span3, "top", "22px");
     			set_style(span3, "left", "32px");
     			set_style(span3, "position", "absolute");
-    			add_location(span3, file$9, 37, 10, 1114);
+    			add_location(span3, file$9, 37, 10, 1110);
     			set_style(div1, "position", "relative");
     			set_style(div1, "margin-top", "1.2rem");
-    			add_location(div1, file$9, 34, 8, 960);
+    			add_location(div1, file$9, 34, 8, 956);
     			attr_dev(div2, "class", "tab ");
-    			add_location(div2, file$9, 32, 6, 889);
+    			add_location(div2, file$9, 32, 6, 885);
     			set_style(sup, "font-size", "12px");
-    			add_location(sup, file$9, 41, 8, 1333);
+    			add_location(sup, file$9, 41, 8, 1329);
     			set_style(sub, "font-size", "1.1rem");
-    			add_location(sub, file$9, 43, 8, 1394);
+    			add_location(sub, file$9, 43, 8, 1390);
     			set_style(span4, "margin-left", "0.4rem");
     			set_style(span4, "font-size", "12px");
-    			add_location(span4, file$9, 44, 8, 1447);
+    			add_location(span4, file$9, 44, 8, 1443);
     			set_style(span5, "font-size", "12px");
-    			add_location(span5, file$9, 46, 8, 1589);
+    			add_location(span5, file$9, 46, 8, 1585);
     			attr_dev(div3, "class", "sky i ");
     			set_style(div3, "font-size", "2.0rem");
     			set_style(div3, "margin-left", "20px");
     			set_style(div3, "margin-top", "2.3rem");
-    			add_location(div3, file$9, 40, 6, 1240);
-    			set_style(div4, "margin-left", "10rem");
-    			add_location(div4, file$9, 30, 4, 802);
-    			set_style(div5, "margin-top", "3rem");
-    			add_location(div5, file$9, 50, 4, 1699);
-    			attr_dev(div6, "class", "tab down f09");
-    			add_location(div6, file$9, 52, 4, 1847);
+    			add_location(div3, file$9, 40, 6, 1236);
+    			set_style(span6, "font-size", "12px");
+    			add_location(span6, file$9, 48, 32, 1670);
+    			add_location(i, file$9, 48, 78, 1716);
+    			attr_dev(div4, "class", "tab down f09");
+    			add_location(div4, file$9, 48, 6, 1644);
+    			set_style(div5, "margin-left", "10rem");
+    			add_location(div5, file$9, 30, 4, 798);
+    			set_style(div6, "margin-top", "3rem");
+    			add_location(div6, file$9, 51, 4, 1806);
     			attr_dev(div7, "class", "tab down f09");
-    			add_location(div7, file$9, 53, 4, 1908);
-    			set_style(div8, "margin-top", "2rem");
-    			attr_dev(div8, "class", "tab f09");
-    			add_location(div8, file$9, 58, 4, 2142);
+    			add_location(div7, file$9, 53, 4, 1954);
+    			attr_dev(div8, "class", "tab down f09");
+    			add_location(div8, file$9, 54, 4, 2015);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, span0);
-    			append_dev(div4, t1);
-    			append_dev(div4, div2);
+    			insert_dev(target, div5, anchor);
+    			append_dev(div5, span0);
+    			append_dev(div5, t1);
+    			append_dev(div5, div2);
     			append_dev(div2, div0);
     			append_dev(div2, t3);
     			append_dev(div2, div1);
@@ -12846,8 +12857,8 @@ var app = (function () {
     			append_dev(div1, span2);
     			append_dev(div1, t7);
     			append_dev(div1, span3);
-    			append_dev(div4, t9);
-    			append_dev(div4, div3);
+    			append_dev(div5, t9);
+    			append_dev(div5, div3);
     			append_dev(div3, sup);
     			append_dev(div3, t11);
     			append_dev(div3, sub);
@@ -12855,17 +12866,21 @@ var app = (function () {
     			append_dev(div3, span4);
     			append_dev(div3, t15);
     			append_dev(div3, span5);
-    			append_dev(div4, t17);
-    			mount_component(grid0, div4, null);
-    			insert_dev(target, t18, anchor);
-    			insert_dev(target, div5, anchor);
-    			insert_dev(target, t19, anchor);
+    			append_dev(div5, t17);
+    			append_dev(div5, div4);
+    			append_dev(div4, span6);
+    			append_dev(div4, t19);
+    			append_dev(div4, i);
+    			append_dev(div4, t21);
+    			append_dev(div5, t22);
+    			mount_component(grid0, div5, null);
+    			insert_dev(target, t23, anchor);
     			insert_dev(target, div6, anchor);
-    			insert_dev(target, t21, anchor);
-    			insert_dev(target, div7, anchor);
-    			insert_dev(target, t22, anchor);
-    			insert_dev(target, div8, anchor);
     			insert_dev(target, t24, anchor);
+    			insert_dev(target, div7, anchor);
+    			insert_dev(target, t26, anchor);
+    			insert_dev(target, div8, anchor);
+    			insert_dev(target, t27, anchor);
     			mount_component(grid1, target, anchor);
     			current = true;
     		},
@@ -12882,17 +12897,15 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div4);
-    			destroy_component(grid0);
-    			if (detaching) detach_dev(t18);
     			if (detaching) detach_dev(div5);
-    			if (detaching) detach_dev(t19);
+    			destroy_component(grid0);
+    			if (detaching) detach_dev(t23);
     			if (detaching) detach_dev(div6);
-    			if (detaching) detach_dev(t21);
-    			if (detaching) detach_dev(div7);
-    			if (detaching) detach_dev(t22);
-    			if (detaching) detach_dev(div8);
     			if (detaching) detach_dev(t24);
+    			if (detaching) detach_dev(div7);
+    			if (detaching) detach_dev(t26);
+    			if (detaching) detach_dev(div8);
+    			if (detaching) detach_dev(t27);
     			destroy_component(grid1, detaching);
     		}
     	};
@@ -12908,7 +12921,7 @@ var app = (function () {
     	return block;
     }
 
-    // (67:2) <Two>
+    // (68:2) <Two>
     function create_default_slot_5$4(ctx) {
     	let div0;
     	let t1;
@@ -12927,11 +12940,11 @@ var app = (function () {
     			div2 = element("div");
     			div2.textContent = "even more of it";
     			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$9, 67, 4, 2412);
+    			add_location(div0, file$9, 68, 4, 2528);
     			attr_dev(div1, "class", "i sea tab");
-    			add_location(div1, file$9, 68, 4, 2450);
+    			add_location(div1, file$9, 69, 4, 2566);
     			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$9, 69, 4, 2495);
+    			add_location(div2, file$9, 70, 4, 2611);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -12953,14 +12966,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$4.name,
     		type: "slot",
-    		source: "(67:2) <Two>",
+    		source: "(68:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (73:2) <Two>
+    // (74:2) <Two>
     function create_default_slot_4$5(ctx) {
     	let div;
     	let t;
@@ -12978,7 +12991,7 @@ var app = (function () {
     			t = space();
     			create_component(grid.$$.fragment);
     			set_style(div, "width", "250px");
-    			add_location(div, file$9, 73, 4, 2560);
+    			add_location(div, file$9, 74, 4, 2676);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -13007,14 +13020,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_4$5.name,
     		type: "slot",
-    		source: "(73:2) <Two>",
+    		source: "(74:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (78:2) <One>
+    // (80:2) <One>
     function create_default_slot_3$5(ctx) {
     	let div0;
     	let t0;
@@ -13035,7 +13048,10 @@ var app = (function () {
     	let div7;
     	let t13;
     	let div8;
-    	let t15;
+    	let t14;
+    	let i;
+    	let t16;
+    	let t17;
     	let div9;
 
     	const block = {
@@ -13056,42 +13072,47 @@ var app = (function () {
     			div5 = element("div");
     			t7 = text$1("like a crowbar, ");
     			div4 = element("div");
-    			div4.textContent = "for text";
+    			div4.textContent = "for text.";
     			t9 = space();
     			div6 = element("div");
-    			div6.textContent = "you can pull your information out.";
+    			div6.textContent = "so you can pull a chunk out, or";
     			t11 = space();
     			div7 = element("div");
-    			div7.textContent = "- and bounce random queries off -";
+    			div7.textContent = "ask a question off of -";
     			t13 = space();
     			div8 = element("div");
-    			div8.textContent = "and understand the words, a little.";
-    			t15 = space();
+    			t14 = text$1("and ");
+    			i = element("i");
+    			i.textContent = "get something back";
+    			t16 = text$1(", from words.");
+    			t17 = space();
     			div9 = element("div");
     			attr_dev(div0, "class", "space");
-    			add_location(div0, file$9, 78, 4, 2651);
+    			add_location(div0, file$9, 80, 4, 2830);
     			attr_dev(b, "class", "sky f2");
-    			add_location(b, file$9, 80, 6, 2689);
+    			add_location(b, file$9, 82, 6, 2868);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "margin-top", "1.4rem");
-    			add_location(div1, file$9, 81, 6, 2743);
-    			add_location(div2, file$9, 79, 4, 2677);
-    			add_location(div3, file$9, 85, 6, 2909);
+    			add_location(div1, file$9, 83, 6, 2922);
+    			add_location(div2, file$9, 81, 4, 2856);
+    			add_location(div3, file$9, 87, 6, 3088);
     			set_style(div4, "position", "absolute");
     			set_style(div4, "top", "50px");
-    			add_location(div4, file$9, 91, 24, 3175);
+    			add_location(div4, file$9, 93, 24, 3367);
     			attr_dev(div5, "class", "sea down tab f2 ");
     			set_style(div5, "position", "relative");
-    			add_location(div5, file$9, 90, 6, 3093);
+    			set_style(div5, "margin", "4rem");
+    			add_location(div5, file$9, 92, 6, 3272);
     			attr_dev(div6, "class", "f09 i down");
-    			add_location(div6, file$9, 93, 6, 3251);
+    			add_location(div6, file$9, 95, 6, 3444);
     			attr_dev(div7, "class", "down");
-    			add_location(div7, file$9, 97, 6, 3413);
+    			add_location(div7, file$9, 99, 6, 3603);
+    			add_location(i, file$9, 100, 32, 3683);
     			attr_dev(div8, "class", "down f09");
-    			add_location(div8, file$9, 98, 6, 3477);
-    			add_location(ul, file$9, 84, 4, 2898);
+    			add_location(div8, file$9, 100, 6, 3657);
+    			add_location(ul, file$9, 86, 4, 3077);
     			attr_dev(div9, "class", "down");
-    			add_location(div9, file$9, 104, 4, 3693);
+    			add_location(div9, file$9, 106, 4, 3880);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -13113,7 +13134,10 @@ var app = (function () {
     			append_dev(ul, div7);
     			append_dev(ul, t13);
     			append_dev(ul, div8);
-    			insert_dev(target, t15, anchor);
+    			append_dev(div8, t14);
+    			append_dev(div8, i);
+    			append_dev(div8, t16);
+    			insert_dev(target, t17, anchor);
     			insert_dev(target, div9, anchor);
     		},
     		d: function destroy(detaching) {
@@ -13122,7 +13146,7 @@ var app = (function () {
     			if (detaching) detach_dev(div2);
     			if (detaching) detach_dev(t4);
     			if (detaching) detach_dev(ul);
-    			if (detaching) detach_dev(t15);
+    			if (detaching) detach_dev(t17);
     			if (detaching) detach_dev(div9);
     		}
     	};
@@ -13131,14 +13155,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$5.name,
     		type: "slot",
-    		source: "(78:2) <One>",
+    		source: "(80:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (108:2) <Left accent="steelblue">
+    // (110:2) <Left accent="steelblue">
     function create_default_slot_2$5(ctx) {
     	let div0;
     	let t0;
@@ -13196,37 +13220,37 @@ var app = (function () {
     			div8 = element("div");
     			div8.textContent = "that's the best way to build this.";
     			attr_dev(div0, "class", "down");
-    			add_location(div0, file$9, 108, 4, 3756);
+    			add_location(div0, file$9, 110, 4, 3943);
     			set_style(hr, "height", "3px");
     			set_style(hr, "background-color", "#50617A");
     			set_style(hr, "width", "250px");
     			set_style(hr, "margin-bottom", "3rem");
     			set_style(hr, "margin-top", "4rem");
-    			add_location(hr, file$9, 109, 4, 3781);
-    			add_location(i, file$9, 110, 24, 3908);
+    			add_location(hr, file$9, 111, 4, 3968);
+    			add_location(i, file$9, 112, 24, 4095);
     			attr_dev(a, "class", "sea b i");
     			attr_dev(a, "href", "https://github.com/spencermountain/compromise/graphs/contributors");
-    			add_location(a, file$9, 112, 12, 3995);
+    			add_location(a, file$9, 114, 12, 4182);
     			attr_dev(div1, "class", "tab f09 down");
-    			add_location(div1, file$9, 111, 4, 3956);
+    			add_location(div1, file$9, 113, 4, 4143);
     			attr_dev(div2, "class", "down f2 fuscia tab");
-    			add_location(div2, file$9, 115, 4, 4157);
+    			add_location(div2, file$9, 117, 4, 4344);
     			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$9, 117, 6, 4304);
+    			add_location(div3, file$9, 119, 6, 4491);
     			attr_dev(div4, "class", "down f2 tulip");
     			set_style(div4, "margin-top", "100px");
     			set_style(div4, "margin-left", "25%");
-    			add_location(div4, file$9, 116, 4, 4227);
+    			add_location(div4, file$9, 118, 4, 4414);
     			attr_dev(div5, "class", "tab f2 blue");
-    			add_location(div5, file$9, 121, 6, 4451);
+    			add_location(div5, file$9, 123, 6, 4638);
     			attr_dev(div6, "class", "down ");
     			set_style(div6, "margin-top", "100px");
     			set_style(div6, "margin-left", "100px");
-    			add_location(div6, file$9, 119, 4, 4369);
+    			add_location(div6, file$9, 121, 4, 4556);
     			set_style(div7, "margin-top", "100px");
-    			add_location(div7, file$9, 126, 4, 4662);
+    			add_location(div7, file$9, 128, 4, 4849);
     			attr_dev(div8, "class", "down tab");
-    			add_location(div8, file$9, 127, 4, 4700);
+    			add_location(div8, file$9, 129, 4, 4887);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -13278,14 +13302,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$5.name,
     		type: "slot",
-    		source: "(108:2) <Left accent=\\\"steelblue\\\">",
+    		source: "(110:2) <Left accent=\\\"steelblue\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (133:2) <One>
+    // (135:2) <One>
     function create_default_slot_1$5(ctx) {
     	let grid0;
     	let t0;
@@ -13325,11 +13349,11 @@ var app = (function () {
     			t6 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(div0, "class", "sea f09");
-    			add_location(div0, file$9, 135, 6, 4922);
-    			add_location(kbd0, file$9, 136, 6, 4967);
-    			add_location(kbd1, file$9, 137, 6, 5049);
+    			add_location(div0, file$9, 137, 6, 5109);
+    			add_location(kbd0, file$9, 138, 6, 5154);
+    			add_location(kbd1, file$9, 139, 6, 5236);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$9, 134, 4, 4898);
+    			add_location(div1, file$9, 136, 4, 5085);
     		},
     		m: function mount(target, anchor) {
     			mount_component(grid0, target, anchor);
@@ -13369,7 +13393,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$5.name,
     		type: "slot",
-    		source: "(133:2) <One>",
+    		source: "(135:2) <One>",
     		ctx
     	});
 
@@ -13392,10 +13416,12 @@ var app = (function () {
     	let t5;
     	let two4;
     	let t6;
-    	let one2;
-    	let t7;
-    	let left;
+    	let div;
     	let t8;
+    	let one2;
+    	let t9;
+    	let left;
+    	let t10;
     	let one3;
     	let current;
     	two0 = new Two({ $$inline: true });
@@ -13483,11 +13509,15 @@ var app = (function () {
     			t5 = space();
     			create_component(two4.$$.fragment);
     			t6 = space();
-    			create_component(one2.$$.fragment);
-    			t7 = space();
-    			create_component(left.$$.fragment);
+    			div = element("div");
+    			div.textContent = "why does a sentence have to kill our information?";
     			t8 = space();
+    			create_component(one2.$$.fragment);
+    			t9 = space();
+    			create_component(left.$$.fragment);
+    			t10 = space();
     			create_component(one3.$$.fragment);
+    			add_location(div, file$9, 77, 2, 2756);
     		},
     		m: function mount(target, anchor) {
     			mount_component(two0, target, anchor);
@@ -13504,10 +13534,12 @@ var app = (function () {
     			insert_dev(target, t5, anchor);
     			mount_component(two4, target, anchor);
     			insert_dev(target, t6, anchor);
-    			mount_component(one2, target, anchor);
-    			insert_dev(target, t7, anchor);
-    			mount_component(left, target, anchor);
+    			insert_dev(target, div, anchor);
     			insert_dev(target, t8, anchor);
+    			mount_component(one2, target, anchor);
+    			insert_dev(target, t9, anchor);
+    			mount_component(left, target, anchor);
+    			insert_dev(target, t10, anchor);
     			mount_component(one3, target, anchor);
     			current = true;
     		},
@@ -13611,10 +13643,12 @@ var app = (function () {
     			if (detaching) detach_dev(t5);
     			destroy_component(two4, detaching);
     			if (detaching) detach_dev(t6);
-    			destroy_component(one2, detaching);
-    			if (detaching) detach_dev(t7);
-    			destroy_component(left, detaching);
+    			if (detaching) detach_dev(div);
     			if (detaching) detach_dev(t8);
+    			destroy_component(one2, detaching);
+    			if (detaching) detach_dev(t9);
+    			destroy_component(left, detaching);
+    			if (detaching) detach_dev(t10);
     			destroy_component(one3, detaching);
     		}
     	};
@@ -13714,22 +13748,22 @@ var app = (function () {
     	}
     }
 
-    let methods$l = {
+    let methods$m = {
       one: {},
       two: {},
       three: {},
       four: {},
     };
 
-    let model$1 = {
+    let model$3 = {
       one: {},
       two: {},
       three: {},
     };
-    let compute$3 = {};
+    let compute$7 = {};
     let hooks = [];
 
-    var tmp = { methods: methods$l, model: model$1, compute: compute$3, hooks };
+    var tmp = { methods: methods$m, model: model$3, compute: compute$7, hooks };
 
     const isArray$4 = input => Object.prototype.toString.call(input) === '[object Array]';
 
@@ -13755,7 +13789,7 @@ var app = (function () {
         return this
       },
     };
-    var compute$2 = fns$3;
+    var compute$6 = fns$3;
 
     const forEach = function (cb) {
       let ptrs = this.fullPointer;
@@ -13766,14 +13800,14 @@ var app = (function () {
       return this
     };
 
-    const map = function (cb) {
+    const map = function (cb, empty) {
       let ptrs = this.fullPointer;
       let res = ptrs.map((ptr, i) => {
         let view = this.update([ptr]);
         return cb(view, i)
       });
       if (res.length === 0) {
-        return this.update([])
+        return empty || this.update([])
       }
       // return an array of values, or View objects?
       // user can return either from their callback
@@ -13868,9 +13902,20 @@ var app = (function () {
       },
       /** */
       last: function () {
-        let n = this.pointer.length - 1;
+        let n = this.fullPointer.length - 1;
         return this.eq(n)
       },
+
+      /** grab term[0] for every match */
+      firstTerms: function () {
+        return this.match('^.')
+      },
+
+      /** grab the last term for every match  */
+      lastTerms: function () {
+        return this.match('.$')
+      },
+
       /** */
       slice: function (min, max) {
         let pntrs = this.pointer || this.docs.map((_o, n) => [n]);
@@ -13922,9 +13967,12 @@ var app = (function () {
     };
     utils.group = utils.groups;
     utils.fullSentence = utils.fullSentences;
+    utils.sentence = utils.fullSentences;
+    utils.lastTerm = utils.lastTerms;
+    utils.firstTerm = utils.firstTerms;
     var util = utils;
 
-    const methods$k = {
+    const methods$l = {
       // allow re-use of this view, after a mutation
       freeze: function () {
         this.frozen = this.docs;
@@ -13936,13 +13984,13 @@ var app = (function () {
         return this
       },
     };
-    var freeze = methods$k;
+    var freeze = methods$l;
 
-    const methods$j = Object.assign({}, util, compute$2, loops, freeze);
+    const methods$k = Object.assign({}, util, compute$6, loops, freeze);
 
     // aliases
-    methods$j.get = methods$j.eq;
-    var api$7 = methods$j;
+    methods$k.get = methods$k.eq;
+    var api$9 = methods$k;
 
     const getPtrs = function (view) {
       const { methods, frozen, ptrs, document } = view;
@@ -14070,21 +14118,21 @@ var app = (function () {
         return m
       }
     }
-    Object.assign(View.prototype, api$7);
+    Object.assign(View.prototype, api$9);
     var View$1 = View;
 
     var version = '14rc';
 
-    const isObject$3 = function (item) {
+    const isObject$4 = function (item) {
       // let isSet = item instanceof Set
       return item && typeof item === 'object' && !Array.isArray(item)
     };
 
     // recursive merge of objects
     function mergeDeep(model, plugin) {
-      if (isObject$3(plugin)) {
+      if (isObject$4(plugin)) {
         for (const key in plugin) {
-          if (isObject$3(plugin[key])) {
+          if (isObject$4(plugin[key])) {
             if (!model[key]) Object.assign(model, { [key]: {} });
             mergeDeep(model[key], plugin[key]); //recursion
           } else {
@@ -14106,7 +14154,15 @@ var app = (function () {
       return model
     }
 
-    const extend = function (plugin, world, View) {
+    // wire-up existing tags
+    // const addTags = function (tags, world) {
+    //   const add = world.methods.one.addTags
+    //   const tagSet = world.model.one.tagSet
+    //   // console.log(world.model.one.tagSet)
+    //   world.model.one.tagSet = add(tags, tagSet)
+    // }
+
+    const extend = function (plugin, world, View, nlp) {
       const { methods, model, compute, hooks } = world;
       if (plugin.methods) {
         mergeQuick(methods, plugin.methods);
@@ -14126,43 +14182,42 @@ var app = (function () {
       if (plugin.api) {
         plugin.api(View);
       }
+      if (plugin.lib) {
+        Object.keys(plugin.lib).forEach(k => nlp[k] = plugin.lib[k]);
+      }
+      if (plugin.tags) {
+        nlp.addTags(plugin.tags);
+      }
+      if (plugin.words) {
+        nlp.addWords(plugin.words);
+      }
     };
     var extend$1 = extend;
 
     const isArray$3 = arr => Object.prototype.toString.call(arr) === '[object Array]';
 
-    const isObject$2 = item => item && typeof item === 'object' && !Array.isArray(item);
+    const isObject$3 = item => item && typeof item === 'object' && !Array.isArray(item);
 
     const isSet = item => item instanceof Set;
 
-    // not-very-deep clone
-    const deepClone$1 = function (obj) {
-      for (const key in obj) {
-        if (isObject$2(obj[key])) {
-          obj[key] = Object.assign({}, obj[key]);
-          // obj[key] = deepClone(obj[key]) //recursive
-        } else if (isArray$3(obj[key])) {
-          obj[key] = obj[key].slice(0);
-        } else if (isSet(obj[key])) {
-          obj[key] = new Set(obj[key]);
+    // deep-i-guess clone of model object
+    const deepClone$1 = function (model) {
+      // console.log(Object.keys(obj))
+      for (const key in model) {
+        if (isObject$3(model[key])) {
+          model[key] = Object.assign({}, model[key]);
+          model[key] = deepClone$1(model[key]); //recursive
+        } else if (isArray$3(model[key])) {
+          model[key] = model[key].slice(0);
+        } else if (isSet(model[key])) {
+          model[key] = new Set(model[key]);
         }
       }
-      return obj
+      return model
     };
     var clone = deepClone$1;
 
     /** add words to assume by prefix in typeahead */
-    const typeAhead = function (lex = {}) {
-      // interpret array as input
-      if (Object.prototype.toString.call(lex) === '[object Array]') {
-        lex = lex.reduce((h, k) => {
-          h[k] = true;
-          return h
-        }, {});
-      }
-      this.world.one.typeahead = lex;
-      return this
-    };
 
     /** log the decision-making to console */
     const verbose = function (set) {
@@ -14192,60 +14247,20 @@ var app = (function () {
       doc.compute(hooks);
       return doc
     };
-
-    /** log the decision-making to console */
-    nlp.verbose = verbose;
-
-    /** pre-parse any match statements */
-    nlp.parseMatch = function (str) {
-      return world.methods.one.parseMatch(str)
-    };
-
-    /** pre-compile a list of matches to lookup */
-    nlp.compile = compile;
-
-    /** add words to assume by prefix in typeahead */
-    nlp.typeAhead = typeAhead;
-
-    /** extend compromise functionality */
-    nlp.plugin = function (plugin) {
-      extend$1(plugin, world, View$1, this);
-      return this
-    };
-    nlp.extend = nlp.plugin;
-
-    /** reach-into compromise internals */
-    nlp.world = () => world;
-
-    /** current library release version */
-    nlp.version = version;
-
-    /** insert new words/phrases into the lexicon */
-    nlp.addWords = function (words) {
-      const { methods, model } = world;
-      if (!words) {
-        return
-      }
-      // add some words to our lexicon
-      if (!methods.two.expandLexicon) {
-        Object.assign(model.two.lexicon, words); //no fancy-business
-      } else {
-        // expand it, if appropriate
-        let { lex, _multi } = methods.two.expandLexicon(words, world);
-        Object.assign(model.two.lexicon, lex);
-        Object.assign(model.two._multiCache, _multi);
-      }
-    };
+    Object.defineProperty(nlp, '_world', {
+      value: world,
+      writable: true,
+    });
 
     /** don't run the POS-tagger */
     nlp.tokenize = function (input, lex) {
-      const { methods, compute } = world;
+      const { methods, compute } = this._world;
       // add user-given words to lexicon
       if (lex) {
         nlp.addWords(lex);
       }
       // run the tokenizer
-      let document = methods.one.tokenize(input, world);
+      let document = methods.one.tokenize(input, this._world);
       let doc = new View$1(document);
       // give contractions a shot, at least
       if (compute.contractions) {
@@ -14256,17 +14271,41 @@ var app = (function () {
 
     /** deep-clone the library's model*/
     nlp.fork = function (str) {
-      world = Object.assign({}, world);
-      world.methods = Object.assign({}, world.methods);
-      world.model = clone(world.model);
-      world.model.forked = str;
-      return nlp
+      this._world = Object.assign({}, this._world);
+      this._world.methods = Object.assign({}, this._world.methods);
+      this._world.model = clone(this._world.model);
+      this._world.model.fork = str;
+      return this
     };
 
-    // some helper methods
-    nlp.model = () => world.model;
-    nlp.methods = () => world.methods;
-    nlp.hooks = () => world.hooks;
+    /** extend compromise functionality */
+    nlp.plugin = function (plugin) {
+      extend$1(plugin, this._world, View$1, this);
+      return this
+    };
+    nlp.extend = nlp.plugin;
+
+    /** log the decision-making to console */
+    nlp.verbose = verbose;
+    /** pre-compile a list of matches to lookup */
+    nlp.compile = compile;
+    /** current library release version */
+    nlp.version = version;
+    /** reach-into compromise internals */
+    nlp.world = function () {
+      return this._world
+    };
+    nlp.model = function () {
+      return this._world.model
+    };
+    nlp.methods = function () {
+      return this._world.methods
+    };
+    nlp.hooks = function () {
+      return this._world.hooks
+    };
+
+    // apply our only default plugins
     var nlp$1 = nlp;
 
     var caseFns = {
@@ -14307,6 +14346,8 @@ var app = (function () {
       },
     };
 
+    // punctuation we wanna transfer
+
     // splice an array into an array
     const spliceArr = (parent, index, child) => {
       let args = [index, 0].concat(child);
@@ -14317,15 +14358,16 @@ var app = (function () {
     // add a space at end, if required
     const endSpace = function (terms) {
       const hasSpace = / $/;
+      const hasDash = /[-–—]/;
       let lastTerm = terms[terms.length - 1];
-      if (hasSpace.test(lastTerm.post) === false) {
+      if (lastTerm && !hasSpace.test(lastTerm.post) && !hasDash.test(lastTerm.post)) {
         lastTerm.post += ' ';
       }
     };
 
     // sentence-ending punctuation should move in append
     const movePunct = (source, end, needle) => {
-      const juicy = /[.?!]/g; // punctuation we wanna transfer
+      const juicy = /[.?!,;:)-–—'"]/g;
       let wasLast = source[end - 1];
       if (!wasLast) {
         return
@@ -14390,9 +14432,11 @@ var app = (function () {
     const cleanAppend = function (home, ptr, needle, document) {
       let [n, , end] = ptr;
       let total = document[n].length;
+
       if (end < total) {
         // are we in the middle?
         // add trailing space on self
+        movePunct(home, end, needle);
         endSpace(needle);
       } else if (total === end) {
         // are we at the end?
@@ -14409,6 +14453,12 @@ var app = (function () {
       // insert words at end of each doc
       let ptrs = view.fullPointer;
       let selfPtrs = view.fullPointer;
+      // are we inserting inside a contraction?
+      // expand, it first
+      if (view.has('@hasContraction')) {
+        let more = view.grow('@hasContraction');
+        more.contractions().expand();
+      }
       ptrs.forEach((ptr, i) => {
         let [n] = ptr;
         // add-in the words
@@ -14435,7 +14485,7 @@ var app = (function () {
       // shift our self pointer, if necessary
       view.ptrs = selfPtrs;
       // try to tag them, too
-      doc.compute('index');
+      doc.compute(['index', 'lexicon', 'preTagger']);
       return doc
     };
 
@@ -14479,9 +14529,14 @@ var app = (function () {
       this.insertAfter(input);
       // delete the original terms
       let original = this.update(ptrs);
+      // are we replacing part of a contraction?
+      if (original.has('@hasContraction')) {
+        let more = this.growLeft('@hasContraction+').growRight('@hasContraction+');
+        more.contractions().expand();
+      }
       this.delete(original);
       // what should we return?
-      return this.toView(ptrs).compute('index')
+      return this.toView(ptrs).compute(['index', 'lexicon', 'preTagger'])
     };
 
     fns$1.replace = function (match, input) {
@@ -14545,7 +14600,7 @@ var app = (function () {
       return document
     };
 
-    const methods$i = {
+    const methods$j = {
       /** */
       remove: function (reg) {
         const { indexN } = this.methods.one;
@@ -14558,6 +14613,12 @@ var app = (function () {
           self = this;
           not = this.match(reg);
         }
+        // is it part of a contraction?
+        if (self.has('@hasContraction')) {
+          let more = self.grow('@hasContraction');
+          more.contractions().expand();
+        }
+
         let ptrs = self.fullPointer;
         let nots = not.fullPointer.reverse();
         // remove them from the actual document)
@@ -14597,13 +14658,13 @@ var app = (function () {
       },
     };
     // aliases
-    methods$i.delete = methods$i.remove;
-    var remove = methods$i;
+    methods$j.delete = methods$j.remove;
+    var remove = methods$j;
 
-    const methods$h = {
+    const methods$i = {
       /** add this punctuation or whitespace before each match: */
       pre: function (str, concat) {
-        if (str === undefined) {
+        if (str === undefined && this.found) {
           return this.docs[0][0].pre
         }
         this.docs.forEach(terms => {
@@ -14636,6 +14697,9 @@ var app = (function () {
 
       /** remove whitespace from start/end */
       trim: function () {
+        if (!this.found) {
+          return this
+        }
         let docs = this.docs;
         let start = docs[0][0];
         start.pre = start.pre.trimStart();
@@ -14699,10 +14763,10 @@ var app = (function () {
         return this
       },
     };
-    methods$h.deHyphenate = methods$h.dehyphenate;
-    methods$h.toQuotation = methods$h.toQuotations;
+    methods$i.deHyphenate = methods$i.dehyphenate;
+    methods$i.toQuotation = methods$i.toQuotations;
 
-    var whitespace$1 = methods$h;
+    var whitespace$1 = methods$i;
 
     /** alphabetical order */
     const alpha = (a, b) => {
@@ -14774,7 +14838,7 @@ var app = (function () {
       return arr
     };
 
-    var methods$g = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
+    var methods$h = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
 
     // aliases
     const seqNames = new Set(['index', 'sequence', 'seq', 'sequential', 'chron', 'chronological']);
@@ -14798,12 +14862,12 @@ var app = (function () {
         input = 'sequential';
       }
       if (freqNames.has(input)) {
-        arr = methods$g.byFreq(arr);
+        arr = methods$h.byFreq(arr);
         return this.update(arr.map(o => o.pointer))
       }
       // apply sort method on each phrase
-      if (typeof methods$g[input] === 'function') {
-        arr = arr.sort(methods$g[input]);
+      if (typeof methods$h[input] === 'function') {
+        arr = arr.sort(methods$h[input]);
         return this.update(arr.map(o => o.pointer))
       }
       return this
@@ -14837,7 +14901,7 @@ var app = (function () {
     const deepClone = function (obj) {
       return JSON.parse(JSON.stringify(obj))
     };
-    const methods$f = {
+    const methods$g = {
       fork: function () {
         let after = this;
         after.world.model = deepClone(after.world.model);
@@ -14850,17 +14914,17 @@ var app = (function () {
         return after
       },
     };
-    var fork = methods$f;
+    var fork = methods$g;
 
-    const methods$e = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork);
+    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork);
 
     const addAPI$3 = function (View) {
-      Object.assign(View.prototype, methods$e);
+      Object.assign(View.prototype, methods$f);
     };
-    var api$6 = addAPI$3;
+    var api$8 = addAPI$3;
 
     var change = {
-      api: api$6,
+      api: api$8,
     };
 
     const relPointer = function (ptrs, parent) {
@@ -14982,6 +15046,7 @@ var app = (function () {
 
     // import { indexN } from '../../pointers/methods/lib/index.js'
 
+
     const before = function (regs, group) {
       const { indexN } = this.methods.one;
       let pre = [];
@@ -15020,19 +15085,58 @@ var app = (function () {
       return postWords.match(regs, group)
     };
 
-    var lookaround = { before, after };
+    const growLeft = function (regs, group) {
+      regs = this.world.methods.one.parseMatch(regs);
+      regs[regs.length - 1].end = true;// ensure matches are beside us ←
+      let ptrs = this.fullPointer;
+      this.forEach((m, n) => {
+        let more = m.before(regs, group);
+        if (more.found) {
+          ptrs[n][1] -= more.terms().length;
+        }
+      });
+      return this.update(ptrs)
+    };
+
+    const growRight = function (regs, group) {
+      regs = this.world.methods.one.parseMatch(regs);
+      regs[0].start = true;// ensure matches are beside us →
+      let ptrs = this.fullPointer;
+      this.forEach((m, n) => {
+        let more = m.after(regs, group);
+        if (more.found) {
+          ptrs[n][2] += more.terms().length;
+        }
+      });
+      return this.update(ptrs)
+    };
+
+    const grow = function (regs, group) {
+      return this.growRight(regs, group).growLeft(regs, group)
+    };
+
+    var lookaround = { before, after, growLeft, growRight, grow };
 
     const combine = function (left, right) {
       return [left[0], left[1], right[2]]
     };
 
-    const getDoc$2 = (m, view, group) => {
-      return typeof m === 'string' ? view.match(m, group) : m
+    const getDoc$2 = (reg, view, group) => {
+      let m = reg;
+      if (typeof reg === 'string') {
+        m = view.match(reg, group);
+      }
+      // are we splitting within a contraction?
+      if (m.has('@hasContraction')) {
+        let more = m.grow('@hasContraction');
+        more.contractions().expand();
+      }
+      return m
     };
 
-    const methods$d = {};
+    const methods$e = {};
     // [before], [match], [after]
-    methods$d.splitOn = function (m, group) {
+    methods$e.splitOn = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -15048,7 +15152,7 @@ var app = (function () {
     };
 
     // [before], [match after]
-    methods$d.splitBefore = function (m, group) {
+    methods$e.splitBefore = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -15068,7 +15172,7 @@ var app = (function () {
     };
 
     // [before match], [after]
-    methods$d.splitAfter = function (m, group) {
+    methods$e.splitAfter = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -15086,24 +15190,24 @@ var app = (function () {
       res = res.filter(p => p);
       return this.update(res)
     };
-    methods$d.split = methods$d.splitAfter;
+    methods$e.split = methods$e.splitAfter;
 
-    var split$1 = methods$d;
+    var split$1 = methods$e;
 
-    const methods$c = Object.assign({}, match$3, lookaround, split$1);
+    const methods$d = Object.assign({}, match$3, lookaround, split$1);
 
     // aliases
-    methods$c.lookBehind = methods$c.before;
-    methods$c.lookBefore = methods$c.before;
+    methods$d.lookBehind = methods$d.before;
+    methods$d.lookBefore = methods$d.before;
 
-    methods$c.lookAhead = methods$c.after;
-    methods$c.lookAfter = methods$c.after;
+    methods$d.lookAhead = methods$d.after;
+    methods$d.lookAfter = methods$d.after;
 
-    methods$c.notIf = methods$c.ifNo;
+    methods$d.notIf = methods$d.ifNo;
     const matchAPI = function (View) {
-      Object.assign(View.prototype, methods$c);
+      Object.assign(View.prototype, methods$d);
     };
-    var api$5 = matchAPI;
+    var api$7 = matchAPI;
 
     // match  'foo /yes/' and not 'foo/no/bar'
     const bySlashes = /(?:^|\s)([![^]*(?:<[^<]*>)?\/.*?[^\\/]\/[?\]+*$~]*)(?:\s|$)/;
@@ -15469,7 +15573,7 @@ var app = (function () {
       // console.log(tokens)
       return tokens
     };
-    var parseMatch = syntax;
+    var parseMatch$1 = syntax;
 
     const anyIntersection = function (setA, setB) {
       for (let elem of setB) {
@@ -15591,7 +15695,7 @@ var app = (function () {
     /** search the term's 'pre' punctuation  */
     const hasPre = (term, punct) => term.pre.indexOf(punct) !== -1;
 
-    const methods$b = {
+    const methods$c = {
       /** does it have a quotation symbol?  */
       hasQuote: term => startQuote.test(term.pre) || endQuote.test(term.post),
       /** does it have a comma?  */
@@ -15620,9 +15724,9 @@ var app = (function () {
       isTitleCase: term => /^[A-Z][a-z'\u00C0-\u00FF]/.test(term.text), //|| /^[A-Z]$/.test(term.text)
     };
     // aliases
-    methods$b.hasQuotation = methods$b.hasQuote;
+    methods$c.hasQuotation = methods$c.hasQuote;
 
-    var termMethods = methods$b;
+    var termMethods = methods$c;
 
     //declare it up here
     let wrapMatch = function () { };
@@ -15738,7 +15842,7 @@ var app = (function () {
     var matchTerm = wrapMatch;
 
     const env = typeof process === 'undefined' ? self.env : process.env;
-    const log = msg => {
+    const log$1 = msg => {
       if (env.DEBUG_MATCH) {
         console.log(`\n  \x1b[32m ${msg} \x1b[0m`); // eslint-disable-line
       }
@@ -15782,7 +15886,7 @@ var app = (function () {
       //otherwise, we're looking for the next one
       for (; t < state.terms.length; t += 1) {
         if (matchTerm(state.terms[t], nextReg, state.start_i + t, state.phrase_length) === true) {
-          log(`greedyTo ${state.terms[t].normal}`);
+          log$1(`greedyTo ${state.terms[t].normal}`);
           return t
         }
       }
@@ -15795,7 +15899,7 @@ var app = (function () {
         if (state.start_i + state.t < state.phrase_length - 1) {
           let tmpReg = Object.assign({}, reg, { end: false });
           if (matchTerm(state.terms[state.t], tmpReg, state.start_i + state.t, state.phrase_length) === true) {
-            log(`endGreedy ${state.terms[state.t].normal}`);
+            log$1(`endGreedy ${state.terms[state.t].normal}`);
             return true
           }
         }
@@ -15865,7 +15969,7 @@ var app = (function () {
         return allWords
       });
       if (allDidMatch === true) {
-        log(`doAndBlock ${state.terms[state.t].normal}`);
+        log$1(`doAndBlock ${state.terms[state.t].normal}`);
         return longest
       }
       return false
@@ -16236,19 +16340,29 @@ var app = (function () {
 
     var match$1 = runMatch;
 
-    const methods$9 = {
+    const methods$a = {
       one: {
         termMethods,
-        parseMatch,
+        parseMatch: parseMatch$1,
         match: match$1,
       },
     };
 
-    var methods$a = methods$9;
+    var methods$b = methods$a;
+
+    /** pre-parse any match statements */
+    const parseMatch = function (str) {
+      const world = this.world();
+      return world.methods.one.parseMatch(str)
+    };
+    var lib$3 = {
+      parseMatch
+    };
 
     var match = {
-      api: api$5,
-      methods: methods$a,
+      api: api$7,
+      methods: methods$b,
+      lib: lib$3,
     };
 
     // some nice colors for client-side debug
@@ -16304,12 +16418,12 @@ var app = (function () {
     /* eslint-disable no-console */
 
     const tagString = function (tags, model) {
-      if (model.two.tagSet) {
+      if (model.one.tagSet) {
         tags = tags.map(tag => {
-          if (!model.two.tagSet.hasOwnProperty(tag)) {
+          if (!model.one.tagSet.hasOwnProperty(tag)) {
             return tag
           }
-          const c = model.two.tagSet[tag].color || 'blue';
+          const c = model.one.tagSet[tag].color || 'blue';
           return cli$1[c](tag)
         });
       }
@@ -16574,7 +16688,7 @@ var app = (function () {
         return term
       })
     };
-    const defaults = {
+    const defaults$1 = {
       text: true,
       terms: true,
     };
@@ -16584,7 +16698,7 @@ var app = (function () {
       if (typeof opts === 'string') {
         opts = {};
       }
-      opts = Object.assign({}, defaults, opts);
+      opts = Object.assign({}, defaults$1, opts);
       // run any necessary upfront steps
       if (opts.offset) {
         view.compute('offset');
@@ -16616,7 +16730,7 @@ var app = (function () {
     };
     var json = toJson;
 
-    const methods$8 = {
+    const methods$9 = {
       /** return data */
       json: function (n) {
         let res = json(this, n);
@@ -16632,11 +16746,11 @@ var app = (function () {
       out: out$2,
     };
     // aliases
-    methods$8.data = methods$8.json;
+    methods$9.data = methods$9.json;
 
-    var out = methods$8;
+    var out = methods$9;
 
-    const isObject$1 = val => {
+    const isObject$2 = val => {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
@@ -16663,11 +16777,12 @@ var app = (function () {
         punctuation: 'some',
         case: 'some',
         unicode: 'some',
-        use: 'normal',
+        use: 'root',
       },
     };
     fmts.clean = fmts.normal;
     fmts.reduced = fmts.root;
+    fmts.implicit = fmts.machine;
 
     var text = {
       /** */
@@ -16678,7 +16793,7 @@ var app = (function () {
         };
         if (fmt && typeof fmt === 'string' && fmts.hasOwnProperty(fmt)) {
           opts = Object.assign({}, fmts[fmt]);
-        } else if (fmt && isObject$1(fmt)) {
+        } else if (fmt && isObject$2(fmt)) {
           opts = Object.assign({}, fmt, opts);//todo: fixme
         }
         if (this.pointer) {
@@ -16694,15 +16809,15 @@ var app = (function () {
       },
     };
 
-    const methods$7 = Object.assign({}, out, text);
+    const methods$8 = Object.assign({}, out, text);
 
     const addAPI$2 = function (View) {
-      Object.assign(View.prototype, methods$7);
+      Object.assign(View.prototype, methods$8);
     };
-    var api$4 = addAPI$2;
+    var api$6 = addAPI$2;
 
     var output = {
-      api: api$4,
+      api: api$6,
     };
 
     // do the pointers intersect?
@@ -16972,7 +17087,7 @@ var app = (function () {
       return doc
     };
 
-    var methods$6 = {
+    var methods$7 = {
       one: {
         termList,
         getDoc: getDoc$1,
@@ -16992,19 +17107,19 @@ var app = (function () {
       return typeof m === 'string' ? view.match(m) : m
     };
 
-    const methods$5 = {};
+    const methods$6 = {};
 
     // all parts, minus duplicates
-    methods$5.union = function (m) {
+    methods$6.union = function (m) {
       const { getUnion } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getUnion(this.fullPointer, m.fullPointer);
       return this.toView(ptrs)
     };
-    methods$5.and = methods$5.union;
+    methods$6.and = methods$6.union;
 
     // only parts they both have
-    methods$5.intersection = function (m) {
+    methods$6.intersection = function (m) {
       const { getIntersection } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getIntersection(this.fullPointer, m.fullPointer);
@@ -17012,16 +17127,16 @@ var app = (function () {
     };
 
     // only parts of a that b does not have
-    methods$5.difference = function (m) {
+    methods$6.difference = function (m) {
       const { getDifference } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getDifference(this.fullPointer, m.fullPointer);
       return this.toView(ptrs)
     };
-    methods$5.not = methods$5.difference;
+    methods$6.not = methods$6.difference;
 
     // get opposite of a
-    methods$5.complement = function () {
+    methods$6.complement = function () {
       const { getDifference } = this.methods.one;
       let doc = this.all();
       let ptrs = getDifference(doc.fullPointer, this.fullPointer);
@@ -17029,7 +17144,7 @@ var app = (function () {
     };
 
     // remove overlaps
-    methods$5.settle = function () {
+    methods$6.settle = function () {
       const { getUnion } = this.methods.one;
       let ptrs = this.fullPointer;
       ptrs.forEach(ptr => {
@@ -17038,17 +17153,17 @@ var app = (function () {
       return this.update(ptrs)
     };
 
-    var sets = methods$5;
+    var sets = methods$6;
 
     const addAPI$1 = function (View) {
       // add set/intersection/union
       Object.assign(View.prototype, sets);
     };
-    var api$3 = addAPI$1;
+    var api$5 = addAPI$1;
 
     var pointers = {
-      methods: methods$6,
-      api: api$3,
+      methods: methods$7,
+      api: api$5,
     };
 
     const isMulti = / /;
@@ -17117,7 +17232,7 @@ var app = (function () {
 
     // add a tag to all these terms
     const setTag = function (terms, tag, world = {}, isSafe) {
-      const tagSet = world.model.two.tagSet || {};
+      const tagSet = world.model.one.tagSet || {};
       if (!tag) {
         return
       }
@@ -17162,10 +17277,158 @@ var app = (function () {
     };
     var unTag$1 = unTag;
 
-    var methods$4 = {
+    const e=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t=/^ *(#|\/\/)/,n=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e({id:t}))),n}return [e({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i=e=>"[object Array]"===Object.prototype.toString.call(e),c=e=>(e=e||"").trim(),s=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e(s),s}(c):i(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e({});return t.forEach((t=>{if((t=e(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r(s=c).forEach(e),s);var s;},h=e=>"[31m"+e+"[0m",o=e=>"[2m"+e+"[0m",l=function(e,t){let n="-> ";t&&(n=o("→ "));let i="";return r(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a=function(e){let t=r(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p={text:l,txt:l,array:a,flat:a},d=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l(e,!0)),null):p.hasOwnProperty(t)?p[t](e):e},u=e=>{r(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j=/\//;class g{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c(t),!j.test(t)){let e=this.json.children.find((e=>e.id===t));return new g(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e({});return new g(n)}add(t,n={}){if(i(t))return t.forEach((e=>this.add(c(e),n))),this;t=c(t);let r=e({id:t,props:n});return this.json.children.push(r),new g(r)}remove(e){return e=c(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r(this.json)}fillDown(){var e;return e=this.json,r(e,((e,t)=>{t.props=f(t.props,e.props);})),this}depth(){u(this.json);let e=r(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u(this.json),d(this.json,e)}debug(){return u(this.json),d(this.json,"debug"),this}}const _=function(e){let t=s(e);return new g(t)};_.prototype.plugin=function(e){e(this);};
+
+    // i just made these up
+    const colors = {
+      Noun: 'blue',
+      Verb: 'green',
+      Negative: 'green',
+      Date: 'red',
+      Value: 'red',
+      Adjective: 'magenta',
+      Preposition: 'cyan',
+      Conjunction: 'cyan',
+      Determiner: 'cyan',
+      Adverb: 'cyan',
+    };
+
+    var colors$1 = colors;
+
+    const getColor = function (node) {
+      if (colors$1.hasOwnProperty(node.id)) {
+        return colors$1[node.id]
+      }
+      if (colors$1.hasOwnProperty(node.is)) {
+        return colors$1[node.is]
+      }
+      let found = node._cache.parents.find(c => colors$1[c]);
+      return colors$1[found]
+    };
+
+
+
+    // convert tags to our final format
+    const fmt = function (nodes) {
+      const res = {};
+      nodes.forEach(node => {
+        let { not, also, is } = node.props;
+        let parents = node._cache.parents;
+        if (also) {
+          parents = parents.concat(also);
+        }
+        res[node.id] = {
+          is,
+          not,
+          parents,
+          children: node._cache.children,
+          color: getColor(node)
+        };
+      });
+      // lastly, add all children of all nots
+      Object.keys(res).forEach(k => {
+        let nots = new Set(res[k].not);
+        res[k].not.forEach(not => {
+          res[not].children.forEach(tag => nots.add(tag));
+        });
+        res[k].not = Array.from(nots);
+      });
+      return res
+    };
+
+    var fmt$1 = fmt;
+
+    const toArr = function (input) {
+      if (!input) {
+        return []
+      }
+      if (typeof input === 'string') {
+        return [input]
+      }
+      return input
+    };
+
+    const addImplied = function (tags, already) {
+      Object.keys(tags).forEach(k => {
+        // support deprecated fmts
+        if (tags[k].isA) {
+          tags[k].is = tags[k].isA;
+        }
+        if (tags[k].notA) {
+          tags[k].not = tags[k].notA;
+        }
+        // add any implicit 'is' tags
+        if (tags[k].is && typeof tags[k].is === 'string') {
+          if (!already.hasOwnProperty(tags[k].is) && !tags.hasOwnProperty(tags[k].is)) {
+            tags[tags[k].is] = {};
+          }
+        }
+        // add any implicit 'not' tags
+        if (tags[k].not && typeof tags[k].not === 'string' && !tags.hasOwnProperty(tags[k].not)) {
+          if (!already.hasOwnProperty(tags[k].not) && !tags.hasOwnProperty(tags[k].not)) {
+            tags[tags[k].not] = {};
+          }
+        }
+      });
+      return tags
+    };
+
+
+    const validate = function (tags, already) {
+
+      tags = addImplied(tags, already);
+
+      // property validation
+      Object.keys(tags).forEach(k => {
+        tags[k].children = toArr(tags[k].children);
+        tags[k].not = toArr(tags[k].not);
+      });
+      // not links are bi-directional
+      // add any incoming not tags
+      Object.keys(tags).forEach(k => {
+        let nots = tags[k].not || [];
+        nots.forEach(no => {
+          if (tags[no] && tags[no].not) {
+            tags[no].not.push(k);
+          }
+        });
+      });
+      return tags
+    };
+    var validate$1 = validate;
+
+    // import grad from '/Users/spencer/mountain/grad-school/src/index.js'
+
+    // 'fill-down' parent logic inference
+    const compute$5 = function (allTags) {
+      // setup graph-lib format
+      const flatList = Object.keys(allTags).map(k => {
+        let o = allTags[k];
+        const props = { not: new Set(o.not), also: o.also, is: o.is };
+        return { id: k, parent: o.is, props, children: [] }
+      });
+      const graph = _(flatList).cache().fillDown();
+      return graph.out('array')
+    };
+
+    const addTags$1 = function (tags, already) {
+      tags = validate$1(tags, already);
+
+      let allTags = Object.assign({}, already, tags);
+      // do some basic setting-up
+      // 'fill-down' parent logic
+      const nodes = compute$5(allTags);
+      // convert it to our final format
+      const res = fmt$1(nodes);
+      return res
+    };
+    var addTags$2 = addTags$1;
+
+    var methods$5 = {
       one: {
         setTag: setTag$1,
         unTag: unTag$1,
+        addTags: addTags$2
       },
     };
 
@@ -17217,7 +17480,7 @@ var app = (function () {
         if (verbose === true) {
           console.log(' -  ', input, reason || '');
         }
-        let tagSet = model.two.tagSet;
+        let tagSet = model.one.tagSet;
         if (isArray$1(input)) {
           input.forEach(tag => methods.one.unTag(terms, tag, tagSet));
         } else {
@@ -17230,7 +17493,7 @@ var app = (function () {
 
       /** return only the terms that can be this tag  */
       canBe: function (tag) {
-        let tagSet = this.model.two.tagSet;
+        let tagSet = this.model.one.tagSet;
         // everything can be an unknown tag
         if (!tagSet.hasOwnProperty(tag)) {
           return this
@@ -17254,11 +17517,27 @@ var app = (function () {
     const tagAPI = function (View) {
       Object.assign(View.prototype, tag$1);
     };
-    var api$2 = tagAPI;
+    var api$4 = tagAPI;
+
+    // wire-up more pos-tags to our model
+    const addTags = function (tags) {
+      const { model, methods } = this.world();
+      const tagSet = model.one.tagSet;
+      const addTags = methods.one.addTags;
+      let res = addTags(tags, tagSet);
+      model.one.tagSet = res;
+      return this
+    };
+
+    var lib$2 = { addTags };
 
     var tag = {
-      methods: methods$4,
-      api: api$2,
+      model: {
+        one: { tagSet: {} }
+      },
+      methods: methods$5,
+      api: api$4,
+      lib: lib$2
     };
 
     const initSplit = /(\S.+?[.!?\u203D\u2E18\u203C\u2047-\u2049])(?=\s|$)/g;
@@ -17768,7 +18047,7 @@ var app = (function () {
       return input
     };
 
-    var methods$3 = {
+    var methods$4 = {
       one: {
         splitSentences: sentence,
         splitTerms: term,
@@ -18017,16 +18296,16 @@ var app = (function () {
     // create key-val for sentence-tokenizer
     let abbreviations = {};
     // add them to a future lexicon
-    let lexicon = {};
+    let lexicon$1 = {};
 
     list.forEach(a => {
       a[0].forEach(w => {
         // sentence abbrevs
         abbreviations[w] = true;
         // future-lexicon
-        lexicon[w] = 'Abbreviation';
+        lexicon$1[w] = 'Abbreviation';
         if (a[1] !== undefined) {
-          lexicon[w] = [lexicon[w], a[1]];
+          lexicon$1[w] = [lexicon$1[w], a[1]];
         }
       });
     });
@@ -18088,15 +18367,13 @@ var app = (function () {
       // 'fold':true,
     };
 
-    var model = {
+    var model$2 = {
       one: {
         aliases: aliases$1,
         abbreviations,
         prefixes,
         suffixes,
-      },
-      two: {
-        lexicon, //give this one forward
+        lexicon: lexicon$1, //give this one forward
       },
     };
 
@@ -18253,7 +18530,7 @@ var app = (function () {
       }
     };
 
-    const methods$2 = {
+    const methods$3 = {
       alias: (view) => termLoop(view, alias),
       normal: (view) => termLoop(view, normal),
       machine: (view) => termLoop(view, machine),
@@ -18262,12 +18539,12 @@ var app = (function () {
       index: index$1,
       wordCount: wordCount$1,
     };
-    var compute$1 = methods$2;
+    var compute$4 = methods$3;
 
     var tokenize$1 = {
-      compute: compute$1,
-      methods: methods$3,
-      model: model,
+      compute: compute$4,
+      methods: methods$4,
+      model: model$2,
       hooks: ['alias', 'machine', 'index'],
     };
 
@@ -18444,11 +18721,11 @@ var app = (function () {
     };
     var scan$1 = scan;
 
-    const isObject = val => {
+    const isObject$1 = val => {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const api$1 = function (View) {
+    const api$3 = function (View) {
       /** turn an array or object into a compressed trie*/
       View.prototype.compile = function (obj) {
         const trie = build(obj, this.world);
@@ -18463,7 +18740,7 @@ var app = (function () {
         if (typeof input === 'string') {
           input = [input];
         }
-        let trie = isObject(input) ? input : build(input, this.world);
+        let trie = isObject$1(input) ? input : build(input, this.world);
         let res = scan$1(this, trie);
         res = res.settle();
         return res
@@ -18471,7 +18748,7 @@ var app = (function () {
     };
 
     var lookup = {
-      api: api$1,
+      api: api$3,
     };
 
     const createCache = function (document) {
@@ -18516,14 +18793,14 @@ var app = (function () {
     };
     var cacheMatch$1 = cacheMatch;
 
-    var methods$1 = {
+    var methods$2 = {
       one: {
         cacheDoc,
         cacheMatch: cacheMatch$1,
       },
     };
 
-    const methods = {
+    const methods$1 = {
       /** */
       cache: function () {
         this._cache = this.methods.one.cacheDoc(this.document);
@@ -18536,23 +18813,364 @@ var app = (function () {
       },
     };
     const addAPI = function (View) {
-      Object.assign(View.prototype, methods);
+      Object.assign(View.prototype, methods$1);
     };
-    var api = addAPI;
+    var api$2 = addAPI;
 
     const cache$1 = function (view) {
       view._cache = view.methods.one.cacheDoc(view.document);
     };
 
-    var compute = {
+    var compute$3 = {
       cache: cache$1
     };
 
     var cache = {
-      api,
-      compute,
-      methods: methods$1,
+      api: api$2,
+      compute: compute$3,
+      methods: methods$2,
       // hooks: ['cache']
+    };
+
+    // lookup last word in the type-ahead prefixes
+    const compute$1 = function (view) {
+      const prefixes = view.model.one.typeahead;
+      const docs = view.docs;
+      if (docs.length === 0 || Object.keys(prefixes).length === 0) {
+        return
+      }
+      let lastPhrase = docs[docs.length - 1] || [];
+      let lastTerm = lastPhrase[lastPhrase.length - 1];
+      // if we've already put whitespace, end.
+      if (lastTerm.post) {
+        return
+      }
+      // if we found something
+      if (prefixes.hasOwnProperty(lastTerm.normal)) {
+        let found = prefixes[lastTerm.normal];
+        // add full-word as an implicit result
+        lastTerm.machine = found;
+        lastTerm.typeahead = true;
+        // tag it, as our assumed term
+        if (view.compute.preTagger) {
+          view.last().unTag('*').compute(['lexicon', 'preTagger']);
+        }
+      }
+    };
+
+    var compute$2 = { typeahead: compute$1 };
+
+    // assume any discovered prefixes
+    const autoFill = function () {
+      const docs = this.docs;
+      if (docs.length === 0) {
+        return
+      }
+      let lastPhrase = docs[docs.length - 1] || [];
+      let term = lastPhrase[lastPhrase.length - 1];
+      if (term.typeahead === true && term.machine) {
+        term.text = term.machine;
+        term.normal = term.machine;
+      }
+      return this
+    };
+
+    const api = function (View) {
+      View.prototype.autoFill = autoFill;
+    };
+    var api$1 = api;
+
+    // generate all the possible prefixes up-front
+    const getPrefixes = function (arr, opts, world) {
+      let index = {};
+      let collisions = [];
+      let existing = world.prefixes || {};
+      arr.forEach((str) => {
+        str = str.toLowerCase().trim();
+        let max = str.length;
+        if (opts.max && max > opts.max) {
+          max = opts.max;
+        }
+        for (let size = opts.min; size < max; size += 1) {
+          let prefix = str.substr(0, size);
+          // ensure prefix is not a word
+          if (opts.safe && world.model.one.lexicon.hasOwnProperty(prefix)) {
+            continue
+          }
+          // does it already exist?
+          if (existing.hasOwnProperty(prefix) === true) {
+            collisions.push(prefix);
+            continue
+          }
+          if (index.hasOwnProperty(prefix) === true) {
+            collisions.push(prefix);
+            continue
+          }
+          index[prefix] = str;
+        }
+      });
+      // merge with existing prefixes
+      index = Object.assign({}, existing, index);
+      // remove ambiguous-prefixes
+      collisions.forEach((str) => {
+        delete index[str];
+      });
+      return index
+    };
+
+    var allPrefixes = getPrefixes;
+
+    const isObject = val => {
+      return Object.prototype.toString.call(val) === '[object Object]'
+    };
+
+    const defaults = {
+      safe: true,
+      min: 3,
+    };
+
+    const prepare = function (words = [], opts = {}) {
+      let model = this.model();
+      opts = Object.assign({}, defaults, opts);
+      if (isObject(words)) {
+        Object.assign(model.one.lexicon, words);
+        words = Object.keys(words);
+      }
+      let prefixes = allPrefixes(words, opts, this.world());
+      // manually combine these with any existing prefixes
+      Object.keys(prefixes).forEach(str => {
+        // explode any overlaps
+        if (model.one.typeahead.hasOwnProperty(str)) {
+          delete model.one.typeahead[str];
+          return
+        }
+        model.one.typeahead[str] = prefixes[str];
+      });
+      return this
+    };
+
+    var lib$1 = {
+      typeahead: prepare,
+      typeAhead: prepare,
+    };
+
+    const model$1 = {
+      one: {
+        typeahead: {}
+      }
+    };
+    var typeahead = {
+      model: model$1,
+      api: api$1,
+      lib: lib$1,
+      compute: compute$2,
+      hooks: ['typeahead']
+    };
+
+    // scan-ahead to match multiple-word terms - 'jack rabbit'
+    const checkMulti = function (terms, i, lexicon, fastTag) {
+      let max = i + 4 > terms.length ? terms.length - i : 4;
+      let str = terms[i].machine || terms[i].normal;
+      for (let skip = 1; skip < max; skip += 1) {
+        let t = terms[i + skip];
+        let word = t.machine || t.normal;
+        str += ' ' + word;
+        if (lexicon.hasOwnProperty(str) === true) {
+          let tag = lexicon[str];
+          terms.slice(i, i + skip + 1).forEach(term => fastTag(term, tag, '1-multi-lexicon'));
+          return true
+        }
+      }
+      return false
+    };
+
+    const multiWord = function (terms, i, world) {
+      const { model, methods } = world;
+      const { fastTag } = methods.one;
+      const multi = model.one._multiCache || {};
+      const lexicon = model.one.lexicon || {};
+      // basic lexicon lookup
+      let t = terms[i];
+      let word = t.machine || t.normal;
+      // multi-word lookup
+      if (terms[i + 1] !== undefined && multi[word] === true) {
+        return checkMulti(terms, i, lexicon, fastTag)
+      }
+      return null
+    };
+    var multiWord$1 = multiWord;
+
+    const underOver = /^(under|over)-?.{3}/;
+
+    // tag any words in our lexicon
+    const checkLexicon = function (terms, i, world) {
+      const { model, methods } = world;
+      const fastTag = methods.one.fastTag;
+      const lexicon = model.one.lexicon;
+      // basic lexicon lookup
+      let t = terms[i];
+      let word = t.machine || t.normal;
+      // normal lexicon lookup
+      if (lexicon[word] !== undefined && lexicon.hasOwnProperty(word)) {
+        let tag = lexicon[word];
+        fastTag(t, tag, '1-lexicon');
+        return true
+      }
+      // lookup aliases in the lexicon
+      if (t.alias) {
+        let found = t.alias.find(str => lexicon.hasOwnProperty(str));
+        if (found) {
+          let tag = lexicon[found];
+          fastTag(t, tag, '1-lexicon-alias');
+          return true
+        }
+      }
+      // try removing a word-stem
+      if (underOver.test(word) === true) {
+        let stem = word.replace(/^(under|over)-?/, '');
+        if (lexicon.hasOwnProperty(stem)) {
+          let tag = lexicon[stem];
+          fastTag(t, tag, '1-lexicon-prefix');
+          return true
+        }
+      }
+      return null
+    };
+    var singleWord = checkLexicon;
+
+    // tag any words in our lexicon - even if it hasn't been filled-up yet
+    // rest of pre-tagger is in ./two/preTagger
+    const firstPass = function (view) {
+      const world = view.world;
+      view.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          if (terms[i].tags.size === 0) {
+            let found = null;
+            found = found || multiWord$1(terms, i, world);
+            // lookup known words
+            found = found || singleWord(terms, i, world);
+          }
+        }
+      });
+    };
+
+    var compute = {
+      lexicon: firstPass
+    };
+
+    // verbose-mode tagger debuging
+    const log = (term, tag, reason = '') => {
+      const yellow = str => '\x1b[33m\x1b[3m' + str + '\x1b[0m';
+      const i = str => '\x1b[3m' + str + '\x1b[0m';
+      let word = term.text || '[' + term.implicit + ']';
+      if (typeof tag !== 'string' && tag.length > 2) {
+        tag = tag.slice(0, 2).join(', #') + ' +'; //truncate the list of tags
+      }
+      tag = typeof tag !== 'string' ? tag.join(', #') : tag;
+      console.log(` ${yellow(word).padEnd(24)} \x1b[32m→\x1b[0m #${tag.padEnd(25)}  ${i(reason)}`); // eslint-disable-line
+    };
+
+    // a faster version than the user-facing one in ./methods
+    const fastTag = function (term, tag, reason) {
+      if (!tag || tag.length === 0) {
+        return
+      }
+      // some logging for debugging
+      let env = typeof process === 'undefined' ? self.env : process.env;
+      if (env && env.DEBUG_TAGS) {
+        log(term, tag, reason);
+      }
+      term.tags = term.tags || new Set();
+      if (typeof tag === 'string') {
+        term.tags.add(tag);
+      } else {
+        tag.forEach(tg => term.tags.add(tg));
+      }
+    };
+
+    var fastTag$1 = fastTag;
+
+    // derive clever things from our lexicon key-value pairs
+    const expand = function (words, world) {
+      let lex = {};
+      // console.log('start:', Object.keys(lex).length)
+      let _multi = {};
+
+      // go through each word in this key-value obj:
+      Object.keys(words).forEach(word => {
+        let tag = words[word];
+        // normalize lexicon a little bit
+        word = word.toLowerCase().trim();
+        // cache multi-word terms
+        let split = word.split(/ /);
+        if (split.length > 1) {
+          _multi[split[0]] = true;
+        }
+        lex[word] = lex[word] || tag;
+      });
+      // cleanup
+      delete lex[''];
+      delete lex[null];
+      delete lex[' '];
+      return { lex, _multi }
+    };
+    var expandLexicon = expand;
+
+    var methods = {
+      one: {
+        expandLexicon,
+        fastTag: fastTag$1
+      }
+    };
+
+    /** insert new words/phrases into the lexicon */
+    const addWords = function (words) {
+      const world = this.world();
+      const { methods, model } = world;
+      if (!words) {
+        return
+      }
+
+      // normalize tag vals
+      Object.keys(words).forEach(k => {
+        if (typeof words[k] === 'string' && words[k].startsWith('#')) {
+          words[k] = words[k].replace(/^#/, '');
+        }
+      });
+      // add some words to our lexicon
+      if (methods.two.expandLexicon) {
+        // do fancy ./two version
+        let { lex, _multi } = methods.two.expandLexicon(words, world);
+        Object.assign(model.one.lexicon, lex);
+        Object.assign(model.one._multiCache, _multi);
+      } else if (methods.one.expandLexicon) {
+        // do basic ./one version
+        let { lex, _multi } = methods.one.expandLexicon(words, world);
+        Object.assign(model.one.lexicon, lex);
+        Object.assign(model.one._multiCache, _multi);
+      } else {
+        //no fancy-business
+        Object.assign(model.one.lexicon, words);
+      }
+    };
+
+    var lib = {
+      addWords
+    };
+
+    const model = {
+      one: {
+        lexicon: {},
+        _multiCache: {},
+      }
+    };
+
+    var lexicon = {
+      model,
+      methods,
+      compute,
+      lib,
+      hooks: ['lexicon']
     };
 
     nlp$1.extend(change); //0kb
@@ -18563,6 +19181,8 @@ var app = (function () {
     nlp$1.extend(tokenize$1); //7kb
     nlp$1.plugin(cache); //~1kb
     nlp$1.extend(lookup); //7kb
+    nlp$1.extend(typeahead); //1kb
+    nlp$1.extend(lexicon); //1kb
 
     /* home/demos/Tokenize.svelte generated by Svelte v3.43.0 */
 
@@ -19090,7 +19710,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			div.textContent = "you can do:";
+    			div.textContent = "so you can do:";
     			t1 = space();
     			ul = element("ul");
     			li0 = element("li");
@@ -19110,47 +19730,47 @@ var app = (function () {
     			li2 = element("li");
     			a2 = element("a");
     			span2 = element("span");
-    			span2.textContent = "Lookup";
+    			span2.textContent = "Phrase Lookup";
     			t9 = space();
     			create_component(caret2.$$.fragment);
     			t10 = space();
     			li3 = element("li");
     			a3 = element("a");
     			span3 = element("span");
-    			span3.textContent = "Type-ahead";
+    			span3.textContent = "TypeAhead";
     			t12 = space();
     			create_component(caret3.$$.fragment);
     			attr_dev(div, "class", "down f09");
     			add_location(div, file$7, 69, 4, 2302);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$7, 71, 22, 2391);
+    			add_location(span0, file$7, 71, 22, 2394);
     			attr_dev(a0, "href", "#");
-    			add_location(a0, file$7, 71, 10, 2379);
-    			add_location(li0, file$7, 71, 6, 2375);
+    			add_location(a0, file$7, 71, 10, 2382);
+    			add_location(li0, file$7, 71, 6, 2378);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$7, 72, 35, 2507);
+    			add_location(span1, file$7, 72, 35, 2510);
     			attr_dev(a1, "href", "#");
-    			add_location(a1, file$7, 72, 23, 2495);
+    			add_location(a1, file$7, 72, 23, 2498);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$7, 72, 6, 2478);
+    			add_location(li1, file$7, 72, 6, 2481);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$7, 73, 35, 2627);
+    			add_location(span2, file$7, 73, 35, 2630);
     			attr_dev(a2, "href", "#");
-    			add_location(a2, file$7, 73, 23, 2615);
+    			add_location(a2, file$7, 73, 23, 2618);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$7, 73, 6, 2598);
+    			add_location(li2, file$7, 73, 6, 2601);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$7, 74, 35, 2737);
+    			add_location(span3, file$7, 74, 35, 2747);
     			attr_dev(a3, "href", "#");
-    			add_location(a3, file$7, 74, 23, 2725);
+    			add_location(a3, file$7, 74, 23, 2735);
     			attr_dev(li3, "class", "down");
-    			add_location(li3, file$7, 74, 6, 2708);
+    			add_location(li3, file$7, 74, 6, 2718);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$7, 70, 4, 2346);
+    			add_location(ul, file$7, 70, 4, 2349);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19233,6 +19853,8 @@ var app = (function () {
     	let div0;
     	let t6;
     	let div1;
+    	let t8;
+    	let div2;
     	let current;
 
     	left = new Left({
@@ -19291,10 +19913,15 @@ var app = (function () {
     			div0.textContent = "sometimes just splitting things up is enough.";
     			t6 = space();
     			div1 = element("div");
-    			div1.textContent = "or swing harder ↓";
-    			add_location(div0, file$7, 78, 2, 2838);
-    			attr_dev(div1, "class", "m2 sea down f09");
-    			add_location(div1, file$7, 79, 2, 2897);
+    			div1.textContent = "it feels like data now, a little.";
+    			t8 = space();
+    			div2 = element("div");
+    			div2.textContent = "or swing harder ↓";
+    			add_location(div0, file$7, 78, 2, 2847);
+    			attr_dev(div1, "class", "m1");
+    			add_location(div1, file$7, 79, 2, 2906);
+    			attr_dev(div2, "class", "m2 sea down f09");
+    			add_location(div2, file$7, 80, 2, 2964);
     		},
     		m: function mount(target, anchor) {
     			mount_component(left, target, anchor);
@@ -19310,6 +19937,8 @@ var app = (function () {
     			insert_dev(target, div0, anchor);
     			insert_dev(target, t6, anchor);
     			insert_dev(target, div1, anchor);
+    			insert_dev(target, t8, anchor);
+    			insert_dev(target, div2, anchor);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
@@ -19380,6 +20009,8 @@ var app = (function () {
     			if (detaching) detach_dev(div0);
     			if (detaching) detach_dev(t6);
     			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(t8);
+    			if (detaching) detach_dev(div2);
     		}
     	};
 

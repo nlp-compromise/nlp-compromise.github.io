@@ -1,5 +1,5 @@
 <script>
-  export let accent
+  export let accent = ''
   export let left = 'none'
   import colors from './_colors.js'
   left = colors[left] || left

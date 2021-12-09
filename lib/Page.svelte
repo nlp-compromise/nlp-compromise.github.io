@@ -2,13 +2,14 @@
   import colors from './_colors'
   export let color = null
   color = colors[color] || color
+  export let bottom = '140px'
 
   let cmp
 </script>
 
 <div class="row">
   <div class="side" />
-  <div class="container">
+  <div class="container" style="margin-bottom:{bottom};">
     <slot />
   </div>
   <div class="side" />
@@ -16,7 +17,10 @@
 
 <style>
   .container {
-    min-height: 200px;
+    min-height: 800px;
+    border-radius: 5px;
+    text-align: left;
+    padding: 2rem;
     box-shadow: 3px 12px 36px 1px rgba(0, 0, 0, 0.2);
     margin-left: 55px;
     margin-right: 55px;
@@ -39,6 +43,7 @@
   /* phones */
   @media (max-width: 900px) {
     .container {
+      padding: 0.5rem;
       margin: 15px;
     }
   }

@@ -2,41 +2,18 @@
   import { onMount } from 'svelte'
   import './style.css'
   import CodeMirror from './lib.js'
-  export let text = ''
-  export let autofocus = true
+  export let text = 'let x=5;'
+  export let autofocus = false
   let editor
   let el
-  export let highlight = () => {}
-  export let onEnter = e => {
-    return CodeMirror.Pass
-  }
-  const clear = function (doc) {
-    doc.getAllMarks().forEach(m => m.clear())
-  }
 
   onMount(() => {
     // create codemirror instance
     editor = CodeMirror.fromTextArea(el, {
+      value: 'hello',
       autofocus: autofocus,
       viewportMargin: Infinity,
-      extraKeys: {
-        Enter: onEnter,
-      },
     })
-    // update each keypress
-    editor.on('change', doc => {
-      clear(doc)
-      text = doc.getValue()
-      let offsets = highlight(text) || []
-      offsets.forEach(m => {
-        let start = doc.posFromIndex(m.start)
-        let end = doc.posFromIndex(m.end)
-        editor.markText(start, end, {
-          className: m.tag,
-        })
-      })
-    })
-    CodeMirror.signal(editor, 'change', editor)
 
     setTimeout(() => {
       editor.focus()
@@ -46,7 +23,7 @@
 </script>
 
 <div class="outside">
-  <textarea class="textarea" bind:this={el} tabindex="0 ">{text}</textarea>
+  <textarea class="textarea" bind:this={el} tabindex="0 " />
 </div>
 
 <style>
