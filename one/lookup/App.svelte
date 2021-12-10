@@ -1,23 +1,10 @@
 <script>
   import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
   import nlp from '/Users/spencer/mountain/compromise/src/one.js'
-  let words=`ends of the earth
-ashes to ashes
-the good fight
-the extra mile
-fly in the ointment
-cross to bear
-bite the dust
-give up the ghost
-flesh and blood
-move mountains
-head on a planter
-`
-  let text=``
-  $: more=()=>{
-    let doc=nlp(text)
-    return doc.text()
-  }
+  import Picker from './Picker.svelte'
+  let choice=0
+  let trie=null
+  import words from './words.js'
 let example=`// pre-compile lookup words
 let m = nlp.compile(myWords)
 
@@ -27,58 +14,20 @@ doc.cache() // why not.
 let m = doc.lookup(m) // whoosh 💨
 m.debug()
 `
+let doc=nlp('')
+
+$: lookup=()=>{
+  const m=doc.lookup(trie)
+  console.log(m.length)
+  return m.fullSentences().unique().out('array')
+}
+function recompile(){
+  let terms=words.split(/\r?\n/).map(txt => txt.trim())
+  terms=terms.filter(str => str)
+  trie=nlp.compile(terms)
+}
+recompile()
 </script>
-
-
-<style >
-  .res {
-    font-size:4rem;
-    line-height:4.5rem;
-    margin-top:3rem;
-    margin-left:2rem;
-    margin-bottom:2rem;
-    color:#2D85A8;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    text-align:center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
-.col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: flex-start;
-  text-align:center;
-  flex-wrap: wrap;
-  align-self: stretch;
-}
-.both {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: center;
-  text-align:center;
-  flex-wrap: wrap;
-  align-self: stretch;
-}
-button{
-  box-shadow: 2px 2px 8px 0px rgba( 0, 0, 0, 0.2 );
-  background-color:#edeceb;
-  border-radius:5px;
-  margin:0.1rem;
-  margin-left:4.5rem;
-  padding-top:0.3rem;
-  padding-bottom:0.3rem;
-  padding-left:0.8rem;
-  padding-right:0.8rem;
-  color:#705E5C;
-  font-size:0.7rem;
-  font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
-}
-</style >
 
 <div class="col">
   <Back />
@@ -88,14 +37,22 @@ button{
       <div class="down tab desc">super-fast scan for a list of words in a document</div>
       <div class="both">
         <div >
-          <TextArea width="240px" height="250px" value={''} size="0.9rem" />
+          <Picker {choice} bind:doc={doc} title="state of the unions:"/>
+          <!-- <TextArea width="240px" height="250px" value={''} size="0.9rem" /> -->
         </div>
         <div >
-          <TextArea width="180px" height="300px" value={words} size="0.9rem" />
-          <button>re-compile</button>
+          <TextArea width="180px" height="300px" bind:value={words} size="0.9rem" />
+          <button on:click={recompile}>↻ compile</button>
         </div>
       </div>
-      
+      <!-- sentence-list -->
+      <div class="list">
+        {#each lookup() as m}
+          <div class="sentence">•  {m}</div>
+        {/each}
+        </div>
+
+        <!-- docs -->
       <Left >
         <div class="down tab desc">looking up a list of words in a text is a <i >suprisingly-tough</i> thing.
           <div class="down tab">
@@ -139,3 +96,56 @@ button{
   </Below>
 </div>
 
+
+<style >
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+  text-align:center;
+  flex-wrap: wrap;
+  align-self: stretch;
+}
+.both {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  text-align:center;
+  flex-wrap: wrap;
+  align-self: stretch;
+}
+button{
+  box-shadow: 2px 2px 8px 0px rgba( 0, 0, 0, 0.2 );
+  color: #d7d5d2;
+  background-color: #6699ad;
+  border-radius:5px;
+  margin:0.1rem;
+  margin-left:4.5rem;
+  padding-top:0.3rem;
+  padding-bottom:0.3rem;
+  padding-left:0.8rem;
+  padding-right:0.8rem;
+  font-size:1rem;
+  font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
+}
+.list{
+  font-size:0.9rem;
+  margin-right:4rem;
+  margin-top:4rem;
+  margin-left:4rem;
+  padding:1rem;
+  color:#606c74;
+  border-bottom: 2px solid transparent;
+  border-left: 4px solid lightgrey;
+  color: #577c97;
+  /* box-shadow: 2px 1px 5px 0 rgba(0, 0, 0, 0.2); */
+  border-bottom: 2px solid lightsteelblue;
+  font-style: italic;
+}
+.sentence{
+  margin-bottom:30px;
+
+}
+</style >
