@@ -9,9 +9,7 @@
   import Grid from '../lib/Grid/Grid.svelte'
 </script>
 
-<Page>
-  <Block color="#6699cc" />
-</Page>
+<Block color="#6699cc" />
 
 <Page>
   <Left>

@@ -18,17 +18,19 @@
     </div>
   </One>
   <Two>
-    <div class="tab down f09">
+    <div class="tab down f09 col">
       <div style="max-width:180px; margin-bottom:1rem;">
         <Grid seed="8935149fa5750c247c9" />
       </div>
-      and we can
-      <span class="sky"> search</span>
-      it, or <span class="sky">read</span> it-
+      <div>
+        and we can
+        <span class="sky"> search</span>
+        it, or <span class="sky">read</span> it-
+      </div>
     </div>
   </Two>
   <One>
-    <div style="margin-left:10rem;">
+    <div style="">
       <span class="down i">but we can't </span>
       <div class="tab ">
         <div class="sea i f2 sky">get</div>
@@ -68,7 +70,7 @@
   <Two>
     <div class="f09">and people</div>
     <div class="i sea tab">keep typing</div>
-    <div class="f09 tab">even more of it</div>
+    <div class="f09 tab">more of it.</div>
   </Two>
 
   <Two>
@@ -91,7 +93,7 @@
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
       <div class="sea down tab f2 " style="position:relative; margin:4rem;">
-        like a crowbar, <div style="position:absolute; top:50px;">for text.</div>
+        like a crowbar, <div style="">for text.</div>
       </div>
       <div class="f09 i down">
         so you can pull a chunk out, or

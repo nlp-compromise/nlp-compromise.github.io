@@ -72,7 +72,7 @@
     .goldGrid {
       grid-template-columns: 1fr 1.618fr 1fr 1.618fr;
       justify-self: stretch;
-      min-height: 10rem;
+      /* min-height: 10rem; */
     }
   }
   .one {

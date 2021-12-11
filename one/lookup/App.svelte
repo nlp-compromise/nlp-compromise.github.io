@@ -17,7 +17,10 @@ m.debug()
 let doc=nlp('')
 
 $: lookup=()=>{
-  const m=doc.lookup(trie)
+  let begin = new Date()
+const m=doc.lookup(trie)
+let end = new Date()
+let duration=(end.getTime() - begin.getTime()) / 1000)
   console.log(m.length)
   return m.fullSentences().unique().out('array')
 }
@@ -37,7 +40,7 @@ recompile()
       <div class="down tab desc">super-fast scan for a list of words in a document</div>
       <div class="both">
         <div >
-          <Picker {choice} bind:doc={doc} title="state of the unions:"/>
+          <Picker {choice} bind:doc={doc} title="state of the union:"/>
           <!-- <TextArea width="240px" height="250px" value={''} size="0.9rem" /> -->
         </div>
         <div >

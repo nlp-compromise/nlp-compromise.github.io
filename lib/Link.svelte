@@ -23,12 +23,14 @@
     flex-wrap: nowrap;
     align-self: flex-start;
     transition: margin-left 180ms;
+    white-space: nowrap;
   }
   .container:hover {
     margin-left: 0.6rem;
     /* height: 250px; */
   }
   .choose {
+    white-space: nowrap;
     color: white;
     font-size: 1.8rem;
     background-color: rgba(70, 130, 180, 0.8);
@@ -44,5 +46,11 @@
   }
   .choose:hover {
     box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.5);
+  }
+  /* phones */
+  @media (max-width: 900px) {
+    .choose {
+      font-size: 1rem;
+    }
   }
 </style>

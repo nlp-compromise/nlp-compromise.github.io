@@ -8,9 +8,7 @@
   import Chunker from './demos/Chunker.svelte'
 </script>
 
-<Page>
-  <Block color="#e6b3bc" />
-</Page>
+<Block color="#e6b3bc" />
 
 <Page>
   <Left>

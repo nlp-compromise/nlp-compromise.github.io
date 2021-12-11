@@ -451,6 +451,10 @@ var app = (function () {
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
+    function prop_dev(node, property, value) {
+        node[property] = value;
+        dispatch_dev('SvelteDOMSetProperty', { node, property, value });
+    }
     function set_data_dev(text, data) {
         data = '' + data;
         if (text.wholeText === data)
@@ -556,8 +560,8 @@ var app = (function () {
     	let t1;
     	let div2;
     	let current;
-    	const default_slot_template = /*#slots*/ ctx[2].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[1], null);
+    	const default_slot_template = /*#slots*/ ctx[3].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
     	const block = {
     		c: function create() {
@@ -568,14 +572,15 @@ var app = (function () {
     			if (default_slot) default_slot.c();
     			t1 = space();
     			div2 = element("div");
-    			attr_dev(div0, "class", "side svelte-ppbo48");
-    			add_location(div0, file$j, 9, 2, 143);
-    			attr_dev(div1, "class", "container svelte-ppbo48");
-    			add_location(div1, file$j, 10, 2, 166);
-    			attr_dev(div2, "class", "side svelte-ppbo48");
-    			add_location(div2, file$j, 13, 2, 214);
-    			attr_dev(div3, "class", "row svelte-ppbo48");
-    			add_location(div3, file$j, 8, 0, 123);
+    			attr_dev(div0, "class", "side svelte-1qs1965");
+    			add_location(div0, file$j, 10, 2, 173);
+    			attr_dev(div1, "class", "container svelte-1qs1965");
+    			set_style(div1, "margin-bottom", /*bottom*/ ctx[0]);
+    			add_location(div1, file$j, 11, 2, 196);
+    			attr_dev(div2, "class", "side svelte-1qs1965");
+    			add_location(div2, file$j, 14, 2, 276);
+    			attr_dev(div3, "class", "row svelte-1qs1965");
+    			add_location(div3, file$j, 9, 0, 153);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -596,18 +601,22 @@ var app = (function () {
     		},
     		p: function update(ctx, [dirty]) {
     			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 2)) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 4)) {
     					update_slot_base(
     						default_slot,
     						default_slot_template,
     						ctx,
-    						/*$$scope*/ ctx[1],
+    						/*$$scope*/ ctx[2],
     						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[1])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[1], dirty, null),
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[2])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null),
     						null
     					);
     				}
+    			}
+
+    			if (!current || dirty & /*bottom*/ 1) {
+    				set_style(div1, "margin-bottom", /*bottom*/ ctx[0]);
     			}
     		},
     		i: function intro(local) {
@@ -641,22 +650,25 @@ var app = (function () {
     	validate_slots('Page', slots, ['default']);
     	let { color = null } = $$props;
     	color = colors$2[color] || color;
+    	let { bottom = '140px' } = $$props;
     	let cmp;
-    	const writable_props = ['color'];
+    	const writable_props = ['color', 'bottom'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Page> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
-    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
-    		if ('$$scope' in $$props) $$invalidate(1, $$scope = $$props.$$scope);
+    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
+    		if ('bottom' in $$props) $$invalidate(0, bottom = $$props.bottom);
+    		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ colors: colors$2, color, cmp });
+    	$$self.$capture_state = () => ({ colors: colors$2, color, bottom, cmp });
 
     	$$self.$inject_state = $$props => {
-    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
+    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
+    		if ('bottom' in $$props) $$invalidate(0, bottom = $$props.bottom);
     		if ('cmp' in $$props) cmp = $$props.cmp;
     	};
 
@@ -664,13 +676,13 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [color, $$scope, slots];
+    	return [bottom, color, $$scope, slots];
     }
 
     class Page extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { color: 0 });
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { color: 1, bottom: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -685,6 +697,14 @@ var app = (function () {
     	}
 
     	set color(value) {
+    		throw new Error("<Page>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get bottom() {
+    		throw new Error("<Page>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set bottom(value) {
     		throw new Error("<Page>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -1328,7 +1348,7 @@ var app = (function () {
     			div = element("div");
     			attr_dev(div, "class", "line svelte-6r4k1");
     			set_style(div, "background-color", /*accent*/ ctx[0]);
-    			add_location(div, file$f, 11, 6, 272);
+    			add_location(div, file$f, 11, 6, 277);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1376,10 +1396,10 @@ var app = (function () {
     			div1 = element("div");
     			attr_dev(div0, "class", "body svelte-6r4k1");
     			set_style(div0, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			add_location(div0, file$f, 9, 2, 192);
-    			add_location(div1, file$f, 15, 2, 362);
+    			add_location(div0, file$f, 9, 2, 197);
+    			add_location(div1, file$f, 15, 2, 367);
     			attr_dev(div2, "class", "column svelte-6r4k1");
-    			add_location(div2, file$f, 8, 0, 169);
+    			add_location(div2, file$f, 8, 0, 174);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1461,7 +1481,7 @@ var app = (function () {
     function instance$g($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Left', slots, ['default']);
-    	let { accent } = $$props;
+    	let { accent = '' } = $$props;
     	let { left = 'none' } = $$props;
     	left = colors$2[left] || left;
     	accent = colors$2[accent] || accent;
@@ -1502,13 +1522,6 @@ var app = (function () {
     			options,
     			id: create_fragment$g.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*accent*/ ctx[0] === undefined && !('accent' in props)) {
-    			console.warn("<Left> was created without expected prop 'accent'");
-    		}
     	}
 
     	get accent() {
@@ -1772,7 +1785,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			attr_dev(div, "class", "img " + /*cell*/ ctx[10].size + " svelte-vjklc0");
+    			attr_dev(div, "class", "img " + /*cell*/ ctx[10].size + " svelte-5bq61u");
     			set_style(div, "background-image", "url(" + /*cell*/ ctx[10].image + ")");
     			add_location(div, file$d, 52, 8, 1480);
     		},
@@ -1803,7 +1816,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			attr_dev(div, "class", "color " + /*cell*/ ctx[10].size + " svelte-vjklc0");
+    			attr_dev(div, "class", "color " + /*cell*/ ctx[10].size + " svelte-5bq61u");
     			set_style(div, "background-color", /*cell*/ ctx[10].color);
     			add_location(div, file$d, 50, 8, 1360);
     		},
@@ -1920,7 +1933,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			attr_dev(div, "class", "goldGrid svelte-vjklc0");
+    			attr_dev(div, "class", "goldGrid svelte-5bq61u");
     			set_style(div, "grid-template-columns", "repeat(" + /*cols*/ ctx[3] + ", 1fr)");
     			set_style(div, "grid-template-rows", "repeat(" + /*rows*/ ctx[2] + ", 1fr)");
     			add_location(div, file$d, 41, 2, 1108);
@@ -2420,12 +2433,14 @@ var app = (function () {
     		c: function create() {
     			textarea = element("textarea");
     			attr_dev(textarea, "class", "input svelte-1gzfkwt");
+    			textarea.readOnly = /*readonly*/ ctx[2];
     			set_style(textarea, "width", /*width*/ ctx[1]);
-    			set_style(textarea, "height", /*height*/ ctx[2]);
-    			set_style(textarea, "font-size", /*size*/ ctx[3]);
+    			set_style(textarea, "height", /*height*/ ctx[3]);
+    			set_style(textarea, "font-size", /*size*/ ctx[4]);
+    			set_style(textarea, "line-height", "1.5rem");
     			attr_dev(textarea, "spellcheck", "false");
     			attr_dev(textarea, "type", "text");
-    			add_location(textarea, file$b, 17, 0, 313);
+    			add_location(textarea, file$b, 17, 0, 346);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2433,28 +2448,32 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, textarea, anchor);
     			set_input_value(textarea, /*value*/ ctx[0]);
-    			/*textarea_binding*/ ctx[8](textarea);
+    			/*textarea_binding*/ ctx[9](textarea);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea, "input", /*callback*/ ctx[5], false, false, false),
-    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[7])
+    					listen_dev(textarea, "input", /*callback*/ ctx[6], false, false, false),
+    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[8])
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
+    			if (dirty & /*readonly*/ 4) {
+    				prop_dev(textarea, "readOnly", /*readonly*/ ctx[2]);
+    			}
+
     			if (dirty & /*width*/ 2) {
     				set_style(textarea, "width", /*width*/ ctx[1]);
     			}
 
-    			if (dirty & /*height*/ 4) {
-    				set_style(textarea, "height", /*height*/ ctx[2]);
+    			if (dirty & /*height*/ 8) {
+    				set_style(textarea, "height", /*height*/ ctx[3]);
     			}
 
-    			if (dirty & /*size*/ 8) {
-    				set_style(textarea, "font-size", /*size*/ ctx[3]);
+    			if (dirty & /*size*/ 16) {
+    				set_style(textarea, "font-size", /*size*/ ctx[4]);
     			}
 
     			if (dirty & /*value*/ 1) {
@@ -2465,7 +2484,7 @@ var app = (function () {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(textarea);
-    			/*textarea_binding*/ ctx[8](null);
+    			/*textarea_binding*/ ctx[9](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -2493,6 +2512,7 @@ var app = (function () {
     	} } = $$props;
 
     	let { width = '60%' } = $$props;
+    	let { readonly = undefined } = $$props;
     	let { height = '142px' } = $$props;
     	let { size = '1.2rem' } = $$props;
 
@@ -2500,7 +2520,7 @@ var app = (function () {
     		cb(e.target.value);
     	};
 
-    	const writable_props = ['value', 'cb', 'width', 'height', 'size'];
+    	const writable_props = ['value', 'cb', 'width', 'readonly', 'height', 'size'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<TextArea> was created with unknown prop '${key}'`);
@@ -2514,16 +2534,17 @@ var app = (function () {
     	function textarea_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			el = $$value;
-    			$$invalidate(4, el);
+    			$$invalidate(5, el);
     		});
     	}
 
     	$$self.$$set = $$props => {
     		if ('value' in $$props) $$invalidate(0, value = $$props.value);
-    		if ('cb' in $$props) $$invalidate(6, cb = $$props.cb);
+    		if ('cb' in $$props) $$invalidate(7, cb = $$props.cb);
     		if ('width' in $$props) $$invalidate(1, width = $$props.width);
-    		if ('height' in $$props) $$invalidate(2, height = $$props.height);
-    		if ('size' in $$props) $$invalidate(3, size = $$props.size);
+    		if ('readonly' in $$props) $$invalidate(2, readonly = $$props.readonly);
+    		if ('height' in $$props) $$invalidate(3, height = $$props.height);
+    		if ('size' in $$props) $$invalidate(4, size = $$props.size);
     	};
 
     	$$self.$capture_state = () => ({
@@ -2531,6 +2552,7 @@ var app = (function () {
     		el,
     		cb,
     		width,
+    		readonly,
     		height,
     		size,
     		callback
@@ -2538,11 +2560,12 @@ var app = (function () {
 
     	$$self.$inject_state = $$props => {
     		if ('value' in $$props) $$invalidate(0, value = $$props.value);
-    		if ('el' in $$props) $$invalidate(4, el = $$props.el);
-    		if ('cb' in $$props) $$invalidate(6, cb = $$props.cb);
+    		if ('el' in $$props) $$invalidate(5, el = $$props.el);
+    		if ('cb' in $$props) $$invalidate(7, cb = $$props.cb);
     		if ('width' in $$props) $$invalidate(1, width = $$props.width);
-    		if ('height' in $$props) $$invalidate(2, height = $$props.height);
-    		if ('size' in $$props) $$invalidate(3, size = $$props.size);
+    		if ('readonly' in $$props) $$invalidate(2, readonly = $$props.readonly);
+    		if ('height' in $$props) $$invalidate(3, height = $$props.height);
+    		if ('size' in $$props) $$invalidate(4, size = $$props.size);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -2552,6 +2575,7 @@ var app = (function () {
     	return [
     		value,
     		width,
+    		readonly,
     		height,
     		size,
     		el,
@@ -2568,10 +2592,11 @@ var app = (function () {
 
     		init(this, options, instance$c, create_fragment$c, safe_not_equal, {
     			value: 0,
-    			cb: 6,
+    			cb: 7,
     			width: 1,
-    			height: 2,
-    			size: 3
+    			readonly: 2,
+    			height: 3,
+    			size: 4
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -2606,6 +2631,14 @@ var app = (function () {
     		throw new Error("<TextArea>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
+    	get readonly() {
+    		throw new Error("<TextArea>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set readonly(value) {
+    		throw new Error("<TextArea>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
     	get height() {
     		throw new Error("<TextArea>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
@@ -2633,7 +2666,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			attr_dev(div, "class", "block svelte-4rb7y9");
+    			attr_dev(div, "class", "block container svelte-owkcqy");
     			set_style(div, "background-color", /*color*/ ctx[0]);
     			add_location(div, file$a, 4, 0, 53);
     		},
@@ -12507,6 +12540,2560 @@ var app = (function () {
     })));
     });
 
+    var deepFreezeEs6 = {exports: {}};
+
+    function deepFreeze(obj) {
+        if (obj instanceof Map) {
+            obj.clear = obj.delete = obj.set = function () {
+                throw new Error('map is read-only');
+            };
+        } else if (obj instanceof Set) {
+            obj.add = obj.clear = obj.delete = function () {
+                throw new Error('set is read-only');
+            };
+        }
+
+        // Freeze self
+        Object.freeze(obj);
+
+        Object.getOwnPropertyNames(obj).forEach(function (name) {
+            var prop = obj[name];
+
+            // Freeze prop if it is an object
+            if (typeof prop == 'object' && !Object.isFrozen(prop)) {
+                deepFreeze(prop);
+            }
+        });
+
+        return obj;
+    }
+
+    deepFreezeEs6.exports = deepFreeze;
+    deepFreezeEs6.exports.default = deepFreeze;
+
+    var deepFreeze$1 = deepFreezeEs6.exports;
+
+    /** @typedef {import('highlight.js').CallbackResponse} CallbackResponse */
+    /** @typedef {import('highlight.js').CompiledMode} CompiledMode */
+    /** @implements CallbackResponse */
+
+    class Response {
+      /**
+       * @param {CompiledMode} mode
+       */
+      constructor(mode) {
+        // eslint-disable-next-line no-undefined
+        if (mode.data === undefined) mode.data = {};
+
+        this.data = mode.data;
+        this.isMatchIgnored = false;
+      }
+
+      ignoreMatch() {
+        this.isMatchIgnored = true;
+      }
+    }
+
+    /**
+     * @param {string} value
+     * @returns {string}
+     */
+    function escapeHTML(value) {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
+    /**
+     * performs a shallow merge of multiple objects into one
+     *
+     * @template T
+     * @param {T} original
+     * @param {Record<string,any>[]} objects
+     * @returns {T} a single new object
+     */
+    function inherit$1(original, ...objects) {
+      /** @type Record<string,any> */
+      const result = Object.create(null);
+
+      for (const key in original) {
+        result[key] = original[key];
+      }
+      objects.forEach(function(obj) {
+        for (const key in obj) {
+          result[key] = obj[key];
+        }
+      });
+      return /** @type {T} */ (result);
+    }
+
+    /**
+     * @typedef {object} Renderer
+     * @property {(text: string) => void} addText
+     * @property {(node: Node) => void} openNode
+     * @property {(node: Node) => void} closeNode
+     * @property {() => string} value
+     */
+
+    /** @typedef {{kind?: string, sublanguage?: boolean}} Node */
+    /** @typedef {{walk: (r: Renderer) => void}} Tree */
+    /** */
+
+    const SPAN_CLOSE = '</span>';
+
+    /**
+     * Determines if a node needs to be wrapped in <span>
+     *
+     * @param {Node} node */
+    const emitsWrappingTags = (node) => {
+      return !!node.kind;
+    };
+
+    /**
+     *
+     * @param {string} name
+     * @param {{prefix:string}} options
+     */
+    const expandScopeName = (name, { prefix }) => {
+      if (name.includes(".")) {
+        const pieces = name.split(".");
+        return [
+          `${prefix}${pieces.shift()}`,
+          ...(pieces.map((x, i) => `${x}${"_".repeat(i + 1)}`))
+        ].join(" ");
+      }
+      return `${prefix}${name}`;
+    };
+
+    /** @type {Renderer} */
+    class HTMLRenderer {
+      /**
+       * Creates a new HTMLRenderer
+       *
+       * @param {Tree} parseTree - the parse tree (must support `walk` API)
+       * @param {{classPrefix: string}} options
+       */
+      constructor(parseTree, options) {
+        this.buffer = "";
+        this.classPrefix = options.classPrefix;
+        parseTree.walk(this);
+      }
+
+      /**
+       * Adds texts to the output stream
+       *
+       * @param {string} text */
+      addText(text) {
+        this.buffer += escapeHTML(text);
+      }
+
+      /**
+       * Adds a node open to the output stream (if needed)
+       *
+       * @param {Node} node */
+      openNode(node) {
+        if (!emitsWrappingTags(node)) return;
+
+        let scope = node.kind;
+        if (node.sublanguage) {
+          scope = `language-${scope}`;
+        } else {
+          scope = expandScopeName(scope, { prefix: this.classPrefix });
+        }
+        this.span(scope);
+      }
+
+      /**
+       * Adds a node close to the output stream (if needed)
+       *
+       * @param {Node} node */
+      closeNode(node) {
+        if (!emitsWrappingTags(node)) return;
+
+        this.buffer += SPAN_CLOSE;
+      }
+
+      /**
+       * returns the accumulated buffer
+      */
+      value() {
+        return this.buffer;
+      }
+
+      // helpers
+
+      /**
+       * Builds a span element
+       *
+       * @param {string} className */
+      span(className) {
+        this.buffer += `<span class="${className}">`;
+      }
+    }
+
+    /** @typedef {{kind?: string, sublanguage?: boolean, children: Node[]} | string} Node */
+    /** @typedef {{kind?: string, sublanguage?: boolean, children: Node[]} } DataNode */
+    /** @typedef {import('highlight.js').Emitter} Emitter */
+    /**  */
+
+    class TokenTree {
+      constructor() {
+        /** @type DataNode */
+        this.rootNode = { children: [] };
+        this.stack = [this.rootNode];
+      }
+
+      get top() {
+        return this.stack[this.stack.length - 1];
+      }
+
+      get root() { return this.rootNode; }
+
+      /** @param {Node} node */
+      add(node) {
+        this.top.children.push(node);
+      }
+
+      /** @param {string} kind */
+      openNode(kind) {
+        /** @type Node */
+        const node = { kind, children: [] };
+        this.add(node);
+        this.stack.push(node);
+      }
+
+      closeNode() {
+        if (this.stack.length > 1) {
+          return this.stack.pop();
+        }
+        // eslint-disable-next-line no-undefined
+        return undefined;
+      }
+
+      closeAllNodes() {
+        while (this.closeNode());
+      }
+
+      toJSON() {
+        return JSON.stringify(this.rootNode, null, 4);
+      }
+
+      /**
+       * @typedef { import("./html_renderer").Renderer } Renderer
+       * @param {Renderer} builder
+       */
+      walk(builder) {
+        // this does not
+        return this.constructor._walk(builder, this.rootNode);
+        // this works
+        // return TokenTree._walk(builder, this.rootNode);
+      }
+
+      /**
+       * @param {Renderer} builder
+       * @param {Node} node
+       */
+      static _walk(builder, node) {
+        if (typeof node === "string") {
+          builder.addText(node);
+        } else if (node.children) {
+          builder.openNode(node);
+          node.children.forEach((child) => this._walk(builder, child));
+          builder.closeNode(node);
+        }
+        return builder;
+      }
+
+      /**
+       * @param {Node} node
+       */
+      static _collapse(node) {
+        if (typeof node === "string") return;
+        if (!node.children) return;
+
+        if (node.children.every(el => typeof el === "string")) {
+          // node.text = node.children.join("");
+          // delete node.children;
+          node.children = [node.children.join("")];
+        } else {
+          node.children.forEach((child) => {
+            TokenTree._collapse(child);
+          });
+        }
+      }
+    }
+
+    /**
+      Currently this is all private API, but this is the minimal API necessary
+      that an Emitter must implement to fully support the parser.
+
+      Minimal interface:
+
+      - addKeyword(text, kind)
+      - addText(text)
+      - addSublanguage(emitter, subLanguageName)
+      - finalize()
+      - openNode(kind)
+      - closeNode()
+      - closeAllNodes()
+      - toHTML()
+
+    */
+
+    /**
+     * @implements {Emitter}
+     */
+    class TokenTreeEmitter extends TokenTree {
+      /**
+       * @param {*} options
+       */
+      constructor(options) {
+        super();
+        this.options = options;
+      }
+
+      /**
+       * @param {string} text
+       * @param {string} kind
+       */
+      addKeyword(text, kind) {
+        if (text === "") { return; }
+
+        this.openNode(kind);
+        this.addText(text);
+        this.closeNode();
+      }
+
+      /**
+       * @param {string} text
+       */
+      addText(text) {
+        if (text === "") { return; }
+
+        this.add(text);
+      }
+
+      /**
+       * @param {Emitter & {root: DataNode}} emitter
+       * @param {string} name
+       */
+      addSublanguage(emitter, name) {
+        /** @type DataNode */
+        const node = emitter.root;
+        node.kind = name;
+        node.sublanguage = true;
+        this.add(node);
+      }
+
+      toHTML() {
+        const renderer = new HTMLRenderer(this, this.options);
+        return renderer.value();
+      }
+
+      finalize() {
+        return true;
+      }
+    }
+
+    /**
+     * @param {string} value
+     * @returns {RegExp}
+     * */
+
+    /**
+     * @param {RegExp | string } re
+     * @returns {string}
+     */
+    function source(re) {
+      if (!re) return null;
+      if (typeof re === "string") return re;
+
+      return re.source;
+    }
+
+    /**
+     * @param {RegExp | string } re
+     * @returns {string}
+     */
+    function lookahead(re) {
+      return concat('(?=', re, ')');
+    }
+
+    /**
+     * @param {RegExp | string } re
+     * @returns {string}
+     */
+    function anyNumberOfTimes(re) {
+      return concat('(?:', re, ')*');
+    }
+
+    /**
+     * @param {RegExp | string } re
+     * @returns {string}
+     */
+    function optional(re) {
+      return concat('(?:', re, ')?');
+    }
+
+    /**
+     * @param {...(RegExp | string) } args
+     * @returns {string}
+     */
+    function concat(...args) {
+      const joined = args.map((x) => source(x)).join("");
+      return joined;
+    }
+
+    /**
+     * @param { Array<string | RegExp | Object> } args
+     * @returns {object}
+     */
+    function stripOptionsFromArgs(args) {
+      const opts = args[args.length - 1];
+
+      if (typeof opts === 'object' && opts.constructor === Object) {
+        args.splice(args.length - 1, 1);
+        return opts;
+      } else {
+        return {};
+      }
+    }
+
+    /**
+     * Any of the passed expresssions may match
+     *
+     * Creates a huge this | this | that | that match
+     * @param {(RegExp | string)[] } args
+     * @returns {string}
+     */
+    function either(...args) {
+      /** @type { object & {capture?: boolean} }  */
+      const opts = stripOptionsFromArgs(args);
+      const joined = '('
+        + (opts.capture ? "" : "?:")
+        + args.map((x) => source(x)).join("|") + ")";
+      return joined;
+    }
+
+    /**
+     * @param {RegExp | string} re
+     * @returns {number}
+     */
+    function countMatchGroups(re) {
+      return (new RegExp(re.toString() + '|')).exec('').length - 1;
+    }
+
+    /**
+     * Does lexeme start with a regular expression match at the beginning
+     * @param {RegExp} re
+     * @param {string} lexeme
+     */
+    function startsWith(re, lexeme) {
+      const match = re && re.exec(lexeme);
+      return match && match.index === 0;
+    }
+
+    // BACKREF_RE matches an open parenthesis or backreference. To avoid
+    // an incorrect parse, it additionally matches the following:
+    // - [...] elements, where the meaning of parentheses and escapes change
+    // - other escape sequences, so we do not misparse escape sequences as
+    //   interesting elements
+    // - non-matching or lookahead parentheses, which do not capture. These
+    //   follow the '(' with a '?'.
+    const BACKREF_RE = /\[(?:[^\\\]]|\\.)*\]|\(\??|\\([1-9][0-9]*)|\\./;
+
+    // **INTERNAL** Not intended for outside usage
+    // join logically computes regexps.join(separator), but fixes the
+    // backreferences so they continue to match.
+    // it also places each individual regular expression into it's own
+    // match group, keeping track of the sequencing of those match groups
+    // is currently an exercise for the caller. :-)
+    /**
+     * @param {(string | RegExp)[]} regexps
+     * @param {{joinWith: string}} opts
+     * @returns {string}
+     */
+    function _rewriteBackreferences(regexps, { joinWith }) {
+      let numCaptures = 0;
+
+      return regexps.map((regex) => {
+        numCaptures += 1;
+        const offset = numCaptures;
+        let re = source(regex);
+        let out = '';
+
+        while (re.length > 0) {
+          const match = BACKREF_RE.exec(re);
+          if (!match) {
+            out += re;
+            break;
+          }
+          out += re.substring(0, match.index);
+          re = re.substring(match.index + match[0].length);
+          if (match[0][0] === '\\' && match[1]) {
+            // Adjust the backreference.
+            out += '\\' + String(Number(match[1]) + offset);
+          } else {
+            out += match[0];
+            if (match[0] === '(') {
+              numCaptures++;
+            }
+          }
+        }
+        return out;
+      }).map(re => `(${re})`).join(joinWith);
+    }
+
+    /** @typedef {import('highlight.js').Mode} Mode */
+    /** @typedef {import('highlight.js').ModeCallback} ModeCallback */
+
+    // Common regexps
+    const MATCH_NOTHING_RE = /\b\B/;
+    const IDENT_RE = '[a-zA-Z]\\w*';
+    const UNDERSCORE_IDENT_RE = '[a-zA-Z_]\\w*';
+    const NUMBER_RE = '\\b\\d+(\\.\\d+)?';
+    const C_NUMBER_RE = '(-?)(\\b0[xX][a-fA-F0-9]+|(\\b\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)'; // 0x..., 0..., decimal, float
+    const BINARY_NUMBER_RE = '\\b(0b[01]+)'; // 0b...
+    const RE_STARTERS_RE = '!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|-|-=|/=|/|:|;|<<|<<=|<=|<|===|==|=|>>>=|>>=|>=|>>>|>>|>|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~';
+
+    /**
+    * @param { Partial<Mode> & {binary?: string | RegExp} } opts
+    */
+    const SHEBANG = (opts = {}) => {
+      const beginShebang = /^#![ ]*\//;
+      if (opts.binary) {
+        opts.begin = concat(
+          beginShebang,
+          /.*\b/,
+          opts.binary,
+          /\b.*/);
+      }
+      return inherit$1({
+        scope: 'meta',
+        begin: beginShebang,
+        end: /$/,
+        relevance: 0,
+        /** @type {ModeCallback} */
+        "on:begin": (m, resp) => {
+          if (m.index !== 0) resp.ignoreMatch();
+        }
+      }, opts);
+    };
+
+    // Common modes
+    const BACKSLASH_ESCAPE = {
+      begin: '\\\\[\\s\\S]', relevance: 0
+    };
+    const APOS_STRING_MODE = {
+      scope: 'string',
+      begin: '\'',
+      end: '\'',
+      illegal: '\\n',
+      contains: [BACKSLASH_ESCAPE]
+    };
+    const QUOTE_STRING_MODE = {
+      scope: 'string',
+      begin: '"',
+      end: '"',
+      illegal: '\\n',
+      contains: [BACKSLASH_ESCAPE]
+    };
+    const PHRASAL_WORDS_MODE = {
+      begin: /\b(a|an|the|are|I'm|isn't|don't|doesn't|won't|but|just|should|pretty|simply|enough|gonna|going|wtf|so|such|will|you|your|they|like|more)\b/
+    };
+    /**
+     * Creates a comment mode
+     *
+     * @param {string | RegExp} begin
+     * @param {string | RegExp} end
+     * @param {Mode | {}} [modeOptions]
+     * @returns {Partial<Mode>}
+     */
+    const COMMENT = function(begin, end, modeOptions = {}) {
+      const mode = inherit$1(
+        {
+          scope: 'comment',
+          begin,
+          end,
+          contains: []
+        },
+        modeOptions
+      );
+      mode.contains.push({
+        scope: 'doctag',
+        // hack to avoid the space from being included. the space is necessary to
+        // match here to prevent the plain text rule below from gobbling up doctags
+        begin: '[ ]*(?=(TODO|FIXME|NOTE|BUG|OPTIMIZE|HACK|XXX):)',
+        end: /(TODO|FIXME|NOTE|BUG|OPTIMIZE|HACK|XXX):/,
+        excludeBegin: true,
+        relevance: 0
+      });
+      const ENGLISH_WORD = either(
+        // list of common 1 and 2 letter words in English
+        "I",
+        "a",
+        "is",
+        "so",
+        "us",
+        "to",
+        "at",
+        "if",
+        "in",
+        "it",
+        "on",
+        // note: this is not an exhaustive list of contractions, just popular ones
+        /[A-Za-z]+['](d|ve|re|ll|t|s|n)/, // contractions - can't we'd they're let's, etc
+        /[A-Za-z]+[-][a-z]+/, // `no-way`, etc.
+        /[A-Za-z][a-z]{2,}/ // allow capitalized words at beginning of sentences
+      );
+      // looking like plain text, more likely to be a comment
+      mode.contains.push(
+        {
+          // TODO: how to include ", (, ) without breaking grammars that use these for
+          // comment delimiters?
+          // begin: /[ ]+([()"]?([A-Za-z'-]{3,}|is|a|I|so|us|[tT][oO]|at|if|in|it|on)[.]?[()":]?([.][ ]|[ ]|\))){3}/
+          // ---
+
+          // this tries to find sequences of 3 english words in a row (without any
+          // "programming" type syntax) this gives us a strong signal that we've
+          // TRULY found a comment - vs perhaps scanning with the wrong language.
+          // It's possible to find something that LOOKS like the start of the
+          // comment - but then if there is no readable text - good chance it is a
+          // false match and not a comment.
+          //
+          // for a visual example please see:
+          // https://github.com/highlightjs/highlight.js/issues/2827
+
+          begin: concat(
+            /[ ]+/, // necessary to prevent us gobbling up doctags like /* @author Bob Mcgill */
+            '(',
+            ENGLISH_WORD,
+            /[.]?[:]?([.][ ]|[ ])/,
+            '){3}') // look for 3 words in a row
+        }
+      );
+      return mode;
+    };
+    const C_LINE_COMMENT_MODE = COMMENT('//', '$');
+    const C_BLOCK_COMMENT_MODE = COMMENT('/\\*', '\\*/');
+    const HASH_COMMENT_MODE = COMMENT('#', '$');
+    const NUMBER_MODE = {
+      scope: 'number',
+      begin: NUMBER_RE,
+      relevance: 0
+    };
+    const C_NUMBER_MODE = {
+      scope: 'number',
+      begin: C_NUMBER_RE,
+      relevance: 0
+    };
+    const BINARY_NUMBER_MODE = {
+      scope: 'number',
+      begin: BINARY_NUMBER_RE,
+      relevance: 0
+    };
+    const REGEXP_MODE = {
+      // this outer rule makes sure we actually have a WHOLE regex and not simply
+      // an expression such as:
+      //
+      //     3 / something
+      //
+      // (which will then blow up when regex's `illegal` sees the newline)
+      begin: /(?=\/[^/\n]*\/)/,
+      contains: [{
+        scope: 'regexp',
+        begin: /\//,
+        end: /\/[gimuy]*/,
+        illegal: /\n/,
+        contains: [
+          BACKSLASH_ESCAPE,
+          {
+            begin: /\[/,
+            end: /\]/,
+            relevance: 0,
+            contains: [BACKSLASH_ESCAPE]
+          }
+        ]
+      }]
+    };
+    const TITLE_MODE = {
+      scope: 'title',
+      begin: IDENT_RE,
+      relevance: 0
+    };
+    const UNDERSCORE_TITLE_MODE = {
+      scope: 'title',
+      begin: UNDERSCORE_IDENT_RE,
+      relevance: 0
+    };
+    const METHOD_GUARD = {
+      // excludes method names from keyword processing
+      begin: '\\.\\s*' + UNDERSCORE_IDENT_RE,
+      relevance: 0
+    };
+
+    /**
+     * Adds end same as begin mechanics to a mode
+     *
+     * Your mode must include at least a single () match group as that first match
+     * group is what is used for comparison
+     * @param {Partial<Mode>} mode
+     */
+    const END_SAME_AS_BEGIN = function(mode) {
+      return Object.assign(mode,
+        {
+          /** @type {ModeCallback} */
+          'on:begin': (m, resp) => { resp.data._beginMatch = m[1]; },
+          /** @type {ModeCallback} */
+          'on:end': (m, resp) => { if (resp.data._beginMatch !== m[1]) resp.ignoreMatch(); }
+        });
+    };
+
+    var MODES = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        MATCH_NOTHING_RE: MATCH_NOTHING_RE,
+        IDENT_RE: IDENT_RE,
+        UNDERSCORE_IDENT_RE: UNDERSCORE_IDENT_RE,
+        NUMBER_RE: NUMBER_RE,
+        C_NUMBER_RE: C_NUMBER_RE,
+        BINARY_NUMBER_RE: BINARY_NUMBER_RE,
+        RE_STARTERS_RE: RE_STARTERS_RE,
+        SHEBANG: SHEBANG,
+        BACKSLASH_ESCAPE: BACKSLASH_ESCAPE,
+        APOS_STRING_MODE: APOS_STRING_MODE,
+        QUOTE_STRING_MODE: QUOTE_STRING_MODE,
+        PHRASAL_WORDS_MODE: PHRASAL_WORDS_MODE,
+        COMMENT: COMMENT,
+        C_LINE_COMMENT_MODE: C_LINE_COMMENT_MODE,
+        C_BLOCK_COMMENT_MODE: C_BLOCK_COMMENT_MODE,
+        HASH_COMMENT_MODE: HASH_COMMENT_MODE,
+        NUMBER_MODE: NUMBER_MODE,
+        C_NUMBER_MODE: C_NUMBER_MODE,
+        BINARY_NUMBER_MODE: BINARY_NUMBER_MODE,
+        REGEXP_MODE: REGEXP_MODE,
+        TITLE_MODE: TITLE_MODE,
+        UNDERSCORE_TITLE_MODE: UNDERSCORE_TITLE_MODE,
+        METHOD_GUARD: METHOD_GUARD,
+        END_SAME_AS_BEGIN: END_SAME_AS_BEGIN
+    });
+
+    /**
+    @typedef {import('highlight.js').CallbackResponse} CallbackResponse
+    @typedef {import('highlight.js').CompilerExt} CompilerExt
+    */
+
+    // Grammar extensions / plugins
+    // See: https://github.com/highlightjs/highlight.js/issues/2833
+
+    // Grammar extensions allow "syntactic sugar" to be added to the grammar modes
+    // without requiring any underlying changes to the compiler internals.
+
+    // `compileMatch` being the perfect small example of now allowing a grammar
+    // author to write `match` when they desire to match a single expression rather
+    // than being forced to use `begin`.  The extension then just moves `match` into
+    // `begin` when it runs.  Ie, no features have been added, but we've just made
+    // the experience of writing (and reading grammars) a little bit nicer.
+
+    // ------
+
+    // TODO: We need negative look-behind support to do this properly
+    /**
+     * Skip a match if it has a preceding dot
+     *
+     * This is used for `beginKeywords` to prevent matching expressions such as
+     * `bob.keyword.do()`. The mode compiler automatically wires this up as a
+     * special _internal_ 'on:begin' callback for modes with `beginKeywords`
+     * @param {RegExpMatchArray} match
+     * @param {CallbackResponse} response
+     */
+    function skipIfHasPrecedingDot(match, response) {
+      const before = match.input[match.index - 1];
+      if (before === ".") {
+        response.ignoreMatch();
+      }
+    }
+
+    /**
+     *
+     * @type {CompilerExt}
+     */
+    function scopeClassName(mode, _parent) {
+      // eslint-disable-next-line no-undefined
+      if (mode.className !== undefined) {
+        mode.scope = mode.className;
+        delete mode.className;
+      }
+    }
+
+    /**
+     * `beginKeywords` syntactic sugar
+     * @type {CompilerExt}
+     */
+    function beginKeywords(mode, parent) {
+      if (!parent) return;
+      if (!mode.beginKeywords) return;
+
+      // for languages with keywords that include non-word characters checking for
+      // a word boundary is not sufficient, so instead we check for a word boundary
+      // or whitespace - this does no harm in any case since our keyword engine
+      // doesn't allow spaces in keywords anyways and we still check for the boundary
+      // first
+      mode.begin = '\\b(' + mode.beginKeywords.split(' ').join('|') + ')(?!\\.)(?=\\b|\\s)';
+      mode.__beforeBegin = skipIfHasPrecedingDot;
+      mode.keywords = mode.keywords || mode.beginKeywords;
+      delete mode.beginKeywords;
+
+      // prevents double relevance, the keywords themselves provide
+      // relevance, the mode doesn't need to double it
+      // eslint-disable-next-line no-undefined
+      if (mode.relevance === undefined) mode.relevance = 0;
+    }
+
+    /**
+     * Allow `illegal` to contain an array of illegal values
+     * @type {CompilerExt}
+     */
+    function compileIllegal(mode, _parent) {
+      if (!Array.isArray(mode.illegal)) return;
+
+      mode.illegal = either(...mode.illegal);
+    }
+
+    /**
+     * `match` to match a single expression for readability
+     * @type {CompilerExt}
+     */
+    function compileMatch(mode, _parent) {
+      if (!mode.match) return;
+      if (mode.begin || mode.end) throw new Error("begin & end are not supported with match");
+
+      mode.begin = mode.match;
+      delete mode.match;
+    }
+
+    /**
+     * provides the default 1 relevance to all modes
+     * @type {CompilerExt}
+     */
+    function compileRelevance(mode, _parent) {
+      // eslint-disable-next-line no-undefined
+      if (mode.relevance === undefined) mode.relevance = 1;
+    }
+
+    // allow beforeMatch to act as a "qualifier" for the match
+    // the full match begin must be [beforeMatch][begin]
+    const beforeMatchExt = (mode, parent) => {
+      if (!mode.beforeMatch) return;
+      // starts conflicts with endsParent which we need to make sure the child
+      // rule is not matched multiple times
+      if (mode.starts) throw new Error("beforeMatch cannot be used with starts");
+
+      const originalMode = Object.assign({}, mode);
+      Object.keys(mode).forEach((key) => { delete mode[key]; });
+
+      mode.keywords = originalMode.keywords;
+      mode.begin = concat(originalMode.beforeMatch, lookahead(originalMode.begin));
+      mode.starts = {
+        relevance: 0,
+        contains: [
+          Object.assign(originalMode, { endsParent: true })
+        ]
+      };
+      mode.relevance = 0;
+
+      delete originalMode.beforeMatch;
+    };
+
+    // keywords that should have no default relevance value
+    const COMMON_KEYWORDS = [
+      'of',
+      'and',
+      'for',
+      'in',
+      'not',
+      'or',
+      'if',
+      'then',
+      'parent', // common variable name
+      'list', // common variable name
+      'value' // common variable name
+    ];
+
+    const DEFAULT_KEYWORD_SCOPE = "keyword";
+
+    /**
+     * Given raw keywords from a language definition, compile them.
+     *
+     * @param {string | Record<string,string|string[]> | Array<string>} rawKeywords
+     * @param {boolean} caseInsensitive
+     */
+    function compileKeywords(rawKeywords, caseInsensitive, scopeName = DEFAULT_KEYWORD_SCOPE) {
+      /** @type KeywordDict */
+      const compiledKeywords = Object.create(null);
+
+      // input can be a string of keywords, an array of keywords, or a object with
+      // named keys representing scopeName (which can then point to a string or array)
+      if (typeof rawKeywords === 'string') {
+        compileList(scopeName, rawKeywords.split(" "));
+      } else if (Array.isArray(rawKeywords)) {
+        compileList(scopeName, rawKeywords);
+      } else {
+        Object.keys(rawKeywords).forEach(function(scopeName) {
+          // collapse all our objects back into the parent object
+          Object.assign(
+            compiledKeywords,
+            compileKeywords(rawKeywords[scopeName], caseInsensitive, scopeName)
+          );
+        });
+      }
+      return compiledKeywords;
+
+      // ---
+
+      /**
+       * Compiles an individual list of keywords
+       *
+       * Ex: "for if when while|5"
+       *
+       * @param {string} scopeName
+       * @param {Array<string>} keywordList
+       */
+      function compileList(scopeName, keywordList) {
+        if (caseInsensitive) {
+          keywordList = keywordList.map(x => x.toLowerCase());
+        }
+        keywordList.forEach(function(keyword) {
+          const pair = keyword.split('|');
+          compiledKeywords[pair[0]] = [scopeName, scoreForKeyword(pair[0], pair[1])];
+        });
+      }
+    }
+
+    /**
+     * Returns the proper score for a given keyword
+     *
+     * Also takes into account comment keywords, which will be scored 0 UNLESS
+     * another score has been manually assigned.
+     * @param {string} keyword
+     * @param {string} [providedScore]
+     */
+    function scoreForKeyword(keyword, providedScore) {
+      // manual scores always win over common keywords
+      // so you can force a score of 1 if you really insist
+      if (providedScore) {
+        return Number(providedScore);
+      }
+
+      return commonKeyword(keyword) ? 0 : 1;
+    }
+
+    /**
+     * Determines if a given keyword is common or not
+     *
+     * @param {string} keyword */
+    function commonKeyword(keyword) {
+      return COMMON_KEYWORDS.includes(keyword.toLowerCase());
+    }
+
+    /*
+
+    For the reasoning behind this please see:
+    https://github.com/highlightjs/highlight.js/issues/2880#issuecomment-747275419
+
+    */
+
+    /**
+     * @type {Record<string, boolean>}
+     */
+    const seenDeprecations = {};
+
+    /**
+     * @param {string} message
+     */
+    const error = (message) => {
+      console.error(message);
+    };
+
+    /**
+     * @param {string} message
+     * @param {any} args
+     */
+    const warn = (message, ...args) => {
+      console.log(`WARN: ${message}`, ...args);
+    };
+
+    /**
+     * @param {string} version
+     * @param {string} message
+     */
+    const deprecated = (version, message) => {
+      if (seenDeprecations[`${version}/${message}`]) return;
+
+      console.log(`Deprecated as of ${version}. ${message}`);
+      seenDeprecations[`${version}/${message}`] = true;
+    };
+
+    /* eslint-disable no-throw-literal */
+
+    /**
+    @typedef {import('highlight.js').CompiledMode} CompiledMode
+    */
+
+    const MultiClassError = new Error();
+
+    /**
+     * Renumbers labeled scope names to account for additional inner match
+     * groups that otherwise would break everything.
+     *
+     * Lets say we 3 match scopes:
+     *
+     *   { 1 => ..., 2 => ..., 3 => ... }
+     *
+     * So what we need is a clean match like this:
+     *
+     *   (a)(b)(c) => [ "a", "b", "c" ]
+     *
+     * But this falls apart with inner match groups:
+     *
+     * (a)(((b)))(c) => ["a", "b", "b", "b", "c" ]
+     *
+     * Our scopes are now "out of alignment" and we're repeating `b` 3 times.
+     * What needs to happen is the numbers are remapped:
+     *
+     *   { 1 => ..., 2 => ..., 5 => ... }
+     *
+     * We also need to know that the ONLY groups that should be output
+     * are 1, 2, and 5.  This function handles this behavior.
+     *
+     * @param {CompiledMode} mode
+     * @param {Array<RegExp | string>} regexes
+     * @param {{key: "beginScope"|"endScope"}} opts
+     */
+    function remapScopeNames(mode, regexes, { key }) {
+      let offset = 0;
+      const scopeNames = mode[key];
+      /** @type Record<number,boolean> */
+      const emit = {};
+      /** @type Record<number,string> */
+      const positions = {};
+
+      for (let i = 1; i <= regexes.length; i++) {
+        positions[i + offset] = scopeNames[i];
+        emit[i + offset] = true;
+        offset += countMatchGroups(regexes[i - 1]);
+      }
+      // we use _emit to keep track of which match groups are "top-level" to avoid double
+      // output from inside match groups
+      mode[key] = positions;
+      mode[key]._emit = emit;
+      mode[key]._multi = true;
+    }
+
+    /**
+     * @param {CompiledMode} mode
+     */
+    function beginMultiClass(mode) {
+      if (!Array.isArray(mode.begin)) return;
+
+      if (mode.skip || mode.excludeBegin || mode.returnBegin) {
+        error("skip, excludeBegin, returnBegin not compatible with beginScope: {}");
+        throw MultiClassError;
+      }
+
+      if (typeof mode.beginScope !== "object" || mode.beginScope === null) {
+        error("beginScope must be object");
+        throw MultiClassError;
+      }
+
+      remapScopeNames(mode, mode.begin, { key: "beginScope" });
+      mode.begin = _rewriteBackreferences(mode.begin, { joinWith: "" });
+    }
+
+    /**
+     * @param {CompiledMode} mode
+     */
+    function endMultiClass(mode) {
+      if (!Array.isArray(mode.end)) return;
+
+      if (mode.skip || mode.excludeEnd || mode.returnEnd) {
+        error("skip, excludeEnd, returnEnd not compatible with endScope: {}");
+        throw MultiClassError;
+      }
+
+      if (typeof mode.endScope !== "object" || mode.endScope === null) {
+        error("endScope must be object");
+        throw MultiClassError;
+      }
+
+      remapScopeNames(mode, mode.end, { key: "endScope" });
+      mode.end = _rewriteBackreferences(mode.end, { joinWith: "" });
+    }
+
+    /**
+     * this exists only to allow `scope: {}` to be used beside `match:`
+     * Otherwise `beginScope` would necessary and that would look weird
+
+      {
+        match: [ /def/, /\w+/ ]
+        scope: { 1: "keyword" , 2: "title" }
+      }
+
+     * @param {CompiledMode} mode
+     */
+    function scopeSugar(mode) {
+      if (mode.scope && typeof mode.scope === "object" && mode.scope !== null) {
+        mode.beginScope = mode.scope;
+        delete mode.scope;
+      }
+    }
+
+    /**
+     * @param {CompiledMode} mode
+     */
+    function MultiClass(mode) {
+      scopeSugar(mode);
+
+      if (typeof mode.beginScope === "string") {
+        mode.beginScope = { _wrap: mode.beginScope };
+      }
+      if (typeof mode.endScope === "string") {
+        mode.endScope = { _wrap: mode.endScope };
+      }
+
+      beginMultiClass(mode);
+      endMultiClass(mode);
+    }
+
+    /**
+    @typedef {import('highlight.js').Mode} Mode
+    @typedef {import('highlight.js').CompiledMode} CompiledMode
+    @typedef {import('highlight.js').Language} Language
+    @typedef {import('highlight.js').HLJSPlugin} HLJSPlugin
+    @typedef {import('highlight.js').CompiledLanguage} CompiledLanguage
+    */
+
+    // compilation
+
+    /**
+     * Compiles a language definition result
+     *
+     * Given the raw result of a language definition (Language), compiles this so
+     * that it is ready for highlighting code.
+     * @param {Language} language
+     * @returns {CompiledLanguage}
+     */
+    function compileLanguage(language) {
+      /**
+       * Builds a regex with the case sensitivity of the current language
+       *
+       * @param {RegExp | string} value
+       * @param {boolean} [global]
+       */
+      function langRe(value, global) {
+        return new RegExp(
+          source(value),
+          'm'
+          + (language.case_insensitive ? 'i' : '')
+          + (language.unicodeRegex ? 'u' : '')
+          + (global ? 'g' : '')
+        );
+      }
+
+      /**
+        Stores multiple regular expressions and allows you to quickly search for
+        them all in a string simultaneously - returning the first match.  It does
+        this by creating a huge (a|b|c) regex - each individual item wrapped with ()
+        and joined by `|` - using match groups to track position.  When a match is
+        found checking which position in the array has content allows us to figure
+        out which of the original regexes / match groups triggered the match.
+
+        The match object itself (the result of `Regex.exec`) is returned but also
+        enhanced by merging in any meta-data that was registered with the regex.
+        This is how we keep track of which mode matched, and what type of rule
+        (`illegal`, `begin`, end, etc).
+      */
+      class MultiRegex {
+        constructor() {
+          this.matchIndexes = {};
+          // @ts-ignore
+          this.regexes = [];
+          this.matchAt = 1;
+          this.position = 0;
+        }
+
+        // @ts-ignore
+        addRule(re, opts) {
+          opts.position = this.position++;
+          // @ts-ignore
+          this.matchIndexes[this.matchAt] = opts;
+          this.regexes.push([opts, re]);
+          this.matchAt += countMatchGroups(re) + 1;
+        }
+
+        compile() {
+          if (this.regexes.length === 0) {
+            // avoids the need to check length every time exec is called
+            // @ts-ignore
+            this.exec = () => null;
+          }
+          const terminators = this.regexes.map(el => el[1]);
+          this.matcherRe = langRe(_rewriteBackreferences(terminators, { joinWith: '|' }), true);
+          this.lastIndex = 0;
+        }
+
+        /** @param {string} s */
+        exec(s) {
+          this.matcherRe.lastIndex = this.lastIndex;
+          const match = this.matcherRe.exec(s);
+          if (!match) { return null; }
+
+          // eslint-disable-next-line no-undefined
+          const i = match.findIndex((el, i) => i > 0 && el !== undefined);
+          // @ts-ignore
+          const matchData = this.matchIndexes[i];
+          // trim off any earlier non-relevant match groups (ie, the other regex
+          // match groups that make up the multi-matcher)
+          match.splice(0, i);
+
+          return Object.assign(match, matchData);
+        }
+      }
+
+      /*
+        Created to solve the key deficiently with MultiRegex - there is no way to
+        test for multiple matches at a single location.  Why would we need to do
+        that?  In the future a more dynamic engine will allow certain matches to be
+        ignored.  An example: if we matched say the 3rd regex in a large group but
+        decided to ignore it - we'd need to started testing again at the 4th
+        regex... but MultiRegex itself gives us no real way to do that.
+
+        So what this class creates MultiRegexs on the fly for whatever search
+        position they are needed.
+
+        NOTE: These additional MultiRegex objects are created dynamically.  For most
+        grammars most of the time we will never actually need anything more than the
+        first MultiRegex - so this shouldn't have too much overhead.
+
+        Say this is our search group, and we match regex3, but wish to ignore it.
+
+          regex1 | regex2 | regex3 | regex4 | regex5    ' ie, startAt = 0
+
+        What we need is a new MultiRegex that only includes the remaining
+        possibilities:
+
+          regex4 | regex5                               ' ie, startAt = 3
+
+        This class wraps all that complexity up in a simple API... `startAt` decides
+        where in the array of expressions to start doing the matching. It
+        auto-increments, so if a match is found at position 2, then startAt will be
+        set to 3.  If the end is reached startAt will return to 0.
+
+        MOST of the time the parser will be setting startAt manually to 0.
+      */
+      class ResumableMultiRegex {
+        constructor() {
+          // @ts-ignore
+          this.rules = [];
+          // @ts-ignore
+          this.multiRegexes = [];
+          this.count = 0;
+
+          this.lastIndex = 0;
+          this.regexIndex = 0;
+        }
+
+        // @ts-ignore
+        getMatcher(index) {
+          if (this.multiRegexes[index]) return this.multiRegexes[index];
+
+          const matcher = new MultiRegex();
+          this.rules.slice(index).forEach(([re, opts]) => matcher.addRule(re, opts));
+          matcher.compile();
+          this.multiRegexes[index] = matcher;
+          return matcher;
+        }
+
+        resumingScanAtSamePosition() {
+          return this.regexIndex !== 0;
+        }
+
+        considerAll() {
+          this.regexIndex = 0;
+        }
+
+        // @ts-ignore
+        addRule(re, opts) {
+          this.rules.push([re, opts]);
+          if (opts.type === "begin") this.count++;
+        }
+
+        /** @param {string} s */
+        exec(s) {
+          const m = this.getMatcher(this.regexIndex);
+          m.lastIndex = this.lastIndex;
+          let result = m.exec(s);
+
+          // The following is because we have no easy way to say "resume scanning at the
+          // existing position but also skip the current rule ONLY". What happens is
+          // all prior rules are also skipped which can result in matching the wrong
+          // thing. Example of matching "booger":
+
+          // our matcher is [string, "booger", number]
+          //
+          // ....booger....
+
+          // if "booger" is ignored then we'd really need a regex to scan from the
+          // SAME position for only: [string, number] but ignoring "booger" (if it
+          // was the first match), a simple resume would scan ahead who knows how
+          // far looking only for "number", ignoring potential string matches (or
+          // future "booger" matches that might be valid.)
+
+          // So what we do: We execute two matchers, one resuming at the same
+          // position, but the second full matcher starting at the position after:
+
+          //     /--- resume first regex match here (for [number])
+          //     |/---- full match here for [string, "booger", number]
+          //     vv
+          // ....booger....
+
+          // Which ever results in a match first is then used. So this 3-4 step
+          // process essentially allows us to say "match at this position, excluding
+          // a prior rule that was ignored".
+          //
+          // 1. Match "booger" first, ignore. Also proves that [string] does non match.
+          // 2. Resume matching for [number]
+          // 3. Match at index + 1 for [string, "booger", number]
+          // 4. If #2 and #3 result in matches, which came first?
+          if (this.resumingScanAtSamePosition()) {
+            if (result && result.index === this.lastIndex) ; else { // use the second matcher result
+              const m2 = this.getMatcher(0);
+              m2.lastIndex = this.lastIndex + 1;
+              result = m2.exec(s);
+            }
+          }
+
+          if (result) {
+            this.regexIndex += result.position + 1;
+            if (this.regexIndex === this.count) {
+              // wrap-around to considering all matches again
+              this.considerAll();
+            }
+          }
+
+          return result;
+        }
+      }
+
+      /**
+       * Given a mode, builds a huge ResumableMultiRegex that can be used to walk
+       * the content and find matches.
+       *
+       * @param {CompiledMode} mode
+       * @returns {ResumableMultiRegex}
+       */
+      function buildModeRegex(mode) {
+        const mm = new ResumableMultiRegex();
+
+        mode.contains.forEach(term => mm.addRule(term.begin, { rule: term, type: "begin" }));
+
+        if (mode.terminatorEnd) {
+          mm.addRule(mode.terminatorEnd, { type: "end" });
+        }
+        if (mode.illegal) {
+          mm.addRule(mode.illegal, { type: "illegal" });
+        }
+
+        return mm;
+      }
+
+      /** skip vs abort vs ignore
+       *
+       * @skip   - The mode is still entered and exited normally (and contains rules apply),
+       *           but all content is held and added to the parent buffer rather than being
+       *           output when the mode ends.  Mostly used with `sublanguage` to build up
+       *           a single large buffer than can be parsed by sublanguage.
+       *
+       *             - The mode begin ands ends normally.
+       *             - Content matched is added to the parent mode buffer.
+       *             - The parser cursor is moved forward normally.
+       *
+       * @abort  - A hack placeholder until we have ignore.  Aborts the mode (as if it
+       *           never matched) but DOES NOT continue to match subsequent `contains`
+       *           modes.  Abort is bad/suboptimal because it can result in modes
+       *           farther down not getting applied because an earlier rule eats the
+       *           content but then aborts.
+       *
+       *             - The mode does not begin.
+       *             - Content matched by `begin` is added to the mode buffer.
+       *             - The parser cursor is moved forward accordingly.
+       *
+       * @ignore - Ignores the mode (as if it never matched) and continues to match any
+       *           subsequent `contains` modes.  Ignore isn't technically possible with
+       *           the current parser implementation.
+       *
+       *             - The mode does not begin.
+       *             - Content matched by `begin` is ignored.
+       *             - The parser cursor is not moved forward.
+       */
+
+      /**
+       * Compiles an individual mode
+       *
+       * This can raise an error if the mode contains certain detectable known logic
+       * issues.
+       * @param {Mode} mode
+       * @param {CompiledMode | null} [parent]
+       * @returns {CompiledMode | never}
+       */
+      function compileMode(mode, parent) {
+        const cmode = /** @type CompiledMode */ (mode);
+        if (mode.isCompiled) return cmode;
+
+        [
+          scopeClassName,
+          // do this early so compiler extensions generally don't have to worry about
+          // the distinction between match/begin
+          compileMatch,
+          MultiClass,
+          beforeMatchExt
+        ].forEach(ext => ext(mode, parent));
+
+        language.compilerExtensions.forEach(ext => ext(mode, parent));
+
+        // __beforeBegin is considered private API, internal use only
+        mode.__beforeBegin = null;
+
+        [
+          beginKeywords,
+          // do this later so compiler extensions that come earlier have access to the
+          // raw array if they wanted to perhaps manipulate it, etc.
+          compileIllegal,
+          // default to 1 relevance if not specified
+          compileRelevance
+        ].forEach(ext => ext(mode, parent));
+
+        mode.isCompiled = true;
+
+        let keywordPattern = null;
+        if (typeof mode.keywords === "object" && mode.keywords.$pattern) {
+          // we need a copy because keywords might be compiled multiple times
+          // so we can't go deleting $pattern from the original on the first
+          // pass
+          mode.keywords = Object.assign({}, mode.keywords);
+          keywordPattern = mode.keywords.$pattern;
+          delete mode.keywords.$pattern;
+        }
+        keywordPattern = keywordPattern || /\w+/;
+
+        if (mode.keywords) {
+          mode.keywords = compileKeywords(mode.keywords, language.case_insensitive);
+        }
+
+        cmode.keywordPatternRe = langRe(keywordPattern, true);
+
+        if (parent) {
+          if (!mode.begin) mode.begin = /\B|\b/;
+          cmode.beginRe = langRe(cmode.begin);
+          if (!mode.end && !mode.endsWithParent) mode.end = /\B|\b/;
+          if (mode.end) cmode.endRe = langRe(cmode.end);
+          cmode.terminatorEnd = source(cmode.end) || '';
+          if (mode.endsWithParent && parent.terminatorEnd) {
+            cmode.terminatorEnd += (mode.end ? '|' : '') + parent.terminatorEnd;
+          }
+        }
+        if (mode.illegal) cmode.illegalRe = langRe(/** @type {RegExp | string} */ (mode.illegal));
+        if (!mode.contains) mode.contains = [];
+
+        mode.contains = [].concat(...mode.contains.map(function(c) {
+          return expandOrCloneMode(c === 'self' ? mode : c);
+        }));
+        mode.contains.forEach(function(c) { compileMode(/** @type Mode */ (c), cmode); });
+
+        if (mode.starts) {
+          compileMode(mode.starts, parent);
+        }
+
+        cmode.matcher = buildModeRegex(cmode);
+        return cmode;
+      }
+
+      if (!language.compilerExtensions) language.compilerExtensions = [];
+
+      // self is not valid at the top-level
+      if (language.contains && language.contains.includes('self')) {
+        throw new Error("ERR: contains `self` is not supported at the top-level of a language.  See documentation.");
+      }
+
+      // we need a null object, which inherit will guarantee
+      language.classNameAliases = inherit$1(language.classNameAliases || {});
+
+      return compileMode(/** @type Mode */ (language));
+    }
+
+    /**
+     * Determines if a mode has a dependency on it's parent or not
+     *
+     * If a mode does have a parent dependency then often we need to clone it if
+     * it's used in multiple places so that each copy points to the correct parent,
+     * where-as modes without a parent can often safely be re-used at the bottom of
+     * a mode chain.
+     *
+     * @param {Mode | null} mode
+     * @returns {boolean} - is there a dependency on the parent?
+     * */
+    function dependencyOnParent(mode) {
+      if (!mode) return false;
+
+      return mode.endsWithParent || dependencyOnParent(mode.starts);
+    }
+
+    /**
+     * Expands a mode or clones it if necessary
+     *
+     * This is necessary for modes with parental dependenceis (see notes on
+     * `dependencyOnParent`) and for nodes that have `variants` - which must then be
+     * exploded into their own individual modes at compile time.
+     *
+     * @param {Mode} mode
+     * @returns {Mode | Mode[]}
+     * */
+    function expandOrCloneMode(mode) {
+      if (mode.variants && !mode.cachedVariants) {
+        mode.cachedVariants = mode.variants.map(function(variant) {
+          return inherit$1(mode, { variants: null }, variant);
+        });
+      }
+
+      // EXPAND
+      // if we have variants then essentially "replace" the mode with the variants
+      // this happens in compileMode, where this function is called from
+      if (mode.cachedVariants) {
+        return mode.cachedVariants;
+      }
+
+      // CLONE
+      // if we have dependencies on parents then we need a unique
+      // instance of ourselves, so we can be reused with many
+      // different parents without issue
+      if (dependencyOnParent(mode)) {
+        return inherit$1(mode, { starts: mode.starts ? inherit$1(mode.starts) : null });
+      }
+
+      if (Object.isFrozen(mode)) {
+        return inherit$1(mode);
+      }
+
+      // no special dependency issues, just return ourselves
+      return mode;
+    }
+
+    var version$1 = "11.3.1";
+
+    class HTMLInjectionError extends Error {
+      constructor(reason, html) {
+        super(reason);
+        this.name = "HTMLInjectionError";
+        this.html = html;
+      }
+    }
+
+    /*
+    Syntax highlighting with language autodetection.
+    https://highlightjs.org/
+    */
+
+    /**
+    @typedef {import('highlight.js').Mode} Mode
+    @typedef {import('highlight.js').CompiledMode} CompiledMode
+    @typedef {import('highlight.js').CompiledScope} CompiledScope
+    @typedef {import('highlight.js').Language} Language
+    @typedef {import('highlight.js').HLJSApi} HLJSApi
+    @typedef {import('highlight.js').HLJSPlugin} HLJSPlugin
+    @typedef {import('highlight.js').PluginEvent} PluginEvent
+    @typedef {import('highlight.js').HLJSOptions} HLJSOptions
+    @typedef {import('highlight.js').LanguageFn} LanguageFn
+    @typedef {import('highlight.js').HighlightedHTMLElement} HighlightedHTMLElement
+    @typedef {import('highlight.js').BeforeHighlightContext} BeforeHighlightContext
+    @typedef {import('highlight.js/private').MatchType} MatchType
+    @typedef {import('highlight.js/private').KeywordData} KeywordData
+    @typedef {import('highlight.js/private').EnhancedMatch} EnhancedMatch
+    @typedef {import('highlight.js/private').AnnotatedError} AnnotatedError
+    @typedef {import('highlight.js').AutoHighlightResult} AutoHighlightResult
+    @typedef {import('highlight.js').HighlightOptions} HighlightOptions
+    @typedef {import('highlight.js').HighlightResult} HighlightResult
+    */
+
+
+    const escape = escapeHTML;
+    const inherit = inherit$1;
+    const NO_MATCH = Symbol("nomatch");
+    const MAX_KEYWORD_HITS = 7;
+
+    /**
+     * @param {any} hljs - object that is extended (legacy)
+     * @returns {HLJSApi}
+     */
+    const HLJS = function(hljs) {
+      // Global internal variables used within the highlight.js library.
+      /** @type {Record<string, Language>} */
+      const languages = Object.create(null);
+      /** @type {Record<string, string>} */
+      const aliases = Object.create(null);
+      /** @type {HLJSPlugin[]} */
+      const plugins = [];
+
+      // safe/production mode - swallows more errors, tries to keep running
+      // even if a single syntax or parse hits a fatal error
+      let SAFE_MODE = true;
+      const LANGUAGE_NOT_FOUND = "Could not find the language '{}', did you forget to load/include a language module?";
+      /** @type {Language} */
+      const PLAINTEXT_LANGUAGE = { disableAutodetect: true, name: 'Plain text', contains: [] };
+
+      // Global options used when within external APIs. This is modified when
+      // calling the `hljs.configure` function.
+      /** @type HLJSOptions */
+      let options = {
+        ignoreUnescapedHTML: false,
+        throwUnescapedHTML: false,
+        noHighlightRe: /^(no-?highlight)$/i,
+        languageDetectRe: /\blang(?:uage)?-([\w-]+)\b/i,
+        classPrefix: 'hljs-',
+        cssSelector: 'pre code',
+        languages: null,
+        // beta configuration options, subject to change, welcome to discuss
+        // https://github.com/highlightjs/highlight.js/issues/1086
+        __emitter: TokenTreeEmitter
+      };
+
+      /* Utility functions */
+
+      /**
+       * Tests a language name to see if highlighting should be skipped
+       * @param {string} languageName
+       */
+      function shouldNotHighlight(languageName) {
+        return options.noHighlightRe.test(languageName);
+      }
+
+      /**
+       * @param {HighlightedHTMLElement} block - the HTML element to determine language for
+       */
+      function blockLanguage(block) {
+        let classes = block.className + ' ';
+
+        classes += block.parentNode ? block.parentNode.className : '';
+
+        // language-* takes precedence over non-prefixed class names.
+        const match = options.languageDetectRe.exec(classes);
+        if (match) {
+          const language = getLanguage(match[1]);
+          if (!language) {
+            warn(LANGUAGE_NOT_FOUND.replace("{}", match[1]));
+            warn("Falling back to no-highlight mode for this block.", block);
+          }
+          return language ? match[1] : 'no-highlight';
+        }
+
+        return classes
+          .split(/\s+/)
+          .find((_class) => shouldNotHighlight(_class) || getLanguage(_class));
+      }
+
+      /**
+       * Core highlighting function.
+       *
+       * OLD API
+       * highlight(lang, code, ignoreIllegals, continuation)
+       *
+       * NEW API
+       * highlight(code, {lang, ignoreIllegals})
+       *
+       * @param {string} codeOrLanguageName - the language to use for highlighting
+       * @param {string | HighlightOptions} optionsOrCode - the code to highlight
+       * @param {boolean} [ignoreIllegals] - whether to ignore illegal matches, default is to bail
+       *
+       * @returns {HighlightResult} Result - an object that represents the result
+       * @property {string} language - the language name
+       * @property {number} relevance - the relevance score
+       * @property {string} value - the highlighted HTML code
+       * @property {string} code - the original raw code
+       * @property {CompiledMode} top - top of the current mode stack
+       * @property {boolean} illegal - indicates whether any illegal matches were found
+      */
+      function highlight(codeOrLanguageName, optionsOrCode, ignoreIllegals) {
+        let code = "";
+        let languageName = "";
+        if (typeof optionsOrCode === "object") {
+          code = codeOrLanguageName;
+          ignoreIllegals = optionsOrCode.ignoreIllegals;
+          languageName = optionsOrCode.language;
+        } else {
+          // old API
+          deprecated("10.7.0", "highlight(lang, code, ...args) has been deprecated.");
+          deprecated("10.7.0", "Please use highlight(code, options) instead.\nhttps://github.com/highlightjs/highlight.js/issues/2277");
+          languageName = codeOrLanguageName;
+          code = optionsOrCode;
+        }
+
+        // https://github.com/highlightjs/highlight.js/issues/3149
+        // eslint-disable-next-line no-undefined
+        if (ignoreIllegals === undefined) { ignoreIllegals = true; }
+
+        /** @type {BeforeHighlightContext} */
+        const context = {
+          code,
+          language: languageName
+        };
+        // the plugin can change the desired language or the code to be highlighted
+        // just be changing the object it was passed
+        fire("before:highlight", context);
+
+        // a before plugin can usurp the result completely by providing it's own
+        // in which case we don't even need to call highlight
+        const result = context.result
+          ? context.result
+          : _highlight(context.language, context.code, ignoreIllegals);
+
+        result.code = context.code;
+        // the plugin can change anything in result to suite it
+        fire("after:highlight", result);
+
+        return result;
+      }
+
+      /**
+       * private highlight that's used internally and does not fire callbacks
+       *
+       * @param {string} languageName - the language to use for highlighting
+       * @param {string} codeToHighlight - the code to highlight
+       * @param {boolean?} [ignoreIllegals] - whether to ignore illegal matches, default is to bail
+       * @param {CompiledMode?} [continuation] - current continuation mode, if any
+       * @returns {HighlightResult} - result of the highlight operation
+      */
+      function _highlight(languageName, codeToHighlight, ignoreIllegals, continuation) {
+        const keywordHits = Object.create(null);
+
+        /**
+         * Return keyword data if a match is a keyword
+         * @param {CompiledMode} mode - current mode
+         * @param {string} matchText - the textual match
+         * @returns {KeywordData | false}
+         */
+        function keywordData(mode, matchText) {
+          return mode.keywords[matchText];
+        }
+
+        function processKeywords() {
+          if (!top.keywords) {
+            emitter.addText(modeBuffer);
+            return;
+          }
+
+          let lastIndex = 0;
+          top.keywordPatternRe.lastIndex = 0;
+          let match = top.keywordPatternRe.exec(modeBuffer);
+          let buf = "";
+
+          while (match) {
+            buf += modeBuffer.substring(lastIndex, match.index);
+            const word = language.case_insensitive ? match[0].toLowerCase() : match[0];
+            const data = keywordData(top, word);
+            if (data) {
+              const [kind, keywordRelevance] = data;
+              emitter.addText(buf);
+              buf = "";
+
+              keywordHits[word] = (keywordHits[word] || 0) + 1;
+              if (keywordHits[word] <= MAX_KEYWORD_HITS) relevance += keywordRelevance;
+              if (kind.startsWith("_")) {
+                // _ implied for relevance only, do not highlight
+                // by applying a class name
+                buf += match[0];
+              } else {
+                const cssClass = language.classNameAliases[kind] || kind;
+                emitter.addKeyword(match[0], cssClass);
+              }
+            } else {
+              buf += match[0];
+            }
+            lastIndex = top.keywordPatternRe.lastIndex;
+            match = top.keywordPatternRe.exec(modeBuffer);
+          }
+          buf += modeBuffer.substr(lastIndex);
+          emitter.addText(buf);
+        }
+
+        function processSubLanguage() {
+          if (modeBuffer === "") return;
+          /** @type HighlightResult */
+          let result = null;
+
+          if (typeof top.subLanguage === 'string') {
+            if (!languages[top.subLanguage]) {
+              emitter.addText(modeBuffer);
+              return;
+            }
+            result = _highlight(top.subLanguage, modeBuffer, true, continuations[top.subLanguage]);
+            continuations[top.subLanguage] = /** @type {CompiledMode} */ (result._top);
+          } else {
+            result = highlightAuto(modeBuffer, top.subLanguage.length ? top.subLanguage : null);
+          }
+
+          // Counting embedded language score towards the host language may be disabled
+          // with zeroing the containing mode relevance. Use case in point is Markdown that
+          // allows XML everywhere and makes every XML snippet to have a much larger Markdown
+          // score.
+          if (top.relevance > 0) {
+            relevance += result.relevance;
+          }
+          emitter.addSublanguage(result._emitter, result.language);
+        }
+
+        function processBuffer() {
+          if (top.subLanguage != null) {
+            processSubLanguage();
+          } else {
+            processKeywords();
+          }
+          modeBuffer = '';
+        }
+
+        /**
+         * @param {CompiledScope} scope
+         * @param {RegExpMatchArray} match
+         */
+        function emitMultiClass(scope, match) {
+          let i = 1;
+          // eslint-disable-next-line no-undefined
+          while (match[i] !== undefined) {
+            if (!scope._emit[i]) { i++; continue; }
+            const klass = language.classNameAliases[scope[i]] || scope[i];
+            const text = match[i];
+            if (klass) {
+              emitter.addKeyword(text, klass);
+            } else {
+              modeBuffer = text;
+              processKeywords();
+              modeBuffer = "";
+            }
+            i++;
+          }
+        }
+
+        /**
+         * @param {CompiledMode} mode - new mode to start
+         * @param {RegExpMatchArray} match
+         */
+        function startNewMode(mode, match) {
+          if (mode.scope && typeof mode.scope === "string") {
+            emitter.openNode(language.classNameAliases[mode.scope] || mode.scope);
+          }
+          if (mode.beginScope) {
+            // beginScope just wraps the begin match itself in a scope
+            if (mode.beginScope._wrap) {
+              emitter.addKeyword(modeBuffer, language.classNameAliases[mode.beginScope._wrap] || mode.beginScope._wrap);
+              modeBuffer = "";
+            } else if (mode.beginScope._multi) {
+              // at this point modeBuffer should just be the match
+              emitMultiClass(mode.beginScope, match);
+              modeBuffer = "";
+            }
+          }
+
+          top = Object.create(mode, { parent: { value: top } });
+          return top;
+        }
+
+        /**
+         * @param {CompiledMode } mode - the mode to potentially end
+         * @param {RegExpMatchArray} match - the latest match
+         * @param {string} matchPlusRemainder - match plus remainder of content
+         * @returns {CompiledMode | void} - the next mode, or if void continue on in current mode
+         */
+        function endOfMode(mode, match, matchPlusRemainder) {
+          let matched = startsWith(mode.endRe, matchPlusRemainder);
+
+          if (matched) {
+            if (mode["on:end"]) {
+              const resp = new Response(mode);
+              mode["on:end"](match, resp);
+              if (resp.isMatchIgnored) matched = false;
+            }
+
+            if (matched) {
+              while (mode.endsParent && mode.parent) {
+                mode = mode.parent;
+              }
+              return mode;
+            }
+          }
+          // even if on:end fires an `ignore` it's still possible
+          // that we might trigger the end node because of a parent mode
+          if (mode.endsWithParent) {
+            return endOfMode(mode.parent, match, matchPlusRemainder);
+          }
+        }
+
+        /**
+         * Handle matching but then ignoring a sequence of text
+         *
+         * @param {string} lexeme - string containing full match text
+         */
+        function doIgnore(lexeme) {
+          if (top.matcher.regexIndex === 0) {
+            // no more regexes to potentially match here, so we move the cursor forward one
+            // space
+            modeBuffer += lexeme[0];
+            return 1;
+          } else {
+            // no need to move the cursor, we still have additional regexes to try and
+            // match at this very spot
+            resumeScanAtSamePosition = true;
+            return 0;
+          }
+        }
+
+        /**
+         * Handle the start of a new potential mode match
+         *
+         * @param {EnhancedMatch} match - the current match
+         * @returns {number} how far to advance the parse cursor
+         */
+        function doBeginMatch(match) {
+          const lexeme = match[0];
+          const newMode = match.rule;
+
+          const resp = new Response(newMode);
+          // first internal before callbacks, then the public ones
+          const beforeCallbacks = [newMode.__beforeBegin, newMode["on:begin"]];
+          for (const cb of beforeCallbacks) {
+            if (!cb) continue;
+            cb(match, resp);
+            if (resp.isMatchIgnored) return doIgnore(lexeme);
+          }
+
+          if (newMode.skip) {
+            modeBuffer += lexeme;
+          } else {
+            if (newMode.excludeBegin) {
+              modeBuffer += lexeme;
+            }
+            processBuffer();
+            if (!newMode.returnBegin && !newMode.excludeBegin) {
+              modeBuffer = lexeme;
+            }
+          }
+          startNewMode(newMode, match);
+          return newMode.returnBegin ? 0 : lexeme.length;
+        }
+
+        /**
+         * Handle the potential end of mode
+         *
+         * @param {RegExpMatchArray} match - the current match
+         */
+        function doEndMatch(match) {
+          const lexeme = match[0];
+          const matchPlusRemainder = codeToHighlight.substr(match.index);
+
+          const endMode = endOfMode(top, match, matchPlusRemainder);
+          if (!endMode) { return NO_MATCH; }
+
+          const origin = top;
+          if (top.endScope && top.endScope._wrap) {
+            processBuffer();
+            emitter.addKeyword(lexeme, top.endScope._wrap);
+          } else if (top.endScope && top.endScope._multi) {
+            processBuffer();
+            emitMultiClass(top.endScope, match);
+          } else if (origin.skip) {
+            modeBuffer += lexeme;
+          } else {
+            if (!(origin.returnEnd || origin.excludeEnd)) {
+              modeBuffer += lexeme;
+            }
+            processBuffer();
+            if (origin.excludeEnd) {
+              modeBuffer = lexeme;
+            }
+          }
+          do {
+            if (top.scope) {
+              emitter.closeNode();
+            }
+            if (!top.skip && !top.subLanguage) {
+              relevance += top.relevance;
+            }
+            top = top.parent;
+          } while (top !== endMode.parent);
+          if (endMode.starts) {
+            startNewMode(endMode.starts, match);
+          }
+          return origin.returnEnd ? 0 : lexeme.length;
+        }
+
+        function processContinuations() {
+          const list = [];
+          for (let current = top; current !== language; current = current.parent) {
+            if (current.scope) {
+              list.unshift(current.scope);
+            }
+          }
+          list.forEach(item => emitter.openNode(item));
+        }
+
+        /** @type {{type?: MatchType, index?: number, rule?: Mode}}} */
+        let lastMatch = {};
+
+        /**
+         *  Process an individual match
+         *
+         * @param {string} textBeforeMatch - text preceding the match (since the last match)
+         * @param {EnhancedMatch} [match] - the match itself
+         */
+        function processLexeme(textBeforeMatch, match) {
+          const lexeme = match && match[0];
+
+          // add non-matched text to the current mode buffer
+          modeBuffer += textBeforeMatch;
+
+          if (lexeme == null) {
+            processBuffer();
+            return 0;
+          }
+
+          // we've found a 0 width match and we're stuck, so we need to advance
+          // this happens when we have badly behaved rules that have optional matchers to the degree that
+          // sometimes they can end up matching nothing at all
+          // Ref: https://github.com/highlightjs/highlight.js/issues/2140
+          if (lastMatch.type === "begin" && match.type === "end" && lastMatch.index === match.index && lexeme === "") {
+            // spit the "skipped" character that our regex choked on back into the output sequence
+            modeBuffer += codeToHighlight.slice(match.index, match.index + 1);
+            if (!SAFE_MODE) {
+              /** @type {AnnotatedError} */
+              const err = new Error(`0 width match regex (${languageName})`);
+              err.languageName = languageName;
+              err.badRule = lastMatch.rule;
+              throw err;
+            }
+            return 1;
+          }
+          lastMatch = match;
+
+          if (match.type === "begin") {
+            return doBeginMatch(match);
+          } else if (match.type === "illegal" && !ignoreIllegals) {
+            // illegal match, we do not continue processing
+            /** @type {AnnotatedError} */
+            const err = new Error('Illegal lexeme "' + lexeme + '" for mode "' + (top.scope || '<unnamed>') + '"');
+            err.mode = top;
+            throw err;
+          } else if (match.type === "end") {
+            const processed = doEndMatch(match);
+            if (processed !== NO_MATCH) {
+              return processed;
+            }
+          }
+
+          // edge case for when illegal matches $ (end of line) which is technically
+          // a 0 width match but not a begin/end match so it's not caught by the
+          // first handler (when ignoreIllegals is true)
+          if (match.type === "illegal" && lexeme === "") {
+            // advance so we aren't stuck in an infinite loop
+            return 1;
+          }
+
+          // infinite loops are BAD, this is a last ditch catch all. if we have a
+          // decent number of iterations yet our index (cursor position in our
+          // parsing) still 3x behind our index then something is very wrong
+          // so we bail
+          if (iterations > 100000 && iterations > match.index * 3) {
+            const err = new Error('potential infinite loop, way more iterations than matches');
+            throw err;
+          }
+
+          /*
+          Why might be find ourselves here?  An potential end match that was
+          triggered but could not be completed.  IE, `doEndMatch` returned NO_MATCH.
+          (this could be because a callback requests the match be ignored, etc)
+
+          This causes no real harm other than stopping a few times too many.
+          */
+
+          modeBuffer += lexeme;
+          return lexeme.length;
+        }
+
+        const language = getLanguage(languageName);
+        if (!language) {
+          error(LANGUAGE_NOT_FOUND.replace("{}", languageName));
+          throw new Error('Unknown language: "' + languageName + '"');
+        }
+
+        const md = compileLanguage(language);
+        let result = '';
+        /** @type {CompiledMode} */
+        let top = continuation || md;
+        /** @type Record<string,CompiledMode> */
+        const continuations = {}; // keep continuations for sub-languages
+        const emitter = new options.__emitter(options);
+        processContinuations();
+        let modeBuffer = '';
+        let relevance = 0;
+        let index = 0;
+        let iterations = 0;
+        let resumeScanAtSamePosition = false;
+
+        try {
+          top.matcher.considerAll();
+
+          for (;;) {
+            iterations++;
+            if (resumeScanAtSamePosition) {
+              // only regexes not matched previously will now be
+              // considered for a potential match
+              resumeScanAtSamePosition = false;
+            } else {
+              top.matcher.considerAll();
+            }
+            top.matcher.lastIndex = index;
+
+            const match = top.matcher.exec(codeToHighlight);
+            // console.log("match", match[0], match.rule && match.rule.begin)
+
+            if (!match) break;
+
+            const beforeMatch = codeToHighlight.substring(index, match.index);
+            const processedCount = processLexeme(beforeMatch, match);
+            index = match.index + processedCount;
+          }
+          processLexeme(codeToHighlight.substr(index));
+          emitter.closeAllNodes();
+          emitter.finalize();
+          result = emitter.toHTML();
+
+          return {
+            language: languageName,
+            value: result,
+            relevance: relevance,
+            illegal: false,
+            _emitter: emitter,
+            _top: top
+          };
+        } catch (err) {
+          if (err.message && err.message.includes('Illegal')) {
+            return {
+              language: languageName,
+              value: escape(codeToHighlight),
+              illegal: true,
+              relevance: 0,
+              _illegalBy: {
+                message: err.message,
+                index: index,
+                context: codeToHighlight.slice(index - 100, index + 100),
+                mode: err.mode,
+                resultSoFar: result
+              },
+              _emitter: emitter
+            };
+          } else if (SAFE_MODE) {
+            return {
+              language: languageName,
+              value: escape(codeToHighlight),
+              illegal: false,
+              relevance: 0,
+              errorRaised: err,
+              _emitter: emitter,
+              _top: top
+            };
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      /**
+       * returns a valid highlight result, without actually doing any actual work,
+       * auto highlight starts with this and it's possible for small snippets that
+       * auto-detection may not find a better match
+       * @param {string} code
+       * @returns {HighlightResult}
+       */
+      function justTextHighlightResult(code) {
+        const result = {
+          value: escape(code),
+          illegal: false,
+          relevance: 0,
+          _top: PLAINTEXT_LANGUAGE,
+          _emitter: new options.__emitter(options)
+        };
+        result._emitter.addText(code);
+        return result;
+      }
+
+      /**
+      Highlighting with language detection. Accepts a string with the code to
+      highlight. Returns an object with the following properties:
+
+      - language (detected language)
+      - relevance (int)
+      - value (an HTML string with highlighting markup)
+      - secondBest (object with the same structure for second-best heuristically
+        detected language, may be absent)
+
+        @param {string} code
+        @param {Array<string>} [languageSubset]
+        @returns {AutoHighlightResult}
+      */
+      function highlightAuto(code, languageSubset) {
+        languageSubset = languageSubset || options.languages || Object.keys(languages);
+        const plaintext = justTextHighlightResult(code);
+
+        const results = languageSubset.filter(getLanguage).filter(autoDetection).map(name =>
+          _highlight(name, code, false)
+        );
+        results.unshift(plaintext); // plaintext is always an option
+
+        const sorted = results.sort((a, b) => {
+          // sort base on relevance
+          if (a.relevance !== b.relevance) return b.relevance - a.relevance;
+
+          // always award the tie to the base language
+          // ie if C++ and Arduino are tied, it's more likely to be C++
+          if (a.language && b.language) {
+            if (getLanguage(a.language).supersetOf === b.language) {
+              return 1;
+            } else if (getLanguage(b.language).supersetOf === a.language) {
+              return -1;
+            }
+          }
+
+          // otherwise say they are equal, which has the effect of sorting on
+          // relevance while preserving the original ordering - which is how ties
+          // have historically been settled, ie the language that comes first always
+          // wins in the case of a tie
+          return 0;
+        });
+
+        const [best, secondBest] = sorted;
+
+        /** @type {AutoHighlightResult} */
+        const result = best;
+        result.secondBest = secondBest;
+
+        return result;
+      }
+
+      /**
+       * Builds new class name for block given the language name
+       *
+       * @param {HTMLElement} element
+       * @param {string} [currentLang]
+       * @param {string} [resultLang]
+       */
+      function updateClassName(element, currentLang, resultLang) {
+        const language = (currentLang && aliases[currentLang]) || resultLang;
+
+        element.classList.add("hljs");
+        element.classList.add(`language-${language}`);
+      }
+
+      /**
+       * Applies highlighting to a DOM node containing code.
+       *
+       * @param {HighlightedHTMLElement} element - the HTML element to highlight
+      */
+      function highlightElement(element) {
+        /** @type HTMLElement */
+        let node = null;
+        const language = blockLanguage(element);
+
+        if (shouldNotHighlight(language)) return;
+
+        fire("before:highlightElement",
+          { el: element, language: language });
+
+        // we should be all text, no child nodes (unescaped HTML) - this is possibly
+        // an HTML injection attack - it's likely too late if this is already in
+        // production (the code has likely already done its damage by the time
+        // we're seeing it)... but we yell loudly about this so that hopefully it's
+        // more likely to be caught in development before making it to production
+        if (element.children.length > 0) {
+          if (!options.ignoreUnescapedHTML) {
+            console.warn("One of your code blocks includes unescaped HTML. This is a potentially serious security risk.");
+            console.warn("https://github.com/highlightjs/highlight.js/issues/2886");
+            console.warn(element);
+          }
+          if (options.throwUnescapedHTML) {
+            const err = new HTMLInjectionError(
+              "One of your code blocks includes unescaped HTML.",
+              element.innerHTML
+            );
+            throw err;
+          }
+        }
+
+        node = element;
+        const text = node.textContent;
+        const result = language ? highlight(text, { language, ignoreIllegals: true }) : highlightAuto(text);
+
+        element.innerHTML = result.value;
+        updateClassName(element, language, result.language);
+        element.result = {
+          language: result.language,
+          // TODO: remove with version 11.0
+          re: result.relevance,
+          relevance: result.relevance
+        };
+        if (result.secondBest) {
+          element.secondBest = {
+            language: result.secondBest.language,
+            relevance: result.secondBest.relevance
+          };
+        }
+
+        fire("after:highlightElement", { el: element, result, text });
+      }
+
+      /**
+       * Updates highlight.js global options with the passed options
+       *
+       * @param {Partial<HLJSOptions>} userOptions
+       */
+      function configure(userOptions) {
+        options = inherit(options, userOptions);
+      }
+
+      // TODO: remove v12, deprecated
+      const initHighlighting = () => {
+        highlightAll();
+        deprecated("10.6.0", "initHighlighting() deprecated.  Use highlightAll() now.");
+      };
+
+      // TODO: remove v12, deprecated
+      function initHighlightingOnLoad() {
+        highlightAll();
+        deprecated("10.6.0", "initHighlightingOnLoad() deprecated.  Use highlightAll() now.");
+      }
+
+      let wantsHighlight = false;
+
+      /**
+       * auto-highlights all pre>code elements on the page
+       */
+      function highlightAll() {
+        // if we are called too early in the loading process
+        if (document.readyState === "loading") {
+          wantsHighlight = true;
+          return;
+        }
+
+        const blocks = document.querySelectorAll(options.cssSelector);
+        blocks.forEach(highlightElement);
+      }
+
+      function boot() {
+        // if a highlight was requested before DOM was loaded, do now
+        if (wantsHighlight) highlightAll();
+      }
+
+      // make sure we are in the browser environment
+      if (typeof window !== 'undefined' && window.addEventListener) {
+        window.addEventListener('DOMContentLoaded', boot, false);
+      }
+
+      /**
+       * Register a language grammar module
+       *
+       * @param {string} languageName
+       * @param {LanguageFn} languageDefinition
+       */
+      function registerLanguage(languageName, languageDefinition) {
+        let lang = null;
+        try {
+          lang = languageDefinition(hljs);
+        } catch (error$1) {
+          error("Language definition for '{}' could not be registered.".replace("{}", languageName));
+          // hard or soft error
+          if (!SAFE_MODE) { throw error$1; } else { error(error$1); }
+          // languages that have serious errors are replaced with essentially a
+          // "plaintext" stand-in so that the code blocks will still get normal
+          // css classes applied to them - and one bad language won't break the
+          // entire highlighter
+          lang = PLAINTEXT_LANGUAGE;
+        }
+        // give it a temporary name if it doesn't have one in the meta-data
+        if (!lang.name) lang.name = languageName;
+        languages[languageName] = lang;
+        lang.rawDefinition = languageDefinition.bind(null, hljs);
+
+        if (lang.aliases) {
+          registerAliases(lang.aliases, { languageName });
+        }
+      }
+
+      /**
+       * Remove a language grammar module
+       *
+       * @param {string} languageName
+       */
+      function unregisterLanguage(languageName) {
+        delete languages[languageName];
+        for (const alias of Object.keys(aliases)) {
+          if (aliases[alias] === languageName) {
+            delete aliases[alias];
+          }
+        }
+      }
+
+      /**
+       * @returns {string[]} List of language internal names
+       */
+      function listLanguages() {
+        return Object.keys(languages);
+      }
+
+      /**
+       * @param {string} name - name of the language to retrieve
+       * @returns {Language | undefined}
+       */
+      function getLanguage(name) {
+        name = (name || '').toLowerCase();
+        return languages[name] || languages[aliases[name]];
+      }
+
+      /**
+       *
+       * @param {string|string[]} aliasList - single alias or list of aliases
+       * @param {{languageName: string}} opts
+       */
+      function registerAliases(aliasList, { languageName }) {
+        if (typeof aliasList === 'string') {
+          aliasList = [aliasList];
+        }
+        aliasList.forEach(alias => { aliases[alias.toLowerCase()] = languageName; });
+      }
+
+      /**
+       * Determines if a given language has auto-detection enabled
+       * @param {string} name - name of the language
+       */
+      function autoDetection(name) {
+        const lang = getLanguage(name);
+        return lang && !lang.disableAutodetect;
+      }
+
+      /**
+       * Upgrades the old highlightBlock plugins to the new
+       * highlightElement API
+       * @param {HLJSPlugin} plugin
+       */
+      function upgradePluginAPI(plugin) {
+        // TODO: remove with v12
+        if (plugin["before:highlightBlock"] && !plugin["before:highlightElement"]) {
+          plugin["before:highlightElement"] = (data) => {
+            plugin["before:highlightBlock"](
+              Object.assign({ block: data.el }, data)
+            );
+          };
+        }
+        if (plugin["after:highlightBlock"] && !plugin["after:highlightElement"]) {
+          plugin["after:highlightElement"] = (data) => {
+            plugin["after:highlightBlock"](
+              Object.assign({ block: data.el }, data)
+            );
+          };
+        }
+      }
+
+      /**
+       * @param {HLJSPlugin} plugin
+       */
+      function addPlugin(plugin) {
+        upgradePluginAPI(plugin);
+        plugins.push(plugin);
+      }
+
+      /**
+       *
+       * @param {PluginEvent} event
+       * @param {any} args
+       */
+      function fire(event, args) {
+        const cb = event;
+        plugins.forEach(function(plugin) {
+          if (plugin[cb]) {
+            plugin[cb](args);
+          }
+        });
+      }
+
+      /**
+       * DEPRECATED
+       * @param {HighlightedHTMLElement} el
+       */
+      function deprecateHighlightBlock(el) {
+        deprecated("10.7.0", "highlightBlock will be removed entirely in v12.0");
+        deprecated("10.7.0", "Please use highlightElement now.");
+
+        return highlightElement(el);
+      }
+
+      /* Interface definition */
+      Object.assign(hljs, {
+        highlight,
+        highlightAuto,
+        highlightAll,
+        highlightElement,
+        // TODO: Remove with v12 API
+        highlightBlock: deprecateHighlightBlock,
+        configure,
+        initHighlighting,
+        initHighlightingOnLoad,
+        registerLanguage,
+        unregisterLanguage,
+        listLanguages,
+        getLanguage,
+        registerAliases,
+        autoDetection,
+        inherit,
+        addPlugin
+      });
+
+      hljs.debugMode = function() { SAFE_MODE = false; };
+      hljs.safeMode = function() { SAFE_MODE = true; };
+      hljs.versionString = version$1;
+
+      hljs.regex = {
+        concat: concat,
+        lookahead: lookahead,
+        either: either,
+        optional: optional,
+        anyNumberOfTimes: anyNumberOfTimes
+      };
+
+      for (const key in MODES) {
+        // @ts-ignore
+        if (typeof MODES[key] === "object") {
+          // @ts-ignore
+          deepFreeze$1(MODES[key]);
+        }
+      }
+
+      // merge all the modes/regexes into our main object
+      Object.assign(hljs, MODES);
+
+      return hljs;
+    };
+
+    // export an "instance" of the highlighter
+    var highlight = HLJS({});
+    highlight.HighlightJS = highlight;
+    highlight.default = highlight;
+
     /* home/Intro.svelte generated by Svelte v3.43.0 */
     const file$9 = "home/Intro.svelte";
 
@@ -12620,15 +15207,17 @@ var app = (function () {
     }
 
     // (20:2) <Two>
-    function create_default_slot_7$2(ctx) {
-    	let div1;
+    function create_default_slot_7$1(ctx) {
+    	let div2;
     	let div0;
     	let grid;
     	let t0;
+    	let div1;
+    	let t1;
     	let span0;
-    	let t2;
+    	let t3;
     	let span1;
-    	let t4;
+    	let t5;
     	let current;
 
     	grid = new Grid({
@@ -12638,35 +15227,40 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			div1 = element("div");
+    			div2 = element("div");
     			div0 = element("div");
     			create_component(grid.$$.fragment);
-    			t0 = text$1("\n      and we can\n      ");
+    			t0 = space();
+    			div1 = element("div");
+    			t1 = text$1("and we can\n        ");
     			span0 = element("span");
     			span0.textContent = "search";
-    			t2 = text$1("\n      it, or ");
+    			t3 = text$1("\n        it, or ");
     			span1 = element("span");
     			span1.textContent = "read";
-    			t4 = text$1(" it-");
+    			t5 = text$1(" it-");
     			set_style(div0, "max-width", "180px");
     			set_style(div0, "margin-bottom", "1rem");
-    			add_location(div0, file$9, 21, 6, 555);
+    			add_location(div0, file$9, 21, 6, 559);
     			attr_dev(span0, "class", "sky");
-    			add_location(span0, file$9, 25, 6, 686);
+    			add_location(span0, file$9, 26, 8, 706);
     			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$9, 26, 13, 732);
-    			attr_dev(div1, "class", "tab down f09");
-    			add_location(div1, file$9, 20, 4, 522);
+    			add_location(span1, file$9, 27, 15, 754);
+    			add_location(div1, file$9, 24, 6, 673);
+    			attr_dev(div2, "class", "tab down f09 col");
+    			add_location(div2, file$9, 20, 4, 522);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, div0);
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, div0);
     			mount_component(grid, div0, null);
-    			append_dev(div1, t0);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, t1);
     			append_dev(div1, span0);
-    			append_dev(div1, t2);
+    			append_dev(div1, t3);
     			append_dev(div1, span1);
-    			append_dev(div1, t4);
+    			append_dev(div1, t5);
     			current = true;
     		},
     		p: noop,
@@ -12680,14 +15274,14 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(div2);
     			destroy_component(grid);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_7$2.name,
+    		id: create_default_slot_7$1.name,
     		type: "slot",
     		source: "(20:2) <Two>",
     		ctx
@@ -12696,8 +15290,8 @@ var app = (function () {
     	return block;
     }
 
-    // (30:2) <One>
-    function create_default_slot_6$3(ctx) {
+    // (32:2) <One>
+    function create_default_slot_6$2(ctx) {
     	let div5;
     	let span0;
     	let t1;
@@ -12799,50 +15393,50 @@ var app = (function () {
     			t27 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(span0, "class", "down i");
-    			add_location(span0, file$9, 31, 6, 837);
+    			add_location(span0, file$9, 33, 6, 854);
     			attr_dev(div0, "class", "sea i f2 sky");
-    			add_location(div0, file$9, 33, 8, 912);
+    			add_location(div0, file$9, 35, 8, 929);
     			attr_dev(span1, "class", "red ");
-    			add_location(span1, file$9, 35, 10, 1018);
+    			add_location(span1, file$9, 37, 10, 1035);
     			attr_dev(span2, "class", "red f09 i");
-    			add_location(span2, file$9, 36, 10, 1060);
+    			add_location(span2, file$9, 38, 10, 1077);
     			attr_dev(span3, "class", "sea b i f2");
     			set_style(span3, "top", "22px");
     			set_style(span3, "left", "32px");
     			set_style(span3, "position", "absolute");
-    			add_location(span3, file$9, 37, 10, 1110);
+    			add_location(span3, file$9, 39, 10, 1127);
     			set_style(div1, "position", "relative");
     			set_style(div1, "margin-top", "1.2rem");
-    			add_location(div1, file$9, 34, 8, 956);
+    			add_location(div1, file$9, 36, 8, 973);
     			attr_dev(div2, "class", "tab ");
-    			add_location(div2, file$9, 32, 6, 885);
+    			add_location(div2, file$9, 34, 6, 902);
     			set_style(sup, "font-size", "12px");
-    			add_location(sup, file$9, 41, 8, 1329);
+    			add_location(sup, file$9, 43, 8, 1346);
     			set_style(sub, "font-size", "1.1rem");
-    			add_location(sub, file$9, 43, 8, 1390);
+    			add_location(sub, file$9, 45, 8, 1407);
     			set_style(span4, "margin-left", "0.4rem");
     			set_style(span4, "font-size", "12px");
-    			add_location(span4, file$9, 44, 8, 1443);
+    			add_location(span4, file$9, 46, 8, 1460);
     			set_style(span5, "font-size", "12px");
-    			add_location(span5, file$9, 46, 8, 1585);
+    			add_location(span5, file$9, 48, 8, 1602);
     			attr_dev(div3, "class", "sky i ");
     			set_style(div3, "font-size", "2.0rem");
     			set_style(div3, "margin-left", "20px");
     			set_style(div3, "margin-top", "2.3rem");
-    			add_location(div3, file$9, 40, 6, 1236);
+    			add_location(div3, file$9, 42, 6, 1253);
     			set_style(span6, "font-size", "12px");
-    			add_location(span6, file$9, 48, 32, 1670);
-    			add_location(i, file$9, 48, 78, 1716);
+    			add_location(span6, file$9, 50, 32, 1687);
+    			add_location(i, file$9, 50, 78, 1733);
     			attr_dev(div4, "class", "tab down f09");
-    			add_location(div4, file$9, 48, 6, 1644);
-    			set_style(div5, "margin-left", "10rem");
-    			add_location(div5, file$9, 30, 4, 798);
+    			add_location(div4, file$9, 50, 6, 1661);
+    			attr_dev(div5, "style", "");
+    			add_location(div5, file$9, 32, 4, 833);
     			set_style(div6, "margin-top", "3rem");
-    			add_location(div6, file$9, 51, 4, 1806);
+    			add_location(div6, file$9, 53, 4, 1823);
     			attr_dev(div7, "class", "tab down f09");
-    			add_location(div7, file$9, 53, 4, 1954);
+    			add_location(div7, file$9, 55, 4, 1971);
     			attr_dev(div8, "class", "tab down f09");
-    			add_location(div8, file$9, 54, 4, 2015);
+    			add_location(div8, file$9, 56, 4, 2032);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
@@ -12912,16 +15506,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_6$3.name,
+    		id: create_default_slot_6$2.name,
     		type: "slot",
-    		source: "(30:2) <One>",
+    		source: "(32:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (68:2) <Two>
+    // (70:2) <Two>
     function create_default_slot_5$4(ctx) {
     	let div0;
     	let t1;
@@ -12938,13 +15532,13 @@ var app = (function () {
     			div1.textContent = "keep typing";
     			t3 = space();
     			div2 = element("div");
-    			div2.textContent = "even more of it";
+    			div2.textContent = "more of it.";
     			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$9, 68, 4, 2528);
+    			add_location(div0, file$9, 70, 4, 2545);
     			attr_dev(div1, "class", "i sea tab");
-    			add_location(div1, file$9, 69, 4, 2566);
+    			add_location(div1, file$9, 71, 4, 2583);
     			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$9, 70, 4, 2611);
+    			add_location(div2, file$9, 72, 4, 2628);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -12966,15 +15560,15 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$4.name,
     		type: "slot",
-    		source: "(68:2) <Two>",
+    		source: "(70:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (74:2) <Two>
-    function create_default_slot_4$5(ctx) {
+    // (76:2) <Two>
+    function create_default_slot_4$4(ctx) {
     	let div;
     	let t;
     	let grid;
@@ -12991,7 +15585,7 @@ var app = (function () {
     			t = space();
     			create_component(grid.$$.fragment);
     			set_style(div, "width", "250px");
-    			add_location(div, file$9, 74, 4, 2676);
+    			add_location(div, file$9, 76, 4, 2689);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -13018,16 +15612,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$5.name,
+    		id: create_default_slot_4$4.name,
     		type: "slot",
-    		source: "(74:2) <Two>",
+    		source: "(76:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (80:2) <One>
+    // (82:2) <One>
     function create_default_slot_3$5(ctx) {
     	let div0;
     	let t0;
@@ -13088,31 +15682,30 @@ var app = (function () {
     			t17 = space();
     			div9 = element("div");
     			attr_dev(div0, "class", "space");
-    			add_location(div0, file$9, 80, 4, 2830);
+    			add_location(div0, file$9, 82, 4, 2843);
     			attr_dev(b, "class", "sky f2");
-    			add_location(b, file$9, 82, 6, 2868);
+    			add_location(b, file$9, 84, 6, 2881);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "margin-top", "1.4rem");
-    			add_location(div1, file$9, 83, 6, 2922);
-    			add_location(div2, file$9, 81, 4, 2856);
-    			add_location(div3, file$9, 87, 6, 3088);
-    			set_style(div4, "position", "absolute");
-    			set_style(div4, "top", "50px");
-    			add_location(div4, file$9, 93, 24, 3367);
+    			add_location(div1, file$9, 85, 6, 2935);
+    			add_location(div2, file$9, 83, 4, 2869);
+    			add_location(div3, file$9, 89, 6, 3101);
+    			attr_dev(div4, "style", "");
+    			add_location(div4, file$9, 95, 24, 3380);
     			attr_dev(div5, "class", "sea down tab f2 ");
     			set_style(div5, "position", "relative");
     			set_style(div5, "margin", "4rem");
-    			add_location(div5, file$9, 92, 6, 3272);
+    			add_location(div5, file$9, 94, 6, 3285);
     			attr_dev(div6, "class", "f09 i down");
-    			add_location(div6, file$9, 95, 6, 3444);
+    			add_location(div6, file$9, 97, 6, 3429);
     			attr_dev(div7, "class", "down");
-    			add_location(div7, file$9, 99, 6, 3603);
-    			add_location(i, file$9, 100, 32, 3683);
+    			add_location(div7, file$9, 101, 6, 3588);
+    			add_location(i, file$9, 102, 32, 3668);
     			attr_dev(div8, "class", "down f09");
-    			add_location(div8, file$9, 100, 6, 3657);
-    			add_location(ul, file$9, 86, 4, 3077);
+    			add_location(div8, file$9, 102, 6, 3642);
+    			add_location(ul, file$9, 88, 4, 3090);
     			attr_dev(div9, "class", "down");
-    			add_location(div9, file$9, 106, 4, 3880);
+    			add_location(div9, file$9, 108, 4, 3865);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -13155,14 +15748,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$5.name,
     		type: "slot",
-    		source: "(80:2) <One>",
+    		source: "(82:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (110:2) <Left accent="steelblue">
+    // (112:2) <Left accent="steelblue">
     function create_default_slot_2$5(ctx) {
     	let div0;
     	let t0;
@@ -13220,37 +15813,37 @@ var app = (function () {
     			div8 = element("div");
     			div8.textContent = "that's the best way to build this.";
     			attr_dev(div0, "class", "down");
-    			add_location(div0, file$9, 110, 4, 3943);
+    			add_location(div0, file$9, 112, 4, 3928);
     			set_style(hr, "height", "3px");
     			set_style(hr, "background-color", "#50617A");
     			set_style(hr, "width", "250px");
     			set_style(hr, "margin-bottom", "3rem");
     			set_style(hr, "margin-top", "4rem");
-    			add_location(hr, file$9, 111, 4, 3968);
-    			add_location(i, file$9, 112, 24, 4095);
+    			add_location(hr, file$9, 113, 4, 3953);
+    			add_location(i, file$9, 114, 24, 4080);
     			attr_dev(a, "class", "sea b i");
     			attr_dev(a, "href", "https://github.com/spencermountain/compromise/graphs/contributors");
-    			add_location(a, file$9, 114, 12, 4182);
+    			add_location(a, file$9, 116, 12, 4167);
     			attr_dev(div1, "class", "tab f09 down");
-    			add_location(div1, file$9, 113, 4, 4143);
+    			add_location(div1, file$9, 115, 4, 4128);
     			attr_dev(div2, "class", "down f2 fuscia tab");
-    			add_location(div2, file$9, 117, 4, 4344);
+    			add_location(div2, file$9, 119, 4, 4329);
     			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$9, 119, 6, 4491);
+    			add_location(div3, file$9, 121, 6, 4476);
     			attr_dev(div4, "class", "down f2 tulip");
     			set_style(div4, "margin-top", "100px");
     			set_style(div4, "margin-left", "25%");
-    			add_location(div4, file$9, 118, 4, 4414);
+    			add_location(div4, file$9, 120, 4, 4399);
     			attr_dev(div5, "class", "tab f2 blue");
-    			add_location(div5, file$9, 123, 6, 4638);
+    			add_location(div5, file$9, 125, 6, 4623);
     			attr_dev(div6, "class", "down ");
     			set_style(div6, "margin-top", "100px");
     			set_style(div6, "margin-left", "100px");
-    			add_location(div6, file$9, 121, 4, 4556);
+    			add_location(div6, file$9, 123, 4, 4541);
     			set_style(div7, "margin-top", "100px");
-    			add_location(div7, file$9, 128, 4, 4849);
+    			add_location(div7, file$9, 130, 4, 4834);
     			attr_dev(div8, "class", "down tab");
-    			add_location(div8, file$9, 129, 4, 4887);
+    			add_location(div8, file$9, 131, 4, 4872);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -13302,14 +15895,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$5.name,
     		type: "slot",
-    		source: "(110:2) <Left accent=\\\"steelblue\\\">",
+    		source: "(112:2) <Left accent=\\\"steelblue\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:2) <One>
+    // (137:2) <One>
     function create_default_slot_1$5(ctx) {
     	let grid0;
     	let t0;
@@ -13349,11 +15942,11 @@ var app = (function () {
     			t6 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(div0, "class", "sea f09");
-    			add_location(div0, file$9, 137, 6, 5109);
-    			add_location(kbd0, file$9, 138, 6, 5154);
-    			add_location(kbd1, file$9, 139, 6, 5236);
+    			add_location(div0, file$9, 139, 6, 5094);
+    			add_location(kbd0, file$9, 140, 6, 5139);
+    			add_location(kbd1, file$9, 141, 6, 5221);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$9, 136, 4, 5085);
+    			add_location(div1, file$9, 138, 4, 5070);
     		},
     		m: function mount(target, anchor) {
     			mount_component(grid0, target, anchor);
@@ -13393,7 +15986,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$5.name,
     		type: "slot",
-    		source: "(135:2) <One>",
+    		source: "(137:2) <One>",
     		ctx
     	});
 
@@ -13436,7 +16029,7 @@ var app = (function () {
 
     	two1 = new Two({
     			props: {
-    				$$slots: { default: [create_default_slot_7$2] },
+    				$$slots: { default: [create_default_slot_7$1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -13444,7 +16037,7 @@ var app = (function () {
 
     	one1 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_6$3] },
+    				$$slots: { default: [create_default_slot_6$2] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -13462,7 +16055,7 @@ var app = (function () {
 
     	two4 = new Two({
     			props: {
-    				$$slots: { default: [create_default_slot_4$5] },
+    				$$slots: { default: [create_default_slot_4$4] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -13517,7 +16110,7 @@ var app = (function () {
     			create_component(left.$$.fragment);
     			t10 = space();
     			create_component(one3.$$.fragment);
-    			add_location(div, file$9, 77, 2, 2756);
+    			add_location(div, file$9, 79, 2, 2769);
     		},
     		m: function mount(target, anchor) {
     			mount_component(two0, target, anchor);
@@ -16725,6 +19318,9 @@ var app = (function () {
         if (opts.confidence && view.confidence) {
           res.confidence = view.eq(i).confidence();
         }
+        if (opts.syllables && view.syllables) {
+          res.syllables = view.syllables();
+        }
         return res
       })
     };
@@ -19316,123 +21912,81 @@ var app = (function () {
     /* home/One.svelte generated by Svelte v3.43.0 */
     const file$7 = "home/One.svelte";
 
-    // (12:0) <Page>
-    function create_default_slot_6$2(ctx) {
-    	let block;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#D68881" },
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_default_slot_6$2.name,
-    		type: "slot",
-    		source: "(12:0) <Page>",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    // (16:2) <Left>
+    // (14:2) <Left>
     function create_default_slot_5$3(ctx) {
-    	let kbd;
-    	let span0;
-    	let t2;
     	let div0;
-    	let t3;
+    	let t1;
     	let div1;
-    	let t4;
-    	let span1;
-    	let t6;
-    	let t7;
+    	let t3;
     	let div2;
-    	let t9;
+    	let t4;
     	let div3;
+    	let t5;
+    	let span;
+    	let t7;
+    	let t8;
+    	let div4;
+    	let t10;
+    	let div5;
     	let tokenize;
     	let current;
     	tokenize = new Tokenize({ $$inline: true });
 
     	const block = {
     		c: function create() {
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/one";
-    			span0 = element("span");
-    			span0.textContent = ":";
-    			t2 = space();
     			div0 = element("div");
-    			t3 = space();
+    			div0.textContent = "compromise/one";
+    			t1 = space();
     			div1 = element("div");
-    			t4 = text$1("- ");
-    			span1 = element("span");
-    			span1.textContent = "  splitting - it - up  ";
-    			t6 = text$1(" -");
-    			t7 = space();
+    			div1.textContent = "tokenization";
+    			t3 = space();
     			div2 = element("div");
-    			div2.textContent = "turn your novel into JSON -";
-    			t9 = space();
+    			t4 = space();
     			div3 = element("div");
+    			t5 = text$1("- ");
+    			span = element("span");
+    			span.textContent = "  splitting - it - up  ";
+    			t7 = text$1(" -");
+    			t8 = space();
+    			div4 = element("div");
+    			div4.textContent = "turn your novel into JSON -";
+    			t10 = space();
+    			div5 = element("div");
     			create_component(tokenize.$$.fragment);
-    			set_style(kbd, "font-size", "2rem");
-    			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$7, 16, 4, 417);
-    			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$7, 16, 70, 483);
-    			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$7, 17, 4, 513);
-    			set_style(span1, "border-bottom", "4px solid #D68881");
-    			set_style(span1, "padding-bottom", "5px");
-    			add_location(span1, file$7, 19, 8, 601);
-    			attr_dev(div1, "class", "tab");
-    			set_style(div1, "font-size", "1rem");
-    			add_location(div1, file$7, 18, 4, 550);
-    			attr_dev(div2, "class", "down tab");
-    			add_location(div2, file$7, 21, 4, 725);
-    			attr_dev(div3, "class", "");
-    			set_style(div3, "margin-top", "4.5rem");
-    			add_location(div3, file$7, 22, 4, 785);
+    			attr_dev(div0, "class", "lib");
+    			add_location(div0, file$7, 14, 4, 400);
+    			attr_dev(div1, "class", "plugin");
+    			add_location(div1, file$7, 15, 4, 442);
+    			set_style(div2, "margin-top", "2rem");
+    			add_location(div2, file$7, 16, 4, 485);
+    			set_style(span, "border-bottom", "4px solid #D68881");
+    			set_style(span, "padding-bottom", "5px");
+    			add_location(span, file$7, 18, 8, 573);
+    			attr_dev(div3, "class", "tab");
+    			set_style(div3, "font-size", "1rem");
+    			add_location(div3, file$7, 17, 4, 522);
+    			attr_dev(div4, "class", "down tab");
+    			add_location(div4, file$7, 20, 4, 697);
+    			attr_dev(div5, "class", "");
+    			set_style(div5, "margin-top", "4.5rem");
+    			add_location(div5, file$7, 21, 4, 757);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, kbd, anchor);
-    			insert_dev(target, span0, anchor);
-    			insert_dev(target, t2, anchor);
     			insert_dev(target, div0, anchor);
-    			insert_dev(target, t3, anchor);
+    			insert_dev(target, t1, anchor);
     			insert_dev(target, div1, anchor);
-    			append_dev(div1, t4);
-    			append_dev(div1, span1);
-    			append_dev(div1, t6);
-    			insert_dev(target, t7, anchor);
+    			insert_dev(target, t3, anchor);
     			insert_dev(target, div2, anchor);
-    			insert_dev(target, t9, anchor);
+    			insert_dev(target, t4, anchor);
     			insert_dev(target, div3, anchor);
-    			mount_component(tokenize, div3, null);
+    			append_dev(div3, t5);
+    			append_dev(div3, span);
+    			append_dev(div3, t7);
+    			insert_dev(target, t8, anchor);
+    			insert_dev(target, div4, anchor);
+    			insert_dev(target, t10, anchor);
+    			insert_dev(target, div5, anchor);
+    			mount_component(tokenize, div5, null);
     			current = true;
     		},
     		i: function intro(local) {
@@ -19445,16 +21999,17 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(kbd);
-    			if (detaching) detach_dev(span0);
-    			if (detaching) detach_dev(t2);
     			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t7);
+    			if (detaching) detach_dev(t3);
     			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t9);
+    			if (detaching) detach_dev(t4);
     			if (detaching) detach_dev(div3);
+    			if (detaching) detach_dev(t8);
+    			if (detaching) detach_dev(div4);
+    			if (detaching) detach_dev(t10);
+    			if (detaching) detach_dev(div5);
     			destroy_component(tokenize);
     		}
     	};
@@ -19463,15 +22018,15 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$3.name,
     		type: "slot",
-    		source: "(16:2) <Left>",
+    		source: "(14:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (27:2) <One>
-    function create_default_slot_4$4(ctx) {
+    // (26:2) <One>
+    function create_default_slot_4$3(ctx) {
     	let div1;
     	let t0;
     	let div0;
@@ -19504,17 +22059,17 @@ var app = (function () {
     			span2.textContent = "punctuation";
     			t9 = text$1(".");
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$7, 33, 6, 1104);
+    			add_location(div0, file$7, 32, 6, 1076);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 30, 4, 1055);
+    			add_location(div1, file$7, 29, 4, 1027);
     			attr_dev(span0, "class", "cherry");
-    			add_location(span0, file$7, 36, 22, 1207);
+    			add_location(span0, file$7, 35, 22, 1179);
     			attr_dev(span1, "class", "rose");
-    			add_location(span1, file$7, 36, 64, 1249);
+    			add_location(span1, file$7, 35, 64, 1221);
     			attr_dev(span2, "class", "sky");
-    			add_location(span2, file$7, 37, 6, 1291);
+    			add_location(span2, file$7, 36, 6, 1263);
     			attr_dev(div2, "class", "tab");
-    			add_location(div2, file$7, 35, 4, 1167);
+    			add_location(div2, file$7, 34, 4, 1139);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19539,16 +22094,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$4.name,
+    		id: create_default_slot_4$3.name,
     		type: "slot",
-    		source: "(27:2) <One>",
+    		source: "(26:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:2) <One>
+    // (41:2) <One>
     function create_default_slot_3$4(ctx) {
     	let div0;
     	let t1;
@@ -19571,13 +22126,13 @@ var app = (function () {
     			div2 = element("div");
     			div2.textContent = "haha, i dunno man!";
     			attr_dev(div0, "class", "down");
-    			add_location(div0, file$7, 42, 4, 1362);
+    			add_location(div0, file$7, 41, 4, 1334);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 50, 6, 1874);
+    			add_location(div1, file$7, 49, 6, 1846);
     			attr_dev(div2, "class", "tab i f09 down");
-    			add_location(div2, file$7, 51, 6, 1924);
+    			add_location(div2, file$7, 50, 6, 1896);
     			attr_dev(div3, "class", "tab down f09");
-    			add_location(div3, file$7, 48, 4, 1795);
+    			add_location(div3, file$7, 47, 4, 1767);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -19599,14 +22154,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$4.name,
     		type: "slot",
-    		source: "(42:2) <One>",
+    		source: "(41:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:2) <One>
+    // (55:2) <One>
     function create_default_slot_2$4(ctx) {
     	let div1;
     	let kbd;
@@ -19631,10 +22186,10 @@ var app = (function () {
     			div0.textContent = "is 20kb of javascript:";
     			t3 = space();
     			create_component(grid.$$.fragment);
-    			add_location(kbd, file$7, 57, 6, 2022);
+    			add_location(kbd, file$7, 56, 6, 1994);
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$7, 58, 6, 2054);
-    			add_location(div1, file$7, 56, 4, 2010);
+    			add_location(div0, file$7, 57, 6, 2026);
+    			add_location(div1, file$7, 55, 4, 1982);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -19666,14 +22221,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$4.name,
     		type: "slot",
-    		source: "(56:2) <One>",
+    		source: "(55:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (69:2) <Two>
+    // (68:2) <Two>
     function create_default_slot_1$4(ctx) {
     	let div;
     	let t1;
@@ -19741,36 +22296,37 @@ var app = (function () {
     			t12 = space();
     			create_component(caret3.$$.fragment);
     			attr_dev(div, "class", "down f09");
-    			add_location(div, file$7, 69, 4, 2302);
+    			add_location(div, file$7, 68, 4, 2274);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$7, 71, 22, 2394);
-    			attr_dev(a0, "href", "#");
-    			add_location(a0, file$7, 71, 10, 2382);
-    			add_location(li0, file$7, 71, 6, 2378);
+    			add_location(span0, file$7, 70, 36, 2380);
+    			attr_dev(a0, "href", "./");
+    			add_location(a0, file$7, 70, 23, 2367);
+    			attr_dev(li0, "class", "down");
+    			add_location(li0, file$7, 70, 6, 2350);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$7, 72, 35, 2510);
-    			attr_dev(a1, "href", "#");
-    			add_location(a1, file$7, 72, 23, 2498);
+    			add_location(span1, file$7, 72, 34, 2519);
+    			attr_dev(a1, "href", "./one/syllables");
+    			add_location(a1, file$7, 72, 8, 2493);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$7, 72, 6, 2481);
+    			add_location(li1, file$7, 71, 6, 2467);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$7, 73, 35, 2630);
-    			attr_dev(a2, "href", "#");
-    			add_location(a2, file$7, 73, 23, 2618);
+    			add_location(span2, file$7, 74, 36, 2647);
+    			attr_dev(a2, "href", "./");
+    			add_location(a2, file$7, 74, 23, 2634);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$7, 73, 6, 2601);
+    			add_location(li2, file$7, 74, 6, 2617);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$7, 74, 35, 2747);
-    			attr_dev(a3, "href", "#");
-    			add_location(a3, file$7, 74, 23, 2735);
+    			add_location(span3, file$7, 76, 34, 2787);
+    			attr_dev(a3, "href", "./one/typeahead");
+    			add_location(a3, file$7, 76, 8, 2761);
     			attr_dev(li3, "class", "down");
-    			add_location(li3, file$7, 74, 6, 2718);
+    			add_location(li3, file$7, 75, 6, 2735);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$7, 70, 4, 2349);
+    			add_location(ul, file$7, 69, 4, 2321);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -19831,14 +22387,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$4.name,
     		type: "slot",
-    		source: "(69:2) <Two>",
+    		source: "(68:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (15:0) <Page>
+    // (13:0) <Page>
     function create_default_slot$4(ctx) {
     	let left;
     	let t0;
@@ -19867,7 +22423,7 @@ var app = (function () {
 
     	one0 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_4$4] },
+    				$$slots: { default: [create_default_slot_4$3] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -19917,11 +22473,11 @@ var app = (function () {
     			t8 = space();
     			div2 = element("div");
     			div2.textContent = "or swing harder ↓";
-    			add_location(div0, file$7, 78, 2, 2847);
+    			add_location(div0, file$7, 81, 2, 2894);
     			attr_dev(div1, "class", "m1");
-    			add_location(div1, file$7, 79, 2, 2906);
+    			add_location(div1, file$7, 82, 2, 2953);
     			attr_dev(div2, "class", "m2 sea down f09");
-    			add_location(div2, file$7, 80, 2, 2964);
+    			add_location(div2, file$7, 83, 2, 3011);
     		},
     		m: function mount(target, anchor) {
     			mount_component(left, target, anchor);
@@ -20018,7 +22574,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$4.name,
     		type: "slot",
-    		source: "(15:0) <Page>",
+    		source: "(13:0) <Page>",
     		ctx
     	});
 
@@ -20026,20 +22582,17 @@ var app = (function () {
     }
 
     function create_fragment$8(ctx) {
-    	let page0;
+    	let block;
     	let t;
-    	let page1;
+    	let page;
     	let current;
 
-    	page0 = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot_6$2] },
-    				$$scope: { ctx }
-    			},
+    	block = new Block({
+    			props: { color: "#D68881" },
     			$$inline: true
     		});
 
-    	page1 = new Page({
+    	page = new Page({
     			props: {
     				$$slots: { default: [create_default_slot$4] },
     				$$scope: { ctx }
@@ -20047,64 +22600,57 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const block = {
+    	const block_1 = {
     		c: function create() {
-    			create_component(page0.$$.fragment);
+    			create_component(block.$$.fragment);
     			t = space();
-    			create_component(page1.$$.fragment);
+    			create_component(page.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page0, target, anchor);
+    			mount_component(block, target, anchor);
     			insert_dev(target, t, anchor);
-    			mount_component(page1, target, anchor);
+    			mount_component(page, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page0_changes = {};
+    			const page_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				page0_changes.$$scope = { dirty, ctx };
+    				page_changes.$$scope = { dirty, ctx };
     			}
 
-    			page0.$set(page0_changes);
-    			const page1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page1.$set(page1_changes);
+    			page.$set(page_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(page0.$$.fragment, local);
-    			transition_in(page1.$$.fragment, local);
+    			transition_in(block.$$.fragment, local);
+    			transition_in(page.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(page0.$$.fragment, local);
-    			transition_out(page1.$$.fragment, local);
+    			transition_out(block.$$.fragment, local);
+    			transition_out(page.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(page0, detaching);
+    			destroy_component(block, detaching);
     			if (detaching) detach_dev(t);
-    			destroy_component(page1, detaching);
+    			destroy_component(page, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
-    		block,
+    		block: block_1,
     		id: create_fragment$8.name,
     		type: "component",
     		source: "",
     		ctx
     	});
 
-    	return block;
+    	return block_1;
     }
 
     function instance$8($$self, $$props, $$invalidate) {
@@ -20267,51 +22813,7 @@ var app = (function () {
     /* home/Two.svelte generated by Svelte v3.43.0 */
     const file$5 = "home/Two.svelte";
 
-    // (13:0) <Page>
-    function create_default_slot_10(ctx) {
-    	let block;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#978BA3" },
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_default_slot_10.name,
-    		type: "slot",
-    		source: "(13:0) <Page>",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    // (17:2) <Left>
+    // (15:2) <Left>
     function create_default_slot_9(ctx) {
     	let kbd;
     	let span0;
@@ -20365,28 +22867,28 @@ var app = (function () {
     			div3.textContent = "which is more handy than you may think -";
     			set_style(kbd, "font-size", "2rem");
     			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$5, 17, 4, 455);
+    			add_location(kbd, file$5, 15, 4, 438);
     			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$5, 17, 70, 521);
+    			add_location(span0, file$5, 15, 70, 504);
     			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$5, 18, 4, 551);
+    			add_location(div0, file$5, 16, 4, 534);
     			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$5, 22, 8, 747);
+    			add_location(span1, file$5, 20, 8, 730);
     			attr_dev(span2, "class", "rose");
-    			add_location(span2, file$5, 23, 8, 789);
+    			add_location(span2, file$5, 21, 8, 772);
     			attr_dev(span3, "class", "red");
-    			add_location(span3, file$5, 24, 8, 832);
+    			add_location(span3, file$5, 22, 8, 815);
     			set_style(span4, "border-bottom", "4px solid #D68881");
     			set_style(span4, "padding-bottom", "5px");
-    			add_location(span4, file$5, 20, 8, 655);
+    			add_location(span4, file$5, 18, 8, 638);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "font-size", "1.5rem");
     			set_style(div1, "color", "#949a9e");
-    			add_location(div1, file$5, 19, 4, 588);
+    			add_location(div1, file$5, 17, 4, 571);
     			attr_dev(div2, "class", "down tab");
-    			add_location(div2, file$5, 27, 4, 903);
+    			add_location(div2, file$5, 25, 4, 886);
     			attr_dev(div3, "class", "down f09");
-    			add_location(div3, file$5, 28, 4, 973);
+    			add_location(div3, file$5, 26, 4, 956);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, kbd, anchor);
@@ -20428,14 +22930,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_9.name,
     		type: "slot",
-    		source: "(17:2) <Left>",
+    		source: "(15:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (32:2) <One>
+    // (30:2) <One>
     function create_default_slot_8(ctx) {
     	let tagger;
     	let current;
@@ -20467,15 +22969,15 @@ var app = (function () {
     		block,
     		id: create_default_slot_8.name,
     		type: "slot",
-    		source: "(32:2) <One>",
+    		source: "(30:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (36:2) <One>
-    function create_default_slot_7$1(ctx) {
+    // (34:2) <One>
+    function create_default_slot_7(ctx) {
     	let div0;
     	let t1;
     	let div3;
@@ -20512,19 +23014,19 @@ var app = (function () {
     			div4 = element("div");
     			div4.textContent = "without actually knowing what those things are.";
     			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$5, 36, 4, 1098);
+    			add_location(div0, file$5, 34, 4, 1081);
     			attr_dev(b0, "class", "f2 sea");
-    			add_location(b0, file$5, 38, 23, 1185);
+    			add_location(b0, file$5, 36, 23, 1168);
     			attr_dev(b1, "class", "f2 sky");
-    			add_location(b1, file$5, 38, 59, 1221);
+    			add_location(b1, file$5, 36, 59, 1204);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 39, 6, 1260);
+    			add_location(div1, file$5, 37, 6, 1243);
     			attr_dev(div2, "class", "f2 red tab down");
-    			add_location(div2, file$5, 40, 6, 1293);
+    			add_location(div2, file$5, 38, 6, 1276);
     			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$5, 37, 4, 1144);
+    			add_location(div3, file$5, 35, 4, 1127);
     			attr_dev(div4, "class", "tab down i");
-    			add_location(div4, file$5, 42, 4, 1350);
+    			add_location(div4, file$5, 40, 4, 1333);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -20552,16 +23054,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_7$1.name,
+    		id: create_default_slot_7.name,
     		type: "slot",
-    		source: "(36:2) <One>",
+    		source: "(34:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:2) <Two>
+    // (43:2) <Two>
     function create_default_slot_6$1(ctx) {
     	let div0;
     	let t1;
@@ -20594,19 +23096,19 @@ var app = (function () {
     			a = element("a");
     			a.textContent = "- match docs";
     			attr_dev(div0, "class", "down");
-    			add_location(div0, file$5, 45, 4, 1449);
+    			add_location(div0, file$5, 43, 4, 1432);
     			attr_dev(kbd0, "class", "blue f2 i");
-    			add_location(kbd0, file$5, 47, 6, 1519);
+    			add_location(kbd0, file$5, 45, 6, 1502);
     			attr_dev(kbd1, "class", "blue f2 i down");
-    			add_location(kbd1, file$5, 48, 6, 1585);
+    			add_location(kbd1, file$5, 46, 6, 1568);
     			attr_dev(kbd2, "class", "blue f2 i down");
-    			add_location(kbd2, file$5, 49, 6, 1663);
-    			add_location(ul, file$5, 46, 4, 1508);
+    			add_location(kbd2, file$5, 47, 6, 1646);
+    			add_location(ul, file$5, 44, 4, 1491);
     			attr_dev(a, "href", "https://observablehq.com/@spencermountain/compromise-match-syntax");
     			attr_dev(a, "class", "red tab");
-    			add_location(a, file$5, 52, 6, 1761);
+    			add_location(a, file$5, 50, 6, 1744);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 51, 4, 1737);
+    			add_location(div1, file$5, 49, 4, 1720);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -20634,14 +23136,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_6$1.name,
     		type: "slot",
-    		source: "(45:2) <Two>",
+    		source: "(43:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:2) <One>
+    // (54:2) <One>
     function create_default_slot_5$2(ctx) {
     	let div0;
     	let t1;
@@ -20669,15 +23171,15 @@ var app = (function () {
     			t7 = space();
     			div4 = element("div");
     			div4.textContent = "they can be written by non-programmers.";
-    			add_location(div0, file$5, 56, 4, 1903);
+    			add_location(div0, file$5, 54, 4, 1886);
     			attr_dev(div1, "class", "tab i");
-    			add_location(div1, file$5, 57, 4, 1942);
+    			add_location(div1, file$5, 55, 4, 1925);
     			attr_dev(div2, "class", "tab sky i");
-    			add_location(div2, file$5, 58, 4, 1998);
+    			add_location(div2, file$5, 56, 4, 1981);
     			attr_dev(div3, "class", "down");
-    			add_location(div3, file$5, 60, 4, 2139);
+    			add_location(div3, file$5, 58, 4, 2122);
     			attr_dev(div4, "class", "tab");
-    			add_location(div4, file$5, 61, 4, 2202);
+    			add_location(div4, file$5, 59, 4, 2185);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -20707,15 +23209,15 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$2.name,
     		type: "slot",
-    		source: "(56:2) <One>",
+    		source: "(54:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (64:2) <Two>
-    function create_default_slot_4$3(ctx) {
+    // (62:2) <Two>
+    function create_default_slot_4$2(ctx) {
     	let div2;
     	let t0;
     	let div0;
@@ -20789,36 +23291,36 @@ var app = (function () {
     			t16 = space();
     			create_component(caret2.$$.fragment);
     			attr_dev(span0, "class", "red ");
-    			add_location(span0, file$5, 66, 44, 2392);
+    			add_location(span0, file$5, 64, 44, 2375);
     			attr_dev(div0, "class", "tab f2");
-    			add_location(div0, file$5, 66, 6, 2354);
+    			add_location(div0, file$5, 64, 6, 2337);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 67, 6, 2441);
-    			add_location(br, file$5, 68, 6, 2488);
+    			add_location(div1, file$5, 65, 6, 2424);
+    			add_location(br, file$5, 66, 6, 2471);
     			set_style(div2, "margin-bottom", "3rem");
-    			add_location(div2, file$5, 64, 4, 2286);
+    			add_location(div2, file$5, 62, 4, 2269);
     			attr_dev(span1, "class", "choose down");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$5, 72, 22, 2602);
+    			add_location(span1, file$5, 70, 22, 2585);
     			attr_dev(a0, "href", "#");
-    			add_location(a0, file$5, 72, 10, 2590);
-    			add_location(li0, file$5, 72, 6, 2586);
+    			add_location(a0, file$5, 70, 10, 2573);
+    			add_location(li0, file$5, 70, 6, 2569);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$5, 74, 20, 2732);
+    			add_location(span2, file$5, 72, 20, 2715);
     			attr_dev(a1, "href", "#");
-    			add_location(a1, file$5, 74, 8, 2720);
+    			add_location(a1, file$5, 72, 8, 2703);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$5, 73, 6, 2694);
+    			add_location(li1, file$5, 71, 6, 2677);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$5, 76, 35, 2862);
+    			add_location(span3, file$5, 74, 35, 2845);
     			attr_dev(a2, "href", "#");
-    			add_location(a2, file$5, 76, 23, 2850);
+    			add_location(a2, file$5, 74, 23, 2833);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$5, 76, 6, 2833);
+    			add_location(li2, file$5, 74, 6, 2816);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$5, 71, 4, 2557);
+    			add_location(ul, file$5, 69, 4, 2540);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -20878,16 +23380,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$3.name,
+    		id: create_default_slot_4$2.name,
     		type: "slot",
-    		source: "(64:2) <Two>",
+    		source: "(62:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (81:2) <One>
+    // (79:2) <One>
     function create_default_slot_3$3(ctx) {
     	let div1;
     	let kbd;
@@ -20902,10 +23404,10 @@ var app = (function () {
     			t1 = space();
     			div0 = element("div");
     			div0.textContent = "is 130kb minified.";
-    			add_location(kbd, file$5, 82, 6, 2984);
+    			add_location(kbd, file$5, 80, 6, 2967);
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$5, 83, 6, 3016);
-    			add_location(div1, file$5, 81, 4, 2972);
+    			add_location(div0, file$5, 81, 6, 2999);
+    			add_location(div1, file$5, 79, 4, 2955);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -20922,14 +23424,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$3.name,
     		type: "slot",
-    		source: "(81:2) <One>",
+    		source: "(79:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (87:2) <Two>
+    // (85:2) <Two>
     function create_default_slot_2$3(ctx) {
     	let div;
     	let t1;
@@ -20943,10 +23445,10 @@ var app = (function () {
     			t1 = space();
     			img = element("img");
     			attr_dev(div, "class", "i");
-    			add_location(div, file$5, 88, 4, 3202);
+    			add_location(div, file$5, 86, 4, 3185);
     			if (!src_url_equal(img.src, img_src_value = "./build/assets/jesus.gif")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "jesus gif");
-    			add_location(img, file$5, 89, 4, 3242);
+    			add_location(img, file$5, 87, 4, 3225);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -20964,14 +23466,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$3.name,
     		type: "slot",
-    		source: "(87:2) <Two>",
+    		source: "(85:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (92:2) <Three>
+    // (90:2) <Three>
     function create_default_slot_1$3(ctx) {
     	let div;
     	let t;
@@ -20989,7 +23491,7 @@ var app = (function () {
     			t = space();
     			create_component(grid.$$.fragment);
     			set_style(div, "width", "200px");
-    			add_location(div, file$5, 92, 4, 3320);
+    			add_location(div, file$5, 90, 4, 3303);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -21018,14 +23520,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$3.name,
     		type: "slot",
-    		source: "(92:2) <Three>",
+    		source: "(90:2) <Three>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (16:0) <Page>
+    // (14:0) <Page>
     function create_default_slot$3(ctx) {
     	let left;
     	let t0;
@@ -21064,7 +23566,7 @@ var app = (function () {
 
     	one1 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_7$1] },
+    				$$slots: { default: [create_default_slot_7] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -21088,7 +23590,7 @@ var app = (function () {
 
     	two1 = new Two({
     			props: {
-    				$$slots: { default: [create_default_slot_4$3] },
+    				$$slots: { default: [create_default_slot_4$2] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -21273,7 +23775,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$3.name,
     		type: "slot",
-    		source: "(16:0) <Page>",
+    		source: "(14:0) <Page>",
     		ctx
     	});
 
@@ -21281,20 +23783,17 @@ var app = (function () {
     }
 
     function create_fragment$6(ctx) {
-    	let page0;
+    	let block;
     	let t;
-    	let page1;
+    	let page;
     	let current;
 
-    	page0 = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot_10] },
-    				$$scope: { ctx }
-    			},
+    	block = new Block({
+    			props: { color: "#978BA3" },
     			$$inline: true
     		});
 
-    	page1 = new Page({
+    	page = new Page({
     			props: {
     				$$slots: { default: [create_default_slot$3] },
     				$$scope: { ctx }
@@ -21302,64 +23801,57 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const block = {
+    	const block_1 = {
     		c: function create() {
-    			create_component(page0.$$.fragment);
+    			create_component(block.$$.fragment);
     			t = space();
-    			create_component(page1.$$.fragment);
+    			create_component(page.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page0, target, anchor);
+    			mount_component(block, target, anchor);
     			insert_dev(target, t, anchor);
-    			mount_component(page1, target, anchor);
+    			mount_component(page, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page0_changes = {};
+    			const page_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				page0_changes.$$scope = { dirty, ctx };
+    				page_changes.$$scope = { dirty, ctx };
     			}
 
-    			page0.$set(page0_changes);
-    			const page1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page1.$set(page1_changes);
+    			page.$set(page_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(page0.$$.fragment, local);
-    			transition_in(page1.$$.fragment, local);
+    			transition_in(block.$$.fragment, local);
+    			transition_in(page.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(page0.$$.fragment, local);
-    			transition_out(page1.$$.fragment, local);
+    			transition_out(block.$$.fragment, local);
+    			transition_out(page.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(page0, detaching);
+    			destroy_component(block, detaching);
     			if (detaching) detach_dev(t);
-    			destroy_component(page1, detaching);
+    			destroy_component(page, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
-    		block,
+    		block: block_1,
     		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
     	});
 
-    	return block;
+    	return block_1;
     }
 
     function instance$6($$self, $$props, $$invalidate) {
@@ -21523,51 +24015,7 @@ var app = (function () {
     /* home/Three.svelte generated by Svelte v3.43.0 */
     const file$3 = "home/Three.svelte";
 
-    // (11:0) <Page>
-    function create_default_slot_7(ctx) {
-    	let block;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#e6b3bc" },
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_default_slot_7.name,
-    		type: "slot",
-    		source: "(11:0) <Page>",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    // (16:2) <Left>
+    // (14:2) <Left>
     function create_default_slot_6(ctx) {
     	let kbd;
     	let span0;
@@ -21595,17 +24043,17 @@ var app = (function () {
     			t6 = text$1(" -");
     			set_style(kbd, "font-size", "2rem");
     			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$3, 16, 4, 371);
+    			add_location(kbd, file$3, 14, 4, 354);
     			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$3, 16, 72, 439);
+    			add_location(span0, file$3, 14, 72, 422);
     			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$3, 17, 4, 469);
+    			add_location(div0, file$3, 15, 4, 452);
     			set_style(span1, "border-bottom", "4px solid #D68881");
     			set_style(span1, "padding-bottom", "5px");
-    			add_location(span1, file$3, 19, 8, 559);
+    			add_location(span1, file$3, 17, 8, 542);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "font-size", "1.8rem");
-    			add_location(div1, file$3, 18, 4, 506);
+    			add_location(div1, file$3, 16, 4, 489);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, kbd, anchor);
@@ -21632,14 +24080,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_6.name,
     		type: "slot",
-    		source: "(16:2) <Left>",
+    		source: "(14:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:2) <One>
+    // (22:2) <One>
     function create_default_slot_5$1(ctx) {
     	let chunker;
     	let current;
@@ -21671,15 +24119,15 @@ var app = (function () {
     		block,
     		id: create_default_slot_5$1.name,
     		type: "slot",
-    		source: "(24:2) <One>",
+    		source: "(22:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (28:2) <One>
-    function create_default_slot_4$2(ctx) {
+    // (26:2) <One>
+    function create_default_slot_4$1(ctx) {
     	let div7;
     	let div2;
     	let div0;
@@ -21740,34 +24188,34 @@ var app = (function () {
     			div9 = element("div");
     			div9.textContent = "or a 3rd of a thing.";
     			attr_dev(div0, "class", "blue");
-    			add_location(div0, file$3, 30, 8, 840);
+    			add_location(div0, file$3, 28, 8, 823);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$3, 31, 8, 903);
+    			add_location(div1, file$3, 29, 8, 886);
     			attr_dev(div2, "class", "f2");
-    			add_location(div2, file$3, 29, 6, 815);
+    			add_location(div2, file$3, 27, 6, 798);
     			attr_dev(span0, "class", "sea i");
-    			add_location(span0, file$3, 34, 36, 1013);
+    			add_location(span0, file$3, 32, 36, 996);
     			attr_dev(div3, "class", "down tab");
-    			add_location(div3, file$3, 34, 8, 985);
+    			add_location(div3, file$3, 32, 8, 968);
     			attr_dev(span1, "class", "sky i");
-    			add_location(span1, file$3, 35, 26, 1085);
+    			add_location(span1, file$3, 33, 26, 1068);
     			attr_dev(div4, "class", "down");
-    			add_location(div4, file$3, 35, 8, 1067);
+    			add_location(div4, file$3, 33, 8, 1050);
     			attr_dev(span2, "class", "rose i");
-    			add_location(span2, file$3, 36, 34, 1166);
+    			add_location(span2, file$3, 34, 34, 1149);
     			attr_dev(div5, "class", "down tab");
-    			add_location(div5, file$3, 36, 8, 1140);
+    			add_location(div5, file$3, 34, 8, 1123);
     			attr_dev(div6, "class", "tab");
-    			add_location(div6, file$3, 33, 6, 959);
-    			add_location(div7, file$3, 28, 4, 803);
+    			add_location(div6, file$3, 31, 6, 942);
+    			add_location(div7, file$3, 26, 4, 786);
     			attr_dev(div8, "class", "mt4");
-    			add_location(div8, file$3, 39, 4, 1247);
+    			add_location(div8, file$3, 37, 4, 1230);
     			attr_dev(div9, "class", "tab f09");
-    			add_location(div9, file$3, 44, 8, 1394);
+    			add_location(div9, file$3, 42, 8, 1377);
     			attr_dev(div10, "class", "");
-    			add_location(div10, file$3, 42, 6, 1337);
+    			add_location(div10, file$3, 40, 6, 1320);
     			attr_dev(div11, "class", "tab");
-    			add_location(div11, file$3, 40, 4, 1271);
+    			add_location(div11, file$3, 38, 4, 1254);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div7, anchor);
@@ -21807,16 +24255,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_4$2.name,
+    		id: create_default_slot_4$1.name,
     		type: "slot",
-    		source: "(28:2) <One>",
+    		source: "(26:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (49:2) <One>
+    // (47:2) <One>
     function create_default_slot_3$2(ctx) {
     	let div0;
     	let t0;
@@ -21843,14 +24291,14 @@ var app = (function () {
     			div2 = element("div");
     			div2.textContent = "or contraction, or something.";
     			attr_dev(i, "class", "sea");
-    			add_location(i, file$3, 49, 36, 1519);
-    			add_location(div0, file$3, 49, 4, 1487);
+    			add_location(i, file$3, 47, 36, 1502);
+    			add_location(div0, file$3, 47, 4, 1470);
     			attr_dev(div1, "class", "down sky");
-    			add_location(div1, file$3, 52, 6, 1621);
+    			add_location(div1, file$3, 50, 6, 1604);
     			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$3, 53, 6, 1687);
+    			add_location(div2, file$3, 51, 6, 1670);
     			attr_dev(div3, "class", "tab i");
-    			add_location(div3, file$3, 50, 4, 1556);
+    			add_location(div3, file$3, 48, 4, 1539);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -21874,14 +24322,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$2.name,
     		type: "slot",
-    		source: "(49:2) <One>",
+    		source: "(47:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (72:2) <Two>
+    // (70:2) <Two>
     function create_default_slot_2$2(ctx) {
     	let div;
     	let t1;
@@ -21935,29 +24383,29 @@ var app = (function () {
     			t9 = space();
     			create_component(caret2.$$.fragment);
     			attr_dev(div, "class", "down f09");
-    			add_location(div, file$3, 72, 4, 2330);
+    			add_location(div, file$3, 70, 4, 2313);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$3, 74, 22, 2437);
+    			add_location(span0, file$3, 72, 22, 2420);
     			attr_dev(a0, "href", "#");
-    			add_location(a0, file$3, 74, 10, 2425);
-    			add_location(li0, file$3, 74, 6, 2421);
+    			add_location(a0, file$3, 72, 10, 2408);
+    			add_location(li0, file$3, 72, 6, 2404);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$3, 75, 35, 2555);
+    			add_location(span1, file$3, 73, 35, 2538);
     			attr_dev(a1, "href", "#");
-    			add_location(a1, file$3, 75, 23, 2543);
+    			add_location(a1, file$3, 73, 23, 2526);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$3, 75, 6, 2526);
+    			add_location(li1, file$3, 73, 6, 2509);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$3, 76, 35, 2671);
+    			add_location(span2, file$3, 74, 35, 2654);
     			attr_dev(a2, "href", "#");
-    			add_location(a2, file$3, 76, 23, 2659);
+    			add_location(a2, file$3, 74, 23, 2642);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$3, 76, 6, 2642);
+    			add_location(li2, file$3, 74, 6, 2625);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$3, 73, 4, 2392);
+    			add_location(ul, file$3, 71, 4, 2375);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -22009,14 +24457,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$2.name,
     		type: "slot",
-    		source: "(72:2) <Two>",
+    		source: "(70:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (82:2) <One>
+    // (80:2) <One>
     function create_default_slot_1$2(ctx) {
     	let t0;
     	let div0;
@@ -22071,26 +24519,26 @@ var app = (function () {
     			div5 = element("div");
     			div5.textContent = "so the hard problem, still ahead ↓";
     			attr_dev(div0, "class", "tab sea");
-    			add_location(div0, file$3, 83, 4, 2852);
+    			add_location(div0, file$3, 81, 4, 2835);
     			attr_dev(div1, "class", "tab down");
-    			add_location(div1, file$3, 84, 4, 2904);
+    			add_location(div1, file$3, 82, 4, 2887);
     			attr_dev(span0, "class", "sky i");
-    			add_location(span0, file$3, 86, 6, 2979);
+    			add_location(span0, file$3, 84, 6, 2962);
     			attr_dev(span1, "class", "rose i");
-    			add_location(span1, file$3, 88, 17, 3083);
+    			add_location(span1, file$3, 86, 17, 3066);
     			attr_dev(span2, "class", "red i");
-    			add_location(span2, file$3, 89, 8, 3127);
+    			add_location(span2, file$3, 87, 8, 3110);
     			attr_dev(div2, "class", "tab");
     			set_style(div2, "font-size", "1.2rem");
-    			add_location(div2, file$3, 87, 6, 3021);
+    			add_location(div2, file$3, 85, 6, 3004);
     			attr_dev(div3, "class", "f2 down");
-    			add_location(div3, file$3, 85, 4, 2951);
+    			add_location(div3, file$3, 83, 4, 2934);
     			attr_dev(b, "class", "sky i");
-    			add_location(b, file$3, 93, 34, 3242);
+    			add_location(b, file$3, 91, 34, 3225);
     			attr_dev(div4, "class", "down");
-    			add_location(div4, file$3, 92, 4, 3189);
+    			add_location(div4, file$3, 90, 4, 3172);
     			attr_dev(div5, "class", "down tab f09");
-    			add_location(div5, file$3, 95, 4, 3291);
+    			add_location(div5, file$3, 93, 4, 3274);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -22133,14 +24581,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$2.name,
     		type: "slot",
-    		source: "(82:2) <One>",
+    		source: "(80:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (15:0) <Page>
+    // (13:0) <Page>
     function create_default_slot$2(ctx) {
     	let left;
     	let t0;
@@ -22175,7 +24623,7 @@ var app = (function () {
 
     	one1 = new One({
     			props: {
-    				$$slots: { default: [create_default_slot_4$2] },
+    				$$slots: { default: [create_default_slot_4$1] },
     				$$scope: { ctx }
     			},
     			$$inline: true
@@ -22325,7 +24773,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$2.name,
     		type: "slot",
-    		source: "(15:0) <Page>",
+    		source: "(13:0) <Page>",
     		ctx
     	});
 
@@ -22333,20 +24781,17 @@ var app = (function () {
     }
 
     function create_fragment$4(ctx) {
-    	let page0;
+    	let block;
     	let t;
-    	let page1;
+    	let page;
     	let current;
 
-    	page0 = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot_7] },
-    				$$scope: { ctx }
-    			},
+    	block = new Block({
+    			props: { color: "#e6b3bc" },
     			$$inline: true
     		});
 
-    	page1 = new Page({
+    	page = new Page({
     			props: {
     				$$slots: { default: [create_default_slot$2] },
     				$$scope: { ctx }
@@ -22354,64 +24799,57 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const block = {
+    	const block_1 = {
     		c: function create() {
-    			create_component(page0.$$.fragment);
+    			create_component(block.$$.fragment);
     			t = space();
-    			create_component(page1.$$.fragment);
+    			create_component(page.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page0, target, anchor);
+    			mount_component(block, target, anchor);
     			insert_dev(target, t, anchor);
-    			mount_component(page1, target, anchor);
+    			mount_component(page, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page0_changes = {};
+    			const page_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				page0_changes.$$scope = { dirty, ctx };
+    				page_changes.$$scope = { dirty, ctx };
     			}
 
-    			page0.$set(page0_changes);
-    			const page1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page1.$set(page1_changes);
+    			page.$set(page_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(page0.$$.fragment, local);
-    			transition_in(page1.$$.fragment, local);
+    			transition_in(block.$$.fragment, local);
+    			transition_in(page.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(page0.$$.fragment, local);
-    			transition_out(page1.$$.fragment, local);
+    			transition_out(block.$$.fragment, local);
+    			transition_out(page.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(page0, detaching);
+    			destroy_component(block, detaching);
     			if (detaching) detach_dev(t);
-    			destroy_component(page1, detaching);
+    			destroy_component(page, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
-    		block,
+    		block: block_1,
     		id: create_fragment$4.name,
     		type: "component",
     		source: "",
     		ctx
     	});
 
-    	return block;
+    	return block_1;
     }
 
     function instance$4($$self, $$props, $$invalidate) {
@@ -22554,51 +24992,7 @@ var app = (function () {
     /* home/Four.svelte generated by Svelte v3.43.0 */
     const file$1 = "home/Four.svelte";
 
-    // (12:0) <Page>
-    function create_default_slot_4$1(ctx) {
-    	let block;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#6699cc" },
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_default_slot_4$1.name,
-    		type: "slot",
-    		source: "(12:0) <Page>",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    // (17:2) <Left>
+    // (15:2) <Left>
     function create_default_slot_3$1(ctx) {
     	let kbd;
     	let span0;
@@ -22626,17 +25020,17 @@ var app = (function () {
     			t6 = text$1(" -");
     			set_style(kbd, "font-size", "2rem");
     			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$1, 17, 4, 407);
+    			add_location(kbd, file$1, 15, 4, 390);
     			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$1, 17, 71, 474);
+    			add_location(span0, file$1, 15, 71, 457);
     			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$1, 18, 4, 504);
+    			add_location(div0, file$1, 16, 4, 487);
     			set_style(span1, "border-bottom", "4px solid #D68881");
     			set_style(span1, "padding-bottom", "5px");
-    			add_location(span1, file$1, 20, 8, 594);
+    			add_location(span1, file$1, 18, 8, 577);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "font-size", "1.8rem");
-    			add_location(div1, file$1, 19, 4, 541);
+    			add_location(div1, file$1, 17, 4, 524);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, kbd, anchor);
@@ -22663,14 +25057,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3$1.name,
     		type: "slot",
-    		source: "(17:2) <Left>",
+    		source: "(15:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (25:2) <One>
+    // (23:2) <One>
     function create_default_slot_2$1(ctx) {
     	let t0;
     	let div;
@@ -22681,7 +25075,7 @@ var app = (function () {
     			div = element("div");
     			div.textContent = "ya right.";
     			attr_dev(div, "class", "tab i");
-    			add_location(div, file$1, 26, 4, 800);
+    			add_location(div, file$1, 24, 4, 783);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -22697,14 +25091,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2$1.name,
     		type: "slot",
-    		source: "(25:2) <One>",
+    		source: "(23:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (35:2) <Two>
+    // (33:2) <Two>
     function create_default_slot_1$1(ctx) {
     	let div0;
     	let t1;
@@ -22717,9 +25111,9 @@ var app = (function () {
     			t1 = space();
     			div1 = element("div");
     			div1.textContent = "- probably forever.";
-    			add_location(div0, file$1, 35, 4, 1069);
+    			add_location(div0, file$1, 33, 4, 1052);
     			attr_dev(div1, "class", "f09 tab");
-    			add_location(div1, file$1, 36, 4, 1113);
+    			add_location(div1, file$1, 34, 4, 1096);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -22737,14 +25131,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1$1.name,
     		type: "slot",
-    		source: "(35:2) <Two>",
+    		source: "(33:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (16:0) <Page>
+    // (14:0) <Page>
     function create_default_slot$1(ctx) {
     	let left;
     	let t0;
@@ -22842,7 +25236,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$1.name,
     		type: "slot",
-    		source: "(16:0) <Page>",
+    		source: "(14:0) <Page>",
     		ctx
     	});
 
@@ -22850,20 +25244,17 @@ var app = (function () {
     }
 
     function create_fragment$2(ctx) {
-    	let page0;
+    	let block;
     	let t;
-    	let page1;
+    	let page;
     	let current;
 
-    	page0 = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot_4$1] },
-    				$$scope: { ctx }
-    			},
+    	block = new Block({
+    			props: { color: "#6699cc" },
     			$$inline: true
     		});
 
-    	page1 = new Page({
+    	page = new Page({
     			props: {
     				$$slots: { default: [create_default_slot$1] },
     				$$scope: { ctx }
@@ -22871,64 +25262,57 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const block = {
+    	const block_1 = {
     		c: function create() {
-    			create_component(page0.$$.fragment);
+    			create_component(block.$$.fragment);
     			t = space();
-    			create_component(page1.$$.fragment);
+    			create_component(page.$$.fragment);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page0, target, anchor);
+    			mount_component(block, target, anchor);
     			insert_dev(target, t, anchor);
-    			mount_component(page1, target, anchor);
+    			mount_component(page, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page0_changes = {};
+    			const page_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				page0_changes.$$scope = { dirty, ctx };
+    				page_changes.$$scope = { dirty, ctx };
     			}
 
-    			page0.$set(page0_changes);
-    			const page1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page1.$set(page1_changes);
+    			page.$set(page_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(page0.$$.fragment, local);
-    			transition_in(page1.$$.fragment, local);
+    			transition_in(block.$$.fragment, local);
+    			transition_in(page.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(page0.$$.fragment, local);
-    			transition_out(page1.$$.fragment, local);
+    			transition_out(block.$$.fragment, local);
+    			transition_out(page.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(page0, detaching);
+    			destroy_component(block, detaching);
     			if (detaching) detach_dev(t);
-    			destroy_component(page1, detaching);
+    			destroy_component(page, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
-    		block,
+    		block: block_1,
     		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
     	});
 
-    	return block;
+    	return block_1;
     }
 
     function instance$2($$self, $$props, $$invalidate) {

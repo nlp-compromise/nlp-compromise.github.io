@@ -9,12 +9,11 @@
   import Tokenize from './demos/Tokenize.svelte'
 </script>
 
-<Page>
-  <Block color="#D68881" />
-</Page>
+<Block color="#D68881" />
 <Page>
   <Left>
-    <kbd style="font-size:2rem; line-height:2rem">compromise/one</kbd><span class="f2">:</span>
+    <div class="lib">compromise/one</div>
+    <div class="plugin">tokenization</div>
     <div style="margin-top:2rem;" />
     <div class="tab" style="font-size:1rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
@@ -69,10 +68,14 @@
   <Two>
     <div class="down f09">so you can do:</div>
     <ul class="list down">
-      <li><a href="#"><span class="choose" style="color:white;">Contractions</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">TypeAhead</span> <Caret /></a></li>
+      <li class="down"><a href="./"><span class="choose" style="color:white;">Contractions</span> <Caret /></a></li>
+      <li class="down">
+        <a href="./one/syllables"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a>
+      </li>
+      <li class="down"><a href="./"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a></li>
+      <li class="down">
+        <a href="./one/typeahead"><span class="choose" style="color:white;">TypeAhead</span> <Caret /></a>
+      </li>
     </ul>
   </Two>
 

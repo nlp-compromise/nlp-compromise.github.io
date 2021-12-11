@@ -10,9 +10,7 @@
   import Grid from '../lib/Grid/Grid.svelte'
 </script>
 
-<Page>
-  <Block color="#978BA3" />
-</Page>
+<Block color="#978BA3" />
 <Page>
   <Left>
     <kbd style="font-size:2rem; line-height:2rem">compromise/two</kbd><span class="f2">:</span>

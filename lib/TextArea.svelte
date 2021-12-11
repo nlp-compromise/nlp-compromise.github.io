@@ -8,7 +8,8 @@
   // })
   export let width = '60%'
   export let readonly = undefined
-  export let height = '142px'
+  // export let height = '142px'
+  export let height = ''
   export let size = '1.2rem'
   const callback = function (e) {
     cb(e.target.value)
@@ -30,7 +31,8 @@
   .input {
     font-family: 'avenir next', avenir, sans-serif;
     display: block;
-    padding: 2rem 2rem 2rem 2rem;
+    padding: 1rem;
+    /* padding: 2rem 2rem 2rem 2rem; */
     margin: 0.3em 0.6em 0.3rem 5px;
     width: 60%;
     max-width: 50rem;
