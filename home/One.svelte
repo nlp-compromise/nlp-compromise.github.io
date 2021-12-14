@@ -7,6 +7,7 @@
   import Caret from '../lib/Caret.svelte'
   import Block from '../lib/Block.svelte'
   import Tokenize from './demos/Tokenize.svelte'
+  import Filesize from '../tmp/filesize/App.svelte'
 </script>
 
 <Block color="#D68881" />
@@ -80,14 +81,42 @@
     </ul>
   </Two>
 
-  <div>sometimes just splitting things up is enough.</div>
-  <div class="m1">it feels like data now, a little.</div>
-  <div class="m2 sea down f09">or swing harder ↓</div>
+  <Left>
+    <div class="down col">
+      <div>
+        <span class="lib">compromise/one</span> is 32kb
+      </div>
+
+      <!-- <Filesize /> -->
+      <img class="clean" style="width:300px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+      <div>
+        it can do ~1.2mbs of text per second,
+        <div>or a novel every 3 seconds</div>
+      </div>
+    </div>
+  </Left>
+  <div>
+    <div>sometimes just splitting things up is enough.</div>
+    <div class="m1">it feels like data now, a little.</div>
+    <div class="m2 sea down f09">or swing harder ↓</div>
+  </div>
 </Page>
 
 <style>
   .demo {
     margin-top: 2rem;
     text-decoration: underline;
+  }
+  .clean {
+    box-shadow: none;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
   }
 </style>

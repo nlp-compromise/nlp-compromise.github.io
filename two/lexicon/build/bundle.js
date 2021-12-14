@@ -10,9 +10,6 @@ var app = (function () {
             tar[k] = src[k];
         return tar;
     }
-    function is_promise(value) {
-        return value && typeof value === 'object' && typeof value.then === 'function';
-    }
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -32,14 +29,6 @@ var app = (function () {
     }
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
-    }
-    let src_url_equal_anchor;
-    function src_url_equal(element_src, url) {
-        if (!src_url_equal_anchor) {
-            src_url_equal_anchor = document.createElement('a');
-        }
-        src_url_equal_anchor.href = url;
-        return element_src === src_url_equal_anchor.href;
     }
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
@@ -117,9 +106,6 @@ var app = (function () {
     function space() {
         return text$1(' ');
     }
-    function empty() {
-        return text$1('');
-    }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
@@ -139,59 +125,6 @@ var app = (function () {
     function set_style(node, key, value, important) {
         node.style.setProperty(key, value, important ? 'important' : '');
     }
-    // unfortunately this can't be a constant as that wouldn't be tree-shakeable
-    // so we cache the result instead
-    let crossorigin;
-    function is_crossorigin() {
-        if (crossorigin === undefined) {
-            crossorigin = false;
-            try {
-                if (typeof window !== 'undefined' && window.parent) {
-                    void window.parent.document;
-                }
-            }
-            catch (error) {
-                crossorigin = true;
-            }
-        }
-        return crossorigin;
-    }
-    function add_resize_listener(node, fn) {
-        const computed_style = getComputedStyle(node);
-        if (computed_style.position === 'static') {
-            node.style.position = 'relative';
-        }
-        const iframe = element('iframe');
-        iframe.setAttribute('style', 'display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; ' +
-            'overflow: hidden; border: 0; opacity: 0; pointer-events: none; z-index: -1;');
-        iframe.setAttribute('aria-hidden', 'true');
-        iframe.tabIndex = -1;
-        const crossorigin = is_crossorigin();
-        let unsubscribe;
-        if (crossorigin) {
-            iframe.src = "data:text/html,<script>onresize=function(){parent.postMessage(0,'*')}</script>";
-            unsubscribe = listen(window, 'message', (event) => {
-                if (event.source === iframe.contentWindow)
-                    fn();
-            });
-        }
-        else {
-            iframe.src = 'about:blank';
-            iframe.onload = () => {
-                unsubscribe = listen(iframe.contentWindow, 'resize', fn);
-            };
-        }
-        append(node, iframe);
-        return () => {
-            if (crossorigin) {
-                unsubscribe();
-            }
-            else if (unsubscribe && iframe.contentWindow) {
-                unsubscribe();
-            }
-            detach(iframe);
-        };
-    }
     function custom_event(type, detail, bubbles = false) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, false, detail);
@@ -206,6 +139,9 @@ var app = (function () {
         if (!current_component)
             throw new Error('Function called outside component initialization');
         return current_component;
+    }
+    function onMount(fn) {
+        get_current_component().$$.on_mount.push(fn);
     }
 
     const dirty_components = [];
@@ -273,19 +209,6 @@ var app = (function () {
     }
     const outroing = new Set();
     let outros;
-    function group_outros() {
-        outros = {
-            r: 0,
-            c: [],
-            p: outros // parent group
-        };
-    }
-    function check_outros() {
-        if (!outros.r) {
-            run_all(outros.c);
-        }
-        outros = outros.p;
-    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -308,94 +231,6 @@ var app = (function () {
             block.o(local);
         }
     }
-
-    function handle_promise(promise, info) {
-        const token = info.token = {};
-        function update(type, index, key, value) {
-            if (info.token !== token)
-                return;
-            info.resolved = value;
-            let child_ctx = info.ctx;
-            if (key !== undefined) {
-                child_ctx = child_ctx.slice();
-                child_ctx[key] = value;
-            }
-            const block = type && (info.current = type)(child_ctx);
-            let needs_flush = false;
-            if (info.block) {
-                if (info.blocks) {
-                    info.blocks.forEach((block, i) => {
-                        if (i !== index && block) {
-                            group_outros();
-                            transition_out(block, 1, 1, () => {
-                                if (info.blocks[i] === block) {
-                                    info.blocks[i] = null;
-                                }
-                            });
-                            check_outros();
-                        }
-                    });
-                }
-                else {
-                    info.block.d(1);
-                }
-                block.c();
-                transition_in(block, 1);
-                block.m(info.mount(), info.anchor);
-                needs_flush = true;
-            }
-            info.block = block;
-            if (info.blocks)
-                info.blocks[index] = block;
-            if (needs_flush) {
-                flush();
-            }
-        }
-        if (is_promise(promise)) {
-            const current_component = get_current_component();
-            promise.then(value => {
-                set_current_component(current_component);
-                update(info.then, 1, info.value, value);
-                set_current_component(null);
-            }, error => {
-                set_current_component(current_component);
-                update(info.catch, 2, info.error, error);
-                set_current_component(null);
-                if (!info.hasCatch) {
-                    throw error;
-                }
-            });
-            // if we previously had a then/catch block, destroy it
-            if (info.current !== info.pending) {
-                update(info.pending, 0);
-                return true;
-            }
-        }
-        else {
-            if (info.current !== info.then) {
-                update(info.then, 1, info.value, promise);
-                return true;
-            }
-            info.resolved = promise;
-        }
-    }
-    function update_await_block_branch(info, ctx, dirty) {
-        const child_ctx = ctx.slice();
-        const { resolved } = info;
-        if (info.current === info.then) {
-            child_ctx[info.value] = resolved;
-        }
-        if (info.current === info.catch) {
-            child_ctx[info.error] = resolved;
-        }
-        info.block.p(child_ctx, dirty);
-    }
-
-    const globals = (typeof window !== 'undefined'
-        ? window
-        : typeof globalThis !== 'undefined'
-            ? globalThis
-            : global);
     function create_component(block) {
         block && block.c();
     }
@@ -659,9 +494,9 @@ var app = (function () {
     };
 
     /* lib/Page.svelte generated by Svelte v3.43.0 */
-    const file$k = "lib/Page.svelte";
+    const file$b = "lib/Page.svelte";
 
-    function create_fragment$l(ctx) {
+    function create_fragment$b(ctx) {
     	let div3;
     	let div0;
     	let t0;
@@ -682,14 +517,14 @@ var app = (function () {
     			t1 = space();
     			div2 = element("div");
     			attr_dev(div0, "class", "side svelte-1qs1965");
-    			add_location(div0, file$k, 10, 2, 173);
+    			add_location(div0, file$b, 10, 2, 173);
     			attr_dev(div1, "class", "container svelte-1qs1965");
     			set_style(div1, "margin-bottom", /*bottom*/ ctx[0]);
-    			add_location(div1, file$k, 11, 2, 196);
+    			add_location(div1, file$b, 11, 2, 196);
     			attr_dev(div2, "class", "side svelte-1qs1965");
-    			add_location(div2, file$k, 14, 2, 276);
+    			add_location(div2, file$b, 14, 2, 276);
     			attr_dev(div3, "class", "row svelte-1qs1965");
-    			add_location(div3, file$k, 9, 0, 153);
+    			add_location(div3, file$b, 9, 0, 153);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -745,7 +580,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$l.name,
+    		id: create_fragment$b.name,
     		type: "component",
     		source: "",
     		ctx
@@ -754,7 +589,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$l($$self, $$props, $$invalidate) {
+    function instance$b($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Page', slots, ['default']);
     	let { color = null } = $$props;
@@ -791,13 +626,13 @@ var app = (function () {
     class Page extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$l, create_fragment$l, safe_not_equal, { color: 1, bottom: 0 });
+    		init(this, options, instance$b, create_fragment$b, safe_not_equal, { color: 1, bottom: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Page",
     			options,
-    			id: create_fragment$l.name
+    			id: create_fragment$b.name
     		});
     	}
 
@@ -819,10 +654,10 @@ var app = (function () {
     }
 
     /* lib/One.svelte generated by Svelte v3.43.0 */
-    const file$j = "lib/One.svelte";
+    const file$a = "lib/One.svelte";
 
     // (11:4) {#if accent}
-    function create_if_block$4(ctx) {
+    function create_if_block$3(ctx) {
     	let div;
 
     	const block = {
@@ -830,7 +665,7 @@ var app = (function () {
     			div = element("div");
     			attr_dev(div, "class", "line svelte-1kpipmv");
     			set_style(div, "background-color", /*accent*/ ctx[0]);
-    			add_location(div, file$j, 11, 6, 274);
+    			add_location(div, file$a, 11, 6, 274);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -847,7 +682,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$3.name,
     		type: "if",
     		source: "(11:4) {#if accent}",
     		ctx
@@ -856,14 +691,14 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$k(ctx) {
+    function create_fragment$a(ctx) {
     	let div2;
     	let div1;
     	let t0;
     	let t1;
     	let div0;
     	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$4(ctx);
+    	let if_block = /*accent*/ ctx[0] && create_if_block$3(ctx);
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
@@ -876,12 +711,12 @@ var app = (function () {
     			if (default_slot) default_slot.c();
     			t1 = space();
     			div0 = element("div");
-    			add_location(div0, file$j, 14, 4, 357);
+    			add_location(div0, file$a, 14, 4, 357);
     			attr_dev(div1, "class", "body svelte-1kpipmv");
     			set_style(div1, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			add_location(div1, file$j, 9, 2, 194);
+    			add_location(div1, file$a, 9, 2, 194);
     			attr_dev(div2, "class", "column svelte-1kpipmv");
-    			add_location(div2, file$j, 8, 0, 171);
+    			add_location(div2, file$a, 8, 0, 171);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -905,7 +740,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$4(ctx);
+    					if_block = create_if_block$3(ctx);
     					if_block.c();
     					if_block.m(div1, t0);
     				}
@@ -951,7 +786,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$k.name,
+    		id: create_fragment$a.name,
     		type: "component",
     		source: "",
     		ctx
@@ -960,7 +795,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$k($$self, $$props, $$invalidate) {
+    function instance$a($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('One', slots, ['default']);
     	let { accent = '' } = $$props;
@@ -996,13 +831,13 @@ var app = (function () {
     class One extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { accent: 0, left: 1 });
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { accent: 0, left: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "One",
     			options,
-    			id: create_fragment$k.name
+    			id: create_fragment$a.name
     		});
     	}
 
@@ -1024,10 +859,10 @@ var app = (function () {
     }
 
     /* lib/Two.svelte generated by Svelte v3.43.0 */
-    const file$i = "lib/Two.svelte";
+    const file$9 = "lib/Two.svelte";
 
     // (13:6) {#if accent}
-    function create_if_block$3(ctx) {
+    function create_if_block$2(ctx) {
     	let div;
 
     	const block = {
@@ -1035,217 +870,7 @@ var app = (function () {
     			div = element("div");
     			attr_dev(div, "class", "line svelte-s0w7u3");
     			set_style(div, "background-color", /*accent*/ ctx[0]);
-    			add_location(div, file$i, 13, 8, 313);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*accent*/ 1) {
-    				set_style(div, "background-color", /*accent*/ ctx[0]);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$3.name,
-    		type: "if",
-    		source: "(13:6) {#if accent}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$j(ctx) {
-    	let div3;
-    	let div0;
-    	let t0;
-    	let div2;
-    	let div1;
-    	let t1;
-    	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$3(ctx);
-    	const default_slot_template = /*#slots*/ ctx[3].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
-
-    	const block = {
-    		c: function create() {
-    			div3 = element("div");
-    			div0 = element("div");
-    			t0 = space();
-    			div2 = element("div");
-    			div1 = element("div");
-    			if (if_block) if_block.c();
-    			t1 = space();
-    			if (default_slot) default_slot.c();
-    			add_location(div0, file$i, 9, 2, 197);
-    			attr_dev(div1, "class", "body svelte-s0w7u3");
-    			set_style(div1, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			add_location(div1, file$i, 11, 4, 229);
-    			attr_dev(div2, "class", "box svelte-s0w7u3");
-    			add_location(div2, file$i, 10, 2, 207);
-    			attr_dev(div3, "class", "column svelte-s0w7u3");
-    			add_location(div3, file$i, 8, 0, 174);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, div0);
-    			append_dev(div3, t0);
-    			append_dev(div3, div2);
-    			append_dev(div2, div1);
-    			if (if_block) if_block.m(div1, null);
-    			append_dev(div1, t1);
-
-    			if (default_slot) {
-    				default_slot.m(div1, null);
-    			}
-
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (/*accent*/ ctx[0]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block$3(ctx);
-    					if_block.c();
-    					if_block.m(div1, t1);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-
-    			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 4)) {
-    					update_slot_base(
-    						default_slot,
-    						default_slot_template,
-    						ctx,
-    						/*$$scope*/ ctx[2],
-    						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[2])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null),
-    						null
-    					);
-    				}
-    			}
-
-    			if (!current || dirty & /*left*/ 2) {
-    				set_style(div1, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(default_slot, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(default_slot, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div3);
-    			if (if_block) if_block.d();
-    			if (default_slot) default_slot.d(detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$j.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$j($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Two', slots, ['default']);
-    	let { accent = '' } = $$props;
-    	let { left = 'none' } = $$props;
-    	left = colors$2[left] || left;
-    	accent = colors$2[accent] || accent;
-    	const writable_props = ['accent', 'left'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Two> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
-    		if ('left' in $$props) $$invalidate(1, left = $$props.left);
-    		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
-    	};
-
-    	$$self.$capture_state = () => ({ accent, left, colors: colors$2 });
-
-    	$$self.$inject_state = $$props => {
-    		if ('accent' in $$props) $$invalidate(0, accent = $$props.accent);
-    		if ('left' in $$props) $$invalidate(1, left = $$props.left);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [accent, left, $$scope, slots];
-    }
-
-    class Two extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$j, create_fragment$j, safe_not_equal, { accent: 0, left: 1 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Two",
-    			options,
-    			id: create_fragment$j.name
-    		});
-    	}
-
-    	get accent() {
-    		throw new Error("<Two>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set accent(value) {
-    		throw new Error("<Two>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get left() {
-    		throw new Error("<Two>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set left(value) {
-    		throw new Error("<Two>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
-    /* lib/Three.svelte generated by Svelte v3.43.0 */
-    const file$h = "lib/Three.svelte";
-
-    // (12:4) {#if accent}
-    function create_if_block$2(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			attr_dev(div, "class", "line svelte-1nervpm");
-    			set_style(div, "background-color", /*accent*/ ctx[0]);
-    			add_location(div, file$h, 12, 6, 282);
+    			add_location(div, file$9, 13, 8, 313);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1264,17 +889,18 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(12:4) {#if accent}",
+    		source: "(13:6) {#if accent}",
     		ctx
     	});
 
     	return block;
     }
 
-    function create_fragment$i(ctx) {
-    	let div2;
+    function create_fragment$9(ctx) {
+    	let div3;
     	let div0;
     	let t0;
+    	let div2;
     	let div1;
     	let t1;
     	let current;
@@ -1284,27 +910,31 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			div2 = element("div");
+    			div3 = element("div");
     			div0 = element("div");
     			t0 = space();
+    			div2 = element("div");
     			div1 = element("div");
     			if (if_block) if_block.c();
     			t1 = space();
     			if (default_slot) default_slot.c();
-    			add_location(div0, file$h, 9, 2, 192);
-    			attr_dev(div1, "class", "body svelte-1nervpm");
+    			add_location(div0, file$9, 9, 2, 197);
+    			attr_dev(div1, "class", "body svelte-s0w7u3");
     			set_style(div1, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			add_location(div1, file$h, 10, 2, 202);
-    			attr_dev(div2, "class", "column svelte-1nervpm");
-    			add_location(div2, file$h, 8, 0, 169);
+    			add_location(div1, file$9, 11, 4, 229);
+    			attr_dev(div2, "class", "box svelte-s0w7u3");
+    			add_location(div2, file$9, 10, 2, 207);
+    			attr_dev(div3, "class", "column svelte-s0w7u3");
+    			add_location(div3, file$9, 8, 0, 174);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
-    			append_dev(div2, t0);
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, div0);
+    			append_dev(div3, t0);
+    			append_dev(div3, div2);
     			append_dev(div2, div1);
     			if (if_block) if_block.m(div1, null);
     			append_dev(div1, t1);
@@ -1358,7 +988,7 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
+    			if (detaching) detach_dev(div3);
     			if (if_block) if_block.d();
     			if (default_slot) default_slot.d(detaching);
     		}
@@ -1366,7 +996,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$i.name,
+    		id: create_fragment$9.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1375,17 +1005,17 @@ var app = (function () {
     	return block;
     }
 
-    function instance$i($$self, $$props, $$invalidate) {
+    function instance$9($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Three', slots, ['default']);
-    	let { accent } = $$props;
+    	validate_slots('Two', slots, ['default']);
+    	let { accent = '' } = $$props;
     	let { left = 'none' } = $$props;
     	left = colors$2[left] || left;
     	accent = colors$2[accent] || accent;
     	const writable_props = ['accent', 'left'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Three> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Two> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
@@ -1408,45 +1038,38 @@ var app = (function () {
     	return [accent, left, $$scope, slots];
     }
 
-    class Three$1 extends SvelteComponentDev {
+    class Two extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$i, create_fragment$i, safe_not_equal, { accent: 0, left: 1 });
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, { accent: 0, left: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Three",
+    			tagName: "Two",
     			options,
-    			id: create_fragment$i.name
+    			id: create_fragment$9.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*accent*/ ctx[0] === undefined && !('accent' in props)) {
-    			console.warn("<Three> was created without expected prop 'accent'");
-    		}
     	}
 
     	get accent() {
-    		throw new Error("<Three>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Two>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set accent(value) {
-    		throw new Error("<Three>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Two>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	get left() {
-    		throw new Error("<Three>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Two>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set left(value) {
-    		throw new Error("<Three>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Two>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
     /* lib/Left.svelte generated by Svelte v3.43.0 */
-    const file$g = "lib/Left.svelte";
+    const file$8 = "lib/Left.svelte";
 
     // (11:4) {#if accent}
     function create_if_block$1(ctx) {
@@ -1457,7 +1080,7 @@ var app = (function () {
     			div = element("div");
     			attr_dev(div, "class", "line svelte-6r4k1");
     			set_style(div, "background-color", /*accent*/ ctx[0]);
-    			add_location(div, file$g, 11, 6, 277);
+    			add_location(div, file$8, 11, 6, 277);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -1483,7 +1106,7 @@ var app = (function () {
     	return block;
     }
 
-    function create_fragment$h(ctx) {
+    function create_fragment$8(ctx) {
     	let div2;
     	let div0;
     	let t0;
@@ -1505,10 +1128,10 @@ var app = (function () {
     			div1 = element("div");
     			attr_dev(div0, "class", "body svelte-6r4k1");
     			set_style(div0, "border-left", "3px solid " + /*left*/ ctx[1]);
-    			add_location(div0, file$g, 9, 2, 197);
-    			add_location(div1, file$g, 15, 2, 367);
+    			add_location(div0, file$8, 9, 2, 197);
+    			add_location(div1, file$8, 15, 2, 367);
     			attr_dev(div2, "class", "column svelte-6r4k1");
-    			add_location(div2, file$g, 8, 0, 174);
+    			add_location(div2, file$8, 8, 0, 174);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1578,7 +1201,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$h.name,
+    		id: create_fragment$8.name,
     		type: "component",
     		source: "",
     		ctx
@@ -1587,7 +1210,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$h($$self, $$props, $$invalidate) {
+    function instance$8($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Left', slots, ['default']);
     	let { accent = '' } = $$props;
@@ -1623,13 +1246,13 @@ var app = (function () {
     class Left extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$h, create_fragment$h, safe_not_equal, { accent: 0, left: 1 });
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { accent: 0, left: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Left",
     			options,
-    			id: create_fragment$h.name
+    			id: create_fragment$8.name
     		});
     	}
 
@@ -1650,890 +1273,11 @@ var app = (function () {
     	}
     }
 
-    /* lib/Ratio.svelte generated by Svelte v3.43.0 */
-
-    const file$f = "lib/Ratio.svelte";
-
-    function create_fragment$g(ctx) {
-    	let div;
-    	let div_resize_listener;
-    	let current;
-    	const default_slot_template = /*#slots*/ ctx[4].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[3], null);
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			if (default_slot) default_slot.c();
-    			attr_dev(div, "class", "container svelte-qzc69a");
-    			set_style(div, "height", /*height*/ ctx[1] + "px");
-    			add_render_callback(() => /*div_elementresize_handler*/ ctx[5].call(div));
-    			add_location(div, file$f, 6, 0, 103);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-
-    			if (default_slot) {
-    				default_slot.m(div, null);
-    			}
-
-    			div_resize_listener = add_resize_listener(div, /*div_elementresize_handler*/ ctx[5].bind(div));
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 8)) {
-    					update_slot_base(
-    						default_slot,
-    						default_slot_template,
-    						ctx,
-    						/*$$scope*/ ctx[3],
-    						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[3])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[3], dirty, null),
-    						null
-    					);
-    				}
-    			}
-
-    			if (!current || dirty & /*height*/ 2) {
-    				set_style(div, "height", /*height*/ ctx[1] + "px");
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(default_slot, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(default_slot, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (default_slot) default_slot.d(detaching);
-    			div_resize_listener();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$g.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$g($$self, $$props, $$invalidate) {
-    	let height;
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Ratio', slots, ['default']);
-    	let { ratio = 0.5 } = $$props;
-    	let clientWidth = 100;
-    	const writable_props = ['ratio'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Ratio> was created with unknown prop '${key}'`);
-    	});
-
-    	function div_elementresize_handler() {
-    		clientWidth = this.clientWidth;
-    		$$invalidate(0, clientWidth);
-    	}
-
-    	$$self.$$set = $$props => {
-    		if ('ratio' in $$props) $$invalidate(2, ratio = $$props.ratio);
-    		if ('$$scope' in $$props) $$invalidate(3, $$scope = $$props.$$scope);
-    	};
-
-    	$$self.$capture_state = () => ({ ratio, clientWidth, height });
-
-    	$$self.$inject_state = $$props => {
-    		if ('ratio' in $$props) $$invalidate(2, ratio = $$props.ratio);
-    		if ('clientWidth' in $$props) $$invalidate(0, clientWidth = $$props.clientWidth);
-    		if ('height' in $$props) $$invalidate(1, height = $$props.height);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*clientWidth, ratio*/ 5) {
-    			$$invalidate(1, height = clientWidth / ratio);
-    		}
-    	};
-
-    	return [clientWidth, height, ratio, $$scope, slots, div_elementresize_handler];
-    }
-
-    class Ratio extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$g, create_fragment$g, safe_not_equal, { ratio: 2 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Ratio",
-    			options,
-    			id: create_fragment$g.name
-    		});
-    	}
-
-    	get ratio() {
-    		throw new Error("<Ratio>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set ratio(value) {
-    		throw new Error("<Ratio>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
-    var combos = [
-         [ '#6699cc', '#C4ABAB', '#335799', '#8C8C88', '#F2C0BB', '#6D5685' ],
-         [ '#914045', '#cc7066', '#cc8a66', '#603a39', '#705E5C', '#8BA3A2' ],
-         [ '#8a849a', '#b5b0bf', '#D68881', '#d7d5d2', '#8BA3A2', '#C4ABAB' ],
-         [ '#cc7066', '#335799', '#7f9c6c', '#F2C0BB', '#9c896c', '#2D85A8' ],
-         [ '#848f9a', '#9aa4ac', '#8C8C88', '#b0b8bf', '#C4ABAB', '#838B91' ],
-         [ '#2D85A8', '#50617A', '#735873', '#8C8C88', '#C4ABAB', '#4d4d4d' ],
-         [ '#6accb2', '#705E5C', '#cc8a66', '#cc7066', '#7f9c6c', '#6699cc' ],
-         [ '#303b50', '#335799', '#e6d7b3', '#914045', '#C4ABAB', '#838B91' ],
-         [ '#C4ABAB', '#8C8C88', '#705E5C', '#2D85A8', '#e6d7b3', '#cc7066' ],
-         [ '#6699cc', '#6accb2', '#e1e6b3', '#cc7066', '#F2C0BB', '#a3a5a5' ],
-         [ '#C4ABAB', '#cc6966', '#275291', '#914045', '#8BA3A2', '#978BA3' ],
-         [ '#cc7066', '#2D85A8', '#c67a53', '#8BA3A2', '#dfb59f', '#C4ABAB' ]
-    ];
-
-    /* eslint-disable no-bitwise */
-
-    /* eslint-disable no-bitwise */
-    // function xorShift(seed){
-    //   seed ^= seed << 13;
-    //   seed ^= seed >> 17;
-    //   seed ^= seed << 5;
-    //   let pos= (seed <0)?~seed+1: seed; //2's complement of the negative result to make all numbers positive.
-    //   pos= pos%10000
-    //   pos=pos/10000
-    //   if(pos===0){
-    //     pos=0.836
-    //   }
-    //   return pos
-    // }
-
-    // const toNum=function(seed){
-    //   let sum=0
-    //   for (let i = 0; i < seed.length; i += 1){
-    //     sum+=seed.charCodeAt(i)
-    //   }
-    //   return sum
-    // }
-
-    // const getNums=function(seed, num=4){
-    //   if(typeof seed==='string'){
-    //     seed=toNum(seed)
-    //   }
-    //   let arr=[]
-    //   for (let i = 0; i < num; i += 1){
-    //     let n=middleSquare(seed)
-    //     arr.push(n/1000)
-    //     seed=n
-    //   }
-    //   return arr
-    // }
-
-    function generate() {
-      return 'xxxxxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16)
-      })
-    }
-
-    const getNums = function (seed) {
-      let arr = [];
-      for (let i = 0; i < seed.length; i += 1) {
-        let num = parseInt(seed[i], 16);
-        arr.push(num / 16);
-      }
-      return arr
-    };
-
-    function pick(input, num) {
-      return input[Math.floor(num * input.length)]
-    }
-    // export default { generate, getNums, pick }
-
-    // let seed=generate()
-    // console.log(seed,fromID(seed))
-    // let nums=getNums(seed,4)
-    // console.log(nums)
-    // let num=nums.pop()
-    // console.log(num,pick([],num))
-
-    // console.log(mulberry32(1331))
-
-    /* lib/Grid/Grid.svelte generated by Svelte v3.43.0 */
-    const file$e = "lib/Grid/Grid.svelte";
-
-    function get_each_context(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
-    	return child_ctx;
-    }
-
-    // (52:38) 
-    function create_if_block_3(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			attr_dev(div, "class", "img " + /*cell*/ ctx[10].size + " svelte-5bq61u");
-    			set_style(div, "background-image", "url(" + /*cell*/ ctx[10].image + ")");
-    			add_location(div, file$e, 52, 8, 1480);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3.name,
-    		type: "if",
-    		source: "(52:38) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (50:38) 
-    function create_if_block_2(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			attr_dev(div, "class", "color " + /*cell*/ ctx[10].size + " svelte-5bq61u");
-    			set_style(div, "background-color", /*cell*/ ctx[10].color);
-    			add_location(div, file$e, 50, 8, 1360);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(50:38) ",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (48:6) {#if cell.type === 'empty'}
-    function create_if_block_1(ctx) {
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			add_location(div, file$e, 48, 8, 1305);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(48:6) {#if cell.type === 'empty'}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (47:4) {#each cells as cell}
-    function create_each_block(ctx) {
-    	let if_block_anchor;
-
-    	function select_block_type(ctx, dirty) {
-    		if (/*cell*/ ctx[10].type === 'empty') return create_if_block_1;
-    		if (/*cell*/ ctx[10].type === 'color') return create_if_block_2;
-    		if (/*cell*/ ctx[10].type === 'image') return create_if_block_3;
-    	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type && current_block_type(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (if_block) if_block.p(ctx, dirty);
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) {
-    				if_block.d(detaching);
-    			}
-
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block.name,
-    		type: "each",
-    		source: "(47:4) {#each cells as cell}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (41:0) <Ratio {ratio}>
-    function create_default_slot$6(ctx) {
-    	let div;
-    	let each_value = /*cells*/ ctx[5];
-    	validate_each_argument(each_value);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-    	}
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			attr_dev(div, "class", "goldGrid svelte-5bq61u");
-    			set_style(div, "grid-template-columns", "repeat(" + /*cols*/ ctx[3] + ", 1fr)");
-    			set_style(div, "grid-template-rows", "repeat(" + /*rows*/ ctx[2] + ", 1fr)");
-    			add_location(div, file$e, 41, 2, 1108);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(div, null);
-    			}
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*cells*/ 32) {
-    				each_value = /*cells*/ ctx[5];
-    				validate_each_argument(each_value);
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div, null);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value.length;
-    			}
-
-    			if (dirty & /*cols*/ 8) {
-    				set_style(div, "grid-template-columns", "repeat(" + /*cols*/ ctx[3] + ", 1fr)");
-    			}
-
-    			if (dirty & /*rows*/ 4) {
-    				set_style(div, "grid-template-rows", "repeat(" + /*rows*/ ctx[2] + ", 1fr)");
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			destroy_each(each_blocks, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$6.name,
-    		type: "slot",
-    		source: "(41:0) <Ratio {ratio}>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (59:0) {#if demo}
-    function create_if_block(ctx) {
-    	let div;
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			t = text$1(/*seed*/ ctx[0]);
-    			attr_dev(div, "class", "f1");
-    			add_location(div, file$e, 59, 2, 1612);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			append_dev(div, t);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*seed*/ 1) set_data_dev(t, /*seed*/ ctx[0]);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block.name,
-    		type: "if",
-    		source: "(59:0) {#if demo}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$f(ctx) {
-    	let ratio_1;
-    	let t;
-    	let if_block_anchor;
-    	let current;
-
-    	ratio_1 = new Ratio({
-    			props: {
-    				ratio: /*ratio*/ ctx[1],
-    				$$slots: { default: [create_default_slot$6] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	let if_block = /*demo*/ ctx[4] && create_if_block(ctx);
-
-    	const block = {
-    		c: function create() {
-    			create_component(ratio_1.$$.fragment);
-    			t = space();
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(ratio_1, target, anchor);
-    			insert_dev(target, t, anchor);
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			const ratio_1_changes = {};
-    			if (dirty & /*ratio*/ 2) ratio_1_changes.ratio = /*ratio*/ ctx[1];
-
-    			if (dirty & /*$$scope, cols, rows*/ 8204) {
-    				ratio_1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			ratio_1.$set(ratio_1_changes);
-
-    			if (/*demo*/ ctx[4]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(ratio_1.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(ratio_1.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(ratio_1, detaching);
-    			if (detaching) detach_dev(t);
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$f.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$f($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Grid', slots, []);
-    	let { images = [] } = $$props;
-    	let { image = null } = $$props;
-    	let { ratio = 1.618 } = $$props; //0.382
-    	let { rows = 3 } = $$props;
-    	let { cols = 3 } = $$props;
-    	let { seed = null } = $$props;
-    	let demo = false;
-
-    	if (seed === null) {
-    		seed = generate();
-    		demo = true;
-    	}
-
-    	let nums = getNums(seed);
-
-    	if (image && images.length === 0) {
-    		images.push(image);
-    	}
-
-    	let colors = pick(combos, nums.pop());
-    	let cells = [];
-
-    	for (let i = 0; i < rows * cols; i += 1) {
-    		let type = pick(['empty', 'empty', 'empty', 'color', 'image'], nums.pop());
-
-    		if (images.length === 0 && type === 'image') {
-    			type = 'color';
-    		}
-
-    		let cell = { type };
-
-    		if (type === 'color') {
-    			cell.color = pick(colors, nums.pop());
-    			cell.size = pick(['one', 'one', 'row2', 'col2', 'four'], nums.pop());
-    		}
-
-    		if (type === 'image') {
-    			cell.image = pick(images, nums.pop());
-    			cell.size = pick(['one', 'row2', 'col2', 'four'], nums.pop());
-    		}
-
-    		cells.push(cell);
-    	}
-
-    	const writable_props = ['images', 'image', 'ratio', 'rows', 'cols', 'seed'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Grid> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('images' in $$props) $$invalidate(6, images = $$props.images);
-    		if ('image' in $$props) $$invalidate(7, image = $$props.image);
-    		if ('ratio' in $$props) $$invalidate(1, ratio = $$props.ratio);
-    		if ('rows' in $$props) $$invalidate(2, rows = $$props.rows);
-    		if ('cols' in $$props) $$invalidate(3, cols = $$props.cols);
-    		if ('seed' in $$props) $$invalidate(0, seed = $$props.seed);
-    	};
-
-    	$$self.$capture_state = () => ({
-    		Ratio,
-    		combos,
-    		generate,
-    		getNums,
-    		pick,
-    		images,
-    		image,
-    		ratio,
-    		rows,
-    		cols,
-    		seed,
-    		demo,
-    		nums,
-    		colors,
-    		cells
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('images' in $$props) $$invalidate(6, images = $$props.images);
-    		if ('image' in $$props) $$invalidate(7, image = $$props.image);
-    		if ('ratio' in $$props) $$invalidate(1, ratio = $$props.ratio);
-    		if ('rows' in $$props) $$invalidate(2, rows = $$props.rows);
-    		if ('cols' in $$props) $$invalidate(3, cols = $$props.cols);
-    		if ('seed' in $$props) $$invalidate(0, seed = $$props.seed);
-    		if ('demo' in $$props) $$invalidate(4, demo = $$props.demo);
-    		if ('nums' in $$props) nums = $$props.nums;
-    		if ('colors' in $$props) colors = $$props.colors;
-    		if ('cells' in $$props) $$invalidate(5, cells = $$props.cells);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [seed, ratio, rows, cols, demo, cells, images, image];
-    }
-
-    class Grid extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, {
-    			images: 6,
-    			image: 7,
-    			ratio: 1,
-    			rows: 2,
-    			cols: 3,
-    			seed: 0
-    		});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Grid",
-    			options,
-    			id: create_fragment$f.name
-    		});
-    	}
-
-    	get images() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set images(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get image() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set image(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get ratio() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set ratio(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get rows() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set rows(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get cols() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set cols(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get seed() {
-    		throw new Error("<Grid>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set seed(value) {
-    		throw new Error("<Grid>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
-    /* lib/Caret.svelte generated by Svelte v3.43.0 */
-
-    const file$d = "lib/Caret.svelte";
-
-    function create_fragment$e(ctx) {
-    	let a;
-    	let svg;
-    	let path;
-
-    	const block = {
-    		c: function create() {
-    			a = element("a");
-    			svg = svg_element("svg");
-    			path = svg_element("path");
-    			attr_dev(path, "fill", /*color*/ ctx[1]);
-    			attr_dev(path, "d", "M1299 1088q0 13-10 23l-466 466q-10 10-23 10t-23-10l-50-50q-10-10-10-23t10-23l393-393-393-393q-10-10-10-23t10-23l50-50q10-10 23-10t23 10l466 466q10 10 10 23z");
-    			add_location(path, file$d, 8, 4, 211);
-    			attr_dev(svg, "width", /*width*/ ctx[2]);
-    			attr_dev(svg, "viewBox", "0 0 2048 2048");
-    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
-    			add_location(svg, file$d, 7, 2, 134);
-    			attr_dev(a, "href", /*href*/ ctx[0]);
-    			attr_dev(a, "class", "container svelte-11w4uta");
-    			add_location(a, file$d, 6, 0, 103);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, a, anchor);
-    			append_dev(a, svg);
-    			append_dev(svg, path);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*color*/ 2) {
-    				attr_dev(path, "fill", /*color*/ ctx[1]);
-    			}
-
-    			if (dirty & /*width*/ 4) {
-    				attr_dev(svg, "width", /*width*/ ctx[2]);
-    			}
-
-    			if (dirty & /*href*/ 1) {
-    				attr_dev(a, "href", /*href*/ ctx[0]);
-    			}
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(a);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$e.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$e($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Caret', slots, []);
-    	let { href = '#' } = $$props;
-    	let { color = '#50617A' } = $$props;
-    	let { width = '65px' } = $$props;
-    	const writable_props = ['href', 'color', 'width'];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Caret> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('href' in $$props) $$invalidate(0, href = $$props.href);
-    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
-    		if ('width' in $$props) $$invalidate(2, width = $$props.width);
-    	};
-
-    	$$self.$capture_state = () => ({ href, color, width });
-
-    	$$self.$inject_state = $$props => {
-    		if ('href' in $$props) $$invalidate(0, href = $$props.href);
-    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
-    		if ('width' in $$props) $$invalidate(2, width = $$props.width);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [href, color, width];
-    }
-
-    class Caret extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$e, create_fragment$e, safe_not_equal, { href: 0, color: 1, width: 2 });
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Caret",
-    			options,
-    			id: create_fragment$e.name
-    		});
-    	}
-
-    	get href() {
-    		throw new Error("<Caret>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set href(value) {
-    		throw new Error("<Caret>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get color() {
-    		throw new Error("<Caret>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set color(value) {
-    		throw new Error("<Caret>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get width() {
-    		throw new Error("<Caret>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set width(value) {
-    		throw new Error("<Caret>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-    }
-
     /* lib/TextArea.svelte generated by Svelte v3.43.0 */
 
-    const file$c = "lib/TextArea.svelte";
+    const file$7 = "lib/TextArea.svelte";
 
-    function create_fragment$d(ctx) {
+    function create_fragment$7(ctx) {
     	let textarea;
     	let mounted;
     	let dispose;
@@ -2549,7 +1293,7 @@ var app = (function () {
     			set_style(textarea, "line-height", "1.5rem");
     			attr_dev(textarea, "spellcheck", "false");
     			attr_dev(textarea, "type", "text");
-    			add_location(textarea, file$c, 18, 0, 374);
+    			add_location(textarea, file$7, 18, 0, 374);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2601,7 +1345,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$d.name,
+    		id: create_fragment$7.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2610,7 +1354,7 @@ var app = (function () {
     	return block;
     }
 
-    function instance$d($$self, $$props, $$invalidate) {
+    function instance$7($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TextArea', slots, []);
     	let { value = '' } = $$props;
@@ -2699,7 +1443,7 @@ var app = (function () {
     	constructor(options) {
     		super(options);
 
-    		init(this, options, instance$d, create_fragment$d, safe_not_equal, {
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {
     			value: 0,
     			cb: 7,
     			width: 1,
@@ -2712,7 +1456,7 @@ var app = (function () {
     			component: this,
     			tagName: "TextArea",
     			options,
-    			id: create_fragment$d.name
+    			id: create_fragment$7.name
     		});
     	}
 
@@ -2765,33 +1509,24 @@ var app = (function () {
     	}
     }
 
-    /* lib/Block.svelte generated by Svelte v3.43.0 */
+    /* lib/Back.svelte generated by Svelte v3.43.0 */
 
-    const file$b = "lib/Block.svelte";
+    const file$6 = "lib/Back.svelte";
 
-    function create_fragment$c(ctx) {
+    // (19:2) {#if hover}
+    function create_if_block(ctx) {
     	let div;
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			attr_dev(div, "class", "block container svelte-owkcqy");
-    			set_style(div, "background-color", /*color*/ ctx[0]);
-    			add_location(div, file$b, 4, 0, 53);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    			div.textContent = "spencermountain";
+    			attr_dev(div, "class", "name svelte-2hakpb");
+    			add_location(div, file$6, 19, 4, 573);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*color*/ 1) {
-    				set_style(div, "background-color", /*color*/ ctx[0]);
-    			}
-    		},
-    		i: noop,
-    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     		}
@@ -2799,7 +1534,81 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$c.name,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(19:2) {#if hover}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$6(ctx) {
+    	let a;
+    	let svg;
+    	let g;
+    	let path;
+    	let t;
+    	let if_block = /*hover*/ ctx[2] && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			a = element("a");
+    			svg = svg_element("svg");
+    			g = svg_element("g");
+    			path = svg_element("path");
+    			t = space();
+    			if (if_block) if_block.c();
+    			attr_dev(path, "d", "M81.5,6 C69.8240666,23.5139001 45.8240666,49.9277635 9.5,85.2415902\n        C45.7984814,120.80686 69.7984814,147.22633 81.5,164.5");
+    			attr_dev(path, "stroke", /*color*/ ctx[1]);
+    			attr_dev(path, "stroke-width", "20");
+    			attr_dev(path, "fill-rule", "nonzero");
+    			add_location(path, file$6, 9, 6, 303);
+    			attr_dev(g, "stroke", "none");
+    			attr_dev(g, "stroke-width", "1");
+    			attr_dev(g, "fill", "none");
+    			attr_dev(g, "fill-rule", "evenodd");
+    			attr_dev(g, "stroke-linejoin", "round");
+    			add_location(g, file$6, 8, 4, 206);
+    			attr_dev(svg, "width", "15px");
+    			attr_dev(svg, "height", "50px");
+    			attr_dev(svg, "viewBox", "0 0 90 170");
+    			add_location(svg, file$6, 7, 2, 148);
+    			attr_dev(a, "href", /*href*/ ctx[0]);
+    			attr_dev(a, "class", "container svelte-2hakpb");
+    			add_location(a, file$6, 6, 0, 117);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, a, anchor);
+    			append_dev(a, svg);
+    			append_dev(svg, g);
+    			append_dev(g, path);
+    			append_dev(a, t);
+    			if (if_block) if_block.m(a, null);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*color*/ 2) {
+    				attr_dev(path, "stroke", /*color*/ ctx[1]);
+    			}
+
+    			if (dirty & /*href*/ 1) {
+    				attr_dev(a, "href", /*href*/ ctx[0]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(a);
+    			if (if_block) if_block.d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$6.name,
     		type: "component",
     		source: "",
     		ctx
@@ -2808,52 +1617,65 @@ var app = (function () {
     	return block;
     }
 
-    function instance$c($$self, $$props, $$invalidate) {
+    function instance$6($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Block', slots, []);
-    	let { color = 'steelblue' } = $$props;
-    	const writable_props = ['color'];
+    	validate_slots('Back', slots, []);
+    	let { href = 'https://compromise.cool' } = $$props;
+    	let { color = '#525050' } = $$props;
+    	let hover = false;
+    	const writable_props = ['href', 'color'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Block> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Back> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
-    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
+    		if ('href' in $$props) $$invalidate(0, href = $$props.href);
+    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
     	};
 
-    	$$self.$capture_state = () => ({ color });
+    	$$self.$capture_state = () => ({ href, color, hover });
 
     	$$self.$inject_state = $$props => {
-    		if ('color' in $$props) $$invalidate(0, color = $$props.color);
+    		if ('href' in $$props) $$invalidate(0, href = $$props.href);
+    		if ('color' in $$props) $$invalidate(1, color = $$props.color);
+    		if ('hover' in $$props) $$invalidate(2, hover = $$props.hover);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [color];
+    	return [href, color, hover];
     }
 
-    class Block extends SvelteComponentDev {
+    class Back extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$c, create_fragment$c, safe_not_equal, { color: 0 });
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { href: 0, color: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Block",
+    			tagName: "Back",
     			options,
-    			id: create_fragment$c.name
+    			id: create_fragment$6.name
     		});
     	}
 
+    	get href() {
+    		throw new Error("<Back>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set href(value) {
+    		throw new Error("<Back>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
     	get color() {
-    		throw new Error("<Block>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Back>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set color(value) {
-    		throw new Error("<Block>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Back>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
@@ -2864,7 +1686,7 @@ var app = (function () {
     	return fn(module, module.exports), module.exports;
     }
 
-    createCommonjsModule(function (module, exports) {
+    var lib$4 = createCommonjsModule(function (module, exports) {
     // CodeMirror, copyright (c) by Marijn Haverbeke and others
     // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -12649,6 +11471,335 @@ var app = (function () {
     })));
     });
 
+    /* lib/CodeMirror/CodeMirror.svelte generated by Svelte v3.43.0 */
+    const file$5 = "lib/CodeMirror/CodeMirror.svelte";
+
+    function create_fragment$5(ctx) {
+    	let div;
+    	let textarea;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			textarea = element("textarea");
+    			attr_dev(textarea, "class", "textarea");
+    			attr_dev(textarea, "tabindex", "0 ");
+    			textarea.value = /*text*/ ctx[0];
+    			add_location(textarea, file$5, 48, 2, 1120);
+    			attr_dev(div, "class", "outside svelte-1qxuf");
+    			add_location(div, file$5, 47, 0, 1096);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, textarea);
+    			/*textarea_binding*/ ctx[5](textarea);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*text*/ 1) {
+    				prop_dev(textarea, "value", /*text*/ ctx[0]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			/*textarea_binding*/ ctx[5](null);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$5.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$5($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('CodeMirror', slots, []);
+    	let { text = '' } = $$props;
+    	let { autofocus = true } = $$props;
+    	let editor;
+    	let el;
+
+    	let { highlight = () => {
+    		
+    	} } = $$props;
+
+    	let { onEnter = e => {
+    		return lib$4.Pass;
+    	} } = $$props;
+
+    	const clear = function (doc) {
+    		doc.getAllMarks().forEach(m => m.clear());
+    	};
+
+    	onMount(() => {
+    		// create codemirror instance
+    		editor = lib$4.fromTextArea(el, {
+    			autofocus,
+    			viewportMargin: Infinity,
+    			extraKeys: { Enter: onEnter }
+    		});
+
+    		// update each keypress
+    		editor.on('change', doc => {
+    			clear(doc);
+    			$$invalidate(0, text = doc.getValue());
+    			let offsets = highlight(text) || [];
+
+    			offsets.forEach(m => {
+    				let start = doc.posFromIndex(m.start);
+    				let end = doc.posFromIndex(m.end);
+    				editor.markText(start, end, { className: m.tag });
+    			});
+    		});
+
+    		lib$4.signal(editor, 'change', editor);
+
+    		setTimeout(
+    			() => {
+    				editor.focus();
+    				editor.setCursor(editor.lineCount(), 0);
+    			},
+    			500
+    		);
+    	});
+
+    	const writable_props = ['text', 'autofocus', 'highlight', 'onEnter'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CodeMirror> was created with unknown prop '${key}'`);
+    	});
+
+    	function textarea_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			el = $$value;
+    			$$invalidate(1, el);
+    		});
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
+    		if ('autofocus' in $$props) $$invalidate(2, autofocus = $$props.autofocus);
+    		if ('highlight' in $$props) $$invalidate(3, highlight = $$props.highlight);
+    		if ('onEnter' in $$props) $$invalidate(4, onEnter = $$props.onEnter);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		CodeMirror: lib$4,
+    		text,
+    		autofocus,
+    		editor,
+    		el,
+    		highlight,
+    		onEnter,
+    		clear
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
+    		if ('autofocus' in $$props) $$invalidate(2, autofocus = $$props.autofocus);
+    		if ('editor' in $$props) editor = $$props.editor;
+    		if ('el' in $$props) $$invalidate(1, el = $$props.el);
+    		if ('highlight' in $$props) $$invalidate(3, highlight = $$props.highlight);
+    		if ('onEnter' in $$props) $$invalidate(4, onEnter = $$props.onEnter);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [text, el, autofocus, highlight, onEnter, textarea_binding];
+    }
+
+    class CodeMirror_1 extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {
+    			text: 0,
+    			autofocus: 2,
+    			highlight: 3,
+    			onEnter: 4
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "CodeMirror_1",
+    			options,
+    			id: create_fragment$5.name
+    		});
+    	}
+
+    	get text() {
+    		throw new Error("<CodeMirror>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set text(value) {
+    		throw new Error("<CodeMirror>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get autofocus() {
+    		throw new Error("<CodeMirror>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set autofocus(value) {
+    		throw new Error("<CodeMirror>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get highlight() {
+    		throw new Error("<CodeMirror>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set highlight(value) {
+    		throw new Error("<CodeMirror>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get onEnter() {
+    		throw new Error("<CodeMirror>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set onEnter(value) {
+    		throw new Error("<CodeMirror>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* lib/Below.svelte generated by Svelte v3.43.0 */
+
+    const file$4 = "lib/Below.svelte";
+
+    function create_fragment$4(ctx) {
+    	let div4;
+    	let div0;
+    	let t0;
+    	let div2;
+    	let div1;
+    	let t1;
+    	let div3;
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[1].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[0], null);
+
+    	const block = {
+    		c: function create() {
+    			div4 = element("div");
+    			div0 = element("div");
+    			t0 = space();
+    			div2 = element("div");
+    			div1 = element("div");
+    			if (default_slot) default_slot.c();
+    			t1 = space();
+    			div3 = element("div");
+    			attr_dev(div0, "class", "side svelte-1hre34c");
+    			add_location(div0, file$4, 4, 2, 40);
+    			attr_dev(div1, "class", "half svelte-1hre34c");
+    			add_location(div1, file$4, 6, 4, 91);
+    			attr_dev(div2, "class", "container svelte-1hre34c");
+    			add_location(div2, file$4, 5, 2, 63);
+    			attr_dev(div3, "class", "side svelte-1hre34c");
+    			add_location(div3, file$4, 10, 2, 147);
+    			attr_dev(div4, "class", "row svelte-1hre34c");
+    			add_location(div4, file$4, 3, 0, 20);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div4, anchor);
+    			append_dev(div4, div0);
+    			append_dev(div4, t0);
+    			append_dev(div4, div2);
+    			append_dev(div2, div1);
+
+    			if (default_slot) {
+    				default_slot.m(div1, null);
+    			}
+
+    			append_dev(div4, t1);
+    			append_dev(div4, div3);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 1)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[0],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[0])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[0], dirty, null),
+    						null
+    					);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div4);
+    			if (default_slot) default_slot.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$4.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$4($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Below', slots, ['default']);
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Below> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('$$scope' in $$props) $$invalidate(0, $$scope = $$props.$$scope);
+    	};
+
+    	return [$$scope, slots];
+    }
+
+    class Below extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Below",
+    			options,
+    			id: create_fragment$4.name
+    		});
+    	}
+    }
+
     var deepFreezeEs6 = {exports: {}};
 
     function deepFreeze(obj) {
@@ -13161,7 +12312,7 @@ var app = (function () {
 
     // Common regexps
     const MATCH_NOTHING_RE = /\b\B/;
-    const IDENT_RE = '[a-zA-Z]\\w*';
+    const IDENT_RE$1 = '[a-zA-Z]\\w*';
     const UNDERSCORE_IDENT_RE = '[a-zA-Z_]\\w*';
     const NUMBER_RE = '\\b\\d+(\\.\\d+)?';
     const C_NUMBER_RE = '(-?)(\\b0[xX][a-fA-F0-9]+|(\\b\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)'; // 0x..., 0..., decimal, float
@@ -13330,7 +12481,7 @@ var app = (function () {
     };
     const TITLE_MODE = {
       scope: 'title',
-      begin: IDENT_RE,
+      begin: IDENT_RE$1,
       relevance: 0
     };
     const UNDERSCORE_TITLE_MODE = {
@@ -13364,7 +12515,7 @@ var app = (function () {
     var MODES = /*#__PURE__*/Object.freeze({
         __proto__: null,
         MATCH_NOTHING_RE: MATCH_NOTHING_RE,
-        IDENT_RE: IDENT_RE,
+        IDENT_RE: IDENT_RE$1,
         UNDERSCORE_IDENT_RE: UNDERSCORE_IDENT_RE,
         NUMBER_RE: NUMBER_RE,
         C_NUMBER_RE: C_NUMBER_RE,
@@ -15200,25 +14351,872 @@ var app = (function () {
 
     // export an "instance" of the highlighter
     var highlight = HLJS({});
+
+    var core = highlight;
     highlight.HighlightJS = highlight;
     highlight.default = highlight;
 
-    let methods$m = {
+    const IDENT_RE = '[A-Za-z$_][0-9A-Za-z$_]*';
+    const KEYWORDS = [
+      "as", // for exports
+      "in",
+      "of",
+      "if",
+      "for",
+      "while",
+      "finally",
+      "var",
+      "new",
+      "function",
+      "do",
+      "return",
+      "void",
+      "else",
+      "break",
+      "catch",
+      "instanceof",
+      "with",
+      "throw",
+      "case",
+      "default",
+      "try",
+      "switch",
+      "continue",
+      "typeof",
+      "delete",
+      "let",
+      "yield",
+      "const",
+      "class",
+      // JS handles these with a special rule
+      // "get",
+      // "set",
+      "debugger",
+      "async",
+      "await",
+      "static",
+      "import",
+      "from",
+      "export",
+      "extends"
+    ];
+    const LITERALS = [
+      "true",
+      "false",
+      "null",
+      "undefined",
+      "NaN",
+      "Infinity"
+    ];
+
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects
+    const TYPES = [
+      // Fundamental objects
+      "Object",
+      "Function",
+      "Boolean",
+      "Symbol",
+      // numbers and dates
+      "Math",
+      "Date",
+      "Number",
+      "BigInt",
+      // text
+      "String",
+      "RegExp",
+      // Indexed collections
+      "Array",
+      "Float32Array",
+      "Float64Array",
+      "Int8Array",
+      "Uint8Array",
+      "Uint8ClampedArray",
+      "Int16Array",
+      "Int32Array",
+      "Uint16Array",
+      "Uint32Array",
+      "BigInt64Array",
+      "BigUint64Array",
+      // Keyed collections
+      "Set",
+      "Map",
+      "WeakSet",
+      "WeakMap",
+      // Structured data
+      "ArrayBuffer",
+      "SharedArrayBuffer",
+      "Atomics",
+      "DataView",
+      "JSON",
+      // Control abstraction objects
+      "Promise",
+      "Generator",
+      "GeneratorFunction",
+      "AsyncFunction",
+      // Reflection
+      "Reflect",
+      "Proxy",
+      // Internationalization
+      "Intl",
+      // WebAssembly
+      "WebAssembly"
+    ];
+
+    const ERROR_TYPES = [
+      "Error",
+      "EvalError",
+      "InternalError",
+      "RangeError",
+      "ReferenceError",
+      "SyntaxError",
+      "TypeError",
+      "URIError"
+    ];
+
+    const BUILT_IN_GLOBALS = [
+      "setInterval",
+      "setTimeout",
+      "clearInterval",
+      "clearTimeout",
+
+      "require",
+      "exports",
+
+      "eval",
+      "isFinite",
+      "isNaN",
+      "parseFloat",
+      "parseInt",
+      "decodeURI",
+      "decodeURIComponent",
+      "encodeURI",
+      "encodeURIComponent",
+      "escape",
+      "unescape"
+    ];
+
+    const BUILT_IN_VARIABLES = [
+      "arguments",
+      "this",
+      "super",
+      "console",
+      "window",
+      "document",
+      "localStorage",
+      "module",
+      "global" // Node.js
+    ];
+
+    const BUILT_INS = [].concat(
+      BUILT_IN_GLOBALS,
+      TYPES,
+      ERROR_TYPES
+    );
+
+    /*
+    Language: JavaScript
+    Description: JavaScript (JS) is a lightweight, interpreted, or just-in-time compiled programming language with first-class functions.
+    Category: common, scripting, web
+    Website: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+    */
+
+    /** @type LanguageFn */
+    function javascript(hljs) {
+      const regex = hljs.regex;
+      /**
+       * Takes a string like "<Booger" and checks to see
+       * if we can find a matching "</Booger" later in the
+       * content.
+       * @param {RegExpMatchArray} match
+       * @param {{after:number}} param1
+       */
+      const hasClosingTag = (match, { after }) => {
+        const tag = "</" + match[0].slice(1);
+        const pos = match.input.indexOf(tag, after);
+        return pos !== -1;
+      };
+
+      const IDENT_RE$1 = IDENT_RE;
+      const FRAGMENT = {
+        begin: '<>',
+        end: '</>'
+      };
+      // to avoid some special cases inside isTrulyOpeningTag
+      const XML_SELF_CLOSING = /<[A-Za-z0-9\\._:-]+\s*\/>/;
+      const XML_TAG = {
+        begin: /<[A-Za-z0-9\\._:-]+/,
+        end: /\/[A-Za-z0-9\\._:-]+>|\/>/,
+        /**
+         * @param {RegExpMatchArray} match
+         * @param {CallbackResponse} response
+         */
+        isTrulyOpeningTag: (match, response) => {
+          const afterMatchIndex = match[0].length + match.index;
+          const nextChar = match.input[afterMatchIndex];
+          if (
+            // HTML should not include another raw `<` inside a tag
+            // nested type?
+            // `<Array<Array<number>>`, etc.
+            nextChar === "<" ||
+            // the , gives away that this is not HTML
+            // `<T, A extends keyof T, V>`
+            nextChar === ",") {
+            response.ignoreMatch();
+            return;
+          }
+
+          // `<something>`
+          // Quite possibly a tag, lets look for a matching closing tag...
+          if (nextChar === ">") {
+            // if we cannot find a matching closing tag, then we
+            // will ignore it
+            if (!hasClosingTag(match, { after: afterMatchIndex })) {
+              response.ignoreMatch();
+            }
+          }
+
+          // `<blah />` (self-closing)
+          // handled by simpleSelfClosing rule
+
+          // `<From extends string>`
+          // technically this could be HTML, but it smells like a type
+          let m;
+          const afterMatch = match.input.substr(afterMatchIndex);
+          // NOTE: This is ugh, but added specifically for https://github.com/highlightjs/highlight.js/issues/3276
+          if ((m = afterMatch.match(/^\s+extends\s+/))) {
+            if (m.index === 0) {
+              response.ignoreMatch();
+              // eslint-disable-next-line no-useless-return
+              return;
+            }
+          }
+        }
+      };
+      const KEYWORDS$1 = {
+        $pattern: IDENT_RE,
+        keyword: KEYWORDS,
+        literal: LITERALS,
+        built_in: BUILT_INS,
+        "variable.language": BUILT_IN_VARIABLES
+      };
+
+      // https://tc39.es/ecma262/#sec-literals-numeric-literals
+      const decimalDigits = '[0-9](_?[0-9])*';
+      const frac = `\\.(${decimalDigits})`;
+      // DecimalIntegerLiteral, including Annex B NonOctalDecimalIntegerLiteral
+      // https://tc39.es/ecma262/#sec-additional-syntax-numeric-literals
+      const decimalInteger = `0|[1-9](_?[0-9])*|0[0-7]*[89][0-9]*`;
+      const NUMBER = {
+        className: 'number',
+        variants: [
+          // DecimalLiteral
+          { begin: `(\\b(${decimalInteger})((${frac})|\\.)?|(${frac}))` +
+            `[eE][+-]?(${decimalDigits})\\b` },
+          { begin: `\\b(${decimalInteger})\\b((${frac})\\b|\\.)?|(${frac})\\b` },
+
+          // DecimalBigIntegerLiteral
+          { begin: `\\b(0|[1-9](_?[0-9])*)n\\b` },
+
+          // NonDecimalIntegerLiteral
+          { begin: "\\b0[xX][0-9a-fA-F](_?[0-9a-fA-F])*n?\\b" },
+          { begin: "\\b0[bB][0-1](_?[0-1])*n?\\b" },
+          { begin: "\\b0[oO][0-7](_?[0-7])*n?\\b" },
+
+          // LegacyOctalIntegerLiteral (does not include underscore separators)
+          // https://tc39.es/ecma262/#sec-additional-syntax-numeric-literals
+          { begin: "\\b0[0-7]+n?\\b" },
+        ],
+        relevance: 0
+      };
+
+      const SUBST = {
+        className: 'subst',
+        begin: '\\$\\{',
+        end: '\\}',
+        keywords: KEYWORDS$1,
+        contains: [] // defined later
+      };
+      const HTML_TEMPLATE = {
+        begin: 'html`',
+        end: '',
+        starts: {
+          end: '`',
+          returnEnd: false,
+          contains: [
+            hljs.BACKSLASH_ESCAPE,
+            SUBST
+          ],
+          subLanguage: 'xml'
+        }
+      };
+      const CSS_TEMPLATE = {
+        begin: 'css`',
+        end: '',
+        starts: {
+          end: '`',
+          returnEnd: false,
+          contains: [
+            hljs.BACKSLASH_ESCAPE,
+            SUBST
+          ],
+          subLanguage: 'css'
+        }
+      };
+      const TEMPLATE_STRING = {
+        className: 'string',
+        begin: '`',
+        end: '`',
+        contains: [
+          hljs.BACKSLASH_ESCAPE,
+          SUBST
+        ]
+      };
+      const JSDOC_COMMENT = hljs.COMMENT(
+        /\/\*\*(?!\/)/,
+        '\\*/',
+        {
+          relevance: 0,
+          contains: [
+            {
+              begin: '(?=@[A-Za-z]+)',
+              relevance: 0,
+              contains: [
+                {
+                  className: 'doctag',
+                  begin: '@[A-Za-z]+'
+                },
+                {
+                  className: 'type',
+                  begin: '\\{',
+                  end: '\\}',
+                  excludeEnd: true,
+                  excludeBegin: true,
+                  relevance: 0
+                },
+                {
+                  className: 'variable',
+                  begin: IDENT_RE$1 + '(?=\\s*(-)|$)',
+                  endsParent: true,
+                  relevance: 0
+                },
+                // eat spaces (not newlines) so we can find
+                // types or variables
+                {
+                  begin: /(?=[^\n])\s/,
+                  relevance: 0
+                }
+              ]
+            }
+          ]
+        }
+      );
+      const COMMENT = {
+        className: "comment",
+        variants: [
+          JSDOC_COMMENT,
+          hljs.C_BLOCK_COMMENT_MODE,
+          hljs.C_LINE_COMMENT_MODE
+        ]
+      };
+      const SUBST_INTERNALS = [
+        hljs.APOS_STRING_MODE,
+        hljs.QUOTE_STRING_MODE,
+        HTML_TEMPLATE,
+        CSS_TEMPLATE,
+        TEMPLATE_STRING,
+        NUMBER,
+        // This is intentional:
+        // See https://github.com/highlightjs/highlight.js/issues/3288
+        // hljs.REGEXP_MODE
+      ];
+      SUBST.contains = SUBST_INTERNALS
+        .concat({
+          // we need to pair up {} inside our subst to prevent
+          // it from ending too early by matching another }
+          begin: /\{/,
+          end: /\}/,
+          keywords: KEYWORDS$1,
+          contains: [
+            "self"
+          ].concat(SUBST_INTERNALS)
+        });
+      const SUBST_AND_COMMENTS = [].concat(COMMENT, SUBST.contains);
+      const PARAMS_CONTAINS = SUBST_AND_COMMENTS.concat([
+        // eat recursive parens in sub expressions
+        {
+          begin: /\(/,
+          end: /\)/,
+          keywords: KEYWORDS$1,
+          contains: ["self"].concat(SUBST_AND_COMMENTS)
+        }
+      ]);
+      const PARAMS = {
+        className: 'params',
+        begin: /\(/,
+        end: /\)/,
+        excludeBegin: true,
+        excludeEnd: true,
+        keywords: KEYWORDS$1,
+        contains: PARAMS_CONTAINS
+      };
+
+      // ES6 classes
+      const CLASS_OR_EXTENDS = {
+        variants: [
+          // class Car extends vehicle
+          {
+            match: [
+              /class/,
+              /\s+/,
+              IDENT_RE$1,
+              /\s+/,
+              /extends/,
+              /\s+/,
+              regex.concat(IDENT_RE$1, "(", regex.concat(/\./, IDENT_RE$1), ")*")
+            ],
+            scope: {
+              1: "keyword",
+              3: "title.class",
+              5: "keyword",
+              7: "title.class.inherited"
+            }
+          },
+          // class Car
+          {
+            match: [
+              /class/,
+              /\s+/,
+              IDENT_RE$1
+            ],
+            scope: {
+              1: "keyword",
+              3: "title.class"
+            }
+          },
+
+        ]
+      };
+
+      const CLASS_REFERENCE = {
+        relevance: 0,
+        match:
+        regex.either(
+          // Hard coded exceptions
+          /\bJSON/,
+          // Float32Array
+          /\b[A-Z][a-z]+([A-Z][a-z]+|\d)*/,
+          // CSSFactory
+          /\b[A-Z]{2,}([A-Z][a-z]+|\d)+/,
+          // BLAH
+          // this will be flagged as a UPPER_CASE_CONSTANT instead
+        ),
+        className: "title.class",
+        keywords: {
+          _: [
+            // se we still get relevance credit for JS library classes
+            ...TYPES,
+            ...ERROR_TYPES
+          ]
+        }
+      };
+
+      const USE_STRICT = {
+        label: "use_strict",
+        className: 'meta',
+        relevance: 10,
+        begin: /^\s*['"]use (strict|asm)['"]/
+      };
+
+      const FUNCTION_DEFINITION = {
+        variants: [
+          {
+            match: [
+              /function/,
+              /\s+/,
+              IDENT_RE$1,
+              /(?=\s*\()/
+            ]
+          },
+          // anonymous function
+          {
+            match: [
+              /function/,
+              /\s*(?=\()/
+            ]
+          }
+        ],
+        className: {
+          1: "keyword",
+          3: "title.function"
+        },
+        label: "func.def",
+        contains: [ PARAMS ],
+        illegal: /%/
+      };
+
+      const UPPER_CASE_CONSTANT = {
+        relevance: 0,
+        match: /\b[A-Z][A-Z_0-9]+\b/,
+        className: "variable.constant"
+      };
+
+      function noneOf(list) {
+        return regex.concat("(?!", list.join("|"), ")");
+      }
+
+      const FUNCTION_CALL = {
+        match: regex.concat(
+          /\b/,
+          noneOf([
+            ...BUILT_IN_GLOBALS,
+            "super"
+          ]),
+          IDENT_RE$1, regex.lookahead(/\(/)),
+        className: "title.function",
+        relevance: 0
+      };
+
+      const PROPERTY_ACCESS = {
+        begin: regex.concat(/\./, regex.lookahead(
+          regex.concat(IDENT_RE$1, /(?![0-9A-Za-z$_(])/)
+        )),
+        end: IDENT_RE$1,
+        excludeBegin: true,
+        keywords: "prototype",
+        className: "property",
+        relevance: 0
+      };
+
+      const GETTER_OR_SETTER = {
+        match: [
+          /get|set/,
+          /\s+/,
+          IDENT_RE$1,
+          /(?=\()/
+        ],
+        className: {
+          1: "keyword",
+          3: "title.function"
+        },
+        contains: [
+          { // eat to avoid empty params
+            begin: /\(\)/
+          },
+          PARAMS
+        ]
+      };
+
+      const FUNC_LEAD_IN_RE = '(\\(' +
+        '[^()]*(\\(' +
+        '[^()]*(\\(' +
+        '[^()]*' +
+        '\\)[^()]*)*' +
+        '\\)[^()]*)*' +
+        '\\)|' + hljs.UNDERSCORE_IDENT_RE + ')\\s*=>';
+
+      const FUNCTION_VARIABLE = {
+        match: [
+          /const|var|let/, /\s+/,
+          IDENT_RE$1, /\s*/,
+          /=\s*/,
+          regex.lookahead(FUNC_LEAD_IN_RE)
+        ],
+        className: {
+          1: "keyword",
+          3: "title.function"
+        },
+        contains: [
+          PARAMS
+        ]
+      };
+
+      return {
+        name: 'Javascript',
+        aliases: ['js', 'jsx', 'mjs', 'cjs'],
+        keywords: KEYWORDS$1,
+        // this will be extended by TypeScript
+        exports: { PARAMS_CONTAINS, CLASS_REFERENCE },
+        illegal: /#(?![$_A-z])/,
+        contains: [
+          hljs.SHEBANG({
+            label: "shebang",
+            binary: "node",
+            relevance: 5
+          }),
+          USE_STRICT,
+          hljs.APOS_STRING_MODE,
+          hljs.QUOTE_STRING_MODE,
+          HTML_TEMPLATE,
+          CSS_TEMPLATE,
+          TEMPLATE_STRING,
+          COMMENT,
+          NUMBER,
+          CLASS_REFERENCE,
+          {
+            className: 'attr',
+            begin: IDENT_RE$1 + regex.lookahead(':'),
+            relevance: 0
+          },
+          FUNCTION_VARIABLE,
+          { // "value" container
+            begin: '(' + hljs.RE_STARTERS_RE + '|\\b(case|return|throw)\\b)\\s*',
+            keywords: 'return throw case',
+            relevance: 0,
+            contains: [
+              COMMENT,
+              hljs.REGEXP_MODE,
+              {
+                className: 'function',
+                // we have to count the parens to make sure we actually have the
+                // correct bounding ( ) before the =>.  There could be any number of
+                // sub-expressions inside also surrounded by parens.
+                begin: FUNC_LEAD_IN_RE,
+                returnBegin: true,
+                end: '\\s*=>',
+                contains: [
+                  {
+                    className: 'params',
+                    variants: [
+                      {
+                        begin: hljs.UNDERSCORE_IDENT_RE,
+                        relevance: 0
+                      },
+                      {
+                        className: null,
+                        begin: /\(\s*\)/,
+                        skip: true
+                      },
+                      {
+                        begin: /\(/,
+                        end: /\)/,
+                        excludeBegin: true,
+                        excludeEnd: true,
+                        keywords: KEYWORDS$1,
+                        contains: PARAMS_CONTAINS
+                      }
+                    ]
+                  }
+                ]
+              },
+              { // could be a comma delimited list of params to a function call
+                begin: /,/,
+                relevance: 0
+              },
+              {
+                match: /\s+/,
+                relevance: 0
+              },
+              { // JSX
+                variants: [
+                  { begin: FRAGMENT.begin, end: FRAGMENT.end },
+                  { match: XML_SELF_CLOSING },
+                  {
+                    begin: XML_TAG.begin,
+                    // we carefully check the opening tag to see if it truly
+                    // is a tag and not a false positive
+                    'on:begin': XML_TAG.isTrulyOpeningTag,
+                    end: XML_TAG.end
+                  }
+                ],
+                subLanguage: 'xml',
+                contains: [
+                  {
+                    begin: XML_TAG.begin,
+                    end: XML_TAG.end,
+                    skip: true,
+                    contains: ['self']
+                  }
+                ]
+              }
+            ],
+          },
+          FUNCTION_DEFINITION,
+          {
+            // prevent this from getting swallowed up by function
+            // since they appear "function like"
+            beginKeywords: "while if switch catch for"
+          },
+          {
+            // we have to count the parens to make sure we actually have the correct
+            // bounding ( ).  There could be any number of sub-expressions inside
+            // also surrounded by parens.
+            begin: '\\b(?!function)' + hljs.UNDERSCORE_IDENT_RE +
+              '\\(' + // first parens
+              '[^()]*(\\(' +
+                '[^()]*(\\(' +
+                  '[^()]*' +
+                '\\)[^()]*)*' +
+              '\\)[^()]*)*' +
+              '\\)\\s*\\{', // end parens
+            returnBegin:true,
+            label: "func.def",
+            contains: [
+              PARAMS,
+              hljs.inherit(hljs.TITLE_MODE, { begin: IDENT_RE$1, className: "title.function" })
+            ]
+          },
+          // catch ... so it won't trigger the property rule below
+          {
+            match: /\.\.\./,
+            relevance: 0
+          },
+          PROPERTY_ACCESS,
+          // hack: prevents detection of keywords in some circumstances
+          // .keyword()
+          // $keyword = x
+          {
+            match: '\\$' + IDENT_RE$1,
+            relevance: 0
+          },
+          {
+            match: [ /\bconstructor(?=\s*\()/ ],
+            className: { 1: "title.function" },
+            contains: [ PARAMS ]
+          },
+          FUNCTION_CALL,
+          UPPER_CASE_CONSTANT,
+          CLASS_OR_EXTENDS,
+          GETTER_OR_SETTER,
+          {
+            match: /\$[(.]/ // relevance booster for a pattern common to JS libs: `$(something)` and `$.something`
+          }
+        ]
+      };
+    }
+
+    /* lib/JS/Code.svelte generated by Svelte v3.43.0 */
+    const file$3 = "lib/JS/Code.svelte";
+
+    function create_fragment$3(ctx) {
+    	let pre;
+    	let code;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			pre = element("pre");
+    			code = element("code");
+    			t = text$1(/*js*/ ctx[0]);
+    			attr_dev(code, "class", "language-javascript mine svelte-5ej3m3");
+    			set_style(code, "width", /*width*/ ctx[1]);
+    			add_location(code, file$3, 14, 5, 358);
+    			add_location(pre, file$3, 14, 0, 353);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, pre, anchor);
+    			append_dev(pre, code);
+    			append_dev(code, t);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*js*/ 1) set_data_dev(t, /*js*/ ctx[0]);
+
+    			if (dirty & /*width*/ 2) {
+    				set_style(code, "width", /*width*/ ctx[1]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(pre);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$3.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$3($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Code', slots, []);
+    	let { js = '' } = $$props;
+    	let { width = '400px' } = $$props;
+    	core.registerLanguage('javascript', javascript);
+
+    	onMount(() => {
+    		core.highlightAll();
+    	});
+
+    	const writable_props = ['js', 'width'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Code> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('js' in $$props) $$invalidate(0, js = $$props.js);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    	};
+
+    	$$self.$capture_state = () => ({ onMount, hljs: core, javascript, js, width });
+
+    	$$self.$inject_state = $$props => {
+    		if ('js' in $$props) $$invalidate(0, js = $$props.js);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [js, width];
+    }
+
+    class Code extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { js: 0, width: 1 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Code",
+    			options,
+    			id: create_fragment$3.name
+    		});
+    	}
+
+    	get js() {
+    		throw new Error("<Code>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set js(value) {
+    		throw new Error("<Code>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get width() {
+    		throw new Error("<Code>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set width(value) {
+    		throw new Error("<Code>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    let methods$o = {
       one: {},
       two: {},
       three: {},
       four: {},
     };
 
-    let model$3 = {
+    let model$7 = {
       one: {},
       two: {},
       three: {},
     };
-    let compute$7 = {};
+    let compute$a = {};
     let hooks = [];
 
-    var tmp = { methods: methods$m, model: model$3, compute: compute$7, hooks };
+    var tmp = { methods: methods$o, model: model$7, compute: compute$a, hooks };
 
     const isArray$6 = input => Object.prototype.toString.call(input) === '[object Array]';
 
@@ -15244,7 +15242,7 @@ var app = (function () {
         return this
       },
     };
-    var compute$6 = fns$4;
+    var compute$9 = fns$4;
 
     const forEach = function (cb) {
       let ptrs = this.fullPointer;
@@ -15428,7 +15426,7 @@ var app = (function () {
     utils.firstTerm = utils.firstTerms;
     var util = utils;
 
-    const methods$l = {
+    const methods$n = {
       // allow re-use of this view, after a mutation
       freeze: function () {
         this.frozen = this.docs;
@@ -15440,13 +15438,13 @@ var app = (function () {
         return this
       },
     };
-    var freeze = methods$l;
+    var freeze = methods$n;
 
-    const methods$k = Object.assign({}, util, compute$6, loops, freeze);
+    const methods$m = Object.assign({}, util, compute$9, loops, freeze);
 
     // aliases
-    methods$k.get = methods$k.eq;
-    var api$9 = methods$k;
+    methods$m.get = methods$m.eq;
+    var api$c = methods$m;
 
     const getPtrs = function (view) {
       const { methods, frozen, ptrs, document } = view;
@@ -15585,7 +15583,7 @@ var app = (function () {
         return m
       }
     }
-    Object.assign(View.prototype, api$9);
+    Object.assign(View.prototype, api$c);
     var View$1 = View;
 
     var version = '13.11.4-rc4';
@@ -15696,7 +15694,7 @@ var app = (function () {
     };
 
     /** pre-compile a list of matches to lookup */
-    const compile = function (input) {
+    const compile$2 = function (input) {
       return this().compile(input)
     };
 
@@ -15755,7 +15753,7 @@ var app = (function () {
     /** log the decision-making to console */
     nlp.verbose = verbose;
     /** pre-compile a list of matches to lookup */
-    nlp.compile = compile;
+    nlp.compile = compile$2;
     /** current library release version */
     nlp.version = version;
     /** reach-into compromise internals */
@@ -15851,11 +15849,11 @@ var app = (function () {
       }
     };
 
-    const isTitleCase = function (str) {
+    const isTitleCase$1 = function (str) {
       return /^[A-Z][a-z'\u00C0-\u00FF]/.test(str) || /^[A-Z]$/.test(str)
     };
 
-    const toTitleCase = function (str) {
+    const toTitleCase$1 = function (str) {
       str = str.replace(/^[a-z\u00C0-\u00FF]/, x => x.toUpperCase()); //TODO: support unicode
       return str
     };
@@ -15863,17 +15861,17 @@ var app = (function () {
     const moveTitleCase = function (home, start, needle) {
       let from = home[start];
       // should we bother?
-      if (start !== 0 || !isTitleCase(from.text)) {
+      if (start !== 0 || !isTitleCase$1(from.text)) {
         return
       }
       // titlecase new first term
-      needle[0].text = toTitleCase(needle[0].text);
+      needle[0].text = toTitleCase$1(needle[0].text);
       // should we un-titlecase the old word?
       let old = home[start];
       if (old.tags.has('ProperNoun') || old.tags.has('Acronym')) {
         return
       }
-      if (isTitleCase(old.text) && old.text.length > 1) {
+      if (isTitleCase$1(old.text) && old.text.length > 1) {
         old.text = old.text.replace(/^[A-Z]/, x => x.toLowerCase());
       }
     };
@@ -15918,7 +15916,7 @@ var app = (function () {
 
     // are we inserting inside a contraction?
     // expand it first
-    const expand$1 = function (m) {
+    const expand$5 = function (m) {
       if (m.has('@hasContraction')) {
         let more = m.grow('@hasContraction');
         more.contractions().expand();
@@ -15955,10 +15953,10 @@ var app = (function () {
         let home = document[n];
         let terms = getTerms(input, world);
         if (prepend) {
-          expand$1(view.update([ptr]).firstTerm());
+          expand$5(view.update([ptr]).firstTerm());
           cleanPrepend(home, ptr, terms, document);
         } else {
-          expand$1(view.update([ptr]).lastTerm());
+          expand$5(view.update([ptr]).lastTerm());
           cleanAppend(home, ptr, terms, document);
         }
         // change self backwards by len
@@ -16072,7 +16070,7 @@ var app = (function () {
       return document
     };
 
-    const methods$j = {
+    const methods$l = {
       /** */
       remove: function (reg) {
         const { indexN } = this.methods.one;
@@ -16130,10 +16128,10 @@ var app = (function () {
       },
     };
     // aliases
-    methods$j.delete = methods$j.remove;
-    var remove = methods$j;
+    methods$l.delete = methods$l.remove;
+    var remove = methods$l;
 
-    const methods$i = {
+    const methods$k = {
       /** add this punctuation or whitespace before each match: */
       pre: function (str, concat) {
         if (str === undefined && this.found) {
@@ -16235,10 +16233,10 @@ var app = (function () {
         return this
       },
     };
-    methods$i.deHyphenate = methods$i.dehyphenate;
-    methods$i.toQuotation = methods$i.toQuotations;
+    methods$k.deHyphenate = methods$k.dehyphenate;
+    methods$k.toQuotation = methods$k.toQuotations;
 
-    var whitespace$1 = methods$i;
+    var whitespace$1 = methods$k;
 
     /** alphabetical order */
     const alpha = (a, b) => {
@@ -16310,7 +16308,7 @@ var app = (function () {
       return arr
     };
 
-    var methods$h = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
+    var methods$j = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
 
     // aliases
     const seqNames = new Set(['index', 'sequence', 'seq', 'sequential', 'chron', 'chronological']);
@@ -16334,12 +16332,12 @@ var app = (function () {
         input = 'sequential';
       }
       if (freqNames.has(input)) {
-        arr = methods$h.byFreq(arr);
+        arr = methods$j.byFreq(arr);
         return this.update(arr.map(o => o.pointer))
       }
       // apply sort method on each phrase
-      if (typeof methods$h[input] === 'function') {
-        arr = arr.sort(methods$h[input]);
+      if (typeof methods$j[input] === 'function') {
+        arr = arr.sort(methods$j[input]);
         return this.update(arr.map(o => o.pointer))
       }
       return this
@@ -16373,7 +16371,7 @@ var app = (function () {
     const deepClone = function (obj) {
       return JSON.parse(JSON.stringify(obj))
     };
-    const methods$g = {
+    const methods$i = {
       fork: function () {
         let after = this;
         after.world.model = deepClone(after.world.model);
@@ -16386,7 +16384,7 @@ var app = (function () {
         return after
       },
     };
-    var fork = methods$g;
+    var fork = methods$i;
 
     const isArray$3 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
 
@@ -16444,15 +16442,15 @@ var app = (function () {
       },
     };
 
-    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork, concat);
+    const methods$h = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork, concat);
 
     const addAPI$3 = function (View) {
-      Object.assign(View.prototype, methods$f);
+      Object.assign(View.prototype, methods$h);
     };
-    var api$8 = addAPI$3;
+    var api$b = addAPI$3;
 
     var change = {
-      api: api$8,
+      api: api$b,
     };
 
     const relPointer = function (ptrs, parent) {
@@ -16662,9 +16660,9 @@ var app = (function () {
       return m
     };
 
-    const methods$e = {};
+    const methods$g = {};
     // [before], [match], [after]
-    methods$e.splitOn = function (m, group) {
+    methods$g.splitOn = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -16680,7 +16678,7 @@ var app = (function () {
     };
 
     // [before], [match after]
-    methods$e.splitBefore = function (m, group) {
+    methods$g.splitBefore = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -16700,7 +16698,7 @@ var app = (function () {
     };
 
     // [before match], [after]
-    methods$e.splitAfter = function (m, group) {
+    methods$g.splitAfter = function (m, group) {
       const { splitAll } = this.methods.one;
       let splits = getDoc$2(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
@@ -16718,24 +16716,24 @@ var app = (function () {
       res = res.filter(p => p);
       return this.update(res)
     };
-    methods$e.split = methods$e.splitAfter;
+    methods$g.split = methods$g.splitAfter;
 
-    var split$1 = methods$e;
+    var split$1 = methods$g;
 
-    const methods$d = Object.assign({}, match$3, lookaround, split$1);
+    const methods$f = Object.assign({}, match$3, lookaround, split$1);
 
     // aliases
-    methods$d.lookBehind = methods$d.before;
-    methods$d.lookBefore = methods$d.before;
+    methods$f.lookBehind = methods$f.before;
+    methods$f.lookBefore = methods$f.before;
 
-    methods$d.lookAhead = methods$d.after;
-    methods$d.lookAfter = methods$d.after;
+    methods$f.lookAhead = methods$f.after;
+    methods$f.lookAfter = methods$f.after;
 
-    methods$d.notIf = methods$d.ifNo;
+    methods$f.notIf = methods$f.ifNo;
     const matchAPI = function (View) {
-      Object.assign(View.prototype, methods$d);
+      Object.assign(View.prototype, methods$f);
     };
-    var api$7 = matchAPI;
+    var api$a = matchAPI;
 
     // match  'foo /yes/' and not 'foo/no/bar'
     const bySlashes = /(?:^|\s)([![^]*(?:<[^<]*>)?\/.*?[^\\/]\/[?\]+*$~]*)(?:\s|$)/;
@@ -16806,7 +16804,7 @@ var app = (function () {
       choices:[],
     }
     */
-    const titleCase = str => {
+    const titleCase$2 = str => {
       return str.charAt(0).toUpperCase() + str.substr(1)
     };
     const end = function (str) {
@@ -16929,7 +16927,7 @@ var app = (function () {
         //chunks
         if (start(w) === '<' && end(w) === '>') {
           w = stripBoth(w);
-          obj.chunk = titleCase(w);
+          obj.chunk = titleCase$2(w);
           obj.greedy = true;
           return obj
         }
@@ -16958,7 +16956,7 @@ var app = (function () {
       //do the actual token content
       if (start(w) === '#') {
         obj.tag = stripStart(w);
-        obj.tag = titleCase(obj.tag);
+        obj.tag = titleCase$2(obj.tag);
         return obj
       }
       //dynamic function on a term object
@@ -17223,7 +17221,7 @@ var app = (function () {
     /** search the term's 'pre' punctuation  */
     const hasPre = (term, punct) => term.pre.indexOf(punct) !== -1;
 
-    const methods$c = {
+    const methods$e = {
       /** does it have a quotation symbol?  */
       hasQuote: term => startQuote.test(term.pre) || endQuote.test(term.post),
       /** does it have a comma?  */
@@ -17252,9 +17250,9 @@ var app = (function () {
       isTitleCase: term => /^[A-Z][a-z'\u00C0-\u00FF]/.test(term.text), //|| /^[A-Z]$/.test(term.text)
     };
     // aliases
-    methods$c.hasQuotation = methods$c.hasQuote;
+    methods$e.hasQuotation = methods$e.hasQuote;
 
-    var termMethods = methods$c;
+    var termMethods = methods$e;
 
     //declare it up here
     let wrapMatch = function () { };
@@ -17369,9 +17367,9 @@ var app = (function () {
     };
     var matchTerm = wrapMatch;
 
-    const env = typeof process === 'undefined' ? self.env || {} : process.env;
-    const log$1 = msg => {
-      if (env.DEBUG_MATCH) {
+    const env$1 = typeof process === 'undefined' ? self.env || {} : process.env;
+    const log$2 = msg => {
+      if (env$1.DEBUG_MATCH) {
         console.log(`\n  \x1b[32m ${msg} \x1b[0m`); // eslint-disable-line
       }
     };
@@ -17414,7 +17412,7 @@ var app = (function () {
       //otherwise, we're looking for the next one
       for (; t < state.terms.length; t += 1) {
         if (matchTerm(state.terms[t], nextReg, state.start_i + t, state.phrase_length) === true) {
-          log$1(`greedyTo ${state.terms[t].normal}`);
+          log$2(`greedyTo ${state.terms[t].normal}`);
           return t
         }
       }
@@ -17427,7 +17425,7 @@ var app = (function () {
         if (state.start_i + state.t < state.phrase_length - 1) {
           let tmpReg = Object.assign({}, reg, { end: false });
           if (matchTerm(state.terms[state.t], tmpReg, state.start_i + state.t, state.phrase_length) === true) {
-            log$1(`endGreedy ${state.terms[state.t].normal}`);
+            log$2(`endGreedy ${state.terms[state.t].normal}`);
             return true
           }
         }
@@ -17497,7 +17495,7 @@ var app = (function () {
         return allWords
       });
       if (allDidMatch === true) {
-        log$1(`doAndBlock ${state.terms[state.t].normal}`);
+        log$2(`doAndBlock ${state.terms[state.t].normal}`);
         return longest
       }
       return false
@@ -17807,7 +17805,7 @@ var app = (function () {
     };
 
     // ok, here we go.
-    const runMatch = function (docs, todo, cache) {
+    const runMatch$2 = function (docs, todo, cache) {
       cache = cache || [];
       let { regs, group, justOne } = todo;
       let results = [];
@@ -17866,9 +17864,9 @@ var app = (function () {
       return results
     };
 
-    var match$1 = runMatch;
+    var match$1 = runMatch$2;
 
-    const methods$a = {
+    const methods$c = {
       one: {
         termMethods,
         parseMatch: parseMatch$1,
@@ -17876,7 +17874,7 @@ var app = (function () {
       },
     };
 
-    var methods$b = methods$a;
+    var methods$d = methods$c;
 
     /** pre-parse any match statements */
     const parseMatch = function (str) {
@@ -17888,8 +17886,8 @@ var app = (function () {
     };
 
     var match = {
-      api: api$7,
-      methods: methods$b,
+      api: api$a,
+      methods: methods$d,
       lib: lib$3,
     };
 
@@ -18144,14 +18142,14 @@ var app = (function () {
       return this.text()
     };
 
-    const methods$9 = {
+    const methods$b = {
       /** */
       debug: debug$1,
       /** */
       out: out,
     };
 
-    var out$1 = methods$9;
+    var out$1 = methods$b;
 
     const trimEnd = /[,:;)\]*.?~!\u0022\uFF02\u201D\u2019\u00BB\u203A\u2032\u2033\u2034\u301E\u00B4—-]+$/;
     const trimStart =
@@ -18345,18 +18343,18 @@ var app = (function () {
       },
     };
 
-    const methods$8 = Object.assign({}, out$1, text, json);
+    const methods$a = Object.assign({}, out$1, text, json);
 
     // aliases
-    methods$8.data = methods$8.json;
+    methods$a.data = methods$a.json;
 
     const addAPI$2 = function (View) {
-      Object.assign(View.prototype, methods$8);
+      Object.assign(View.prototype, methods$a);
     };
-    var api$6 = addAPI$2;
+    var api$9 = addAPI$2;
 
     var output = {
-      api: api$6,
+      api: api$9,
     };
 
     // do the pointers intersect?
@@ -18626,7 +18624,7 @@ var app = (function () {
       return doc
     };
 
-    var methods$7 = {
+    var methods$9 = {
       one: {
         termList,
         getDoc: getDoc$1,
@@ -18646,19 +18644,19 @@ var app = (function () {
       return typeof m === 'string' ? view.match(m) : m
     };
 
-    const methods$6 = {};
+    const methods$8 = {};
 
     // all parts, minus duplicates
-    methods$6.union = function (m) {
+    methods$8.union = function (m) {
       const { getUnion } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getUnion(this.fullPointer, m.fullPointer);
       return this.toView(ptrs)
     };
-    methods$6.and = methods$6.union;
+    methods$8.and = methods$8.union;
 
     // only parts they both have
-    methods$6.intersection = function (m) {
+    methods$8.intersection = function (m) {
       const { getIntersection } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getIntersection(this.fullPointer, m.fullPointer);
@@ -18666,16 +18664,16 @@ var app = (function () {
     };
 
     // only parts of a that b does not have
-    methods$6.difference = function (m) {
+    methods$8.difference = function (m) {
       const { getDifference } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getDifference(this.fullPointer, m.fullPointer);
       return this.toView(ptrs)
     };
-    methods$6.not = methods$6.difference;
+    methods$8.not = methods$8.difference;
 
     // get opposite of a
-    methods$6.complement = function () {
+    methods$8.complement = function () {
       const { getDifference } = this.methods.one;
       let doc = this.all();
       let ptrs = getDifference(doc.fullPointer, this.fullPointer);
@@ -18683,7 +18681,7 @@ var app = (function () {
     };
 
     // remove overlaps
-    methods$6.settle = function () {
+    methods$8.settle = function () {
       const { getUnion } = this.methods.one;
       let ptrs = this.fullPointer;
       ptrs.forEach(ptr => {
@@ -18692,17 +18690,17 @@ var app = (function () {
       return this.update(ptrs)
     };
 
-    var sets = methods$6;
+    var sets = methods$8;
 
     const addAPI$1 = function (View) {
       // add set/intersection/union
       Object.assign(View.prototype, sets);
     };
-    var api$5 = addAPI$1;
+    var api$8 = addAPI$1;
 
     var pointers = {
-      methods: methods$7,
-      api: api$5,
+      methods: methods$9,
+      api: api$8,
     };
 
     const isMulti = / /;
@@ -18772,13 +18770,13 @@ var app = (function () {
     };
 
     // add a tag to all these terms
-    const setTag = function (terms, tag, world = {}, isSafe) {
+    const setTag$2 = function (terms, tag, world = {}, isSafe) {
       const tagSet = world.model.one.tagSet || {};
       if (!tag) {
         return
       }
       if (isArray$2(tag) === true) {
-        tag.forEach(tg => setTag(terms, tg, world, isSafe));
+        tag.forEach(tg => setTag$2(terms, tg, world, isSafe));
         return
       }
       tag = tag.trim();
@@ -18793,7 +18791,7 @@ var app = (function () {
         tagTerm(terms[i], tag, tagSet, isSafe);
       }
     };
-    var setTag$1 = setTag;
+    var setTag$3 = setTag$2;
 
     // remove this tag, and its children, from these terms
     const unTag = function (terms, tag, tagSet) {
@@ -18818,7 +18816,7 @@ var app = (function () {
     };
     var unTag$1 = unTag;
 
-    const e=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t=/^ *(#|\/\/)/,n=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e({id:t}))),n}return [e({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i=e=>"[object Array]"===Object.prototype.toString.call(e),c=e=>(e=e||"").trim(),s=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e(s),s}(c):i(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e({});return t.forEach((t=>{if((t=e(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r(s=c).forEach(e),s);var s;},h=e=>"[31m"+e+"[0m",o=e=>"[2m"+e+"[0m",l=function(e,t){let n="-> ";t&&(n=o("→ "));let i="";return r(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a=function(e){let t=r(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p={text:l,txt:l,array:a,flat:a},d=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l(e,!0)),null):p.hasOwnProperty(t)?p[t](e):e},u=e=>{r(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j=/\//;class g{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c(t),!j.test(t)){let e=this.json.children.find((e=>e.id===t));return new g(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e({});return new g(n)}add(t,n={}){if(i(t))return t.forEach((e=>this.add(c(e),n))),this;t=c(t);let r=e({id:t,props:n});return this.json.children.push(r),new g(r)}remove(e){return e=c(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r(this.json)}fillDown(){var e;return e=this.json,r(e,((e,t)=>{t.props=f(t.props,e.props);})),this}depth(){u(this.json);let e=r(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u(this.json),d(this.json,e)}debug(){return u(this.json),d(this.json,"debug"),this}}const _=function(e){let t=s(e);return new g(t)};_.prototype.plugin=function(e){e(this);};
+    const e$1=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t$1=/^ *(#|\/\/)/,n$2=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e$1({id:t}))),n}return [e$1({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r$1=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i$1=e=>"[object Array]"===Object.prototype.toString.call(e),c$1=e=>(e=e||"").trim(),s$1=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t$1.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n$2(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e$1(s),s}(c):i$1(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e$1({});return t.forEach((t=>{if((t=e$1(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r$1(s=c).forEach(e$1),s);var s;},h$1=e=>"[31m"+e+"[0m",o$1=e=>"[2m"+e+"[0m",l$1=function(e,t){let n="-> ";t&&(n=o$1("→ "));let i="";return r$1(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h$1(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a$1=function(e){let t=r$1(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p$2={text:l$1,txt:l$1,array:a$1,flat:a$1},d$1=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l$1(e,!0)),null):p$2.hasOwnProperty(t)?p$2[t](e):e},u$1=e=>{r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f$1=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i$1(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j$1=/\//;class g$2{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c$1(t),!j$1.test(t)){let e=this.json.children.find((e=>e.id===t));return new g$2(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e$1({});return new g$2(n)}add(t,n={}){if(i$1(t))return t.forEach((e=>this.add(c$1(e),n))),this;t=c$1(t);let r=e$1({id:t,props:n});return this.json.children.push(r),new g$2(r)}remove(e){return e=c$1(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r$1(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r$1(this.json)}fillDown(){var e;return e=this.json,r$1(e,((e,t)=>{t.props=f$1(t.props,e.props);})),this}depth(){u$1(this.json);let e=r$1(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u$1(this.json),d$1(this.json,e)}debug(){return u$1(this.json),d$1(this.json,"debug"),this}}const _=function(e){let t=s$1(e);return new g$2(t)};_.prototype.plugin=function(e){e(this);};
 
     // i just made these up
     const colors = {
@@ -18941,7 +18939,7 @@ var app = (function () {
     // import grad from '/Users/spencer/mountain/grad-school/src/index.js'
 
     // 'fill-down' parent logic inference
-    const compute$5 = function (allTags) {
+    const compute$8 = function (allTags) {
       // setup graph-lib format
       const flatList = Object.keys(allTags).map(k => {
         let o = allTags[k];
@@ -18958,16 +18956,16 @@ var app = (function () {
       let allTags = Object.assign({}, already, tags);
       // do some basic setting-up
       // 'fill-down' parent logic
-      const nodes = compute$5(allTags);
+      const nodes = compute$8(allTags);
       // convert it to our final format
       const res = fmt$1(nodes);
       return res
     };
     var addTags$2 = addTags$1;
 
-    var methods$5 = {
+    var methods$7 = {
       one: {
-        setTag: setTag$1,
+        setTag: setTag$3,
         unTag: unTag$1,
         addTags: addTags$2
       },
@@ -19058,7 +19056,7 @@ var app = (function () {
     const tagAPI = function (View) {
       Object.assign(View.prototype, tag$1);
     };
-    var api$4 = tagAPI;
+    var api$7 = tagAPI;
 
     // wire-up more pos-tags to our model
     const addTags = function (tags) {
@@ -19076,8 +19074,8 @@ var app = (function () {
       model: {
         one: { tagSet: {} }
       },
-      methods: methods$5,
-      api: api$4,
+      methods: methods$7,
+      api: api$7,
       lib: lib$2
     };
 
@@ -19099,7 +19097,7 @@ var app = (function () {
     };
     var basicSplit$1 = basicSplit;
 
-    const isAcronym$1 = /[ .][A-Z]\.? *$/i;
+    const isAcronym$2 = /[ .][A-Z]\.? *$/i;
     const hasEllipse = /(?:\u2026|\.{2,}) *$/;
     const hasLetter$1 = /[a-z0-9\u00C0-\u00FF\u00a9\u00ae\u2000-\u3300\ud000-\udfff]/i;
 
@@ -19110,7 +19108,7 @@ var app = (function () {
         return false
       }
       // check for 'F.B.I.'
-      if (isAcronym$1.test(str) === true) {
+      if (isAcronym$2.test(str) === true) {
         return false
       }
       //check for '...'
@@ -19358,7 +19356,7 @@ var app = (function () {
       /^[ \n\t.[\](){}⟨⟩:,،、‒–—―…!‹›«»‐\-?‘’;/⁄·&*•^†‡°¡¿※№÷×ºª%‰+−=‱¶′″‴§~|‖¦©℗®℠™¤₳฿\u0022\uFF02\u0027\u201C\u201F\u201B\u201E\u2E42\u201A\u2035\u2036\u2037\u301D\u0060\u301F]+/;
     const endings =
       /[ \n\t.'[\](){}⟨⟩:,،、‒–—―…!‹›«»‐\-?‘’;/⁄·&*@•^†‡°¡¿※#№÷×ºª‰+−=‱¶′″‴§~|‖¦©℗®℠™¤₳฿\u0022\uFF02\u201D\u00B4\u301E]+$/;
-    const hasApostrophe = /['’]/;
+    const hasApostrophe$1 = /['’]/;
     const hasAcronym = /^[a-z]\.([a-z]\.)+/i;
     const minusNumber = /^[-+.][0-9]/;
     const shortYear = /^'[0-9]{2}/;
@@ -19385,8 +19383,8 @@ var app = (function () {
       str = str.replace(endings, found => {
         post = found;
         // keep s-apostrophe - "flanders'" or "chillin'"
-        if (hasApostrophe.test(found) && /[sn]['’]$/.test(original) && hasApostrophe.test(pre) === false) {
-          post = post.replace(hasApostrophe, '');
+        if (hasApostrophe$1.test(found) && /[sn]['’]$/.test(original) && hasApostrophe$1.test(pre) === false) {
+          post = post.replace(hasApostrophe$1, '');
           return `'`
         }
         //keep end-period in acronym
@@ -19518,33 +19516,33 @@ var app = (function () {
     };
     var doUnicode = killUnicode;
 
-    const periodAcronym = /([A-Z]\.)+[A-Z]?,?$/;
-    const oneLetterAcronym = /^[A-Z]\.,?$/;
-    const noPeriodAcronym = /[A-Z]{2,}('s|,)?$/;
-    const lowerCaseAcronym = /([a-z]\.)+[a-z]\.?$/;
+    const periodAcronym$1 = /([A-Z]\.)+[A-Z]?,?$/;
+    const oneLetterAcronym$1 = /^[A-Z]\.,?$/;
+    const noPeriodAcronym$1 = /[A-Z]{2,}('s|,)?$/;
+    const lowerCaseAcronym$1 = /([a-z]\.)+[a-z]\.?$/;
 
-    const isAcronym = function (str) {
+    const isAcronym$1 = function (str) {
       //like N.D.A
-      if (periodAcronym.test(str) === true) {
+      if (periodAcronym$1.test(str) === true) {
         return true
       }
       //like c.e.o
-      if (lowerCaseAcronym.test(str) === true) {
+      if (lowerCaseAcronym$1.test(str) === true) {
         return true
       }
       //like 'F.'
-      if (oneLetterAcronym.test(str) === true) {
+      if (oneLetterAcronym$1.test(str) === true) {
         return true
       }
       //like NDA
-      if (noPeriodAcronym.test(str) === true) {
+      if (noPeriodAcronym$1.test(str) === true) {
         return true
       }
       return false
     };
 
     const doAcronym = function (str) {
-      if (isAcronym(str)) {
+      if (isAcronym$1(str)) {
         str = str.replace(/\./g, '');
       }
       return str
@@ -19588,7 +19586,7 @@ var app = (function () {
       return input
     };
 
-    var methods$4 = {
+    var methods$6 = {
       one: {
         splitSentences: sentence,
         splitTerms: term,
@@ -19604,7 +19602,7 @@ var app = (function () {
     };
     var aliases$1 = aliases;
 
-    var misc = [
+    var misc$7 = [
       'approx',
       'apt',
       'bc',
@@ -19709,7 +19707,7 @@ var app = (function () {
 
     var months = ['jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'oct', 'nov', 'dec'];
 
-    var nouns = [
+    var nouns$1 = [
       'ad',
       'al',
       'arc',
@@ -19731,7 +19729,7 @@ var app = (function () {
 
     var organizations = ['dept', 'univ', 'assn', 'bros', 'inc', 'ltd', 'co'];
 
-    var places = [
+    var places$1 = [
       'rd',
       'st',
       'dist',
@@ -19826,34 +19824,34 @@ var app = (function () {
 
     // add our abbreviation list to our lexicon
     let list = [
-      [misc],
+      [misc$7],
       [units, 'Unit'],
-      [nouns, 'Noun'],
+      [nouns$1, 'Noun'],
       [honorifics, 'Honorific'],
       [months, 'Month'],
       [organizations, 'Organization'],
-      [places, 'Place'],
+      [places$1, 'Place'],
     ];
     // create key-val for sentence-tokenizer
     let abbreviations = {};
     // add them to a future lexicon
-    let lexicon$1 = {};
+    let lexicon$2 = {};
 
     list.forEach(a => {
       a[0].forEach(w => {
         // sentence abbrevs
         abbreviations[w] = true;
         // future-lexicon
-        lexicon$1[w] = 'Abbreviation';
+        lexicon$2[w] = 'Abbreviation';
         if (a[1] !== undefined) {
-          lexicon$1[w] = [lexicon$1[w], a[1]];
+          lexicon$2[w] = [lexicon$2[w], a[1]];
         }
       });
     });
 
     // dashed prefixes that are not independent words
     //  'mid-century', 'pre-history'
-    var prefixes = [
+    var prefixes$1 = [
       'anti',
       'bi',
       'co',
@@ -19897,7 +19895,7 @@ var app = (function () {
 
     // dashed suffixes that are not independent words
     //  'flower-like', 'president-elect'
-    var suffixes = {
+    var suffixes$2 = {
       'like': true,
       'ish': true,
       'less': true,
@@ -19908,13 +19906,13 @@ var app = (function () {
       // 'fold':true,
     };
 
-    var model$2 = {
+    var model$6 = {
       one: {
         aliases: aliases$1,
         abbreviations,
-        prefixes,
-        suffixes,
-        lexicon: lexicon$1, //give this one forward
+        prefixes: prefixes$1,
+        suffixes: suffixes$2,
+        lexicon: lexicon$2, //give this one forward
       },
     };
 
@@ -20071,7 +20069,7 @@ var app = (function () {
       }
     };
 
-    const methods$3 = {
+    const methods$5 = {
       alias: (view) => termLoop(view, alias),
       normal: (view) => termLoop(view, normal),
       machine: (view) => termLoop(view, machine),
@@ -20080,12 +20078,12 @@ var app = (function () {
       index: index$1,
       wordCount: wordCount$1,
     };
-    var compute$4 = methods$3;
+    var compute$7 = methods$5;
 
     var tokenize$1 = {
-      compute: compute$4,
-      methods: methods$4,
-      model: model$2,
+      compute: compute$7,
+      methods: methods$6,
+      model: model$6,
       hooks: ['alias', 'machine', 'index'],
     };
 
@@ -20266,7 +20264,7 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const api$3 = function (View) {
+    const api$6 = function (View) {
       /** turn an array or object into a compressed trie*/
       View.prototype.compile = function (obj) {
         const trie = build(obj, this.world);
@@ -20289,7 +20287,7 @@ var app = (function () {
     };
 
     var lookup = {
-      api: api$3,
+      api: api$6,
     };
 
     const createCache = function (document) {
@@ -20334,14 +20332,14 @@ var app = (function () {
     };
     var cacheMatch$1 = cacheMatch;
 
-    var methods$2 = {
+    var methods$4 = {
       one: {
         cacheDoc,
         cacheMatch: cacheMatch$1,
       },
     };
 
-    const methods$1 = {
+    const methods$3 = {
       /** */
       cache: function () {
         this._cache = this.methods.one.cacheDoc(this.document);
@@ -20354,27 +20352,27 @@ var app = (function () {
       },
     };
     const addAPI = function (View) {
-      Object.assign(View.prototype, methods$1);
+      Object.assign(View.prototype, methods$3);
     };
-    var api$2 = addAPI;
+    var api$5 = addAPI;
 
-    const cache$1 = function (view) {
+    const cache$3 = function (view) {
       view._cache = view.methods.one.cacheDoc(view.document);
     };
 
-    var compute$3 = {
-      cache: cache$1
+    var compute$6 = {
+      cache: cache$3
     };
 
-    var cache = {
-      api: api$2,
-      compute: compute$3,
-      methods: methods$2,
+    var cache$2 = {
+      api: api$5,
+      compute: compute$6,
+      methods: methods$4,
       // hooks: ['cache']
     };
 
     // lookup last word in the type-ahead prefixes
-    const compute$1 = function (view) {
+    const compute$4 = function (view) {
       const prefixes = view.model.one.typeahead;
       const docs = view.docs;
       if (docs.length === 0 || Object.keys(prefixes).length === 0) {
@@ -20399,7 +20397,7 @@ var app = (function () {
       }
     };
 
-    var compute$2 = { typeahead: compute$1 };
+    var compute$5 = { typeahead: compute$4 };
 
     // assume any discovered prefixes
     const autoFill = function () {
@@ -20416,10 +20414,10 @@ var app = (function () {
       return this
     };
 
-    const api = function (View) {
+    const api$3 = function (View) {
       View.prototype.autoFill = autoFill;
     };
-    var api$1 = api;
+    var api$4 = api$3;
 
     // generate all the possible prefixes up-front
     const getPrefixes = function (arr, opts, world) {
@@ -20495,16 +20493,16 @@ var app = (function () {
       typeAhead: prepare,
     };
 
-    const model$1 = {
+    const model$5 = {
       one: {
         typeahead: {}
       }
     };
     var typeahead = {
-      model: model$1,
-      api: api$1,
+      model: model$5,
+      api: api$4,
       lib: lib$1,
-      compute: compute$2,
+      compute: compute$5,
       hooks: ['typeahead']
     };
 
@@ -20595,12 +20593,12 @@ var app = (function () {
       });
     };
 
-    var compute = {
+    var compute$3 = {
       lexicon: firstPass
     };
 
     // verbose-mode tagger debuging
-    const log = (term, tag, reason = '') => {
+    const log$1 = (term, tag, reason = '') => {
       const yellow = str => '\x1b[33m\x1b[3m' + str + '\x1b[0m';
       const i = str => '\x1b[3m' + str + '\x1b[0m';
       let word = term.text || '[' + term.implicit + ']';
@@ -20612,14 +20610,14 @@ var app = (function () {
     };
 
     // a faster version than the user-facing one in ./methods
-    const fastTag = function (term, tag, reason) {
+    const fastTag$1 = function (term, tag, reason) {
       if (!tag || tag.length === 0) {
         return
       }
       // some logging for debugging
       let env = typeof process === 'undefined' ? self.env || {} : process.env;
       if (env && env.DEBUG_TAGS) {
-        log(term, tag, reason);
+        log$1(term, tag, reason);
       }
       term.tags = term.tags || new Set();
       if (typeof tag === 'string') {
@@ -20629,10 +20627,10 @@ var app = (function () {
       }
     };
 
-    var fastTag$1 = fastTag;
+    var fastTag$2 = fastTag$1;
 
     // derive clever things from our lexicon key-value pairs
-    const expand = function (words, world) {
+    const expand$4 = function (words, world) {
       let lex = {};
       // console.log('start:', Object.keys(lex).length)
       let _multi = {};
@@ -20655,12 +20653,12 @@ var app = (function () {
       delete lex[' '];
       return { lex, _multi }
     };
-    var expandLexicon = expand;
+    var expandLexicon$3 = expand$4;
 
-    var methods = {
+    var methods$2 = {
       one: {
-        expandLexicon,
-        fastTag: fastTag$1
+        expandLexicon: expandLexicon$3,
+        fastTag: fastTag$2
       }
     };
 
@@ -20699,17 +20697,17 @@ var app = (function () {
       addWords
     };
 
-    const model = {
+    const model$4 = {
       one: {
         lexicon: {},
         _multiCache: {},
       }
     };
 
-    var lexicon = {
-      model,
-      methods,
-      compute,
+    var lexicon$1 = {
+      model: model$4,
+      methods: methods$2,
+      compute: compute$3,
       lib,
       hooks: ['lexicon']
     };
@@ -20720,4993 +20718,7509 @@ var app = (function () {
     nlp$1.extend(pointers); //2kb
     nlp$1.extend(tag); //2kb
     nlp$1.extend(tokenize$1); //7kb
-    nlp$1.plugin(cache); //~1kb
+    nlp$1.plugin(cache$2); //~1kb
     nlp$1.extend(lookup); //7kb
     nlp$1.extend(typeahead); //1kb
-    nlp$1.extend(lexicon); //1kb
+    nlp$1.extend(lexicon$1); //1kb
 
-    /* home/Intro.svelte generated by Svelte v3.43.0 */
-    const file$a = "home/Intro.svelte";
+    //nouns with irregular plural/singular forms
+    //used in nouns.toPlural(), and also in the lexicon.
 
-    // (8:2) <One>
-    function create_default_slot_8$1(ctx) {
-    	let div0;
-    	let t1;
-    	let div3;
-    	let div1;
-    	let t3;
-    	let div2;
-    	let t5;
-    	let div4;
-    	let t7;
-    	let div5;
-    	let t8;
-    	let div6;
-    	let grid;
-    	let current;
+    var irregularPlurals = {
+      addendum: 'addenda',
+      alga: 'algae',
+      alumna: 'alumnae',
+      alumnus: 'alumni',
+      analysis: 'analyses',
+      antenna: 'antennae',
+      appendix: 'appendices',
+      avocado: 'avocados',
+      axis: 'axes',
+      bacillus: 'bacilli',
+      barracks: 'barracks',
+      beau: 'beaux',
+      bus: 'buses',
+      gas: 'gases',
+      cactus: 'cacti',
+      chateau: 'chateaux',
+      child: 'children',
+      circus: 'circuses',
+      clothes: 'clothes',
+      corpus: 'corpora',
+      criterion: 'criteria',
+      curriculum: 'curricula',
+      database: 'databases',
+      deer: 'deer',
+      diagnosis: 'diagnoses',
+      echo: 'echoes',
+      embargo: 'embargoes',
+      epoch: 'epochs',
+      foot: 'feet',
+      formula: 'formulae',
+      fungus: 'fungi',
+      genus: 'genera',
+      goose: 'geese',
+      halo: 'halos',
+      hippopotamus: 'hippopotami',
+      index: 'indices',
+      larva: 'larvae',
+      leaf: 'leaves',
+      libretto: 'libretti',
+      loaf: 'loaves',
+      man: 'men',
+      matrix: 'matrices',
+      memorandum: 'memoranda',
+      modulus: 'moduli',
+      mosquito: 'mosquitoes',
+      mouse: 'mice',
+      nebula: 'nebulae',
+      nucleus: 'nuclei',
+      octopus: 'octopi',
+      opus: 'opera',
+      ovum: 'ova',
+      ox: 'oxen',
+      parenthesis: 'parentheses',
+      person: 'people',
+      phenomenon: 'phenomena',
+      prognosis: 'prognoses',
+      quiz: 'quizzes',
+      radius: 'radii',
+      referendum: 'referenda',
+      rodeo: 'rodeos',
+      sex: 'sexes',
+      shoe: 'shoes',
+      sombrero: 'sombreros',
+      stimulus: 'stimuli',
+      stomach: 'stomachs',
+      syllabus: 'syllabi',
+      synopsis: 'synopses',
+      tableau: 'tableaux',
+      thesis: 'theses',
+      thief: 'thieves',
+      tooth: 'teeth',
+      tornado: 'tornados',
+      tuxedo: 'tuxedos',
+      vertebra: 'vertebrae',
+    };
 
-    	grid = new Grid({
-    			props: { seed: "45ea07497996cea6af4" },
-    			$$inline: true
-    		});
+    // a list of irregular verb conjugations
+    // used in verbs().conjugate()
+    // but also added to our lexicon
+    //use shorter key-names
+    const mapping$1 = {
+      g: 'Gerund',
+      prt: 'Participle',
+      perf: 'PerfectTense',
+      pst: 'PastTense',
+      fut: 'FuturePerfect',
+      pres: 'PresentTense',
+      pluperf: 'Pluperfect',
+      a: 'Actor',
+    };
+    // '_' in conjugations is the infinitive form
+    // (order matters, to the lexicon)
+    let conjugations = {
+      act: {
+        a: '_or',
+      },
+      ache: {
+        pst: 'ached',
+        g: 'aching',
+      },
+      age: {
+        g: 'ageing',
+        pst: 'aged',
+        pres: 'ages',
+      },
+      aim: {
+        a: '_er',
+        g: '_ing',
+        pst: '_ed',
+      },
+      arise: {
+        prt: '_n',
+        pst: 'arose',
+      },
+      babysit: {
+        a: '_ter',
+        pst: 'babysat',
+      },
+      ban: {
+        a: '',
+        g: '_ning',
+        pst: '_ned',
+      },
+      be: {
+        a: '',
+        g: 'am',
+        prt: 'been',
+        pst: 'was',
+        pres: 'is',
+      },
+      beat: {
+        a: '_er',
+        g: '_ing',
+        prt: '_en',
+      },
+      become: {
+        prt: '_',
+      },
+      begin: {
+        g: '_ning',
+        prt: 'begun',
+        pst: 'began',
+      },
+      being: {
+        g: 'are',
+        pst: 'were',
+        pres: 'are',
+      },
+      bend: {
+        prt: 'bent',
+      },
+      bet: {
+        a: '_ter',
+        prt: '_',
+      },
+      bind: {
+        pst: 'bound',
+      },
+      bite: {
+        g: 'biting',
+        prt: 'bitten',
+        pst: 'bit',
+      },
+      bleed: {
+        pst: 'bled',
+        prt: 'bled',
+      },
+      blow: {
+        prt: '_n',
+        pst: 'blew',
+      },
+      boil: {
+        a: '_er',
+      },
+      brake: {
+        prt: 'broken',
+      },
+      break: {
+        pst: 'broke',
+      },
+      breed: {
+        pst: 'bred',
+      },
+      decree: {
+        pst: '_d',
+      },
+      bring: {
+        pst: 'brought',
+        prt: 'brought',
+      },
+      broadcast: {
+        pst: '_',
+      },
+      budget: {
+        pst: '_ed',
+      },
+      build: {
+        pst: 'built',
+        prt: 'built',
+      },
+      burn: {
+        prt: '_ed',
+      },
+      burst: {
+        prt: '_',
+      },
+      buy: {
+        pst: 'bought',
+        prt: 'bought',
+      },
+      can: {
+        a: '',
+        fut: '_',
+        g: '',
+        pst: 'could',
+        perf: 'could',
+        pluperf: 'could',
+        pres: '_',
+      },
+      catch: {
+        pst: 'caught',
+      },
+      choose: {
+        g: 'choosing',
+        prt: 'chosen',
+        pst: 'chose',
+      },
+      cling: {
+        prt: 'clung',
+      },
+      come: {
+        prt: '_',
+        pst: 'came',
+        g: 'coming',
+      },
+      compete: {
+        a: 'competitor',
+        g: 'competing',
+        pst: '_d',
+      },
+      cost: {
+        pst: '_',
+      },
+      color: {
+        pst: '_ed',
+        g: '_ing',
+      },
+      creep: {
+        prt: 'crept',
+      },
+      create: {
+        prt: '_d',
+      },
+      cut: {
+        prt: '_',
+      },
+      deal: {
+        pst: '_t',
+        prt: '_t',
+      },
+      develop: {
+        a: '_er',
+        g: '_ing',
+        pst: '_ed',
+      },
+      die: {
+        g: 'dying',
+        pst: '_d',
+      },
+      dig: {
+        g: '_ging',
+        pst: 'dug',
+        prt: 'dug',
+      },
+      dive: {
+        prt: '_d',
+      },
+      do: {
+        pst: 'did',
+        pres: '_es',
+      },
+      draw: {
+        prt: '_n',
+        pst: 'drew',
+      },
+      dream: {
+        prt: '_t',
+      },
+      drink: {
+        prt: 'drunk',
+        pst: 'drank',
+      },
+      drive: {
+        g: 'driving',
+        prt: '_n',
+        pst: 'drove',
+      },
+      drop: {
+        g: '_ping',
+        pst: '_ped',
+      },
+      eat: {
+        a: '_er',
+        g: '_ing',
+        prt: '_en',
+        pst: 'ate',
+      },
+      edit: {
+        pst: '_ed',
+        g: '_ing',
+      },
+      egg: {
+        pst: '_ed',
+      },
+      fall: {
+        prt: '_en',
+        pst: 'fell',
+      },
+      feed: {
+        prt: 'fed',
+        pst: 'fed',
+      },
+      feel: {
+        a: '_er',
+        pst: 'felt',
+      },
+      fight: {
+        pst: 'fought',
+        prt: 'fought',
+      },
+      find: {
+        pst: 'found',
+      },
+      flee: {
+        g: '_ing',
+        prt: 'fled',
+      },
+      fling: {
+        prt: 'flung',
+      },
+      fly: {
+        prt: 'flown',
+        pst: 'flew',
+      },
+      forbid: {
+        pst: 'forbade',
+      },
+      forget: {
+        g: '_ing',
+        prt: 'forgotten',
+        pst: 'forgot',
+      },
+      forgive: {
+        g: 'forgiving',
+        prt: '_n',
+        pst: 'forgave',
+      },
+      free: {
+        a: '',
+        g: '_ing',
+        pst: '_d',
+      },
+      freeze: {
+        g: 'freezing',
+        prt: 'frozen',
+        pst: 'froze',
+      },
+      get: {
+        pst: 'got',
+        prt: 'gotten',
+      },
+      give: {
+        g: 'giving',
+        prt: '_n',
+        pst: 'gave',
+      },
+      go: {
+        prt: '_ne',
+        pst: 'went',
+        pres: 'goes',
+      },
+      grow: {
+        prt: '_n',
+      },
+      guide: {
+        pst: '_d',
+      },
+      hang: {
+        pst: 'hung',
+        prt: 'hung',
+      },
+      have: {
+        g: 'having',
+        pst: 'had',
+        prt: 'had',
+        pres: 'has',
+      },
+      hear: {
+        pst: '_d',
+        prt: '_d',
+      },
+      hide: {
+        prt: 'hidden',
+        pst: 'hid',
+      },
+      hit: {
+        prt: '_',
+      },
+      hold: {
+        pst: 'held',
+        prt: 'held',
+      },
+      hurt: {
+        pst: '_',
+        prt: '_',
+      },
+      ice: {
+        g: 'icing',
+        pst: '_d',
+      },
+      imply: {
+        pst: 'implied',
+        pres: 'implies',
+      },
+      is: {
+        a: '',
+        g: 'being',
+        pst: 'was',
+        pres: '_',
+      },
+      keep: {
+        prt: 'kept',
+      },
+      kneel: {
+        prt: 'knelt',
+      },
+      know: {
+        prt: '_n',
+      },
+      lay: {
+        pst: 'laid',
+        prt: 'laid',
+      },
+      lead: {
+        pst: 'led',
+        prt: 'led',
+      },
+      leap: {
+        prt: '_t',
+      },
+      leave: {
+        pst: 'left',
+        prt: 'left',
+      },
+      lend: {
+        prt: 'lent',
+      },
+      lie: {
+        g: 'lying',
+        pst: 'lay',
+      },
+      light: {
+        pst: 'lit',
+        prt: 'lit',
+      },
+      log: {
+        g: '_ging',
+        pst: '_ged',
+      },
+      // loose: {
+      //   prt: 'lost',
+      // },
+      lose: {
+        g: 'losing',
+        pst: 'lost',
+      },
+      make: {
+        pst: 'made',
+        prt: 'made',
+      },
+      mean: {
+        pst: '_t',
+        prt: '_t',
+      },
+      meet: {
+        a: '_er',
+        g: '_ing',
+        pst: 'met',
+        prt: 'met',
+      },
+      miss: {
+        pres: '_',
+      },
+      name: {
+        g: 'naming',
+      },
+      patrol: {
+        g: '_ling',
+        pst: '_led',
+      },
+      pay: {
+        pst: 'paid',
+        prt: 'paid',
+      },
+      prove: {
+        prt: '_n',
+      },
+      puke: {
+        g: 'puking',
+      },
+      put: {
+        prt: '_',
+      },
+      quit: {
+        prt: '_',
+      },
+      quote: {
+        pst: '_d',
+      },
+      read: {
+        pst: '_',
+        prt: '_',
+      },
+      ride: {
+        prt: 'ridden',
+      },
+      reside: {
+        pst: '_d',
+      },
+      ring: {
+        pst: 'rang',
+        prt: 'rung',
+      },
+      rise: {
+        g: 'rising',
+        prt: '_n',
+        pst: 'rose',
+        pluperf: 'had _n',
+      },
+      rub: {
+        g: '_bing',
+        pst: '_bed',
+      },
+      run: {
+        g: '_ning',
+        prt: '_',
+        pst: 'ran',
+      },
+      say: {
+        pst: 'said',
+        prt: 'said',
+        pres: '_s',
+      },
 
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "okay consider -";
-    			t1 = space();
-    			div3 = element("div");
-    			div1 = element("div");
-    			div1.textContent = "we put";
-    			t3 = space();
-    			div2 = element("div");
-    			div2.textContent = "all of our information";
-    			t5 = space();
-    			div4 = element("div");
-    			div4.textContent = "in text";
-    			t7 = space();
-    			div5 = element("div");
-    			t8 = space();
-    			div6 = element("div");
-    			create_component(grid.$$.fragment);
-    			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$a, 8, 4, 120);
-    			attr_dev(div1, "class", "i");
-    			set_style(div1, "font-size", "1.8rem");
-    			set_style(div1, "line-height", "2rem");
-    			add_location(div1, file$a, 10, 6, 191);
-    			attr_dev(div2, "class", "tab f2");
-    			add_location(div2, file$a, 11, 6, 269);
-    			attr_dev(div3, "class", "more m1");
-    			add_location(div3, file$a, 9, 4, 163);
-    			attr_dev(div4, "class", "tab i f2 rose");
-    			add_location(div4, file$a, 13, 4, 333);
-    			set_style(div5, "margin-top", "3rem");
-    			add_location(div5, file$a, 14, 4, 378);
-    			attr_dev(div6, "class", "margin-left:15rem;");
-    			add_location(div6, file$a, 15, 4, 415);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, div1);
-    			append_dev(div3, t3);
-    			append_dev(div3, div2);
-    			insert_dev(target, t5, anchor);
-    			insert_dev(target, div4, anchor);
-    			insert_dev(target, t7, anchor);
-    			insert_dev(target, div5, anchor);
-    			insert_dev(target, t8, anchor);
-    			insert_dev(target, div6, anchor);
-    			mount_component(grid, div6, null);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t5);
-    			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t7);
-    			if (detaching) detach_dev(div5);
-    			if (detaching) detach_dev(t8);
-    			if (detaching) detach_dev(div6);
-    			destroy_component(grid);
-    		}
-    	};
+      see: {
+        g: '_ing',
+        prt: '_n',
+        pst: 'saw',
+      },
+      seek: {
+        prt: 'sought',
+      },
+      sell: {
+        pst: 'sold',
+        prt: 'sold',
+      },
+      send: {
+        prt: 'sent',
+      },
+      set: {
+        prt: '_',
+      },
+      sew: {
+        prt: '_n',
+      },
+      shake: {
+        prt: '_n',
+      },
+      shave: {
+        prt: '_d',
+      },
+      shed: {
+        g: '_ding',
+        pst: '_',
+        pres: '_s',
+      },
+      shine: {
+        pst: 'shone',
+        prt: 'shone',
+      },
+      shoot: {
+        pst: 'shot',
+        prt: 'shot',
+      },
+      show: {
+        pst: '_ed',
+      },
+      slow: {
+        pst: '_ed',
+      },
+      shut: {
+        prt: '_',
+      },
+      sing: {
+        prt: 'sung',
+        pst: 'sang',
+      },
+      sink: {
+        pst: 'sank',
+        pluperf: 'had sunk',
+      },
+      sit: {
+        pst: 'sat',
+      },
+      seat: {
+        pst: 'sat',
+        prt: 'sat',
+      },
+      ski: {
+        pst: '_ied',
+      },
+      slay: {
+        prt: 'slain',
+      },
+      sleep: {
+        prt: 'slept',
+      },
+      slide: {
+        pst: 'slid',
+        prt: 'slid',
+      },
+      smash: {
+        pres: '_es',
+      },
+      sneak: {
+        prt: 'snuck',
+      },
+      speak: {
+        prt: 'spoken',
+        pst: 'spoke',
+        perf: 'have spoken',
+        pluperf: 'had spoken',
+      },
+      speed: {
+        prt: 'sped',
+      },
+      spend: {
+        prt: 'spent',
+      },
+      spill: {
+        prt: '_ed',
+        pst: 'spilt',
+      },
+      spin: {
+        g: '_ning',
+        pst: 'spun',
+        prt: 'spun',
+      },
+      spit: {
+        prt: 'spat',
+      },
+      split: {
+        prt: '_',
+      },
+      spread: {
+        pst: '_',
+      },
+      spring: {
+        prt: 'sprung',
+      },
+      stand: {
+        pst: 'stood',
+      },
+      steal: {
+        a: '_er',
+        pst: 'stole',
+        prt: 'stolen',
+      },
+      stick: {
+        pst: 'stuck',
+      },
+      sting: {
+        pst: 'stung',
+      },
+      stink: {
+        pst: 'stunk',
+        prt: 'stunk',
+      },
+      stream: {
+        a: '_er',
+      },
+      strew: {
+        prt: '_n',
+      },
+      string: {
+        pst: 'strung',
+      },
+      strike: {
+        g: 'striking',
+        pst: 'struck',
+      },
+      suit: {
+        a: '_er',
+        g: '_ing',
+        pst: '_ed',
+      },
+      sweep: {
+        prt: 'swept',
+      },
+      swim: {
+        g: '_ming',
+        pst: 'swam',
+      },
+      swing: {
+        pst: 'swung',
+      },
+      take: {
+        pst: 'took',
+        perf: 'have _n',
+        pluperf: 'had _n',
+      },
+      teach: {
+        pst: 'taught',
+        pres: '_es',
+      },
+      tear: {
+        pst: 'tore',
+      },
+      tell: {
+        pst: 'told',
+      },
+      think: {
+        pst: 'thought',
+      },
+      thrive: {
+        prt: '_d',
+      },
+      tie: {
+        g: 'tying',
+        pst: '_d',
+      },
+      tide: {
+        pst: '_d',
+      },
+      undergo: {
+        prt: '_ne',
+      },
+      understand: {
+        pst: 'understood',
+      },
+      upset: {
+        prt: '_',
+      },
+      wait: {
+        a: '_er',
+        g: '_ing',
+        pst: '_ed',
+      },
+      wake: {
+        pst: 'woke',
+      },
+      weave: {
+        prt: 'woven',
+      },
+      wed: {
+        pst: 'wed',
+      },
+      weep: {
+        prt: 'wept',
+      },
+      win: {
+        g: '_ning',
+        pst: 'won',
+      },
+      wind: {
+        prt: 'wound',
+      },
+      withdraw: {
+        pst: 'withdrew',
+      },
+      wring: {
+        prt: 'wrung',
+      },
+      write: {
+        g: 'writing',
+        prt: 'written',
+        pst: 'wrote',
+      },
 
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_8$1.name,
-    		type: "slot",
-    		source: "(8:2) <One>",
-    		ctx
-    	});
+      // -ee verbs
+      agree: {
+        pst: '_d',
+      },
+      disagree: {
+        pst: '_d',
+      },
+      guarantee: {
+        pst: '_d',
+      },
+      pee: {
+        pst: '_d',
+      },
+      permeate: {
+        pst: '_d',
+      },
+      programme: {
+        pst: '_d',
+      },
 
-    	return block;
+      // -orn verbs
+      swear: {
+        pst: 'swore',
+        prt: 'sworn',
+      },
+      wear: {
+        pst: 'wore',
+        prt: 'worn',
+      },
+      shrink: {
+        pst: 'shrunk',
+        prt: 'shrunken',
+      },
+      dye: {
+        pst: '_d',
+      },
+      mimic: {
+        pst: '_ked',
+        g: '_king',
+      },
+      prefer: {
+        pst: '_red',
+      },
+      expedite: {
+        pst: '_d',
+      },
+      exit: {
+        pst: '_ed',
+      },
+      // -led exceptions
+      control: {
+        pst: '_led',
+      },
+      rival: {
+        pst: '_led',
+      },
+      cancel: {
+        pst: '_led',
+      },
+      annul: {
+        pst: '_led',
+      },
+      extol: {
+        pst: '_led',
+      },
+      distil: {
+        pst: '_led',
+      },
+      label: {
+        pst: '_led',
+      },
+
+      sow: {
+        pst: '_ed',
+        prt: '_n',
+      },
+      convene: {
+        pst: '_d',
+      },
+      focus: {
+        pst: '_ed',
+      },
+      persevere: {
+        pst: '_d',
+      },
+      tailor: {
+        pst: '_ed',
+      },
+      solicit: {
+        pst: '_ed',
+      },
+    };
+
+    //uncompress our ad-hoc compression scheme
+    let keys = Object.keys(conjugations);
+    for (let i = 0; i < keys.length; i++) {
+      const inf = keys[i];
+      let final = {};
+      Object.keys(conjugations[inf]).forEach(key => {
+        let str = conjugations[inf][key];
+        //swap-in infinitives for '_'
+        str = str.replace('_', inf);
+        let full = mapping$1[key];
+        final[full] = str;
+      });
+      //over-write original
+      conjugations[inf] = final;
+    }
+    var irregularVerbs = conjugations;
+
+    // generated in ./lib/lexicon
+    var lexData = {
+      "Comparative": "true¦better",
+      "Superlative": "true¦earlier",
+      "PresentTense": "true¦sounds",
+      "Condition": "true¦lest,unless",
+      "PastTense": "true¦be2came,d1had,lied,mea0sa1taken,we0;nt;id;en,gan",
+      "Gerund": "true¦accord0be0go0result0stain0;ing",
+      "Adj|Gerund": "true¦0:26;1:28;2:1W;3:1U;4:1Y;5:1T;a1Tb1Pc17d0We0Rf0Jg0Eh0Di09jud1Nl05m02oZpVrPsEt9u6veYy8;ny7p6;lif0set0;iel1T;aUe9hr7i3ouc5r6wis0;eYoub2us0yi1;ea0Fi6;l2vi1;l2mp0;atisf20creec5hocZkyrocke0lo0ToEpDriZt9u7we6;e0Sl2;pp19r6;gi1pri4roun1K;a7ea1Ri6riVun11;mula0r3;gge3r6;t2vi1;ark2ee1F;a6ot5;ki1ri1;aAe7ive0o6us5;a3l2;fres5ig0SlaCv6war1A;ea2itali6;si1zi1;gi1ll1Kmb2vi1;a1Jerple8ier12r6un17;e6o0Q;ce14s4vai2;xi1;pIut7ver6;arc5whel19;goi1st0N;eande3i7o06u6;mb2;s4tiga0;a7i6o03;fesa02mi0vi1;c6g0L;ki1;m8n6rrita0;sul0te0Vvi6;go14ti1;po4;arro9ea2orrif11umilia0;l9r6;a0ipSo7uel6;i1li1;wi1;a3ea0R;aCetc5it0l9o8r6ulfil2;ee0Righ6ust0V;teY;rebo0Fun0F;a7o6;a0we3;mi1tte3;di1scina0;m9n7x6;ac0ci0is0;ab2c6du3gaZsO;han0ouraY;barras4erXpowe3;aFeAi6;s6zz0H;appoin0gus0t6;r6u0I;ac0es4;c9fiIm8pres4ser7velo6;pi1;vi1;anXeaF;a09liE;maMri1s5un0;aMhJlo4o6ripp2ut0;mCn6rresponT;cerAf9spi3t6;in7r6;as0ol2;ui1;lic0u4;ni1;fAm9p6;e7ro6;mi4;l2ti1;anI;or0;a6ea0il2;llen6rN;gi1;lLptiva0;ecoKinClinCo7rui4u6;dBst2;i2oIri1un6;ci1;bsoOcJgonHlarGmEppea2rCs6;pi3su3to6;n7un6;di1;is5;hi1;ri1;res0;li1;a9u4;si1;mi1;i6zi1;zi1;c6hi1;ele7ompan6;yi1;ra0;ti1;rbi1;ng",
+      "Expression": "true¦a0Qb0Mco0Ld0He0Ffuck,g09hUjeez,lRmQnOoLpIshHtGuDvoi0Sw6y0;a4e3i1u0;ck,p;kYp0;ee,pee;ah,p,s;!a,h6y;ah5h2o1t0;af,f;rd up,w;e1o0;a,ops;e,w;oo;gh,h0;! 0h,m;huh,oh;sk,ut tut;eesh,hh,it;ff,h1l0ow,sst;ease,z;ew,ooey;h1i,o0uch,w,y;h,o,ps;!h;ah,o0;!pe;eh,mm;ah,m1ol0;!s;ao,fao;aBe9i7mm,o2u0;h,mph,rra0zzB;h,y;ly1o0;r4y8;! 0;cow,moCsmok0;es;!p hip hoor0;ay;ck,e,ll0y;!o;ha1i,lleluj0;ah;!ha;ah,ee4o1r0;eat scott,r;l1od0sh; grief,bye;ly;! whiz;e0h,t cetera,ww;k,p;'oh,a0rat,uh;m0ng;mit,n0;!it;ngratulations,wabunga;a2oo1r0ye;avo,r;!ya;h,m; 1h0las,men,rgh;!a,em,oy;la",
+      "Negative": "true¦n0;ever,o0;n,t",
+      "QuestionWord": "true¦how3wh0;at,e1ich,o0y;!m,se;n,re; come,'s",
+      "Plural": "true¦ones,records",
+      "Value": "true¦a few",
+      "Demonym": "true¦0:15;1:12;a0Vb0Oc0Dd0Ce08f07g04h02iYjVkTlPmLnIomHpEqatari,rCs7t5u4v3welAz2;am0Gimbabwe0;enezuel0ietnam0I;gAkrai1;aiwTex0hai,rinida0Ju2;ni0Prkmen;a5cotti4e3ingapoOlovak,oma0Spaniard,udRw2y0W;ede,iss;negal0Cr09;sh;mo0uT;o5us0Jw2;and0;a2eru0Fhilipp0Nortugu07uerto r0S;kist3lesti1na2raguay0;ma1;ani;ami00i2orweP;caragu0geri2;an,en;a3ex0Lo2;ngo0Drocc0;cedo1la2;gasy,y07;a4eb9i2;b2thua1;e0Cy0;o,t01;azakh,eny0o2uwaiI;re0;a2orda1;ma0Ap2;anO;celandic,nd4r2sraeli,ta01vo05;a2iB;ni0qi;i0oneU;aiAin2ondur0unO;di;amEe2hanai0reek,uatemal0;or2rm0;gi0;ilipino,ren8;cuadoVgyp4mira3ngli2sto1thiopi0urope0;shm0;ti;ti0;ominUut3;a9h6o4roat3ub0ze2;ch;!i0;lom2ngol5;bi0;a6i2;le0n2;ese;lifor1m2na3;bo2eroo1;di0;angladeshi,el6o4r3ul2;gaE;azi9it;li2s1;vi0;aru2gi0;si0;fAl7merBngol0r5si0us2;sie,tr2;a2i0;li0;gent2me1;ine;ba1ge2;ri0;ni0;gh0r2;ic0;an",
+      "MaleName": "true¦0:DQ;1:CR;2:D9;3:AL;4:CN;5:C2;6:CI;7:D5;8:BU;9:AT;A:9V;B:DD;C:D6;aCAbB8cA8d98e8If81g7Eh6Ri6Bj5Dk51l4Dm35n2To2Np2Fqu2Dr1Ls11t0Fu0Ev07wTxSyIzD;aDor0;cDh9Ikaria,n0B;hEkD;!aC8;ar5TeC7;aLoFuD;sDu2KvBK;if,uf;nFsEusD;ouf,sD;ef;aDg;s,tD;an,h0;hli,nB9ssX;avi3ho4;aMeKiFoDyaBO;jcie87lfgang,odrow,utD;!er;lDnst1;bFey,fredBlD;aB0iD;am,e,s;e96ur;i,nde9sD;!l8t1;lEyD;l1ne;lDt3;a9Yy;aGiDladimir,ojte7U;cEha0kt66nceDrgA6va0;!nt;e3Vt64;lentDn9T;inD;!e;ghBGlyss58nax,sm0;aWeRhNiLoHrFuEyD;!l3ro6s1;n7r58;avAIeDist0oy,um0;ntAAv5Vy;bFd8QmDny;!as,mDoharu;aCDie,y;iAy;mDt5;!my,othy;adFeoEia0JomD;!as;!do8F;!de5;dGrD;en99rD;an98eDy;ll,n97;!dy;dgh,ha,iDnn3req,tsu4Q;cARka;aTcotRePhLiJoHpenc3tDur1Vylve97zym1;anFeDua84;f0phBEvDwa83;e5Yie;!islaw,l8;lom1uD;leyma6ta;dDlAm1yabonga;!dhart74n8;aFeD;lDrm0;d1t1;h7Jne,qu10un,wn,y6;aDbasti0k2Al4Org4Lth,ymoAG;m5n;!tD;!ie,y;lEmDnti2Eq57ul;!ke5Im9Tu4;ik,vato7N;aYeUhe9WiQoHuEyD;an,ou;b7CdEf5pe7JssD;!elBK;ol3Ey;an,bKc62dIel,geHh0landBmGnFry,sEyD;!ce;coe,s;!aA3n9J;an,eo;l44r;er77g3n8olfo,riD;go;b9EeAS;cDl8;ar6Ic6HhEkDo;!ey,ie,y;a8Wie;gEid,ubCyDza;an1InY;g9UiD;na9Qs;ch6Pfa4lHmGndFpha4sEul,wi2GyD;an,mo6T;h7Km5;alAYol2Ty;iAEon;f,ph;ent2inD;cy,t1;aIeGhilFier6SrD;aka16eD;m,st1;!ip,lip;dA6rcy,tD;ar,e3Dr1X;b4Gdra74tr6IulD;!o17;ctav3Ci3liv3mA0ndrej,rHsEtDum7wC;is,to;aEc7k7m0vD;al5S;ma;i,l4YvL;aLeJiFoDu37;aDel,j5l0ma0r3H;h,m;cEg4i45kD;!au,h7Hola;holAkDolA;!olA;al,d,il,ls1vD;il8K;hom,thD;anDy;!a4i4;aZeWiMoHuEyD;l2Gr1;hamEr6MstaD;fa,p55;ed,mH;di0We,hamFis2CntEsDussa;es,he;e,y;ad,ed,mD;ad,ed;cIgu4hai,kGlFnEtchD;!e9;a7Wik;house,o0Bt1;ae5Oe9PolD;aj;ah,hD;aEeD;al,l;el,l;hElv2rD;le,ri9v2;di,met;ay0hTjd,ks2AlRmadWnQrKs1tFuricExD;imilianBwe9;e,io;eGhEiAtDus,yA;!eo,hew,ia;eDis;us,w;j,o;cHio,kGlFqu70sha9tDv2;iDy;!m,n;in,on;el,oPus;!el93oOus;iGu4;achDcolm,ik;ai,y;amEdi,eDmoud;sh;adDm5I;ou;aWeQiOlo39oKuEyD;le,nd1;cGiFkDth3uk;aDe;!s;gi,s,z;as,iaD;no;g0nn7ErenFuDv84we9;!iD;e,s;!zo;am,oD;n4r;a7Xevi,la4AnHonGst3thaFvD;eDi;nte;bo;!a6Fel;!ny;mFnErDur56wr56;ry,s;ce,d1;ar,o4Z;aLeHhal7IiEristDu4Ly6K;i0o55;er0p,rD;k,ollD;os;en0iFnDrmit,v3T;!dr3WnDt1;e17y;r,th;cp3j5m5Tna6QrEsp7them,uD;ri;im,l;a00eUiSoGuD;an,lDst2;en,iD;an,en,o,us;aNeLhnKkubAnIrGsD;eEhDi7Xue;!ua;!ph;dDge;i,on;!aDny;h,s,th56;!ath55ie,n5N;!l,sDy;ph;o,qu2;an,mD;!m5I;d,ffGrDs5;a60emEmai6oDry;me,ni0X;i7Hy;!e5PrD;ey,y;cKdCkImHrFsEvi3yD;dCs1;on,p3;ed,od,rDv4W;e5Cod;al,es4Nis1;a,e,oDub;b,v;ob,quD;es;aWbQchiPgNkeMlija,nuLonut,rJsFtDv0;ai,suD;ki;aEha0i71maDsac;el,il;ac,iaD;h,s;a,vinDw2;!g;k,nngu5H;!r;nacDor;io;ka;ai,rahD;im;aPeJoIuDyd7;be2EgGmber4LsD;eyEsD;a2e2;in,n;h,o;m3ra37sse2wa41;aHctGitGnrErD;be27m0;iDy;!q0Z;or;th;bLlKmza,nJo,rFsEyD;a48dC;an,s0;lFo4Pry,uDv8;hi45ki,tD;a,o;an,ey;k,s;!im;ib;aVeRiPlenOoLrHuD;ilEsD;!tavo;herme,lerD;mo;aFegDov3;!g,orD;io,y;dy,h5L;nzaErD;an,d1;lo;!n;lbe4Zno,oD;rg38van4Z;oFrD;aDry;ld,rdB;ffr8rge;brElCrDv2;la13r3Ith,y;e34ielD;!i5;aSeOiMlKorrest,rD;anEedDitz;!d39er10r10;cFkD;!ie,lD;in,yn;esLisD;!co,z2X;etch3oD;yd;d4lDnn,onn;ip;deriFliEng,rnD;an04;pe,x;co;bi0di,hd;dXfrWit0lRmKnHo2rFsteb0th0uge6vDymCzra;an,eD;ns,re2X;gi,i08nDrol,v2w2;estBie;oEriqDzo;ue;ch;aIerHiEmD;aHe2Q;lDrh0;!iD;o,s;s1y;nu4;be09d1iFliEm3t1viDwood;n,s;ot1Ss;!as,j4FsD;ha;a2en;!d2Wg7mGoEuEwD;a26in;arD;do;oUuU;a00ePiNoGrag0uFwEylD;an,l0;ay6ight;a6dl8nc0st2;minGnEri0ugDvydAy29;!lA;!a2InDov0;e9ie,y;go,iDykA;cDk;!k;armuDll1on,rk;id;andMj0lbeLmetri5nJon,rHsFvEwDxt3;ay6ey;en,in;hawn,moD;nd;ek,rD;ick;is,nD;is,y;rt;re;an,lMmKnJrFvD;e,iD;!d;en,iFne9rDyl;eDin,yl;l37n;n,o,us;!e,i4ny;iDon;an,en,on;e,lA;as;a07e05hXiar0lNoIrGuEyrD;il,us;rtD;!is;aDistob0R;ig;dy,lGnErD;ey,neli5y;or,rD;ad;by,e,in,l2t1;aHeFiDyJ;fDnt;fo0Dt1;meDt5;nt;rFuEyD;!t1;de;enD;ce;aHeFrisD;!toD;ph3;st3;er;d,rDs;b4leD;s,y;cDdric,s7;il;lGmer1rD;ey,lEro9y;ll;!os,t1;eb,v2;a06eYiUlaToRrEuDyr1;ddy,rtK;aLeGiFuEyD;an,ce,on;ce,no;an,ce;nEtD;!t;dEtD;!on;an,on;dEndD;en,on;!foDl8y;rd;bby,rDyd;is;i6ke;bFlEshD;al;al,lK;ek;nHrDshoi;at,nEtD;!r1B;aDie;rdB;!iEjam2nD;ie,y;to;kaMlazs,nHrD;n8rDt;eDy;tt;ey;dDeE;ar,iD;le;ar16b0Ud0Qf0Ogust2hm0Li0Ija0Hl03mZnSputsiRrIsaHuFveEyDziz;a0kh0;ry;gust5st2;us;hi;aKchJiIjun,maHnFon,tDy0;hDu08;ur;av,oD;ld;an,ndB;!el,ki;ie;ta;aq;as,dHgelBtD;hony,oD;i6nD;!iBy;ne;er,reDy;!as,i,s,w;iFmaDos;nu4r;el;ne,r,t;an,bePdCeJfHi,lGonFphXt1vD;aNin;on;so,zo;an,en;onTrD;ed;c,jaGksandFssaGxD;!andD;er,ru;ar,er;ndD;ro;rtB;ni;dCm7;ar;en;ad,eD;d,t;in;onD;so;aEi,olfBri0vik;!o;mDn;!a;dHeGraEuD;!bakr,lfazl;hDm;am;!l;allIelFoulaye,ulD;!lDrF;ah,o;! rD;ahm0;an;ah;av,on",
+      "Organization": "true¦0:4B;a3Eb2Wc2Dd25e21f1Wg1Oh1Ji1Gj1Ek1Cl17m0Vn0Io0Fp08qu07r00sTtGuBv8w3xiaomi,y1;amaha,m12ou1w12;gov,tu2X;a3e1orld trade organizati2Q;lls fargo,st1;fie27inghou2G;l1rner br3G;gree35l street journ28m16;an halOeriz2Lisa,o1;dafo2Ml1;kswagMvo;b4kip,n2ps,s1;a tod2Wps;es38i1;lev31ted natio2Y;er,s; mobi2Oaco bePd bMeAgi frida9h3im horto2Wmz,o1witt2Z;shiba,y1;ota,s r Z;e 1in lizzy;b3carpen35daily ma2Zguess w2holli0rolling st1Qs1w2;mashing pumpki2Ruprem0;ho;ea1lack eyed pe3Jyrds;ch bo1tl0;ys;l2n3Bs1xas instrumen1I;co,la m14;efoni0Bus;a6e4ieme2Jnp,o2pice gir5quare03ta1ubaru;rbucks,to2P;ny,undgard1;en;a2Tx pisto1;ls;few29insbury2PlesforYmsu21;.e.m.,adiohead,b6e3oyal 1yana2Z;b1dutch she4;ank;aders dige1Gd 1max,vl1Q;bu1c1Yhot chili peppe2Mlobst2B;ll;c,s;ant2Zizno2H;a5bs,e3fiz27hilip morrCi2r1;emier29udenti16;nk floyd,zza hut;psi2Atro1uge0A;br2Uchina,n2U;lant2Mn1yp12; 2ason1Zda2H;ld navy,pec,range juli2xf1;am;us;aAb9e6fl,h5i4o1sa,vid3wa;k2tre dame,vart1;is;ia;ke,ntendo,ss0L;l,s;c,st1Gtflix,w1; 1sweek;kids on the block,york09;a,c;nd1Us2t1;ional aca2Ho,we0Q;a,cYd0O;aBcdonaldAe7i5lb,o3tv,y1;spa1;ce;b1Lnsanto,ody blu0t1;ley crue,or0N;crosoft,t1;as,subisM;dica2rcedes benz,talli1;ca;id,re;'s,s;c's milk,tt13z1Y;'ore08a3e1g,ittle caesa1J;novo,x1;is,mark; 1bour party;pres0Az boy;atv,fc,kk,m1od1I;art;iffy lu0Loy divisi0Fpmorgan1sa;! cha06;bm,hop,n1tv;g,te1;l,rpol;asbro,ewlett pack1Qi3o1sbc,yundai;me dep1n1K;ot;tac1zbollah;hi;eneral 6hq,ithub,l5mb,o2reen d0Ku1;cci,ns n ros0;ldman sachs,o1;dye1g0D;ar;axo smith kli02encoU;electr0Jm1;oto0V;a4bi,da,edex,i2leetwood mac,o1rito l0C;rd,xcW;at,nancial1restoX; tim0;cebook,nnie mae;b07sa,u3xxon1; m1m1;ob0G;!rosceptics;aiml0Ae6isney,o4u1;nkin donu2po0Wran dur1;an;ts;j,w j1;on0;a,f lepp0Yll,peche mode,r spiegYstiny's chi1;ld;aHbc,hDiBloudflaAnn,o3r1;aigsli5eedence clearwater reviv1ossra05;al;ca c6inba5l4m1o0Ast05;ca2p1;aq;st;dplOgate;se;ola;re;a,sco1tigroup;! systems;ev2i1;ck fil-a,na daily;r1y;on;dbury,pital o1rl's jr;ne;aEbc,eBf9l5mw,ni,o1p,rexiteeU;ei3mbardiIston 1;glo1pizza;be;ng;o2ue c1;roV;ckbuster video,omingda1;le; g1g1;oodriL;cht2e ge0rkshire hathaw1;ay;el;idu,nana republ3s1xt5y5;f,kin robbi1;ns;ic;bYcTdidSerosmith,iRlKmEnheuser-busDol,pple9r6s3utodesk,v2y1;er;is,on;hland1sociated F; o1;il;by4g2m1;co;os; compu2bee1;'s;te1;rs;ch;c,d,erican3t1;!r1;ak; ex1;pre1;ss; 5catel2ta1;ir;!-lu1;ce1;nt;jazeera,qae1;da;g,rbnb;as;/dc,a3er,tivision1;! blizz1;ard;demy of scienc0;es;ba,c",
+      "Possessive": "true¦any7h5its,m3no9o1somet8the0yo1;ir1mselves;ur0;!s;i5y0;!s1;ers0ims0;elf;o1t0;hing;ne",
+      "Actor": "true¦aJbGcFdCengineIfAgardenIh9instructPjournalLlawyIm8nurse,opeOp5r3s1t0;echnCherapK;ailNcientJecretary,oldiGu0;pervKrgeon;e0oofE;ceptionGsearC;hotographClumbColi1r0sychologF;actitionBogrammB;cem6t5;echanic,inist9us4;airdress8ousekeep8;arm7ire0;fight6m2;eputy,iet0;ici0;an;arpent2lerk;ricklay1ut0;ch0;er;ccoun6d2ge7r0ssis6ttenda7;chitect,t0;ist;minist1v0;is1;rat0;or;ta0;nt",
+      "Honorific": "true¦aObrigadiNcGdFexcellency,fiAliCma9officNp5queen,r2s0taoiseach,vice4;e0ultJ;cond liArgeaB;abbi,e0;ar0verend; adK;astGr0;eside6i0ofessF;me ministFnce0;!ss;gistrate,r4yC;eld mar3rst l0;ady,i0;eutena0;nt;shB;oct6utchess;aptain,hance4o0;lonel,mmand5ngress1un0;ci2t;m0wom0;an;ll0;or;er;d0yatullah;mir0;al",
+      "Pronoun": "true¦'em,elle,h4i3me,ourselves,she5th1us,we,you0;!rself;e0ou;m,y;!l,t;e0im;!'s",
+      "Singular": "true¦0:1G;1:1B;2:1C;a1Fb11c0Qd0Ie0Ef0Bg04hYins1Hjel0kXlunch,mUnToRpJquestion mark,rHsBt7u5w3;ay3om08;! arou17;nc0Ds 3;doll0Rst0U; rex,ax return,e03h5i4r3v show;agedy,ibe;c,de;ere,i2;ce17ecurity gu0Ihack,i7k6omeone,t3uper bowl,yst1C;ep4ri2udent3;! loY;faVmoV;eletPill;st1te,ze;e3oom;cord label,public;ate0Zencil,i9la8r4u3;ddi2rpo6;e4ie0No3;bl11sp0X;roga03ss relea3;se;te,y1;er,g;bjYceKthers,ve3;n,rview;an0Cothi2umb1;ayf0o3;m3nopo0rni2th1;!my;ey,itt7;a7ea5igh scho01o3uman right;le,me3;! run;d start,v3;en;m,ze;a8entlem7irl06laci1od,rand4u3;l0n,y; sl4fa3mo3;th1;am;an;df0ng;a4ella,lame,ol0r3;ee market,ieZonti1;mi0nSth1;conomy,ff05gg,ner8ven5x3;amp3ecuB;le;i2t;ad9e6i5o3ragonf0ude;cumentJg3i0or;gy;alYnn1;ath,fault rEt3;ec3;tive;!dy;aBeili2h8i6lieSo4redit c3;ard;nnRtUu3;ri1sin;ty,vil w3;ar;andeli1ocol4ristmas car3;ol;ate;n3pital,rF;ary;aCeBo8r5u3;n3tterf0;ny;eakfa4o3;!th1;st;dy,g,y3;!frie3;nd;an,l0;nki2r3;ri1;er;ng;d6l0noma0sp4u3;nt;ect;ly; homin4van3;tage;em",
+      "Noun|Gerund": "true¦0:27;1:26;2:1X;3:1J;4:1Z;a25b1Oc1Cd16en14f0Yg0Wh0Ti0Rjog20k0Pl0Lm0Hn0Fo0Bp04ques07rVsFtAunder9volunt15w5yCzo2;a7ed1Si3or6r5;ap1Oest1Ci1;ki0r1O;i1r2s1Utc1U;st1Nta4;al4e8hin4i7ra5y1K;c4di0i2v5;el16;mi0p1H;a1Ys1;ai13cHeGhEin1PkatClYmo4nowBpeAt8u6w5;ea3im1U;f01r5;fi0vi0J;a1Lretc1Ju5;d1BfI;l0Xn1C;b6i0;eb5i0;oar19;ip15o5;rte2u1;a1r0At1;h6o3re5;a1He2;edu0Ooo0O;aCe8i12o6u5;li0n2;o5wi0;fi0;a7c6hear1Dnde3por1struct5;r1Bu3;or0Wyc0H;di0so2;p0Rti0;aAeacek9la8o6r5ublis0Y;a0Qeten0Sin1oces17;iso2si5;tio2;n2yi0;ee0L;cka0Uin1rt0L;f7pe6rgani5vula1;si0zi0;ni0ra1;fe3;e5ur0X;gotia1twor4;a7e6i5onito3;ni0sunderst0E;e1ssa0L;nufactu3rke1;a7ea6i5od0Jyi0;cen0Qf1s1;r2si0;n09ug0E;i5n0J;c4lS;ci0magi2n5ro2;nova1terac1;andPea1i6o5un1;l03wO;ki0ri0;athe3rie5ui01;vi0;ar0CenHi7l6or5ros1unZ;ecas1mat1;ir1ooX;l6n5;anDdi0;i0li0;di0gin5;ee3;a8eba1irec1o7r5umO;awi0es05i5;n4vi0;ub1wnloaO;n5ti0;ci0;aEelebra1hClAo7r5ur6;aw5osZ;li0;a6di0lo3mplai2n5o4pi0ve3;duc1sul1;cLti0;apCea3imHo5ubH;ni0tJ;a5ee3;n1t1;m8s1te3;ri0;aIeFitDlCoAr8u5;il8ll6r5;pi0;yi0;an5;di0;a1m5o4;bi0;esGoa1;c5i0;hi0;gin2lon5t1;gi0;ni0;bys6c4ki0;ki0;it1;c8dverti7gi0rg6ssu5;mi0;ui0;si0;coun1ti0;ti0;ng",
+      "Noun|Verb": "true¦0:4P;1:5G;2:5I;3:5C;4:4C;a5Ab4Uc46d3Oe3If30g2Rh2Li2Fj2Dk2Al22m1Un1Qo1Op18ques5Br0OsUtJuIvEw7y6z5;ip,o4K;awn,e13ield;aAeath2h8i7o5re5B;nd2r5;k,ry;mp,nd,pe,re,sh;e25i5;p,st4S;it,rra5Kt1ve;a7i6o5;te,w;be,ew,s3Z;cuum,l23;pgra3Hsh2;aDeChrow,iBoAr7u5wi3ype;n5rn;e,n1V;a6eat,i5u3;bu56ck,gg2p;ck,de,in,nsf2p,v1S;ne,r2Jss,t50u1;ck,e,me,p,re;e,st;l5rg49s51;k,ly;ail,cUeShPiOk27lMmLnKou4EpHqua2Qt9u6w5;ear,it1;bje4pp6r5spe4;ge,pri0;ly,o3Q;aBeAit1o8r6u5;dy,ff,mb44;a4Be5i30;ss,t1;p,r5;e,m;m,p;ck,in,ke,mp,nd,re,te;ark,i6la36r5;e0Cink3Wu31;n,te;ee0Jow;eYi3To2Q;eep,i5;ce,p;de,gn;a25i6o5;ck,w;ft,p,v2;a5ed,n0r44t;r1t;a7o6r5;at1ew;re,ut;le,re;aMe9i8o7u5;b,in,le,n,s5;h,t;a3ck,ll,ot;ng,p,sk;as3NcEel,fDgCje4l0UpAque3s7tu2Sv5waF;e5i0S;al,r0;er3Qo6t,u5;lt,me;l3Ort;air,ea5ly,o2P;l,t;a7r30;act0Porm,u0;a6o5;rd;ll;ck,i0l2Un5tI;ge,k;aIeHha0iFlAo9r6u5;mp,n1rcha0sh;ai0e6i1Zo5u2F;ce3Kdu1Yg3Jje4mi0te3;ss,y;i3Kp,re,s1Vw2;a7e6u5;g,n2G;ad;n5y;!t;ck,le,n5pe;!e;el,rm1U;i5n,rt,ss,t1u0;nt,r;ff2il,o5ut1I;ze;ame,e7o5;d,t5;e,i1H;ed,gle4rd;a9e7i6o5urd2;dLnitWp,uth,ve;lk,nd,rrV;asu0Nn2Ir5ss;chandi0it;p,r6s5t1;h,k;ch,k20;aAe8i7o5u0R;a5ck,g,ok,ve;d,n;ft,m1An8st;a5c02vA;ch,d;bJc5nd,t1un1;e,k;e6i5no28;ck,ll,ss;el;am,o0Ou5;d1Hi0V;mp9n6r21ss5;ue;cr6flu08tervi5;ew;ea0;a4leme2D;a8e7i0Qo5u2C;ld,n5pe,r0st,u0;or;ad,lp;nd5rm,te;!le;aCeBlo24o9r7u5;ar5e23i07;antee,d;asp,i5ou1Eumb1A;nd,p;of,ss5;ip;ar,ek;in,ze;aLeHiFlBo9r6u5;el,nc1E;ac6o5y;st,wn;tuG;cus,ol,r5;ce,eca3m;a7e06ip,o5y;at,od,w5;!er;g,re,sh;g5le,nish,re,sh,t,x;ht,u8;a6e5nW;d,l;r,tu5;re;ce,il,ll,rm,vour;cho,n9stima1Bx5ye;c7erci0hibWp5;eri5o04;enO;el,han09;d,vy;aJeEi9o8r6u5;mp;a0Meam,i5;ft,nk,ve;d03ubt;p,s7v5;i5orF;de;li5pl8;ke;al,c8fe7l6ma0AposHsi5;gn,re;ay;at,ct;liN;maSn6r5te;e,t;ce;aQent2hMlKoAr6u5;re,t;e6u5y;sh;d5ep;it;llap0mAn5ok,py,st,ugh,v2;ce8du4t5veB;a4r5;a3ol;ct;rn;bi7fo6m5;aPu0A;rt;ne;a5ip;im,w;a6e5ip;at,ck,er;in,llen5n5r5se;ge;ke,ll,re,sh,u0ve;se;aGeaFiZlDo9r8u5;bb9ck9dg6l5st,zz;ly;et;an1eak;a7mb,ne,o6ss,tt5x;le;k,st,t;rd,st;e5oF;nd;r,t;il,n7rga6s5;e,h;in;g,k;cMdIge,iHlt2nsw2ppDrchBss9tt7uc5;ti5;on;a5empt;ck;i3ociaE;st;!i5;ve;e6roa1;ch;al;er;d,m;d6voca5;te;re5;ss;cou5t;nt",
+      "Uncountable": "true¦a1Sb1Ic1Bd18e11f0Vg0Qh0Li0Gj0Fk0El09mZnWoVpRrMsBt5vi4w0;a2i1oo0;d,l;ldlife,ne;rm3t1G;neg18ol0Etae;e4h3oothpaste,r0una,yranny;affUou1ue nor0;th;ble,sers,t;ermod1Mund1A;a,nnis;a8cene0Ceri0Yh7il6kittl0Yo5p3t1u0;g10nshi0Q;ati1Le0;am,el;ace1Ee0;ci0Ted;ap,cc12;k,v11;eep,ingl0Q;d0Efe18l0nd,tD;m11t;a3e1ic0;e,ke0L;c0laxa0Isearch;ogni0Hrea0H;bi0Jin;aQe2hys18last9o0resL;l0rk;it16yA;a12trZ;bstetr14xyg0J;a0ews;il pol0tional securi0V;ish;a7e5o2u0;mps,s0;ic;n0o0E;ey,o0;gamy;a0chan0U;sl03t;chine0il,themat0S; learn0Cry;aught0Ae2i1ogi0Pu0;ck,g0F;ce,ghtn09ngui0NteraK;ath07i0;suJ;indergart00nowled0C;azz,ewel8usti0H;ce,gnor3mp0nformaQtself;a0ort2;ti0;en0D;an0C;a3eBisto2o0;ck0mework,n0spitali06;ey;ry;ir,libut,ppi9;ene1ol0ra9um,ymna08;d,f; 0t07;editRpo0;ol;icBlour,o2urni0;tu0;re;od,rgive0uriLwl;ne0;ss;conomYduca5lectr4n2quip3thYvery0;body,o0thI;ne;joy0tertain0;ment;iciMonT;tiF;iabet1raugh0;ts;es;aCelcius,h2ivOlassOo0urrency;al,ld w0nfusiAttA;ar;aos,e1ick0;en;e0w4;se;a6eef,i3lood,owls,read,u0;nt1tt0;er;ing;llia1s0;on;rds;g0ss;ga0;ge;c5dvi4ero2ir1mnes0thlet7;ty;craft;b4d0naut4;ynam3;ce;id,ou0;st0;ics",
+      "FemaleName": "true¦0:IU;1:IY;2:I6;3:I7;4:IO;5:IB;6:JF;7:GS;8:JB;9:J7;A:HF;B:HP;C:IK;D:IG;E:J4;F:H4;G:C6;H:HR;aGKbFFcDLdCUeBKfB1gAAh9Qi9Dj8Ck7Cl5Wm46n3Ko3Gp34qu33r2Bs15t0Eu0Cv03wWxiUyPzI;aMeJineb,oIsof3;e3Rf3la,ra;h2iLlJna,ynI;ab,ep;da,ma;da,h2iIra;nab;aLeKi0FolB5uJvI;etAonDJ;i0na;le0sen3;el,gm3Gn,rGCs8T;aoIme0nyi;m5YyAB;aNendDThiDAiI;dele9lKnI;if45niIo0;e,f44;a,helmi0lIma;a,ow;ka0nB;aNeKiIusa5;ck82ktoriBIlAole7viI;anGenIS;da,lA7nus,rIs0;a,nIoniGY;a,iFK;leInesGY;nIArI;i1y;g9rIxGZ;su5te;aZeVhSiOoMrJuIy2;i,la;acISiIu0L;c3na,sI;hGta;nIr0H;iGya;aKffaEJnIs6;a,gtiI;ng;!nFKra;aJeIomasi0;a,l9No88res1;l3ndolwethu;g9Eo86rJssI;!a,ie;eIi,ri8;sa,za;bPlNmLnJrIs6tia0wa0;a61yn;iIya;a,ka,s6;arGe2iIm76ra;!ka;a,iI;a,t6;at6it6;a0Gcarlet3Ue0ChYiUkye,neza0oStOuJyI;bI5lvi1;ha,mayI8ni7sJzI;an3LetAie,y;anIi8;!a,e,nI;aDe;aKeI;fIl5EphI;an4;cHTr5;b3fiA6m0NnIphi1;d2ia,ja,ya;er2lKmon1nJobh8OtI;a,i;dy;lEKv3;aNeJirIo0risF2y5;a,lDG;ba,e0i5lKrI;iIr6Hyl;!d8Gfa;ia,lDS;hd,iNki2nKrJu0w0yI;la,ma,na;i,le9on,ron;aJda,ia,nIon;a,on;!ya;k6mI;!aa;lKrJtaye80vI;da,inj;e0ife;en1i0ma;anA3bNd3Lh1QiBkMlLmJnd2rIs6vannaD;aDi0;aIi2;nt6ra;lDGma,ome;ee0in8Qu2;in1ri0;a05e00hYiVoIuthDE;bTcSghRl8InQsKwJxI;anAWie,y;an,e0;aJeIie,lE; merBKann8ll1marD8t7;!lInn1;iIyn;e,nI;a,dG;da,i,na;ayy8D;hel63io;bDHer7yn;a,cJkImas,nGta,ya;ki,o;helHki;ea,iannG9oI;da,n1L;an0bKemGgi0iJnIta,y0;a88ee;han83na;a,eI;cE7kaD;bi0chJe,i0mo0nIquEHvCy0;di,ia;aEFelIiB;!e,le;een4ia0;aOeNhLipaluk,oKrIute67;iIudenCN;scil3LyamvaB;lly,rt3;ilome0oebe,ylI;is,lis;ggy,nelope,r5t2;ige,m0UnLo5rvaDDtJulI;a,etAin1;ricIt4T;a,e,ia;do2i07;ctav3dJfCWis6lIphCWumC0yunbileg;a,ga,iv3;eIvAB;l3tA;aXeViNoJurIy5;!ay,ul;a,eKor,rJuI;f,r;aDeCma;ll1mi;aOcMhariBLkLlaKna,sIta,vi;anIha;ur;!y;a,iDPki;hoHk9UolI;a,eDG;!mh;hir,lIna,risFsreC;!a,lBQ;asuMdLh3i6DnKomi8rgELtIzanin zah2;aIhal4;li1s6;cy,etA;e9iER;nngu30;a0Ackenz4e02iNoKrignayani,uriDAyI;a,rI;a,lOna,tH;bi0i2llBFnI;a,iI;ca,ka,qD0;a,cUkaTlOmi,nMrJtzi,yI;ar;aJiam,lI;anEK;!l,nB;dy,eIh,n4;nhHrva;aLdKiCMlI;iIy;cent,e;red;!gros;!e5;ae5hI;ae5el40;ag5FgOi,lLrI;edi79iJjem,on,yI;em,l;em,sF;an4iIliF;nIsCB;a,da;!an,han;b0DcAPd0Be,g09ha,i08ja,l06n04rMsoum60tLuJv82x9HyIz4;bell,ra,soB6;de,rI;a,eC;h8Eild1t4;a,cYgUiLjor4l7Sn4s6tKwa,yI;!aIbe6Wja9lAB;m,nBE;a,ha,in1;!aKbC8eJja,lEna,sIt64;!a,ol,sa;!l1H;! Kh,mJnI;!a,e,n1;!awit,i;aliAEcJeduarBfern5GjIlui5Y;o6Ful3;ecil3la2;arKeJie,oIr46ueriA;!t;!ry;et44i39;el4Wi77y;dIon,ue5;akran7y;ak,en,iIlo3Q;a,ka,nB;a,re,s4te;daIg4;!l3C;alEd4elIge,isD8on0;ei9in1yn;el,le;a0Oe0DiZoRuMyI;d3la,nI;!a,dJeBEnIsCI;!a,eBD;a,sCG;aCTcKel0QiFlJna,pIz;e,i7;a,u,wa;iIy;a0Te,ja,l2LnB;is,l1TrKttJuIvel4;el5is1;e,ie;aLeJi8na,rI;a86i8;lIn1t7;ei;!in1;aTbb9AdSepa,lNnKsJv3zI;!a,be5MetAz4;a,etA;!a,dI;a,sIy;ay,ey,i,y;a,iKja,lI;iIy;a9Ye;!aI;!nG;ia,ya;!nI;!a,ne;aQda,e0iOjZla,nNoLsKtIx4y5;iIt4;c3t3;e2NlCD;la,nIra;a,ie,o2;a,or1;a,gh,laI;!ni;!h,nI;a,d2e,n5Q;cPdon95iOkes6mi98na,rNtKurJvIxmi,y5;ern1in3;a,e55ie,yn;as6iJoI;nya,ya;fa,s6;a,isF;a,la;ey,ie,y;a05e00hYiPlAHoOrKyI;lIra;a,ee,ie;istIy6D;a,en,iJyI;!na;!e,n5A;nul,ri,urtnAX;aPerOlAWmKrIzzy;a,stI;en,in;!berlJmernI;aq;eIi,y;e,y;a,stC;!na,ra;aIei2ongordzol;dij1w5;el7OiLjsi,lKnJrI;a,i,ri;d2na,za;ey,i,lBAs4y;ra,s6;bi7cAGdiat7GeAZiSlRmQnyakuma1BrOss6JtLvi7yI;!e,lI;a,eI;e,i8J;a6DeJhIi4OlEri0y;ar6Ber6Bie,leCrAZy;!lyn8Eri0;a,en,iIl5Soli0yn;!ma,nGsF;a5il1;ei8Ci,l4;a,tl6K;a09eZiWoOuI;anMdLliIst63;a8FeIsF;!n9tI;!a,te;e5Ji3Ky;a,i7;!anOcelEdNelHhan7PleMni,sJva0yI;a,ce;eIie;fIlEph5U;a,in1;en,n1;i8y;!a,e,n42;lIng;!i1ElI;!i1D;anOle0nLrKsI;i8AsI;!e,i89;i,ri;!a,elHif2CnI;a,etAiIy;!e,f2A;a,e8BiJnI;a,e8AiI;e,n1;cNda,mi,nJque4WsminGvie2y9zI;min8;a8eJiI;ce,e,n1s;!lIsFt0G;e,le;inJk4lEquelI;in1yn;da,ta;da,lSmQnPo0rOsJvaIzaro;!a0lu,na;aKiJlaIob81;!n9J;do2;belIdo2;!a,e,l39;a74en1i0ma;di2es,gr6Vji;a9elBogI;en1;a,e9iIo0se;a0na;aTePiKoIusFyacin2B;da,ll4rten23snI;a,i9M;lJmaI;ri;aJdIlaJ;a,egard;ry;ath1CiKlJnriet7rmi9sI;sa,t1B;en2Sga,mi;di;bi2Dil8ElOnNrKsJtIwa,yl8E;i5Pt4;n5Vti;iImo4Zri50;etI;!te;aDnaD;a,ey,l4;a04eYiTlRoPrLunKwI;enIyne1Q;!dolE;ay,el;acJetIiselB;a,chC;e,ieI;!la;ld1AogooI;sh;adys,enIor3yn2H;a,da,na;aLgi,lJna,ov85selIta;a,e,le;da,liI;an;!n0;mMnKorgJrI;ald3Oi,m3Btru87;etAi4T;a,eIna;s26vieve;ma;bJle,mIrnet,yH;al5Ki5;i5CrielI;a,l1;aVeSiRlorPoz3rI;anKeJiI;da,eB;da,ja;!cI;esJiIoi0O;n1s5Y;!ca;a,encI;e,ia;en,o0;lJn0rnI;anB;ec3ic3;jr,n7rLtIy8;emJiIma,ouma7;ha,ma,n;eh;ah,iBrah,za0;cr4Ld0Oe0Ni0Mk7l05mXn4WrUsOtNuMvI;aKelJiI;!e,ta;inGyn;!ngel2S;geni1ni43;h5Qta;mMperanLtI;eJhIrel5;er;l2Zr8;za;a,eralB;iIma,nest2Jyn;cIka,n;a,ka;a,eNiKmI;aIie,y;!li9;lIn1;ee,iIy;a,e,ja;lIrald;da,y;aXeViOlNma,no2oLsKvI;a,iI;na,ra;a,ie;iIuiI;se;a,en,ie,y;a0c3da,f,nNsKzaI;!betIve7;e,h;aIe,ka;!beI;th;!a,or;anor,nG;!a;!in1na;leCs6;vi;eJiIna,wi0;e,th;l,n;aZeNh3iMjeneLoI;lor5Qminiq4Gn3DrItt4;a,eCis,la,othIthy;ea,y;ba;an0AnaDon9ya;anRbQde,ePiNlKmetr3nIsir5H;a,iI;ce,se;a,iJla,orIphi9;es,is;a,l6A;dIrdI;re;!d59na;!b2ForaDraD;a,d2nI;!a,e;hl3i0l0HmOnMphn1rJvi1WyI;le,na;a,by,cJia,lI;a,en1;ey,ie;a,etAiI;!ca,el1Bka,z;arIia;is;a0Se0Oh05i03lVoKristJynI;di,th3;al,i0;lQnNrJurI;tn1E;aKd2MiIn2Mri9;!nI;a,e,n1;!l1W;cepci57n4sI;tanIuelo;ce,za;eIleC;en,tA;aKeoJotI;il4Z;!pat2;ir8rKudI;etAiI;a,ne;a,e,iI;ce,s00;a2er2ndI;i,y;aSeOloe,rI;isKyI;stI;al;sy,tI;a1Qen,iIy;an1e,n1;deKlseJrI;!i8yl;a,y;li9;nNrI;isLlJmI;ai9;a,eIotA;n1tA;!sa;d2elHtI;al,elH;cJlI;esAi42;el3ilI;e,ia,y;itlZlYmilXndWrOsMtIy5;aKeKhIri0;erIleCrEy;in1;ri0;a32sI;a31ie;a,iOlMmeKolJrI;ie,ol;!e,in1yn;lIn;!a,la;a,eIie,o7y;ne,y;na,sF;a0Hi0H;a,e,l1;is7l4;in,yn;a0Ie02iZlXoUrI;andi8eRiKoJyI;an0nn;nwEoke;an3CdgMg0XtI;n2WtI;!aJnI;ey,i,y;ny;etI;!t8;an0e,nI;da,na;bbi8glarJlo06nI;i7n4;ka;ancIossom,ythe;a,he;an18lja0nIsm3I;i7tI;ou;aVcky,linUni7rQssPtKulaDvI;!erlI;ey,y;hKsy,tI;e,iIy8;e,na;!anI;ie,y;!ie;nIt6yl;adJiI;ce;etAi9;ay,da;!triI;ce,z;rbKyaI;rmI;aa;a2o2ra;a2Sb2Md23g1Zi1Qj5l16m0Xn0Aoi,r05sVtUuQvPwa,yJzI;ra,u0;aLes6gKlJseI;!l;in;un;!nI;a,na;a,i2I;drKgus1RrJsteI;ja;el3;a,ey,i,y;aahua,he0;hJi2Gja,mi7s2DtrI;id;aNlJraqIt21;at;eJi8yI;!n;e,iIy;gh;!nI;ti;iKleJo6pi7;ta;en,n1tA;aIelH;!n1J;a01dje5eZgViTjRnKohito,toIya;inetAnI;el5ia;!aLeJiImK;e,ka;!mItA;ar4;!belJliFmV;sa;!le;a,eliI;ca;ka,sIta;a,sa;elIie;a,iI;a,ca,n1qI;ue;!tA;te;!bJmIstasiNya;ar3;el;aMberLeliKiIy;e,l3naI;!ta;a,ja;!ly;hHiJl3nB;da;a,ra;le;aXba,eQiNlLthKyI;a,c3sI;a,on,sa;ea;iIys0O;e,s0N;a,cJn1sIza;a,e,ha,on,sa;e,ia,ja;c3is6jaLksaLna,sKxI;aIia;!nd2;ia,saI;nd2;ra;ia;i0nJyI;ah,na;a,is,naDoud;la;c6da,leCmOnMsI;haDlI;inIyZ;g,n;!h;a,o,slI;ey;ee;en;at6g4nJusI;ti0;es;ie;aXdiUelNrI;eKiI;anNenI;a,e,ne;an0;na;!aMeLiJyI;nn;a,n1;a,e;!ne;!iI;de;e,lEsI;on;yn;!lI;i9yn;ne;aLbJiIrM;!gaL;ey,i8y;!e;gaI;il;dLliyKradhJs6;ha;ya;ah;a,ya",
+      "SportsTeam": "true¦0:1A;1:1H;2:1G;a1Eb16c0Td0Kfc dallas,g0Ihouston 0Hindiana0Gjacksonville jagua0k0El0Bm01newToQpJqueens parkIreal salt lake,sAt5utah jazz,vancouver whitecaps,w3yW;ashington 3est ham0Rh10;natio1Oredski2wizar0W;ampa bay 6e5o3;ronto 3ttenham hotspur;blue ja0Mrapto0;nnessee tita2xasC;buccanee0ra0K;a7eattle 5heffield0Kporting kansas0Wt3;. louis 3oke0V;c1Frams;marine0s3;eah15ounG;cramento Rn 3;antonio spu0diego 3francisco gJjose earthquak1;char08paA; ran07;a8h5ittsburgh 4ortland t3;imbe0rail blaze0;pirat1steele0;il3oenix su2;adelphia 3li1;eagl1philNunE;dr1;akland 3klahoma city thunder,rlando magic;athle0Mrai3;de0; 3castle01;england 7orleans 6york 3;city fc,g4je0FknXme0Fred bul0Yy3;anke1;ian0D;pelica2sain0C;patrio0Brevolut3;ion;anchester Be9i3ontreal impact;ami 7lwaukee b6nnesota 3;t4u0Fvi3;kings;imberwolv1wi2;rewe0uc0K;dolphi2heat,marli2;mphis grizz3ts;li1;cXu08;a4eicesterVos angeles 3;clippe0dodDla9; galaxy,ke0;ansas city 3nE;chiefs,roya0E; pace0polis colU;astr06dynamo,rockeTtexa2;olden state warrio0reen bay pac3;ke0;.c.Aallas 7e3i05od5;nver 5troit 3;lio2pisto2ti3;ge0;broncZnuggeM;cowbo4maver3;ic00;ys; uQ;arCelKh8incinnati 6leveland 5ol3;orado r3umbus crew sc;api5ocki1;brow2cavalie0india2;bengaWre3;ds;arlotte horAicago 3;b4cubs,fire,wh3;iteB;ea0ulR;diff3olina panthe0; c3;ity;altimore 9lackburn rove0oston 5rooklyn 3uffalo bilN;ne3;ts;cel4red3; sox;tics;rs;oriol1rave2;rizona Ast8tlanta 3;brav1falco2h4u3;nited;aw9;ns;es;on villa,r3;os;c5di3;amondbac3;ks;ardi3;na3;ls",
+      "Person|Noun": "true¦a0Lb0Dc09d01eZfYgWhRjNkJlImColive,p8r5s3trini0Cv0wang;an,i0;cto0Lol0;a,et;a0ky,on6umm0GydnA;lvador,ntiaZ;ay,e1o0uF;b00d,se;ed,x;a2e0ol;aQn0;ny;ris,tW;a4e2i0;ck0l2;ey;loZrced0;es;x,ya;aEeo,iJ;e2i0obe;ng,r0tR;by;lvKnt;a2e1o0;lUrdan,y;an,w4;de,smi6y;a1iOo0;l9us2;ll,mil1z0;el;ton;ail,e0rant;ne;aith,ern,lo,ranco;a0dFlmo,mir,ula,ve;rl;a4e3i1ol0;ly;ck,e0xF;go;an,ja;i1rw0wn;in;sy;atalina,h0liff,rystal;ari1in,risti0;!an;ty;a4e3i2r0;an0ook;dy;ll;nedict,rg;k1rb0;ie;er;l0rt;exand0fredo,ma;ria",
+      "Unit": "true¦0:0V;a0Rb0Pc0Bd0Aex09f06g03he01in0Kjoule0kUlSmInHoGpDquart0square 9t5volts,w4y2ze3°1µs;c,f,n;a0Cd0Iears old,o1;tt06;att0b;able3e2on1;!ne0;a1r02;spoX;c09d08f3i06kilo0Am1ya05;e0Dil1;e0li08;eet0o04;ascals,e2i1;c0Ent0;rcent,tU;hms,uR;an0BewtO;/s,e6i1m²,²,³;/h,cro4l1;e1li02;! pEs 1²;anEpD;g01s06;gLter1;! 2s1;! 1;per second;iVu1;men0x;elvins,ilo2m1nM;/h,²;byUgSmeter1;! p2s1;! p1;er1; hour;ct1rtz0;aSogM;all2ig6ra1;in0m0;on0;a2emtMluid ou1tE;nce0;hrenheit,rad0;abyH;eciCmA;arat0eAm9oulomb0u1;bic 1p0;c5d4fo3i2meAya1;rd0;nch0;ot0;eci2;enti1;me4;²,³;lsius,nti1;g2li1me1;ter0;ram0;bl,y1;te0;c3tt1;os1;econd0;re0;!s",
+      "Ordinal": "true¦eBf7nin5s3t0zeroE;enDhir1we0;lfCn7;d,t3;e0ixt8;cond,vent7;et0th;e6ie7;i2o0;r0urt3;tie4;ft1rst;ight0lev1;e0h,ie1;en0;th",
+      "Cardinal": "true¦bEeBf5mEnine7one,s4t0zero;en,h2rDw0;e0o;lve,n5;irt6ousands,ree;even2ix2;i3o0;r1ur0;!t2;ty;ft0ve;e2y;ight0lev1;!e0y;en;illions",
+      "Multiple": "true¦b3hundred,m3qu2se1t0;housand,r2;pt1xt1;adr0int0;illion",
+      "Currency": "true¦$,aud,bScQdLeurKfJgbp,hkd,iIjpy,kGlEnis,p8r7s3usd,x2y1z0¢,£,¥,ден,лв,руб,฿,₡,₨,€,₭,﷼;lotySł;en,uanR;af,of;h0t6;e0il6;k0q0;elM;iel,oubleLp,upeeL;e3ound0;! st0s;er0;lingH;n0soG;ceFnies;e0i8;i,mpi7;n,r0wanzaCyatC;!onaBw;ls,nr;ori7ranc9;!o8;en3i2kk,o0;b0ll2;ra5;me4n0rham4;ar3;ad,e0ny;nt1;aht,itcoin0;!s",
+      "City": "true¦0:6X;1:5X;2:6C;3:5Q;4:5N;a64b4Zc4Ed45e41f3Tg3Eh36i2Xj2Sk2Bl20m1In18o15p0Tq0Rr0Ks01tPuOvLwDxiBy9z5;a7h5i4Iuri4K;a5e5ongsh0;ng3E;greb,nzib5C;ang2e5okoha3Punfu;katerin3Erev0;a5n0N;m5Dn;arsBeAi6roclBu5;h0xi,zh5L;c7n5;d5nipeg,terth4;hoek,s1I;hi5Vkl37;l5Zxford;aw;a6ern2i5ladivost5Iolgogr6E;en3lni6L;lenc4Uncouv3Rr3ughn;lan bat1Brumqi,trecht;aDbilisi,eCheBi9o8r7u5;l1Zn5Zr5;in,ku;ipoli,ondh5Y;kyo,m2Zron1OulouS;an5jua3l2Umisoa68ra3;j4Tshui; hag5Zssaloni2I;gucigal26hr0l av1U;briz,i6llinn,mpe56ng5rtu,shk2S;i3Fsh0;an,chu1n0p2Fyu0;aEeDh8kopje,owe1Gt7u5;ra5zh4X;ba0Ht;aten is55ockholm,rasbou64uttga2W;an8e6i5;jiazhua1llo1m5Uy0;f50n5;ya1zh4H;gh3Kt4Q;att45o1Wv44;cramen16int ClBn5o paulo,ppo3Rrajevo; 7aa,t5;a 5o domin3E;a3fe,m1M;antonBdie3Cfrancisco,j5ped3Nsalvad0K;o5u0;se;em,z26;lou56peters25;aAe9i7o5;me,sar5t57;io;ga,o5yadh;! de janei3E;cife,ykjavik;b4Rip4lei2Inc2Pwalpindi;ingdao,u5;ez2i0P;aEeDhCiBo8r7u6yong5;ya1;eb55ya1;ag4Zetor3L;rt5zn0; 5la4Co;au prin0Melizabe25sa04;ls3Prae57tts27;iladelph3Gnom pe1Boenix;r22tah tik3E;lerZnaji,t5;na,r32;ak44des0Km1Nr6s5ttawa;a3Vlo;an,d06;a7ew5ing2Fovosibir1Kyc; 5cast36;del25orlea44taip15;g8iro4Tn5pl2Wshv33v0;ch6ji1t5;es,o1;a1o1;a6o5p4;ya;no,sa0X;aFeCi9o6u5;mb2Ani26sc3Y;gadishu,nt6s5;c14ul;evideo,re2Z;ami,l6n15s5;kolc,sissauga;an,waukee;cca,d5lbour2Mmph3Z;an,ell5i3;in,ín;cau,drAkass2Rl9n8r5shh46;aca6ib5rakesh,se2K;or;i1Ry;a4AchEdal0Zi43;mo;id;aCeiAi8o6u5vRy2;anLckn0Odhia3;n5s angel25;d2g bea1M;brev2Ae3Ima5nz,sb2verpo27;!ss26;c5pzig;est17; p6g5ho2Wn0Dusan24;os;az,la33;aHharFiClaipeBo9rak0Eu7y5;iv,o5;to;ala lump4n5;mi1sh0;hi0Ilka2Xpavog4si5wlo2;ce;da;ev,n5rkuk;gst2sha5;sa;k5toum;iv;bIdu3llakuric0Rmpa3Cn6ohsiu1ra5un1Iwaguc0R;c0Qj;d5o,p4;ah1Ty;a7e6i5ohannesW;l1Vn0;dd33rusalem;ip4k5;ar2H;bad0mph1OnBrkutVs8taYz5̇zm7;m6tapala5;pa;ir;fah0l6tanb5;ul;am2Vi2G;che2d5;ianap2Jo1Z;aAe7o5yder2S; chi mi5ms,nolulu;nh;f6lsin5rakli2;ki;ei;ifa,lifax,mCn5rb1Cva3;g8nov01oi;aFdanEenDhCiPlasgBo9raz,u5;a5jr22;dal6ng5yaquil;zh1I;aja2Kupe;ld coa19then5;bu2O;ow;ent;e0Toa;sk;lw7n5za;dhi5gt1D;nag0T;ay;aisal25es,o8r6ukuya5;ma;ankfu5esno;rt;rt5sh0; wor6ale5;za;th;d5indhov0Ol paso;in5mont2;bur5;gh;aBe8ha0Wisp4o7resd0Ku5;b5esseldorf,rb0shanbe;ai,l0H;ha,nggu0rtmu12;hradRl6nv5troit;er;hi;donghHe5k08li0masc1Vr es sala1HugavpiX;gu,je2;aJebu,hAleve0Vo5raio02uriti1N;lo7n6penhag0Ar5;do1Lk;akKst0V;gUm5;bo;aBen8i6ongqi1ristchur5;ch;ang m7ca5ttago1;go;g6n5;ai;du,zho1;ng5ttogr12;ch8sha,zh07;i9lga8mayenJn6pe town,r5;acCdiff;ber17c5;un;ry;ro;aVeNhKirmingh0UoJr9u5;chareSdapeSenos air7r5s0tu0;g5sa;as;es;a9is6usse5;ls;ba6t5;ol;ne;sil8tisla7zzav5;il5;le;va;ia;goZst2;op6ubaneshw5;ar;al;iBl9ng8r5;g6l5n;in;en;aluru,hazi;fa5grade,o horizonte;st;ji1rut;ghd09kGnAot9r7s6yan n4;ur;el,r05;celo3ranquil07;na;ou;du1g6ja lu5;ka;alo6k5;ok;re;ng;ers5u;field;a02bZccYddis abaXgartaWhmedUizawl,lQmNnHqaXrEsBt7uck5;la5;nd;he7l5;an5;ta;ns;h5unci2;dod,gab5;at;li5;ngt2;on;a6chora5kaLtwerp;ge;h7p5;ol5;is;eim;aravati,m0s5;terd5;am; 6buquerq5eppo,giers,maty;ue;basrah al qadim5mawsil al jadid5;ah;ab5;ad;la;ba;ra;idj0u dha5;bi;an;lbo6rh5;us;rg",
+      "Region": "true¦0:2N;1:2T;2:2K;a2Qb2Dc1Zd1Ues1Tf1Rg1Lh1Hi1Cj18k13l10m0Pn07o05pZqWrTsKtFuCv9w5y3zacatec2U;akut0o0Du3;cat2k07;a4est 3isconsin,yomi1M;bengal,vi6;rwick2Bshington3;! dc;er4i3;rgin0;acruz,mont;dmurt0t3;ah,tar3; 2La0X;a5e4laxca1Rripu1Xu3;scaDva;langa1nnessee,x2F;bas0Vm3smNtar25;aulip2Dil nadu;a8i6o4taf11u3ylh1F;ffYrr04s1A;me1Cno1Quth 3;cVdU;ber0c3kkim,naloa;hu2ily;n4skatchew2xo3;ny; luis potosi,ta catari1;a3hode9;j3ngp07;asth2shahi;ingh25u3;e3intana roo;bec,en5reta0R;ara7e5rince edward3unjab; i3;sl0B;i,nnsylv3rnambu0B;an0;!na;axa0Ydisha,h3klaho20ntar3reg6ss0Bx0G;io;aJeDo5u3;evo le3nav0W;on;r3tt17va scot0;f8mandy,th3; 3ampton16;c5d4yo3;rk14;ako1N;aroli1;olk;bras1Mva0Cw3; 4foundland3;! and labrador;brunswick,hamp0Xjers4mexiSyork3;! state;ey;galOyarit;a9eghala0Mi5o3;nta1r3;dov0elos;ch5dlanCn4ss3zor11;issippi,ouri;as geraOneso18;ig2oac2;dhy12harasht0Gine,ni4r3ssachusetts;anhao,i el,ylF;p3toba;ur;anca0Ie3incoln0IouisH;e3iR;ds;a5e4h3omi;aka06ul1;ntucky,ra01;bardino,lmyk0ns0Qr3;achay,el0nata0X;alis5har3iangxi;kh3;and;co;daho,llino6n3owa;d4gush3;et0;ia1;is;a5ert4i3un2;dalFm0D;fordZ;mpYrya1waii;ansu,eorg0lou7oa,u3;an4erre3izhou,jarat;ro;ajuato,gdo3;ng;cesterS;lori3uji2;da;sex;ageTe6o4uran3;go;rs3;et;lawaLrbyK;aEeaDh8o3rimea ,umbr0;ahui6l5nnectic4rsi3ventry;ca;ut;i02orado;la;e4hattisgarh,i3uvash0;apQhuahua;chn4rke3;ss0;ya;ra;lFm3;bridge6peche;a8ihar,r7u3;ck3ryat0;ingham3;shi3;re;emen,itish columb0;h0ja cal7lk6s3v6;hkorto3que;st2;an;ar0;iforn0;ia;dygea,guascalientes,lAndhr8r4ss3;am;izo1kans4un3;achal 6;as;na;a 3;pradesh;a5ber4t3;ai;ta;ba4s3;ka;ma",
+      "LastName": "true¦0:9G;1:9W;2:9O;3:9Y;4:9I;5:8L;6:9L;7:A1;8:9F;9:8A;A:78;B:6F;C:6K;a9Vb8Nc7Ld6Ye6Sf6Fg5Wh59i55j4Qk46l3Om2Sn2Fo27p1Oquispe,r18s0Ft05vVwOxNyGzD;aytsAEhD;aDou,u;ng,o;aGeun81iDoshiAAun;!lD;diDmaz;rim,z;maDng;da,guc98mo6VsDzaA;aAhiA8;iao,u;aHeGiEoDright,u;jc8Tng;lDmm0nkl0sniewsA;liA2s3;b0iss,lt0;a5Tgn0lDtanabe;k0sh;aHeGiEoDukB;lk5roby5;dBllalDnogr30r10ss0val38;ba,obos;lasEsel7P;lGn dFrg8FsEzD;qu7;ily9Pqu7silj9P;en b36ijk,yk;enzue96verde;aLeix1KhHi2j6ka3JoGrFsui,uD;om50rD;c2n0un1;an,embl8UynisA;dor96lst32m4rr9th;at5Ni7NoD;mErD;are70laci65;ps3s0Z;hirBkah8Enaka;a01chXeUhQiNmKoItFuEvDzabo;en8Bobod35;ar7bot4lliv2zuA;aEein0oD;i68j3Myan8W;l6rm0;kol5lovy5re6Rsa,to,uD;ng,sa;iDy60;rn5tD;!h;l5ZmEnDrbu;at8gh;mo6Eo6K;aFeDimizu;hu,vchD;en7Duk;la,r17;gu8mDoh,pulve8Trra4S;jDyD;on5;evi6Giltz,miDneid0roed0ulz,warz;dEtD;!z;!t;ar42h6ito,lFnDr4saAto,v4;ch7d0AtDz;a4Pe,os;as,ihBm3Zo0Q;aOeNiKoGuEyD;a67oo,u;bio,iz,sD;so,u;bEc7Bdrigue57g03j73mDosevelt,ssi,ta7Nux,w3Z;a4Ce0O;ertsDins3;!on;bei0LcEes,vDzzo;as,e8;ci,hards3;ag2es,it0ut0y9;dFmEnDsmu7Zv5F;tan1;ir7os;ic,u;aSeLhJiGoErDut6;asad,if60ochazk1W;lishc24pDrti63u55we67;e2Tov48;cEe09nD;as,to;as61hl0;aDillips;k,m,n5L;de3AetIna,rGtD;ersErovDtersC;!a,ic;en,on;eDic,ry,ss3;i8ra,tz,z;ers;h71k,rk0tEvD;ic,l3T;el,t2O;bJconnor,g2ClGnei5QrEzD;demir,turk;ella3MtDwe5O;ega,iz;iDof6GsC;vDyn1F;ei8;aPri1;aLeJguy1iFoDune44ym2;rodahl,vDwak;ak3Uik5otn57;eEkolDlsCx3;ic,ov6X;ls1miD;!n1;ils3mD;co42ec;gy,kaEray2varD;ro;jiDmu8shiD;ma;aXcVeQiPoIuD;lGnFrDssoli5T;atDpUr68;i,ov4;oz,te4C;d0l0;h2lIo0HrEsDza0Z;er,s;aFeEiDoz5r3Ete4C;!n6F;au,i8no,t4N;!l9;i2Rl0;crac5Ohhail5kke3Qll0;hmeGij0j2FlFndErci0ssiDyer19;!er;e3Bo2Z;n0Io;dBti;cartDlaughl6;hy;dMe6Dgnu5Ei0jer34kLmJnci59rFtEyD;er,r;ei,ic,su1N;iEkBqu9roqu6tinD;ez,s;a54c,nD;!o;a52mD;ad5;e5Oin1;rig4Os1;aSeMiIoGuEyD;!nch;k4nDo;d,gu;mbarDpe2Rvr4;di;!nDu,yana1S;coln,dD;bDholm;erg;bed5TfeGhtFitn0kaEn6rDw2G;oy;!j;in1on1;bvDvD;re;iDmmy,rsCu,voie;ne,t11;aTennedy,h2iSlQnez47oJrGuEvar2woD;k,n;cerDmar58znets5;a,o2G;aDem0i30yeziu;sni3QvD;ch3V;bay4Frh0Jsk0TvaFwalDzl5;czDsA;yk;cFlD;!cDen3R;huk;!ev4ic,s;e6uiveD;rt;eff0l4mu8nnun1;hn,lloe,minsArEstra32to,ur,yDzl5;a,s0;j0GlsC;aMenLha2Qim0RoEuD;ng,r4;e2KhFnErge2Ku2OvD;anB;es,ss3;anEnsD;en,on,t3;nesDsC;en,s1;ki27s1;cGkob3RnsDrv06;en,sD;enDon;!s;ks3obs1;brahimBglesi3Ake4Ll0DnoZoneFshikEto,vanoD;u,v4A;awa;scu;aPeIitchcock,jaltal6oFrist46uD;!aDb0gh9ynh;m2ng;a24dz4fEjga2Tk,rDx3B;ak0Yvat;er,fm3B;iGmingw3NnErD;nand7re8;dDriks1;ers3;kkiEnD;on1;la,n1;dz4g1lvoLmJnsCqIrr0SsFuEyD;as36es;g1ng;anEhiD;mo0Q;i,ov08;ue;alaD;in1;rs1;aNeorgMheorghe,iKjonJoGrEuDw3;o,staf2Utierr7zm2;ayDg4iffitVub0;li1H;lub3Rme0JnEodD;e,m2;calv9zale0H;aj,i;l,mDordaL;en7;iev3A;gnJlGmaFnd2Mo,rDs2Muthi0;cDza;ia;ge;eaElD;agh0i,o;no;e,on;ab0erLiHjeldsted,lor9oFriedm2uD;cDent9ji3E;hs;ntaDrt6st0urni0;na;lipEsD;ch0;ovD;!ic;hatBnandeVrD;arDei8;a,i;ov4;dHinste6riksCsDva0E;cob2ZpDtra2X;inoDosiM;za;en,s3;er,is3wards;aUeMiKjurhuJoHrisco0ZuEvorakD;!oQ;arte,boEmitru,rDt2U;and,ic;is;g2he0Imingu7n2Ord1AtD;to;us;aDmitr29ssanayake;s,z; GbnaFlEmirDrvis1Lvi,w2;!ov4;gado,ic;th;bo0groot,jo04lEsilDvri9;va;a cruz,e3uD;ca;hl,mcevsAnEt2EviD;d5es,s;ieDku1S;ls1;ki;a06e01hOiobNlarkMoFrD;ivDuz;elli;h1lHntGoFrDs26x;byn,reD;a,ia;ke,p0;i,rer0N;em2liD;ns;!e;anu;aLeIiu,oGriDuJwe;stD;eDiaD;ns1;i,ng,uFwDy;!dhury;!n,onEuD;ng;!g;kEnDpm2tterjee,v7;!d,g;ma,raboD;rty;bGl08ng4rD;eghetEnD;a,y;ti;an,ota0L;cer9lder3mpbeIrFstDvadi07;iDro;llo;doEt0uDvalho;so;so,zo;ll;es;a08eWhTiRlNoGrFyD;rne,tyD;qi;ank5iem,ooks,yant;gdan5nFruya,su,uchEyHziD;c,n5;ard;darDik;enD;ko;ov;aEondD;al;nco,zD;ev4;ancRshwD;as;a01oDuiy2;umDwmD;ik;ckNethov1gu,ktLnJrD;gGisFnD;ascoDds1;ni;ha;er,mD;ann;gtDit7nett;ss3;asD;hi;er,ham;b4ch,ez,hMiley,kk0nHrDu0;bEnDua;es,i0;ieDosa;ri;dDik;a8yopadhyD;ay;ra;er;k,ng;ic;cosZdYguilXkhtXlSnJrGsl2yD;aEd6;in;la;aEsl2;an;ujo,ya;dFgelD;ovD;!a;ersGov,reD;aDjL;ss1;en;en,on,s3;on;eksejGiyGmeiFvD;ar7es;ez;da;ev;ar;ams;ta",
+      "Country": "true¦0:39;1:2M;a2Xb2Ec22d1Ye1Sf1Mg1Ch1Ai14j12k0Zl0Um0Gn05om3DpZqat1KrXsKtCu6v4wal3yemTz2;a25imbabwe;es,lis and futu2Y;a2enezue32ietnam;nuatu,tican city;.5gTkraiZnited 3ruXs2zbeE;a,sr;arab emirat0Kkingdom,states2;! of am2Y;k.,s.2; 28a.;a7haBimor-les0Bo6rinidad4u2;nis0rk2valu;ey,me2Ys and caic1U; and 2-2;toba1K;go,kel0Znga;iw2Wji2nz2S;ki2U;aCcotl1eBi8lov7o5pa2Cri lanka,u4w2yr0;az2ed9itzerl1;il1;d2Rriname;lomon1Wmal0uth 2;afr2JkLsud2P;ak0en0;erra leoEn2;gapo1Xt maart2;en;negKrb0ychellY;int 2moa,n marino,udi arab0;hele25luc0mart20;epublic of ir0Dom2Duss0w2;an26;a3eHhilippinTitcairn1Lo2uerto riM;l1rtugE;ki2Cl3nama,pua new0Ura2;gu6;au,esti2;ne;aAe8i6or2;folk1Hth3w2;ay; k2ern mariana1C;or0N;caragua,ger2ue;!ia;p2ther19w zeal1;al;mib0u2;ru;a6exi5icro0Ao2yanm05;ldova,n2roc4zamb9;a3gol0t2;enegro,serrat;co;c9dagasc00l6r4urit3yot2;te;an0i15;shall0Wtin2;ique;a3div2i,ta;es;wi,ys0;ao,ed01;a5e4i2uxembourg;b2echtenste11thu1F;er0ya;ban0Hsotho;os,tv0;azakh1Ee3iriba03o2uwait,yrgyz1E;rWsovo;eling0Jnya;a2erF;ma15p1B;c6nd5r3s2taly,vory coast;le of m19rael;a2el1;n,q;ia,oI;el1;aiSon2ungary;dur0Mg kong;aAermany,ha0Pibralt9re7u2;a5ern4inea2ya0O;!-biss2;au;sey;deloupe,m,tema0P;e2na0M;ce,nl1;ar;bTmb0;a6i5r2;ance,ench 2;guia0Dpoly2;nes0;ji,nl1;lklandTroeT;ast tim6cu5gypt,l salv5ngl1quatorial3ritr4st2thiop0;on0; guin2;ea;ad2;or;enmark,jibou4ominica3r con2;go;!n B;ti;aAentral african 9h7o4roat0u3yprQzech2; 8ia;ba,racao;c3lo2morPngo-brazzaville,okFsta r03te d'ivoiK;mb0;osD;i2ristmasF;le,na;republic;m2naTpe verde,yman9;bod0ero2;on;aFeChut00o8r4u2;lgar0r2;kina faso,ma,undi;azil,itish 2unei;virgin2; is2;lands;liv0nai4snia and herzegoviGtswaGuvet2; isl1;and;re;l2n7rmuF;ar2gium,ize;us;h3ngladesh,rbad2;os;am3ra2;in;as;fghaFlCmAn5r3ustr2zerbaijH;al0ia;genti2men0uba;na;dorra,g4t2;arct6igua and barbu2;da;o2uil2;la;er2;ica;b2ger0;an0;ia;ni2;st2;an",
+      "Place": "true¦aUbScOdNeMfLgHhGiEjfk,kClAm8new eng7ord,p5s4t2u1vostok,wake is7y0;akutCyz;laanbaatar,pO;ahiti,he 0;bronx,hamptons;akhalFfo,oho,under2yd;acifTek,h0itcairn;l,x;land;a0co,idHuc;gadRlibu,nhattR;a0gw,hr;s,x;osrae,rasnoyar0ul;sk;ax,cn,nd0st;ianKochina;arlem,kg,nd,ovd;ay village,re0;at 0enwich;brita0lakB;in;co,ra;urope,verglad8;en,fw,own2xb;dg,gk,h0lt;a1ina0uuk;town;morro,tham;cn,e0kk,rooklyn;l air,verly hills;frica,m7n2r3sia,tl1zor0;es;!ant2;adyr,tar0;ct0;ic0; oce0;an;ericas,s",
+      "WeekDay": "true¦fri2mon2s1t0wednesd3;hurs1ues1;aturd1und1;!d0;ay0;!s",
+      "Month": "true¦dec0february,july,nov0octo1sept0;em0;ber",
+      "Date": "true¦ago,t0week end,yesterd2;mr2o0;d0morrow;ay;!w",
+      "Duration": "true¦century,dAh9m6q5se4w1y0;ear,r;eek1k0;!s;!e4;ason,c;tr,uarter;i0onth;lliseco0nute;nd;our,r;ay,ecade",
+      "FirstName": "true¦aLblair,cHdevGgabrieFhinaEjCk9l8m4nelly,quinn,re3s0;h0umit;ay,e0iloh;a,lby;g6ne;a1el0ina,org5;!okuh9;naia,r0;ion,lo;ashawn,uca;asCe1ir0rE;an;lsAnyat2rry;am0ess6ie,ude;ie,m5;ta;le;an,on;as2h0;arl0eyenne;ie;ey,sidy;lex2ndr1ubr0;ey;a,ea;is",
+      "Person": "true¦ashton kutchUbTcOdMeKgastPhIinez,jHkGleFmDnettLoCpAr5s4t2va1w0;arrDoode;lentino rossi,n go4;a0heresa may,iger woods,yra banks;tum,ylor;addam hussain,carlett johanssKlobodan milosevic;ay romano,e3o1ush limbau0;gh;d stewart,nald0;inho,o;ese witherspoFilly;a0ipJ;lmIris hiltD;prah winfrFra;essia0itt romnEubarek;en;bron james,e;anye west,endall,iefer sutherland,obe bryant;aime,effers7k rowling;a0itlBulk hogan;lle berry,rris5;ff0meril lagasse,zekiel;ie;a0enzel washingt2ick wolf;lt1nte;ar1lint0;on;dinal wols1son0;! palm2;ey;arack obama,rock;er",
+      "Adjective": "true¦0:5U;1:5W;2:6J;3:6P;4:6D;5:4M;6:3Q;7:6I;8:4Y;9:46;a5Lb58c4Wd4Ge44f3Mg3Fh36i2Mju2Lk2Jl2Bm24n1Uo1Fp11r0Rs09t04uJvHwAyear5;ast8eEholeDiCoA;man5oA;d5Gzy;despr65s4M;!sa3T;eAll o3Xste20;!k5;a0Eeng8iAola3P;b6Oce versa;ltTnFpBrb4IsAttermo62;ef56u4; Cb1DpBsAti16;ca3Lide dJ;er,i33;f2Jto da2;aLbecom0convinc0deIeHfair,ivers4knGprecedSrDsBwA;iel2Writt52;i1JuA;pervis1spect0;eAu5;cognHgul5JlA;at1ent0;own;nd0v4Vxpect1;cid1rA;!sA;iz1to2T;b36ppeal0ssum0uthorA;iz1;i1Mra;aCeBhough3Vip 15oAri2;geth9rp5H;en4Tmpo50rr2B;lAst8;ent1;aQcPeOhNiKmug,nobbi2ToIpHqueami2TtEuAymb57;bCi generis,pAr5;erAre0B;! dup9b;du1seq3Z;eadfa57i0EraightAy2N; fAfA;or4G;ec20irit1lend55ot on; call1mb9phistic4VrAu0Ovi3D;d53ry;gnifiBnA;ce40g2M;ca3;am8e9;co12em5lfi2Ere6;ath0ient1S;cr1me;aHeDiBoA;bu4Ttt40uMy4;ghtAv4;-w0f3W;bScondi2du53lCsAtard1;is3FoA;lu2na3;e0Zuc3D;b4NciA;al,st;aIeGicayu6lac4Lopuli4KrAubl4G;eDiBoA;!b02fu4Mmi2Hp9;ma43or,sAva2;ti6;ci4Jexist0mA;atu3Ei4M;ac8rAti2;fe7ma2Bv4F;i1KrAst;allCtA;-tiAi4;me;el;bKffIkHld GnFrg14th9utEverA;!aCniBt,wA;eiArouA;ght;ll;do0Jer,si3G; boa4Jgo0li6;fashion1school;!ay; gua4GbAli6;eat;eCsA;cAer06o2M;e6u2T;d27se;aIeHiGoAuanc1;nDrBtA;ab1B;thA;!eH;chala3descri43sA;top;ght5;arby,cessa35ighbor5xt;k1usiat0;aDeCindblPoAultip13;deAl0Hnth5ot,st;rn;nac0re;cBgenta,in,jVkeshift,mmoth,nAsculi6;dato2Yy;ab2Bho;aGeCiteraBoAu0R;ngstand0uti0Q;l,te;ft-w0gAth4;al,eBitiA;ma2;nda2Q;ngu34st;ap1Eind5nA;ow0;niIveni0M;gno3Klleg4mMnCpso 1GrA;a2releA;va3; HaGcorFdDfluenNiNnCsBtA;a7en2Z;a6i29;a2er;iBoA;or;re7;deq2Vppr2E;fAsitu,vitro;ro3;mEpA;arCeBoArop9;li2r1A;nd0rfe7;ti4;eAi0G;d26n2K;aFelEiCoAumdr2N;ne2ErrAsZur5;if29;ghfalut16spA;an27;liRpf1F;lBnArdXt8;dy;f,low1;aiFener22iga1Mlob4oEraCuA;ilAng ho;ty;c8tA;ef17is;od;nf15;aOeJinIlHoCrA;a1EeAoz15;q0Otf12;oCrA; keeps,eAge09m9tuna2;go0ign;liA;sh;ag2Cue3;al,i2;dDmini6rA;tiA;le;ne; up;bl1i3l1Or Aux;oAreach0;ff;aIfficie3lHmiGnEre7there4veDxA;a7cess,traBuA;be20l05;!va0Y;n,ryday; Ati0C;rou2sui2;ne3;dIe0T;g9sA;t,ygo0;er;aNeGiCoArea0Rue;mina3ne,ubA;le,tf08;dact0Yfficult,sAv15;creBeas1hone11ordAta3;er5;et; FadpEfDgene19liBspe19voA;ut;ca2ghA;tf00;ia3;an;facto;i5ngeroQ;ly;ar8ertaJivil,oCrA;aAu07;vUz1;loFmpEnBrrAvert;e7u12;grBsAt05;ta3;ue3;le2;ni4ss4;in;efJ;aJeEizarDliHoBrAuck nak1;and new,isk,okJ;gAna fiQ;us;re;autifDhiCloBnAst,yoC;ePt;v1w;nd;ul;ckBnkru0KrrA;en;!wards; priori,b0Cc09d02fra01gYhXlUntiquSpNrHsleep,ttractiZutheGvDwA;aBkA;wa0H;ke,re;ant garBerA;age;de;ntP;bitDroCtiA;fiA;ci4;ga3;raA;ry;pAt;are3etiz0rA;oprA;ia2;ing;at1;ed;cohAiEl,oof;olA;ic;ead;ainBgressiA;ve;st;id; EeCvA;erA;se;pt,qA;ua2;hoc,infinitA;um;cuBtu4u2;al;ra2;erIlHoFruEsBuA;nda3;e3olu2tra7;ct;te;pt;aAve;rd;aze,e;ra3;nt",
+      "Adj|Present": "true¦cleIdFeEfChollow,l9m7o6pr5qua4rigBs2t1utter,w0;aCet,ound,rong;hin,op;e0li1mooth,our,pa5u5;cu4dDlect,parD;ck;esent,ime;pen,wn;atu0eAod8;re;ay,e8i0;g0ve;ht;i0ree;rm;labor2mpty;elib0ry;er0;ate;an",
+      "Adj|Noun": "true¦aQbOcIeHfEiDlattCmAo9premiCre7s4ta3u1va0welcome;gabo1nilla;ndergrou0pstairs;nd;boo,n;e0oAtandard,uper1;cret,n0;ior;ar,p0;resentative,ublican;pposiBvD;a4edium,in0obi4;iature,or;er;de9nnocent;avo1ema0;le;ri4uri4;li3xp9;hief,o0;m2n0;cre0temporary;te;merci0plex;al;lank,o0;ttom,urgeois;dult,l0rab;ert",
+      "Adj|Past": "true¦0:2P;1:2G;2:2J;3:1Z;4:2I;a2Ab25c1Nd17e11f0Xg0Wh0Ti0Mj0Lknown,l0Im0Dn0Bo09p03qua02rUsFtBu9v7w5;arp0ea5or7;kJth4;a5e0S;ri0;ni5pd1s0;fi0t0;ar7hreatEr5wi2J;a5ou15;ck0in0pp0;get0ni1H;aHcaGeFhut,imEmok0pCt8u5;bsid20gge2Es5;pe5ta1L;ct0nd0;at0e7r5;ength5ip0;en0;am0reotyp0;eci5ott0;al1Sfi0;pHul1;al0c1Dle2t1L;r0tt4;t5ut0;is3ur1;aBe5;c8duc0f17g7l1new0qu6s5;pe2tri2;e1Xir0;ist4ul1;eiv0o5;mme09rd0v4;lli0ti3;li3;arallel0l9o8r5ump0;e6o5;c0Hlo0Gnou1Opos0te2;fe0Joc8par0;i1Bli0O;ann0e14;c5rgan17;cupi0;e5ot0;ed0gle2;a7e6ix0o5;di3t0F;as0Olt0;n5rk0;ag0ufact0M;eft,i6o5;ad0st;cens0mit0st0;agg0us0L;mpAn5sol1;br0debt0f8t5volv0;e5ox0D;gr1n5re15;d0si3;e2oX;li0oNrov0;amm4e1o5;ok0r5;ri3;ift0one;aNi7ocus0r5;a5i0;ct04g0I;niVx0;duc1n9quipp0stabliUx5;p5te7;a6e5;ct0rie0P;nd0;ha0NsX;aJeBi5;gni3miniNre2s5;a8c7grun02t5;o5rCurb0;rt0;iplQou06;bl0;cenUdNf9lay0pr8ra7t5velop0;a5ermN;il0;ng0;ess0;e6o5;rm0;rr0;mag0t0;alcul1eIharg0lHoAr7u5;lt5stomS;iv1;a6owd0u5;sh0;ck0mp0;d0loAm7n5ok0v4;centr1s5troll0;id4olid1;b6pl5;ic1;in0;ur0;assi3os0;lebr1n7r5;ti3;fi0;tralC;a8i7o5urn0;il0r0t5und;tl0;as0;laKs0;bandon0cLdIffe2lFnDppBss9u5ward0;g6thor5;iz0;me5;nt0;o7u5;m0r0;li0re5;ci1;im1ticip1;at0;leg0t4;er0;ct0;ju6o8va5;nc0;st0;ce5knowledg0;pt0;ed",
+      "Infinitive": "true¦0:33;1:23;2:31;3:2F;4:2U;5:29;6:25;7:35;a2Kb2Dc1Vd1Ae12f10g0Yhapp6i0Njo29l0Lm0Go0Bp05rOsJtHuCvBw8;a8i0Y;n8rn;d5t;a2Aie;n9p8;lift,set;d8i2lock;er8o;mi1Iw04;ake pa1Fe2Dh8;ank,reat6;eem,hort6lDpBtrAu8;bm2Sff5gge2Tppo7r8;rou29vi0;ength6i0;l22oil;e9o8;am;al0PcKdu4fJlHmGpFqui1sBtAv8;e8oU;l,rt;a1Ni1;eAi2Jt8;o1r8;i3uctu1;mb22nt;la4rR;a1Hemb5i1Vo0;a8e1Bi0y;te,x;er,le3;ei0k2Io8yc1W;gn0Bnci1V;art21erCier4ortr1Kr9u8;bl0Ers1V;ay,e9o8;claim,fe0Ehib24vi0T;di3pa1ve12;fo12si23;bBccur,pera2utweigh,ver8we;co1Llap,ta9u7w8;helm;ke;ser0ta11;aBer20i8ultiply;n9srepr8;ese0T;g1Gus;inta0Wna1W;eaVi8;ke,v6;gno1mGn8;clu0Ddica2hEitia2sCtAv8;e8ol0;nt,st;er8rodu4;a3fe1;i1Kt8;all,ru3;ab1Hib1H;agi02p8;oZro0;a8oveIrab;th5;a8ors1A;st6vor;aEle3mBnAstablIvalua2x8;aPeTi1Ap8te0R;a0Qe3i1la0Co7reI;ab0UcouJdu1for4ga1Bhan4jPri0Qsu1t5visi1G;body,er1Ap8;has8ow5;ize;rn;ark6eHi8;ff5re3s8;aDc9miAtingu8;ish;o9u8;ss;u8v5;ra0Z;gr0Spp8;e0Lro0;cGeFfDliv5ny,pBs9ter8;miD;cribe,er0tr8;oy;a8e06i3;rt;i8y;ne;m,p6;i8la1rea7;de;aNea7hew,i2lo7o9r8;a0ea2;lle3mHn8;fCsAt9v8;ey,in4;aGin01ribu2;i8titu2;d5st;iAo9ro8;nt;rm;gu1rm;men4p8;a1la8;in;re;ncel,re6t5;en;eBo9u8;ry;rrow,th5;er;l9nefVtr8;ay;ie0ong;band01cUdRfford,grQllPmu7nLppIrGssCtt8void,waS;aAe9ra3;ct;nd;ch;e9ign,u8;me;mb8rt;le;g8ri0;ue;e9l8ro0;aud,y;ar;no9t8;icipa2;un4y;ce;eEow;ee;aGju9m8oG;it;st;cBhie0knowled9tiva2;te;ge;ve;e9u7;se;pt;on",
+      "Adverb": "true¦a09b05d01eXfRhPinOjustNkinda,mLnIoDpBquite,r8s4t1up0very,well; to,wards5;h1iny bit,o0wiO;o,t6w05;en,us;eldom,o0uch;!me1rt0; of;hZtimes,w0B;a1e0;alT;ndomSthN;ar excellDer0oint blank; Nhaps;f3n0;ce0ly;! 0;ag04moY; courIten;ewKo0; longEt 0;onIwithstanding;aybe,eanwhiAore0;!ovB;! aboW;deed,steX;en0;ce;or2u0;lArther0;!moL; 0ev3;examp0good,suJ;le;n1v0;er; mas0ough;se;e0irect1; 1finite0;ly;juAtrop;ackw2y 0;far,n0;ow;ard; DbroCd nauseam,gBl6ny3part,s2t 0w4;be6l0mo6wor6;arge,ea5; soon,ide;mo1w0;ay;re;l 1mo0one,ready,so,ways;st;b1t0;hat;ut;ain;ad;lot,posteriori",
+      "Conjunction": "true¦aDb9cuz,how7in caCno6o5p4supposing,t1wh0yet;eth7ile;h0o;eref8o0;!uB;lus,rovided that;r,therwi6; matt1r;!ev0;er;e0ut;cau1f0;ore;se;lthou1nd,s 0;far as,if;gh",
+      "Preposition": "true¦'o,-,aLbIcHdGexcept,fFinEmid,notwithstandiRoCpSqua,sBt7u4v2w0;/o,hereNith0;!in,oR;ersus,i0;a,s-a-vis;n1p0;!on;like,til;h0ill,owards;an,r0;ough0u;!oI;ans,ince,o that;',f0n1ut;!f;!to;or,rom;espite,own,u3;hez,irca;ar1e0oAy;sides,tween;ri6;',bo7cross,ft6lo5m3propos,round,s1t0;!op;! long 0;as;id0ong0;!st;ng;er;ut",
+      "Determiner": "true¦aBboth,d9e6few,l4mu8neiDplenty,s3th2various,wh0;at0ich0;evC;at,e4is,ose;everal,ome;a,e0;!ast,s;a1i6l0very;!se;ch;e0u;!s;!n0;!o0y;th0;er",
+      "Comparable": "true¦0:3J;1:3Y;2:3N;3:2L;a42b3Kc38d2Ye2Rf2Eg22h1Si1Lj1Kk1Hl1Am14n0Yo0Wp0Nqu0Lr0CsNtHuDvBw5y4za0V;ell17ou3I;a8e6hi1Ni4ry;ck0Hde,l4n1ry,se;d,y;a4i41;k,ry;nti3Cry;a4erda2ulgar;g7in,st;g0n4pcomi39;like0t4;i1r4;ue;a8en7hi6i5ough,r4;anqu2Den1ue;dy,g3Bme0ny,r04;ck,rs29;d3Hse;ll,me,rt,wd3M;aRcarQePhNiMkin0BlImGoEpDt7u5w4;eet,ift;b4dd0Xper0Brre28;sta26t3;a8e7iff,r5u4;pUr1;a4ict,o2T;ig30n0P;a1ep,rn;le,rk;e1Si30right0;ci1Zft,l4on,re;emn,id;a4el0;ll,rt;e6i4ow,y;g2Rm4;!y;ek,nd2X;ck,l0mp3;a4iRort,rill,y;dy,ll03rp;ve0Lxy;ce,y;d,fe,int0l1Iv0X;a9e7i6o4ude;mantic,o19sy,u4;gh,nd;ch,pe,tzy;a4d,mo0C;dy,l;gg5ndom,p4re,w;id;ed;ai2i4;ck,et;a3hoBi1GlAo9r6u4;ny,r4;e,p3;egna2ic5o4;fouUud;ey,k0;liZor,te13;ain,easa2;ny;dd,f4i0ld,ranN;fi0S;a8e6i5o4;b3isy,rm0Ysy;ce,mb3;a4w;r,t;ive,rr8;ad,e6ild,o5u4;nda10te;ist,o1;a5ek,ll4;ow;s0ty;a8ewd,i7o4ucky;f0In5o14u4ve0w0Yy0M;d,sy;e0g;ke0tt3ve0;me,r4te;ge;e5i4;nd;en;ol0ui1D;cy,ll,n4;s7t4;e4ima5;llege2rmedia4;te;ecu4ta2;re;aBe8i7o6u4;ge,m4ng1F;b3id;me0t;gh,l0;a4fWsita2;dy,v4;en0y;nd16ppy,r4;d,sh;aEenDhBiAl9oofy,r4;a7e6is0o4ue13;o4ss;vy;at,en,y;nd,y;ad,ib,ooE;a2d1;a4o4;st0;t3uiT;u1y;aEeeb3i9lat,o7r6u4;ll,n4r0T;!ny;aEesh,iend0;a4rmFul;my;erce6n4;an4e;ciB;! ;le;ir,ke,n08r,st,t,ul4;ty;a7erie,sse5v4xtre0G;il;nti4;al;r5s4;tern,y;ly,th0;aCe9i6ru5u4;ll,mb;nk;r5vi4;ne;e,ty;a4ep,nB;d4f,r;!ly;mp,ppVrk;aDhAl8o6r5u4;dd0r0te;isp,uel;ar4ld,mmon,ol,st0ward0zy;se;e4ou1;ar,vO;e4il0;ap,e4;sy;gey,lm,ri4;ng;aJiHlEoCr6u4;r0sy;ly;a8i5o4;ad,wn;ef,g5llia2;nt;ht;sh,ve;ld,un4;cy;a5o4ue;nd,o1;ck,nd;g,tt4;er;d,ld,w1;dy;bsu7ng6we4;so4;me;ry;rd",
+      "Verb": "true¦awak7born,cannot,fr6g5h3keep tabs,le2m1s0wors7;e6hown;ake sure,sg;ngth4ss4;as0e2;!t2;iv1onna;ight0;en",
+      "Modal": "true¦c5lets,m4ought3sh1w0;ill,o5;a0o4;ll,nt;! to,a;ight,ust;an,o0;uld",
+      "PhrasalVerb": "true¦0:81;1:7Q;2:8E;3:84;4:7J;5:8H;6:7P;7:7E;8:7C;9:86;A:7Z;B:89;C:87;D:80;E:6L;F:6D;a8Kb73c66d61e60f4Yg4Gh3Viron0j3Rk3Ml33m2Pn2No2Lp22quietEr1Ns0GtWuUvacuum 1wJyammerAzG;ero Dip HonG;e0k0;by,up;aNeIhHiGor7Vrit37;mp0n34pe0r8s8;eel Dip 8P;aIiGn2S;gh Grd0;in,up;n Dr G;d2in,o4D;it 6Hk8lk Hrm 0Ysh Gt79v5F;aw3d2o5up;aw3in,o84;rgeAsG;e 1herF;aVeThRiNoMrIuGypL;ckFrn G;d2in,o45up;aHiGot0y 2O;ckleEp 8A;ckEdG;e 0N;neEp 2Zs4Z;ck IdHe Gghte5Yme0p o0Ire0;aw3ba4d2in,up;e 6Hy 1;by,oC;ink Grow 6U;ba4ov6up;aGe 6Fll5G;m 1r 53;ckAke Hlk G;ov6shit,u5H;aGba4d2in,o3Pup;ba4ft6p5Mw3;a0Lc0Ke0Eh0Ai07l03m02n01o00pVquar4XtMuKwG;earIiG;ngHtch G;aw3ba4o7O; by;ck Git 1m 1ss0;in,o7Bup;aMe10iLoJrHuG;c36d2O;aigh22iG;ke 6Wn3L;p Grm24;by,in,oC;n31r 1tc44;c30mp0nd Gr7Fve9y 1;ba4d2up;ar2YeJiIlHrGurA;ingAuc8;a3Rit 5R;l17n 1;e69ll0;ber 1rt0und like;ap 56ow D;ash 5Woke0;eep HiGow 7;c1Lp 1;in,oG;ff,v6;de12gn HngGt 5Rz8; al5Mle0;in,o5up;aIoGu5A;ot Gut0w 6U;aw3ba4f3SoC;c2GdeFk5Pve9;e Kll1Gnd Jrv8tG; Gtl4W;d2f5Bin,o5upG;!on;aw3ba4d2in,o2Nup;o6Dto;al5Iout0rap5I;il9v8;aTeQiPoLuG;b 5Ble0n Gstl8;aIba4d2inHoGt3Lu0X;ut,v6;!to;c2HrBw3;ll Iot HuG;g33nd9;a2Hf3Ao5;arBin,o5;ng 5Ip9;aGel9inFnt0;c5Rd G;o3Bup;c1Tt0;aUeTiRlPoNrKsyc2RuG;ll It G;aGba4d2in,o1Zt3Rup;p3Ww3;ap3Vd2in,o5t3Pup;attleAess HiJoG;p 1;ah1Zon;iGp 5Wr4CurEwer 5W;nt0;ay4SuG;gFmp 7;ck Gg0leAn 7p4P;o1Oup;el 4ZncilF;c4Hir 2Xn0ss ItHy G;ba4oC; d2c2E;aw3ba4in,o1J;pGw4C;e4Bt D;arrowEerd0oG;d9teE;aQeNiMoIuG;ddl8lG;l 3W;c12nkeyIp 7uth9ve G;aGd2in,o5up;l41w3; wi3Y;ss0x 1;asur8lHss G;a1Oup;t 7;ke Hn 7rGs1Xx0;k 7ry9;do,o4Vup;aWeRiMoGuck0;aKc3Ug JoGse0;k Gse3S;aft6ba4d2forw2Sin4Iov6uG;nd6p;in,o0V;d 7;e 04ghtJnIsHvG;e 3E;ten 4Y;e 1k 1; 1e3J;ave It HvelG; o4H;d2go,in,o5up;in,oG;pen,ut;c8p 1sh GtchAugh9y26;in43o5;eHick9nock G;d2o4Aup;eGyF;l 2Yp G;aw3ba4d2fYin,o0Dto,up;aIoHuG;ic8mpF;ke3BtE;c3Kzz 1;aVeQiNoKuG;nHrrGsh 7;y 1;kerEt G;arBd2;lGneFrse34;d Ge 1;ba4d2fast,o04up;de Ht G;ba4on,up;aw3o5;aGlp0;d Il 2Gr Gt 1;fGof;rom;in,oWu1K;cJm 1nHve Gz2B;it,to;d Gg 2MkerJ;d2in,o5;k 1;aUeOive Mloss 27oIrHunG; f0O;in3Now 2H; Gof 26;aHb1Fit,oGrBt0Qu1A;ff,n,v6;bo5ft6hMw3;aw3ba4d2in,oGrise,up,w3;ff,n,ut;ar 7ek0t G;aHb19d2in,oGrBup;ff,n,ut,v6;cHhGl23rBt,w3;ead;ross;d aHnG;g 1;bo5;a0Ae03iUlQoMrIuG;ck Ge28;arBup;eHighten GownAy 1;aw3oC;eGshe1U; 1z8;lIol G;aGwi1N;bo5rB;d 7low 1;aHeGip0;sh0;g 7ke0mGrGttenE;e 2Y;gNlLnJrHsGzzle0;h 2W;e Gm 1;aw3ba4up;d0isG;h 1;e Gl 1G;aw3fLin,o5;ht ba4ure0;eLnHsG;s 1;cId G;fGoC;or;e D;dYl 1;cKll Grm0t13;ap07bId2in,oHtG;hrough;ff,ut,v6;a4ehi27;e G;d2oCup;a0Ldge0nd 0Py8;oJrG;aHess 7op G;aw3bWin,o1U;gAwA; 0Iubl0Y;a00hXleaWoJrGut 16;ackAeep Goss D;by,d2in,oGup;n,ut;me JoHuntG; o1W;k 7l G;d2oC;aMbLforJin,oItHuG;nd6;ogeth6;n,ut,v6;th,wG;ard;a4y;pGrBw3;art;n 7;eGipF;ck Der G;on,up;lNncel0rKsItch HveF; in;o1Eup;h Dt G;doubt,oC;ry HvG;e 02;aw3o19;l HmE; d2;aGba4d2o16up;rBw3;a0Me0El07oYrLuG;bblIcklZil05lk 7ndlZrGst VtHy 16zz9;n 0AsG;t D;e G;ov6;anReaPiHush G;oCup;ghLng G;aIba4d2fGin,o5up;orG;th;bo5lGrBw3;ong;teG;n 1;k G;d2in,o5up;ch0;arNg 7iLn8oJssIttlHunce Gx D;aw3ba4;e 7; arB;k Dt 1;e 1;l 7;d2up;d 1;aLeed0oGurt0;cIw G;aw3ba4d2o5up;ck;k G;in,oX;ck0nk0st9; oLaJef 1nd G;d2ov6up;er;up;r0t G;d2in,oQup;ff,nG;to;ck Mil0nIrgHsG;h D;ainAe D;g DkA; on;in,o5; o5;aw3d2oGup;ff,ut;ay;cPdLsk Iuction9; oC;ff;arBo5;ouG;nd;d G;d2oGup;ff,n;own;t G;o5up;ut",
+      "Person|Date": "true¦a2j0sep;an0une;!uary;p0ugust,v0;ril",
+      "Person|Verb": "true¦b1chu2drew,ja2ma0ollie,pat,rob,sue,wade;ck,rk;ob,u0;ck"
+    };
+
+    var t=function(t,n){let e=Math.min(t.length,n.length);for(;e>0;){const o=t.slice(0,e);if(o===n.slice(0,e))return o;e-=1;}return ""},n$1=function(t){t.sort();for(let n=1;n<t.length;n++)t[n-1]===t[n]&&t.splice(n,1);};const e=function(){this.counts={};},o={init:function(t){void 0===this.counts[t]&&(this.counts[t]=0);},add:function(t,n){void 0===n&&(n=1),this.init(t),this.counts[t]+=n;},countOf:function(t){return this.init(t),this.counts[t]},highest:function(t){let n=[];const e=Object.keys(this.counts);for(let t=0;t<e.length;t++){const o=e[t];n.push([o,this.counts[o]]);}return n.sort((function(t,n){return n[1]-t[1]})),t&&(n=n.slice(0,t)),n}};Object.keys(o).forEach((function(t){e.prototype[t]=o[t];}));const s="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",i=s.split("").reduce((function(t,n,e){return t[n]=e,t}),{});var r=function(t){if(void 0!==s[t])return s[t];let n=1,e=36,o="";for(;t>=e;t-=e,n++,e*=36);for(;n--;){const n=t%36;o=String.fromCharCode((n<10?48:55)+n)+o,t=(t-n)/36;}return o},u=function(t){if(void 0!==i[t])return i[t];let n=0,e=1,o=36,s=1;for(;e<t.length;n+=o,e++,o*=36);for(let e=t.length-1;e>=0;e--,s*=36){let o=t.charCodeAt(e)-48;o>10&&(o-=7),n+=o*s;}return n};const c=";",h=":",f=",",l="!",d=36,p$1=function(t,n){let e="",o="";t.isTerminal(n)&&(e+=l);const s=t.nodeProps(n);for(let i=0;i<s.length;i++){const u=s[i];if("number"==typeof n[u]){e+=o+u,o=f;continue}if(t.syms[n[u]._n]){e+=o+u+t.syms[n[u]._n],o="";continue}let c=r(n._n-n[u]._n-1+t.symCount);n[u]._g&&c.length>=n[u]._g.length&&1===n[n[u]._g]?(c=n[u]._g,e+=o+u+c,o=f):(e+=o+u+c,o="");}return e},g$1=function(t,n){if(t.visited(n))return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++){const s=e[o],i=n._n-n[s]._n-1;i<d&&t.histRel.add(i),t.histAbs.add(n[s]._n,r(i).length-1),g$1(t,n[s]);}},a=function(t,n){if(void 0!==n._n)return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++)a(t,n[e[o]]);n._n=t.pos++,t.nodes.unshift(n);},y=function(t){t.nodes=[],t.nodeCount=0,t.syms={},t.symCount=0,t.pos=0,t.optimize(),t.histAbs=new e,t.histRel=new e,a(t,t.root),t.nodeCount=t.nodes.length,t.prepDFS(),g$1(t,t.root),t.symCount=function(t){t.histAbs=t.histAbs.highest(d);const n=[];n[-1]=0;let e=0,o=0;const s=3+r(t.nodeCount).length;for(let i=0;i<d&&void 0!==t.histAbs[i];i++)n[i]=t.histAbs[i][1]-s-t.histRel.countOf(d-i-1)+n[i-1],n[i]>=e&&(e=n[i],o=i+1);return o}(t);for(let n=0;n<t.symCount;n++)t.syms[t.histAbs[n][0]]=r(n);for(let n=0;n<t.nodeCount;n++)t.nodes[n]=p$1(t,t.nodes[n]);for(let n=t.symCount-1;n>=0;n--)t.nodes.unshift(r(n)+h+r(t.nodeCount-t.histAbs[n][0]-1));return t.nodes.join(c)},m$1=new RegExp("[0-9A-Z,;!:|¦]"),b={insertWords:function(t){if(void 0!==t){"string"==typeof t&&(t=t.split(/[^a-zA-Z]+/));for(let n=0;n<t.length;n++)t[n]=t[n].toLowerCase();n$1(t);for(let n=0;n<t.length;n++)null===t[n].match(m$1)&&this.insert(t[n]);}},insert:function(n){this._insert(n,this.root);const e=this.lastWord;this.lastWord=n;if(t(n,e)===e)return;const o=this.uniqueNode(e,n,this.root);o&&this.combineSuffixNode(o);},_insert:function(n,e){let o,s;if(0===n.length)return;const i=Object.keys(e);for(let r=0;r<i.length;r++){const u=i[r];if(o=t(n,u),0!==o.length){if(u===o&&"object"==typeof e[u])return void this._insert(n.slice(o.length),e[u]);if(u===n&&"number"==typeof e[u])return;return s={},s[u.slice(o.length)]=e[u],this.addTerminal(s,n=n.slice(o.length)),delete e[u],e[o]=s,void this.wordCount++}}this.addTerminal(e,n),this.wordCount++;},addTerminal:function(t,n){if(n.length<=1)return void(t[n]=1);const e={};t[n[0]]=e,this.addTerminal(e,n.slice(1));},nodeProps:function(t,n){const e=[];for(const o in t)""!==o&&"_"!==o[0]&&(n&&"object"!=typeof t[o]||e.push(o));return e.sort(),e},optimize:function(){this.combineSuffixNode(this.root),this.prepDFS(),this.countDegree(this.root),this.prepDFS(),this.collapseChains(this.root);},combineSuffixNode:function(t){if(t._c)return t;let n=[];this.isTerminal(t)&&n.push("!");const e=this.nodeProps(t);for(let o=0;o<e.length;o++){const s=e[o];"object"==typeof t[s]?(t[s]=this.combineSuffixNode(t[s]),n.push(s),n.push(t[s]._c)):n.push(s);}n=n.join("-");const o=this.suffixes[n];return o||(this.suffixes[n]=t,t._c=this.cNext++,t)},prepDFS:function(){this.vCur++;},visited:function(t){return t._v===this.vCur||(t._v=this.vCur,!1)},countDegree:function(t){if(void 0===t._d&&(t._d=0),t._d++,this.visited(t))return;const n=this.nodeProps(t,!0);for(let e=0;e<n.length;e++)this.countDegree(t[n[e]]);},collapseChains:function(t){let n,e,o,s;if(!this.visited(t)){for(e=this.nodeProps(t),s=0;s<e.length;s++)n=e[s],o=t[n],"object"==typeof o&&(this.collapseChains(o),void 0===o._g||1!==o._d&&1!==o._g.length||(delete t[n],n+=o._g,t[n]=o[o._g]));1!==e.length||this.isTerminal(t)||(t._g=n);}},isTerminal:function(t){return !!t[""]},uniqueNode:function(t,n,e){const o=this.nodeProps(e,!0);for(let s=0;s<o.length;s++){const i=o[s];if(i===t.slice(0,i.length))return i!==n.slice(0,i.length)?e[i]:this.uniqueNode(t.slice(i.length),n.slice(i.length),e[i])}},pack:function(){return y(this)}};Object.keys(b).forEach((function(t){}));const j=function(t,n,e){const o=u(n);return o<t.symCount?t.syms[o]:e+o+1-t.symCount},A=function(t){const n={nodes:t.split(";"),syms:[],symCount:0};return t.match(":")&&function(t){const n=new RegExp("([0-9A-Z]+):([0-9A-Z]+)");for(let e=0;e<t.nodes.length;e++){const o=n.exec(t.nodes[e]);if(!o){t.symCount=e;break}t.syms[u(o[1])]=u(o[2]);}t.nodes=t.nodes.slice(t.symCount,t.nodes.length);}(n),function(t){const n=[],e=(o,s)=>{let i=t.nodes[o];"!"===i[0]&&(n.push(s),i=i.slice(1));const r=i.split(/([A-Z0-9,]+)/g);for(let i=0;i<r.length;i+=2){const u=r[i],c=r[i+1];if(!u)continue;const h=s+u;if(","===c||void 0===c){n.push(h);continue}const f=j(t,c,o);e(f,h);}};return e(0,""),n}(n)},O=function(t){const n=t.split("|").reduce(((t,n)=>{const e=n.split("¦");return t[e[0]]=e[1],t}),{}),e={};return Object.keys(n).forEach((function(t){const o=A(n[t]);"true"===t&&(t=!0);for(let n=0;n<o.length;n++){const s=o[n];!0===e.hasOwnProperty(s)?!1===Array.isArray(e[s])?e[s]=[e[s],t]:e[s].push(t):e[s]=t;}})),e};
+
+    //words that can't be compressed, for whatever reason
+    let misc$5 = {
+      // numbers
+      '20th century fox': 'Organization',
+      '7 eleven': 'Organization',
+      'motel 6': 'Organization',
+      g8: 'Organization',
+      vh1: 'Organization',
+
+      // ampersands
+      'at&t': 'Organization',
+      'black & decker': 'Organization',
+      'h & m': 'Organization',
+      'johnson & johnson': 'Organization',
+      'procter & gamble': 'Organization',
+      "ben & jerry's": 'Organization',
+      '&': 'Conjunction',
+
+      //pronouns
+      i: ['Pronoun', 'Singular'],
+      he: ['Pronoun', 'Singular'],
+      she: ['Pronoun', 'Singular'],
+      it: ['Pronoun', 'Singular'],
+      they: ['Pronoun', 'Plural'],
+      we: ['Pronoun', 'Plural'],
+      was: ['Copula', 'PastTense'],
+      is: ['Copula', 'PresentTense'],
+      are: ['Copula', 'PresentTense'],
+      am: ['Copula', 'PresentTense'],
+      were: ['Copula', 'PastTense'],
+      her: ['Possessive', 'Pronoun'],
+      his: ['Possessive', 'Pronoun'],
+      hers: ['Possessive', 'Pronoun'],
+      their: ['Possessive', 'Pronoun'],
+      themselves: ['Possessive', 'Pronoun'],
+      your: ['Possessive', 'Pronoun'],
+      our: ['Possessive', 'Pronoun'],
+      my: ['Possessive', 'Pronoun'],
+      its: ['Possessive', 'Pronoun'],
+
+      // misc
+      vs: ['Conjunction', 'Abbreviation'],
+      if: ['Condition', 'Preposition'],
+      closer: 'Comparative',
+      closest: 'Superlative',
+      much: 'Adverb',
+      may: 'Modal',
+    };
+    var misc$6 = misc$5;
+
+    /** patterns for turning 'bus' to 'buses'*/
+    const suffixes$1 = {
+      a: [
+        [/(antenn|formul|nebul|vertebr|vit)a$/i, '$1ae'],
+        [/([ti])a$/i, '$1a'],
+      ],
+      e: [
+        [/(kn|l|w)ife$/i, '$1ives'],
+        [/(hive)$/i, '$1s'],
+        [/([m|l])ouse$/i, '$1ice'],
+        [/([m|l])ice$/i, '$1ice'],
+      ],
+      f: [
+        [/^(dwar|handkerchie|hoo|scar|whar)f$/i, '$1ves'],
+        [/^((?:ca|e|ha|(?:our|them|your)?se|she|wo)l|lea|loa|shea|thie)f$/i, '$1ves'],
+      ],
+      i: [[/(octop|vir)i$/i, '$1i']],
+      m: [[/([ti])um$/i, '$1a']],
+      n: [[/^(oxen)$/i, '$1']],
+      o: [[/(al|ad|at|er|et|ed)o$/i, '$1oes']],
+      s: [
+        [/(ax|test)is$/i, '$1es'],
+        [/(alias|status)$/i, '$1es'],
+        [/sis$/i, 'ses'],
+        [/(bu)s$/i, '$1ses'],
+        [/(sis)$/i, 'ses'],
+        [/^(?!talis|.*hu)(.*)man$/i, '$1men'],
+        [/(octop|vir|radi|nucle|fung|cact|stimul)us$/i, '$1i'],
+      ],
+      x: [
+        [/(matr|vert|ind|cort)(ix|ex)$/i, '$1ices'],
+        [/^(ox)$/i, '$1en'],
+      ],
+      y: [[/([^aeiouy]|qu)y$/i, '$1ies']],
+      z: [[/(quiz)$/i, '$1zes']],
+    };
+    var rules$3 = suffixes$1;
+
+    const addE = /([xsz]|ch|sh)$/;
+
+    const trySuffix = function (str) {
+      let c = str[str.length - 1];
+      if (rules$3.hasOwnProperty(c) === true) {
+        for (let i = 0; i < rules$3[c].length; i += 1) {
+          let reg = rules$3[c][i][0];
+          if (reg.test(str) === true) {
+            return str.replace(reg, rules$3[c][i][1])
+          }
+        }
+      }
+      return null
+    };
+    /** Turn a singular noun into a plural
+     * assume the given string is singular
+     */
+    const pluralize = function (str = '', model) {
+      let { irregularPlurals, uncountable } = model.two;
+      // is it a word without a plural form?
+      if (uncountable.hasOwnProperty(str)) {
+        return str
+      }
+      // check irregulars list
+      if (irregularPlurals.hasOwnProperty(str)) {
+        return irregularPlurals[str]
+      }
+      //we have some rules to try-out
+      let plural = trySuffix(str);
+      if (plural !== null) {
+        return plural
+      }
+      //like 'church'
+      if (addE.test(str)) {
+        return str + 'es'
+      }
+      // ¯\_(ツ)_/¯
+      return str + 's'
+    };
+    var nounToPlural = pluralize;
+
+    // unpack our lexicon of words
+    // (found in ./lexicon/)
+
+    // more clever things are done on the data later
+    //  - once the plugin is applied
+    const hasSwitch = /\|/;
+    let lexicon = misc$6;
+    let variables$2 = {};
+
+    const tmpModel = { two: { irregularPlurals, uncountable: {} } };
+
+    Object.keys(lexData).forEach(tag => {
+      let wordsObj = O(lexData[tag]);
+      // POS tag, or something fancier?
+      if (!hasSwitch.test(tag)) {
+        // set them as simple word key-value lookup
+        Object.keys(wordsObj).forEach(w => {
+          lexicon[w] = tag;
+        });
+        return
+      }
+      // add them as seperate key-val object
+      Object.keys(wordsObj).forEach(w => {
+        variables$2[w] = tag;
+        // pluralize Infinitive|Singular
+        if (tag === 'Noun|Verb') {
+          let plural = nounToPlural(w, tmpModel);
+          variables$2[plural] = 'Plural|Verb';
+        }
+      });
+    });
+    // misc cleanup
+    delete lexicon[''];
+    delete lexicon[null];
+    delete lexicon[' '];
+
+    const jj = 'Adjective';
+
+    var adj$1 = {
+      beforeTags: {
+        Determiner: jj, //the detailed
+        // Copula: jj, //is detailed
+        Possessive: jj, //spencer's detailed
+      },
+
+      afterTags: {
+        // Noun: jj, //detailed plan, overwhelming evidence
+        Adjective: jj, //intoxicated little
+      },
+
+      beforeWords: {
+        seem: jj, //seem prepared
+        seemed: jj,
+        seems: jj,
+        feel: jj, //feel prepared
+        feels: jj,
+        felt: jj,
+        appear: jj,
+        appears: jj,
+        appeared: jj,
+        also: jj,
+        over: jj, //over cooked
+        under: jj,
+        too: jj, //too insulting
+        it: jj, //find it insulting
+        but: jj, //nothing but frustrating
+        still: jj, //still scared
+        // adverbs that are adjective-ish
+        really: jj, //really damaged
+        quite: jj,
+        well: jj,
+        very: jj,
+        deeply: jj,
+        // always: jj,
+        // never: jj,
+        profoundly: jj,
+        extremely: jj,
+        so: jj,
+        badly: jj,
+        mostly: jj,
+        totally: jj,
+        awfully: jj,
+        rather: jj,
+        nothing: jj, //nothing secret, 
+        something: jj,//something wrong
+        anything: jj,
+      },
+      afterWords: {
+        too: jj, //insulting too
+        also: jj, //insulting too
+        or: jj, //insulting or
+      },
+    };
+
+    const g = 'Gerund';
+
+    // Adj|Gerund
+    // Noun|Gerund
+
+    var gerund = {
+      beforeTags: {
+        // Verb: g, // loves shocking
+        Adverb: g, //quickly shocking
+        Preposition: g, //by insulting
+        Conjunction: g, //to insulting
+      },
+      afterTags: {
+        Adverb: g, //shocking quickly
+        Possessive: g, //shocking spencer's
+        Person: g, //telling spencer
+        Pronoun: g, //shocking him
+        Determiner: g, //shocking the
+        Copula: g, //shocking is
+        Preposition: g, //dashing by, swimming in
+        Conjunction: g, //insulting to
+      },
+      beforeWords: {
+        been: g,
+        keep: g,//keep going
+        continue: g,//
+        stop: g,//
+        am: g,//am watching
+        be: g,//be timing
+        // action-words
+        began: g,
+        start: g,
+        starts: g,
+        started: g,
+        stops: g,
+        stopped: g,
+        help: g,
+        helps: g,
+        avoid: g,
+        avoids: g,
+        love: g,//love painting
+        loves: g,
+        loved: g,
+        hate: g,
+        hates: g,
+        hated: g,
+        // was:g,//was working
+        // is:g,
+        // be:g,
+      },
+      afterWords: {
+        you: g, //telling you
+        me: g, //
+        her: g, //
+        him: g, //
+        them: g, //
+        their: g, // fighting their
+        it: g, //dumping it
+        this: g, //running this
+        there: g, // swimming there
+        on: g, // landing on
+        about: g, // talking about
+        for: g, // paying for
+      },
+    };
+
+    // rallying the troops
+    // her rallying cry
+    const clue$5 = {
+      beforeTags: Object.assign({}, adj$1.beforeTags, gerund.beforeTags, {
+        Copula: 'Adjective', PresentTense: 'Gerund',
+        Plural: 'Gerund'//kids cutting
+      }),
+      afterTags: Object.assign({}, adj$1.afterTags, gerund.afterTags),
+      beforeWords: Object.assign({}, adj$1.beforeWords, gerund.beforeWords),
+      afterWords: Object.assign({}, adj$1.afterWords, gerund.afterWords, {
+        to: 'Gerund',
+        the: 'Gerund' //sweeping the country
+      }),
+    };
+    // console.log(clue)
+    var adjGerund = clue$5;
+
+    const n = 'Singular';
+    var noun$1 = {
+      beforeTags: {
+        Determiner: n, //the date
+        Possessive: n, //his date
+        // ProperNoun:n,
+        Noun: n, //nasa funding
+        Adjective: n, //whole bottles
+        // Verb:true, //save storm victims
+        PresentTense: n, //loves hiking
+        Gerund: n, //uplifting victims
+        PastTense: n, //saved storm victims
+        Infinitive: n, //profess love
+        Date: n,//9pm show
+      },
+      afterTags: {
+        Value: n, //date nine  -?
+        Modal: n, //date would
+        Copula: n, //fear is
+        PresentTense: n, //babysitting sucks
+        PastTense: n, //babysitting sucked
+        // Noun:n, //talking therapy, planning process
+        Demonym: n//american touch
+      },
+      // ownTags: { ProperNoun: n },
+      beforeWords: {
+        with: n,//with cakes
+        without: n,//
+        // was:n, //was time  -- was working
+        // is:n, //
+        of: n, //of power
+        for: n, //for rats
+        any: n, //any rats
+        all: n, //all tips
+        on: n, //on time
+        // thing-ish verbs
+        cut: n,//cut spending
+        cuts: n,//cut spending
+        save: n,//
+        saved: n,//
+        saves: n,//
+        make: n,//
+        makes: n,//
+        made: n,//
+        minus: n,//minus laughing
+        plus: n,//
+        than: n,//more than age
+        another: n,//
+        versus: n,//
+        neither: n,//
+      },
+      afterWords: {
+        of: n, //date of birth (preposition)
+        system: n,
+        aid: n,
+        method: n,
+        utility: n,
+        tool: n,
+        reform: n,
+        therapy: n,
+        philosophy: n,
+        room: n,
+        authority: n,
+      },
+    };
+
+    // the commercial market
+    // watching the commercial
+
+    const misc$4 = {
+      beforeTags: {
+        Determiner: undefined //the premier university
+      }
+    };
+    const clue$4 = {
+      beforeTags: Object.assign({}, adj$1.beforeTags, noun$1.beforeTags, misc$4.beforeTags),
+      afterTags: Object.assign({}, adj$1.afterTags, noun$1.afterTags),
+      beforeWords: Object.assign({}, adj$1.beforeWords, noun$1.beforeWords, {
+        // are representative
+        are: 'Adjective', is: 'Adjective', was: 'Adjective', be: 'Adjective',
+      }),
+      afterWords: Object.assign({}, adj$1.afterWords, noun$1.afterWords),
+    };
+    var adjNoun = clue$4;
+
+    // the boiled egg
+    // boiled the water
+
+    const past = {
+      beforeTags: {
+        Adverb: 'PastTense', //quickly detailed
+        Pronoun: 'PastTense', //he detailed
+        ProperNoun: 'PastTense', //toronto closed
+        Auxiliary: 'PastTense',
+        Noun: 'PastTense', //eye closed  -- i guess.
+      },
+      afterTags: {
+        Possessive: 'PastTense', //hooked him
+        Pronoun: 'PastTense', //hooked me
+        Determiner: 'PastTense', //hooked the
+        Adverb: 'PastTense', //cooked perfectly
+        Comparative: 'PastTense',//closed higher
+        Date: 'PastTense',// alleged thursday
+      },
+      beforeWords: {
+        be: 'PastTense',//be hooked
+        get: 'PastTense',//get charged
+        had: 'PastTense',
+        has: 'PastTense',
+        have: 'PastTense',
+        been: 'PastTense',
+        as: 'PastTense',//as requested
+        for: 'Adjective',//for discounted items
+      },
+      afterWords: {
+        by: 'PastTense', //damaged by
+        back: 'PastTense', //charged back
+        out: 'PastTense', //charged out
+        in: 'PastTense', //crowded in
+        up: 'PastTense', //heated up
+        down: 'PastTense', //hammered down
+        for: 'PastTense', //settled for
+        the: 'PastTense', //settled the
+        with: 'PastTense', //obsessed with
+        as: 'PastTense', //known as
+        on: 'PastTense', //focused on
+      },
+    };
+
+    var adjPast = {
+      beforeTags: Object.assign({}, adj$1.beforeTags, past.beforeTags),
+      afterTags: Object.assign({}, adj$1.afterTags, past.afterTags),
+      beforeWords: Object.assign({}, adj$1.beforeWords, past.beforeWords),
+      afterWords: Object.assign({}, adj$1.afterWords, past.afterWords),
+    };
+
+    const v = 'Infinitive';
+
+    var verb = {
+      beforeTags: {
+        Modal: v, //would date
+        Adverb: v, //quickly date
+        Negative: v, //not date
+        Plural: v, //characters drink
+        // ProperNoun: vb,//google thought
+      },
+      afterTags: {
+        Determiner: v, //flash the
+        Adverb: v, //date quickly
+        Possessive: v, //date his
+        // Noun:true, //date spencer
+        Preposition: v, //date around, dump onto, grumble about
+        // Conjunction: v, // dip to, dip through
+      },
+      beforeWords: {
+        i: v, //i date
+        we: v, //we date
+        you: v, //you date
+        they: v, //they date
+        to: v, //to date
+        please: v, //please check
+        will: v, //will check
+        have: v,
+        had: v,
+        would: v,
+        could: v,
+        should: v,
+        do: v,
+        did: v,
+        does: v,
+        can: v,
+        must: v,
+        us: v,
+        me: v,
+        // them: v,
+        he: v,
+        she: v,
+        it: v,
+      },
+      afterWords: {
+        the: v, //echo the
+        me: v, //date me
+        you: v, //date you
+        him: v, //loves him
+        her: v, //
+        them: v, //
+        it: v, //hope it
+        a: v, //covers a
+        an: v, //covers an
+        from: v, //ranges from
+        up: v,//serves up
+        down: v,//serves up
+        by: v,
+        in: v, //bob in
+        out: v,
+        on: v,
+        off: v,
+        // for:true, //settled for
+        all: v,//shiver all night
+        // conjunctions
+        to: v,//dip to
+        because: v,//
+        although: v,//
+        before: v,//
+        how: v,//
+        otherwise: v,//
+        though: v,//
+        yet: v,//
+      },
+    };
+
+    // 'would mean' vs 'is mean'
+    const misc$3 = {
+      afterTags: {
+        Noun: 'Adjective',//ruling party
+        Conjunction: undefined //clean and excellent
+      }
+    };
+    const clue$3 = {
+      beforeTags: Object.assign({}, adj$1.beforeTags, verb.beforeTags, {
+        // always clean
+        Adverb: undefined
+      }),
+      afterTags: Object.assign({}, adj$1.afterTags, verb.afterTags, misc$3.afterTags),
+      beforeWords: Object.assign({}, adj$1.beforeWords, verb.beforeWords, {
+        // have seperate contracts
+        have: undefined, had: undefined,
+        //went wrong, got wrong
+        went: 'Adjective', goes: 'Adjective', got: 'Adjective',
+        // be sure
+        be: 'Adjective'
+      }),
+      afterWords: Object.assign({}, adj$1.afterWords, verb.afterWords, {
+        to: undefined//slick to the touch
+      }),
+    };
+    // console.log(clue.beforeWords)
+    // console.log(clue)
+    var adjPresent = clue$3;
+
+    // 'operating the crane', or 'operating room'
+    const misc$2 = {
+      beforeTags: {
+        Copula: 'Gerund', PastTense: 'Gerund', PresentTense: 'Gerund', Infinitive: 'Gerund'
+      },
+      afterTags: {},
+      beforeWords: {
+        are: 'Gerund', were: 'Gerund', be: 'Gerund', no: 'Gerund', without: 'Gerund',
+        //are you playing
+        you: 'Gerund', we: 'Gerund', they: 'Gerund', he: 'Gerund', she: 'Gerund',
+        //stop us playing
+        us: 'Gerund', them: 'Gerund'
+      },
+      afterWords: {
+        // offering the
+        the: 'Gerund', this: 'Gerund', that: 'Gerund',
+        //got me thinking
+        me: 'Gerund', us: 'Gerund', them: 'Gerund',
+      },
+    };
+    const clue$2 = {
+      beforeTags: Object.assign({}, gerund.beforeTags, noun$1.beforeTags, misc$2.beforeTags),
+      afterTags: Object.assign({}, gerund.afterTags, noun$1.afterTags, misc$2.afterTags),
+      beforeWords: Object.assign({}, gerund.beforeWords, noun$1.beforeWords, misc$2.beforeWords),
+      afterWords: Object.assign({}, gerund.afterWords, noun$1.afterWords, misc$2.afterWords),
+    };
+    var nounGerund = clue$2;
+
+    // 'boot the ball'   -  'the red boot'
+    // 'boots the ball'  -   'the red boots'
+    const clue$1 = {
+      beforeTags: Object.assign({}, verb.beforeTags, noun$1.beforeTags, {
+        // Noun: undefined
+        Adjective: 'Singular',//great name
+      }),
+      afterTags: Object.assign({}, verb.afterTags, noun$1.afterTags, {
+        ProperNoun: 'Infinitive', Gerund: 'Infinitive', Adjective: 'Infinitive',
+        Copula: 'Singular',
+      }),
+      beforeWords: Object.assign({}, verb.beforeWords, noun$1.beforeWords, {
+        // is time
+        is: 'Singular', was: 'Singular'
+      }),
+      afterWords: Object.assign({}, verb.afterWords, noun$1.afterWords, {
+        // for: 'Infinitive',//work for
+        instead: 'Infinitive',
+      }),
+    };
+    // console.log(clue.afterTags)
+    var nounVerb = clue$1;
+
+    const p = 'Person';
+
+    var person$1 = {
+      beforeTags: {
+        Honorific: p,
+        Person: p,
+        Preposition: p, //with sue
+      },
+      afterTags: {
+        Person: p,
+        ProperNoun: p,
+        Verb: p, //bob could
+        // Modal:true, //bob could
+        // Copula:true, //bob is
+        // PresentTense:true, //bob seems
+      },
+      ownTags: {
+        ProperNoun: p, //capital letter
+      },
+      beforeWords: {
+        hi: p,
+        hey: p,
+        yo: p,
+        dear: p,
+        hello: p,
+      },
+      afterWords: {
+        // person-usually verbs
+        said: p,
+        says: p,
+        told: p,
+        tells: p,
+        feels: p,
+        felt: p,
+        seems: p,
+        thinks: p,
+        thought: p,
+        spends: p,
+        spendt: p,
+        plays: p,
+        played: p,
+        sing: p,
+        sang: p,
+        learn: p,
+        learned: p,
+        // and:true, //sue and jeff
+      },
+    };
+
+    // 'april o'neil'  -  'april 1st'
+
+    const m = 'Month';
+    const month = {
+      beforeTags: {
+        Date: m,
+        Value: m,
+      },
+      afterTags: {
+        Date: m,
+        Value: m,
+      },
+      beforeWords: {
+        by: m,
+        in: m,
+        during: m,
+        after: m,
+        until: m,
+        til: m,
+        sometime: m,
+        of: m, //5th of april
+        this: m, //this april
+        next: m,
+        last: m,
+      },
+      afterWords: {
+        sometime: m,
+        in: m,
+        until: m,
+        the: m, //june the 4th
+      },
+    };
+    var personDate = {
+      beforeTags: Object.assign({}, person$1.beforeTags, month.beforeTags),
+      afterTags: Object.assign({}, person$1.afterTags, month.afterTags),
+      beforeWords: Object.assign({}, person$1.beforeWords, month.beforeWords),
+      afterWords: Object.assign({}, person$1.afterWords, month.afterWords),
+    };
+
+    // 'babling brook' vs 'brook sheilds'
+
+    const clue = {
+      beforeTags: Object.assign({}, person$1.beforeTags, noun$1.beforeTags),
+      afterTags: Object.assign({}, person$1.afterTags, noun$1.afterTags),
+      beforeWords: Object.assign({}, person$1.beforeWords, noun$1.beforeWords, { i: 'Infinitive', we: 'Infinitive' }),
+      afterWords: Object.assign({}, person$1.afterWords, noun$1.afterWords),
+    };
+    var personNoun = clue;
+
+    // 'rob the store'   -  'rob lowe'
+    var personVerb$1 = {
+      beforeTags: Object.assign({}, person$1.beforeTags, verb.beforeTags),
+      afterTags: Object.assign({}, person$1.afterTags, verb.afterTags),
+      beforeWords: Object.assign({}, person$1.beforeWords, verb.beforeWords),
+      afterWords: Object.assign({}, person$1.afterWords, verb.afterWords),
+    };
+
+    const clues = {
+      'Adj|Gerund': adjGerund,
+      'Adj|Noun': adjNoun,
+      'Adj|Past': adjPast,
+      'Adj|Present': adjPresent,
+      'Noun|Verb': nounVerb,
+      'Noun|Gerund': nounGerund,
+      'Person|Noun': personNoun,
+      'Person|Date': personDate,
+      'Person|Verb': personVerb$1,
+    };
+
+    const copy = (obj, more) => {
+      let res = Object.keys(obj).reduce((h, k) => {
+        h[k] = obj[k] === 'Infinitive' ? 'PresentTense' : 'Plural';
+        return h
+      }, {});
+      return Object.assign(res, more)
+    };
+
+    // make a copy of this one
+    clues['Plural|Verb'] = {
+      beforeWords: copy(clues['Noun|Verb'].beforeWords, {
+
+      }),
+      afterWords: copy(clues['Noun|Verb'].afterWords, {
+        his: 'PresentTense', her: 'PresentTense', its: 'PresentTense'
+      }),
+      beforeTags: copy(clues['Noun|Verb'].beforeTags, {
+        Conjunction: 'PresentTense', //and changes
+        Noun: undefined, //the century demands
+        ProperNoun: 'PresentTense'//john plays
+      }),
+      afterTags: copy(clues['Noun|Verb'].afterTags, {
+        Noun: 'PresentTense', //changes gears
+        Value: 'PresentTense' //changes seven gears
+      }),
+    };
+    // add some custom plural clues
+    var clues$1 = clues;
+
+    //just a foolish lookup of known suffixes
+    const Adj$1 = 'Adjective';
+    const Inf$1 = 'Infinitive';
+    const Pres$1 = 'PresentTense';
+    const Sing$1 = 'Singular';
+    const Past$1 = 'PastTense';
+    const Avb = 'Adverb';
+    const Plrl = 'Plural';
+    const Actor$1 = 'Actor';
+    const Vb = 'Verb';
+    const Noun$1 = 'Noun';
+    const Last$1 = 'LastName';
+    const Modal = 'Modal';
+    const Place = 'Place';
+    const Prt = 'Participle';
+
+    var suffixPatterns = [
+      null,
+      null,
+      {
+        //2-letter
+        ea: Sing$1,
+        ia: Noun$1,
+        ic: Adj$1,
+        ly: Avb,
+        "'n": Vb,
+        "'t": Vb,
+      },
+      {
+        //3-letter
+        oed: Past$1,
+        ued: Past$1,
+        xed: Past$1,
+        ' so': Avb,
+        "'ll": Modal,
+        "'re": 'Copula',
+        azy: Adj$1,
+        eer: Noun$1,
+        end: Vb,
+        ped: Past$1,
+        ffy: Adj$1,
+        ify: Inf$1,
+        ing: 'Gerund',
+        ize: Inf$1,
+        ibe: Inf$1,
+        lar: Adj$1,
+        mum: Adj$1,
+        nes: Pres$1,
+        nny: Adj$1,
+        oid: Adj$1,
+        ous: Adj$1,
+        que: Adj$1,
+        rol: Sing$1,
+        sis: Sing$1,
+        zes: Pres$1,
+        eld: Past$1,
+        ken: Prt,//awoken
+        ven: Prt,//woven
+        ten: Prt,//brighten
+      },
+      {
+        //4-letter
+        amed: Past$1,
+        aped: Past$1,
+        ched: Past$1,
+        lked: Past$1,
+        rked: Past$1,
+        reed: Past$1,
+        nded: Past$1,
+        mned: Adj$1,
+        cted: Past$1,
+        dged: Past$1,
+        ield: Sing$1,
+        akis: Last$1,
+        cede: Inf$1,
+        chuk: Last$1,
+        czyk: Last$1,
+        ects: Pres$1,
+        ends: Vb,
+        enko: Last$1,
+        ette: Sing$1,
+        fies: Pres$1,
+        fore: Avb,
+        gate: Inf$1,
+        gone: Adj$1,
+        ices: Plrl,
+        ints: Plrl,
+        ines: Plrl,
+        ions: Plrl,
+        less: Adj$1,
+        llen: Adj$1,
+        made: Adj$1,
+        nsen: Last$1,
+        oses: Pres$1,
+        ould: Modal,
+        some: Adj$1,
+        sson: Last$1,
+        tage: Inf$1,
+        tion: Sing$1,
+        tive: Adj$1,
+        tors: Noun$1,
+        vice: Sing$1,
+        wned: Past$1,
+      },
+      {
+        //5-letter
+        tized: Past$1,
+        urned: Past$1,
+        eased: Past$1,
+        ances: Plrl,
+        bound: Adj$1,
+        ettes: Plrl,
+        fully: Avb,
+        ishes: Pres$1,
+        ities: Plrl,
+        marek: Last$1,
+        nssen: Last$1,
+        ology: Noun$1,
+        ports: Plrl,
+        rough: Adj$1,
+        tches: Pres$1,
+        tieth: 'Ordinal',
+        tures: Plrl,
+        wards: Avb,
+        where: Avb,
+      },
+      {
+        //6-letter
+        auskas: Last$1,
+        keeper: Actor$1,
+        logist: Actor$1,
+        teenth: 'Value',
+      },
+      {
+        //7-letter
+        opoulos: Last$1,
+        borough: Place,
+        sdottir: Last$1, //swedish female
+      },
+    ];
+
+    //regex suffix patterns and their most common parts of speech,
+    //built using wordnet, by spencer kelly.
+    //this mapping shrinks-down the uglified build
+    const Adj = 'Adjective';
+    const Inf = 'Infinitive';
+    const Pres = 'PresentTense';
+    const Sing = 'Singular';
+    const Past = 'PastTense';
+    const Adverb = 'Adverb';
+    const Exp = 'Expression';
+    const Actor = 'Actor';
+    const Verb = 'Verb';
+    const Noun = 'Noun';
+    const Last = 'LastName';
+
+    var endsWith = {
+      a: [
+        [/.[aeiou]na$/, Noun, 'tuna'],
+        [/.[oau][wvl]ska$/, Last],
+        [/.[^aeiou]ica$/, Sing, 'harmonica'],
+        [/^([hyj]a+)+$/, Exp, 'haha'], //hahah
+      ],
+      c: [[/.[^aeiou]ic$/, Adj]],
+      d: [
+        //==-ed==
+        //double-consonant
+        [/[aeiou](pp|ll|ss|ff|gg|tt|rr|bb|nn|mm)ed$/, Past, 'popped'],
+        //double-vowel
+        [/.[aeo]{2}[bdgmnprvz]ed$/, Past, 'rammed'],
+        //-hed
+        [/.[aeiou][sg]hed$/, Past, 'gushed'],
+        //-rd
+        [/.[aeiou]red$/, Past, 'hired'],
+        [/.[aeiou]r?ried$/, Past, 'hurried'],
+        // ard
+        [/[^aeiou]ard$/, Sing, 'steward'],
+        // id
+        [/[aeiou][^aeiou]id$/, Adj, ''],
+        [/.[vrl]id$/, Adj, 'livid'],
+
+        // ===== -ed ======
+        //-led
+        [/..led$/, Past, 'hurled'],
+        //-sed
+        [/.[iao]sed$/, Past, ''],
+        [/[aeiou]n?[cs]ed$/, Past, ''],
+        //-med
+        [/[aeiou][rl]?[mnf]ed$/, Past, ''],
+        //-ked
+        [/[aeiou][ns]?c?ked$/, Past, 'bunked'],
+        //-gned
+        [/[aeiou]gned$/, Past],
+        //-ged
+        [/[aeiou][nl]?ged$/, Past],
+        //-ted
+        [/.[tdbwxyz]ed$/, Past],
+        [/[^aeiou][aeiou][tvx]ed$/, Past],
+        //-ied
+        [/.[cdflmnprstv]ied$/, Past, 'emptied'],
+      ],
+      e: [
+        [/.[lnr]ize$/, Inf, 'antagonize'],
+        [/.[^aeiou]ise$/, Inf, 'antagonise'],
+        [/.[aeiou]te$/, Inf, 'bite'],
+        [/.[^aeiou][ai]ble$/, Adj, 'fixable'],
+        [/.[^aeiou]eable$/, Adj, 'maleable'],
+        [/.[ts]ive$/, Adj, 'festive'],
+        [/[a-z]-like$/, Adj, 'woman-like'],
+      ],
+      h: [
+        [/.[^aeiouf]ish$/, Adj, 'cornish'],
+        [/.v[iy]ch$/, Last, '..ovich'],
+        [/^ug?h+$/, Exp, 'ughh'],
+        [/^uh[ -]?oh$/, Exp, 'uhoh'],
+        [/[a-z]-ish$/, Adj, 'cartoon-ish'],
+      ],
+      i: [[/.[oau][wvl]ski$/, Last, 'polish-male']],
+      k: [
+        [/^(k){2}$/, Exp, 'kkkk'], //kkkk
+      ],
+      l: [
+        [/.[gl]ial$/, Adj, 'familial'],
+        [/.[^aeiou]ful$/, Adj, 'fitful'],
+        [/.[nrtumcd]al$/, Adj, 'natal'],
+        [/.[^aeiou][ei]al$/, Adj, 'familial'],
+      ],
+      m: [
+        [/.[^aeiou]ium$/, Sing, 'magnesium'],
+        [/[^aeiou]ism$/, Sing, 'schism'],
+        [/^h*u*m+$/, Exp, 'hmm'],
+        [/^\d+ ?[ap]m$/, 'Date', '3am'],
+      ],
+      n: [
+        [/.[lsrnpb]ian$/, Adj, 'republican'],
+        [/[^aeiou]ician$/, Actor, 'musician'],
+        [/[aeiou][ktrp]in$/, 'Gerund', "cookin'"], // 'cookin', 'hootin'
+      ],
+      o: [
+        [/^no+$/, Exp, 'noooo'],
+        [/^(yo)+$/, Exp, 'yoo'],
+        [/^wo{2,}[pt]?$/, Exp, 'woop'], //woo
+      ],
+      r: [
+        [/.[bdfklmst]ler$/, 'Noun'],
+        [/[aeiou][pns]er$/, Sing],
+        [/[^i]fer$/, Inf],
+        [/.[^aeiou][ao]pher$/, Actor],
+        [/.[lk]er$/, 'Noun'],
+        [/.ier$/, 'Comparative'],
+      ],
+      t: [
+        [/.[di]est$/, 'Superlative'],
+        [/.[icldtgrv]ent$/, Adj],
+        [/[aeiou].*ist$/, Adj],
+        [/^[a-z]et$/, Verb],
+      ],
+      s: [
+        [/.[^aeiou]ises$/, Pres],
+        [/.[rln]ates$/, Pres],
+        [/.[^z]ens$/, Verb],
+        [/.[lstrn]us$/, Sing],
+        [/.[aeiou]sks$/, Pres],
+        [/.[aeiou]kes$/, Pres],
+        [/[aeiou][^aeiou]is$/, Sing],
+        [/[a-z]'s$/, Noun],
+        [/^yes+$/, Exp], //yessss
+      ],
+      v: [
+        [/.[^aeiou][ai][kln]ov$/, Last], //east-europe
+      ],
+      y: [
+        [/.[cts]hy$/, Adj],
+        [/.[st]ty$/, Adj],
+        [/.[tnl]ary$/, Adj],
+        [/.[oe]ry$/, Sing],
+        [/[rdntkbhs]ly$/, Adverb],
+        [/.(gg|bb|zz)ly$/, Adj],
+        [/...lly$/, Adverb],
+        [/.[gk]y$/, Adj],
+        [/[bszmp]{2}y$/, Adj],
+        [/.[ai]my$/, Adj],
+        [/[ea]{2}zy$/, Adj],
+        [/.[^aeiou]ity$/, Sing],
+      ],
+    };
+
+    const vb = 'Verb';
+    const nn = 'Noun';
+
+    var neighbours$2 = {
+      // looking at the previous word's tags:
+      leftTags: [
+        ['Adjective', nn],
+        ['Possessive', nn],
+        ['Determiner', nn],
+        ['Adverb', vb],
+        ['Pronoun', vb],
+        ['Value', nn],
+        ['Ordinal', nn],
+        ['Modal', vb],
+        ['Superlative', nn],
+        ['Demonym', nn],
+        ['Honorific', 'Person'], //dr. Smith
+      ],
+      // looking at the previous word:
+      leftWords: [
+        ['i', vb],
+        ['first', nn],
+        ['it', vb],
+        ['there', vb],
+        ['not', vb],
+        ['because', nn],
+        ['if', nn],
+        ['but', nn],
+        ['who', vb],
+        ['this', nn],
+        ['his', nn],
+        ['when', nn],
+        ['you', vb],
+        ['very', 'Adjective'],
+        ['old', nn],
+        ['never', vb],
+        ['before', nn],
+        ['a', 'Singular'],
+        ['the', nn],
+        ['been', vb],
+      ],
+
+      // looking at the next word's tags:
+      rightTags: [
+        ['Copula', nn],
+        ['PastTense', nn],
+        ['Conjunction', nn],
+        ['Modal', nn],
+        ['Pluperfect', nn],
+        ['PerfectTense', vb], //32%
+      ],
+      // looking at the next word:
+      rightWords: [
+        ['there', vb],
+        ['me', vb],
+        ['man', 'Adjective'],
+        ['only', vb],
+        ['him', vb],
+        ['were', nn],
+        ['took', nn],
+        ['himself', vb],
+        ['went', nn],
+        ['who', nn],
+        ['jr', 'Person'],
+      ],
+    };
+
+    var regexNormal = [
+      //web tags
+      [/^[\w.]+@[\w.]+\.[a-z]{2,3}$/, 'Email'],
+      [/^(https?:\/\/|www\.)+\w+\.[a-z]{2,3}/, 'Url', 'http..'],
+      [/^[a-z0-9./].+\.(com|net|gov|org|ly|edu|info|biz|dev|ru|jp|de|in|uk|br|io|ai)/, 'Url', '.com'],
+
+      // timezones
+      [/^[PMCE]ST$/, 'Timezone', 'EST'],
+
+      //names
+      [/^ma?c'.*/, 'LastName', "mc'neil"],
+      [/^o'[drlkn].*/, 'LastName', "o'connor"],
+      [/^ma?cd[aeiou]/, 'LastName', 'mcdonald'],
+
+      //slang things
+      [/^(lol)+[sz]$/, 'Expression', 'lol'],
+      [/^wo{2,}a*h?$/, 'Expression', 'wooah'],
+      [/^(hee?){2,}h?$/, 'Expression', 'hehe'],
+      [/^(un|de|re)\\-[a-z\u00C0-\u00FF]{2}/, 'Verb', 'un-vite'],
+
+      // m/h
+      [/^(m|k|cm|km)\/(s|h|hr)$/, 'Unit', '5 k/m'],
+      // μg/g
+      [/^(ug|ng|mg)\/(l|m3|ft3)$/, 'Unit', 'ug/L'],
+    ];
+
+    var regexText = [
+      // #coolguy
+      [/^#[a-z0-9_\u00C0-\u00FF]{2,}$/i, 'HashTag'],
+
+      // @spencermountain
+      [/^@\w{2,}$/, 'AtMention'],
+
+      // period-ones acronyms - f.b.i.
+      [/^([A-Z]\.){2}[A-Z]?/i, ['Acronym', 'Noun'], 'F.B.I'], //ascii-only
+
+      // ending-apostrophes
+      [/.{3}[lkmnp]in['‘’‛‵′`´]$/, 'Gerund', "chillin'"],
+      [/.{4}s['‘’‛‵′`´]$/, 'Possessive', "flanders'"],
+    ];
+
+    var regexNumbers = [
+
+      [/^@1?[0-9](am|pm)$/i, 'Time', '3pm'],
+      [/^@1?[0-9]:[0-9]{2}(am|pm)?$/i, 'Time', '3:30pm'],
+      [/^'[0-9]{2}$/, 'Year'],
+      // times
+      [/^[012]?[0-9](:[0-5][0-9])(:[0-5][0-9])$/, 'Time', '3:12:31'],
+      [/^[012]?[0-9](:[0-5][0-9])?(:[0-5][0-9])? ?(am|pm)$/i, 'Time', '1:12pm'],
+      [/^[012]?[0-9](:[0-5][0-9])(:[0-5][0-9])? ?(am|pm)?$/i, 'Time', '1:12:31pm'], //can remove?
+
+      // iso-dates
+      [/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/i, 'Date', 'iso-date'],
+      [/^[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,4}$/, 'Date', 'iso-dash'],
+      [/^[0-9]{1,4}\/[0-9]{1,2}\/[0-9]{1,4}$/, 'Date', 'iso-slash'],
+      [/^[0-9]{1,4}\.[0-9]{1,2}\.[0-9]{1,4}$/, 'Date', 'iso-dot'],
+      [/^[0-9]{1,4}-[a-z]{2,9}-[0-9]{1,4}$/i, 'Date', '12-dec-2019'],
+
+      // timezones
+      [/^utc ?[+-]?[0-9]+$/, 'Timezone', 'utc-9'],
+      [/^(gmt|utc)[+-][0-9]{1,2}$/i, 'Timezone', 'gmt-3'],
+
+      //phone numbers
+      [/^[0-9]{3}-[0-9]{4}$/, 'PhoneNumber', '421-0029'],
+      [/^(\+?[0-9][ -])?[0-9]{3}[ -]?[0-9]{3}-[0-9]{4}$/, 'PhoneNumber', '1-800-'],
+
+
+      //money
+      //like $5.30
+      [
+        /^[-+]?[$\xA2-\xA5\u058F\u060B\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\u20A0-\u20BD\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6][-+]?[0-9]+(,[0-9]{3})*(\.[0-9]+)?([kmb]|bn)?\+?$/,
+        ['Money', 'Value'],
+        '$5.30',
+      ],
+      //like 5.30$
+      [
+        /^[-+]?[0-9]+(,[0-9]{3})*(\.[0-9]+)?[$\xA2-\xA5\u058F\u060B\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\u20A0-\u20BD\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]\+?$/,
+        ['Money', 'Value'],
+        '5.30£',
+      ],
+      //like
+      [/^[-+]?[$£]?[0-9]([0-9,.])+(usd|eur|jpy|gbp|cad|aud|chf|cny|hkd|nzd|kr|rub)$/i, ['Money', 'Value'], '$400usd'],
+
+      //numbers
+      // 50 | -50 | 3.23  | 5,999.0  | 10+
+      [/^[-+]?[0-9]+(,[0-9]{3})*(\.[0-9]+)?\+?$/, ['Cardinal', 'NumericValue'], '5,999'],
+      [/^[-+]?[0-9]+(,[0-9]{3})*(\.[0-9]+)?(st|nd|rd|r?th)$/, ['Ordinal', 'NumericValue'], '53rd'],
+      // .73th
+      [/^\.[0-9]+\+?$/, ['Cardinal', 'NumericValue'], '.73th'],
+      //percent
+      [/^[-+]?[0-9]+(,[0-9]{3})*(\.[0-9]+)?%\+?$/, ['Percent', 'Cardinal', 'NumericValue'], '-4%'],
+      [/^\.[0-9]+%$/, ['Percent', 'Cardinal', 'NumericValue'], '.3%'],
+      //fraction
+      [/^[0-9]{1,4}\/[0-9]{1,4}(st|nd|rd|th)?s?$/, ['Fraction', 'NumericValue'], '2/3rds'],
+      //range
+      [/^[0-9.]{1,3}[a-z]{0,2}[-–—][0-9]{1,3}[a-z]{0,2}$/, ['Value', 'NumberRange'], '3-4'],
+      //time-range
+      [/^[0-9]{1,2}(:[0-9][0-9])?(am|pm)? ?[-–—] ?[0-9]{1,2}(:[0-9][0-9])?(am|pm)$/, ['Time', 'NumberRange'], '3-4pm'],
+      //with unit
+      [/^[0-9.]+([a-z]{1,4})$/, 'Value', '9km'],
+    ];
+
+    //nouns that also signal the title of an unknown organization
+    //todo remove/normalize plural forms
+    var orgWords$1 = [
+      'academy',
+      'administration',
+      'agence',
+      'agences',
+      'agencies',
+      'agency',
+      'airlines',
+      'airways',
+      'army',
+      'assoc',
+      'associates',
+      'association',
+      'assurance',
+      'authority',
+      'autorite',
+      'aviation',
+      'bank',
+      'banque',
+      'board',
+      'boys',
+      'brands',
+      'brewery',
+      'brotherhood',
+      'brothers',
+      'bureau',
+      'cafe',
+      'co',
+      'caisse',
+      'capital',
+      'care',
+      'cathedral',
+      'center',
+      'centre',
+      'chemicals',
+      'choir',
+      'chronicle',
+      'church',
+      'circus',
+      'clinic',
+      'clinique',
+      'club',
+      'co',
+      'coalition',
+      'coffee',
+      'collective',
+      'college',
+      'commission',
+      'committee',
+      'communications',
+      'community',
+      'company',
+      'comprehensive',
+      'computers',
+      'confederation',
+      'conference',
+      'conseil',
+      'consulting',
+      'containers',
+      'corporation',
+      'corps',
+      'corp',
+      'council',
+      'crew',
+      'data',
+      'departement',
+      'department',
+      'departments',
+      'design',
+      'development',
+      'directorate',
+      'division',
+      'drilling',
+      'education',
+      'eglise',
+      'electric',
+      'electricity',
+      'energy',
+      'ensemble',
+      'enterprise',
+      'enterprises',
+      'entertainment',
+      'estate',
+      'etat',
+      'faculty',
+      'federation',
+      'financial',
+      'fm',
+      'foundation',
+      'fund',
+      'gas',
+      'gazette',
+      'girls',
+      'government',
+      'group',
+      'guild',
+      'herald',
+      'holdings',
+      'hospital',
+      'hotel',
+      'hotels',
+      'inc',
+      'industries',
+      'institut',
+      'institute',
+      'institutes',
+      'insurance',
+      'international',
+      'interstate',
+      'investment',
+      'investments',
+      'investors',
+      'journal',
+      'laboratory',
+      'labs',
+      'llc',
+      'ltd',
+      'limited',
+      'machines',
+      'magazine',
+      'management',
+      'marine',
+      'marketing',
+      'markets',
+      'media',
+      'memorial',
+      'ministere',
+      'ministry',
+      'military',
+      'mobile',
+      'motor',
+      'motors',
+      'musee',
+      'museum',
+      'news',
+      'observatory',
+      'office',
+      'oil',
+      'optical',
+      'orchestra',
+      'organization',
+      'partners',
+      'partnership',
+      'petrol',
+      'petroleum',
+      'pharmacare',
+      'pharmaceutical',
+      'pharmaceuticals',
+      'pizza',
+      'plc',
+      'police',
+      'polytechnic',
+      'post',
+      'power',
+      'press',
+      'productions',
+      'quartet',
+      'radio',
+      'reserve',
+      'resources',
+      'restaurant',
+      'restaurants',
+      'savings',
+      'school',
+      'securities',
+      'service',
+      'services',
+      'societe',
+      'society',
+      'sons',
+      // 'standard',
+      'subcommittee',
+      'syndicat',
+      'systems',
+      'telecommunications',
+      'telegraph',
+      'television',
+      'times',
+      'tribunal',
+      'tv',
+      'union',
+      'university',
+      'utilities',
+      'workers',
+    ].reduce((h, str) => {
+      h[str] = true;
+      return h
+    }, {});
+
+    var rules$2 = [
+      [/([^v])ies$/i, '$1y'],
+      [/ises$/i, 'isis'],
+      [/(kn|[^o]l|w)ives$/i, '$1ife'],
+      [/^((?:ca|e|ha|(?:our|them|your)?se|she|wo)l|lea|loa|shea|thie)ves$/i, '$1f'],
+      [/^(dwar|handkerchie|hoo|scar|whar)ves$/i, '$1f'],
+      [/(antenn|formul|nebul|vertebr|vit)ae$/i, '$1a'],
+      [/(octop|vir|radi|nucle|fung|cact|stimul)(i)$/i, '$1us'],
+      [/(buffal|tomat|tornad)(oes)$/i, '$1o'],
+      // [/(analy|diagno|parenthe|progno|synop|the)ses$/i, '$1sis'],
+      [/(eas)es$/i, '$1e'],
+      [/(..[aeiou]s)es$/i, '$1'],
+      [/(vert|ind|cort)(ices)$/i, '$1ex'],
+      [/(matr|append)(ices)$/i, '$1ix'],
+      [/([xzo]|ch|ss|sh)es$/i, '$1'],
+      [/men$/i, 'man'],
+      [/(n)ews$/i, '$1ews'],
+      [/([ti])a$/i, '$1um'],
+      [/([^aeiouy]|qu)ies$/i, '$1y'],
+      [/(s)eries$/i, '$1eries'],
+      [/(m)ovies$/i, '$1ovie'],
+      [/([m|l])ice$/i, '$1ouse'],
+      [/(cris|ax|test)es$/i, '$1is'],
+      [/(alias|status)es$/i, '$1'],
+      [/(ss)$/i, '$1'],
+      [/(ics)$/i, '$1'],
+      [/s$/i, ''],
+    ];
+
+    const invertObj = function (obj) {
+      return Object.keys(obj).reduce((h, k) => {
+        h[obj[k]] = k;
+        return h
+      }, {})
+    };
+
+    const toSingular = function (str, model) {
+      const { irregularPlurals } = model.two;
+      let invert = invertObj(irregularPlurals); //(not very efficient)
+      // check irregulars list
+      if (invert.hasOwnProperty(str)) {
+        return invert[str]
+      }
+      // go through our regexes
+      for (let i = 0; i < rules$2.length; i++) {
+        if (rules$2[i][0].test(str) === true) {
+          str = str.replace(rules$2[i][0], rules$2[i][1]);
+          return str
+        }
+      }
+      return str
+    };
+    var nounToSingular = toSingular;
+
+    //rules for turning a verb into infinitive form
+    let rules = {
+      Participle: [
+        {
+          reg: /own$/i,
+          to: 'ow',
+        },
+        {
+          reg: /(tt)en$/i,//overtaken
+          to: 't',
+        },
+        {
+          reg: /(..[^aeiou])en$/i,//overtaken
+          to: '$1e',
+        },
+        {
+          reg: /(.)un([g|k])$/i,
+          to: '$1in$2',
+        },
+      ],
+      Actor: [
+        {
+          reg: /(er)er$/i,
+          to: '$1',
+        },
+      ],
+      PresentTense: [
+        {
+          reg: /(..)(ies)$/i,
+          to: '$1y',
+        },
+        {
+          reg: /(tch|sh)es$/i,
+          to: '$1',
+        },
+        {
+          reg: /(ss|zz)es$/i,
+          to: '$1',
+        },
+        {
+          reg: /([tzlshicgrvdnkmu])es$/i,
+          to: '$1e',
+        },
+        {
+          reg: /(n[dtk]|c[kt]|[eo]n|i[nl]|er|a[ytrl])s$/i,
+          to: '$1',
+        },
+        {
+          reg: /(ow)s$/i,
+          to: '$1',
+        },
+        {
+          reg: /(op)s$/i,
+          to: '$1',
+        },
+        {
+          reg: /([eirs])ts$/i,
+          to: '$1t',
+        },
+        {
+          reg: /(ll)s$/i,
+          to: '$1',
+        },
+        {
+          reg: /(el)s$/i,
+          to: '$1',
+        },
+        {
+          reg: /(ip)es$/i,
+          to: '$1e',
+        },
+        {
+          reg: /ss$/i,
+          to: 'ss',
+        },
+        {
+          reg: /s$/i,
+          to: '',
+        },
+      ],
+      Gerund: [
+        {
+          //popping -> pop
+          reg: /(..)([pdtg]){2}ing$/i,
+          to: '$1$2',
+        },
+        {
+          //fuzzing -> fuzz
+          reg: /(ll|ss|zz)ing$/i,
+          to: '$1',
+        },
+        {
+          reg: /([^aeiou])ying$/i,
+          to: '$1y',
+        },
+        {
+          reg: /([^ae]i.)ing$/i,
+          to: '$1e',
+        },
+        {
+          //eating, reading
+          reg: /(ea[dklnrtv])ing$/i,
+          to: '$1',
+        },
+        {
+          //washing -> wash
+          reg: /(ch|sh)ing$/i,
+          to: '$1',
+        },
+        //soft-e forms:
+        {
+          //z : hazing (not buzzing)
+          reg: /(z)ing$/i,
+          to: '$1e',
+        },
+        {
+          //a : baking, undulating
+          reg: /(a[gdkvtc])ing$/i,
+          to: '$1e',
+        },
+        {
+          //u : conjuring, tubing
+          reg: /(u[rtcbn])ing$/i,
+          to: '$1e',
+        },
+        {
+          //o : forboding, poking, hoping, boring (not hooping)
+          reg: /([^o]o[bdknprv])ing$/i,
+          to: '$1e',
+        },
+        {
+          //ling : tingling, wrinkling, circling, scrambling, bustling
+          reg: /([tbckg]l)ing$/i,
+          to: '$1e',
+        },
+        {
+          //cing : bouncing, denouncing
+          reg: /(.[c|s])ing$/i,
+          to: '$1e',
+        },
+        // {
+        //   //soft-e :
+        //   reg: /([ua]s|[dr]g|z|o[rlsp]|cre)ing$/i,
+        //   to: '$1e',
+        // },
+        {
+          //fallback
+          reg: /(..)ing$/i,
+          to: '$1',
+        },
+      ],
+      PastTense: [
+        {
+          reg: /([rl])ew$/i,//threw
+          to: '$1ow',
+        },
+        {
+          reg: /(ow)n$/i,//flown
+          to: '$1',
+        },
+        {
+          reg: /orn$/i,//worn
+          to: 'ear',
+        },
+        {
+          reg: /eld$/i,//withheld
+          to: 'old',
+        },
+        {
+          reg: /([pl])t$/i,
+          to: '$1t',
+        },
+
+        // ====  -ed  ====
+
+        // misc-ed
+        {
+          reg: /ea(rn|l|m)ed$/i,
+          to: 'ea$1',
+        },
+        {
+          reg: /(um?pt?)ed$/i,
+          to: '$1',
+        },
+        // misc no e endings
+        {
+          reg: /(..)(h|w|ion|n[dt]|all|int|ld|oo.|ght|rm|lm|rl|x|bt|rb)ed$/i,
+          to: '$1$2',
+        },
+
+        // -bed
+        {
+          reg: /(..)bbed$/i,//robbed
+          to: '$1b',
+        },
+        {
+          reg: /(..mb)ed$/i,//climbed
+          to: '$1',
+        },
+
+        // -ded
+        {
+          reg: /(..)dded$/i,//embedded
+          to: '$1d',
+        },
+        {
+          reg: /uaded$/i,//pursuaded
+          to: 'uade',
+        },
+        {
+          reg: /aided$/i,//braided
+          to: 'aid',
+        },
+
+        {
+          reg: /(.[aeiou]{2}d)ed$/i,//downloaded
+          to: '$1',
+        },
+        {
+          reg: /(.[rnd]d)ed$/i,//forwarded, ended
+          to: '$1',
+        },
+        // -ked
+        {
+          reg: /cked$/i,
+          to: 'ck',
+        },
+        {
+          reg: /([sr])ked$/i,//asked, sparked
+          to: '$1k',
+        },
+        // -fed
+        {
+          reg: /fed$/i,
+          to: 'f',
+        },
+        // -med
+        {
+          reg: /mmed$/i, //jammed
+          to: 'm',
+        },
+        {
+          reg: /([aeiou]{2}m)ed$/i, //doomed
+          to: '$1',
+        },
+        {
+          reg: /([aeiou]me)d$/i, //welcomed
+          to: '$1',
+        },
+        {
+          reg: /med$/i, //doomed
+          to: 'm',
+        },
+        // -ned
+        {
+          reg: /nned$/i, //banned
+          to: 'n',
+        },
+        {
+          reg: /wned$/i, //owned
+          to: 'wn',
+        },
+        {
+          reg: /([aeiou]{2})ned$/i, //rained, ruined
+          to: '$1n',
+        },
+        {
+          reg: /([aiu])ned$/i, //shined
+          to: '$1ne',
+        },
+        // -led
+        {
+          reg: /([vpnd])elled$/i, //one-l
+          to: '$1el',
+        },
+        {
+          reg: /([aeiou])lled$/i, //skilled, smelled, called
+          to: '$1ll',
+        },
+        {
+          reg: /(tl|gl)ed$/i,
+          to: '$1e',
+        },
+        {
+          reg: /([aeiou]{2})led$/i,//sailed
+          to: '$1l',
+        },
+        {
+          reg: /(.[ioua])led$/i, //ruled, piled
+          to: '$1le',
+        },
+        {
+          reg: /(.e)led$/i, //wheeled, totaled
+          to: '$1l',
+        },
+        // -ged
+        {
+          reg: /(..)gged$/i,
+          to: '$1g',
+        },
+        // -ked
+        {
+          reg: /(..[ln]k)ed$/i,//winked, talked
+          to: '$1',
+        },
+        {
+          reg: /([aeiou]{2})ked$/i,//cooked, leaked
+          to: '$1k',
+        },
+        {
+          reg: /([^aeiouy][aeiou])ked$/i,
+          to: '$1ke',
+        },
+        // -ned
+        {
+          reg: /([lfw]in)ed$/i, // lined, entwined
+          to: '$1e',
+        },
+        {
+          reg: /([aeiou][gr]n)ed$/i, // designed, turned
+          to: '$1',
+        },
+        {
+          reg: /([htb]on)ed$/i, // phoned, stoned
+          to: '$1e',
+        },
+        {
+          reg: /([aeiou]n)ed$/i, // rained, poisoned
+          to: '$1',
+        },
+        // -hed
+        {
+          reg: /(.)(sh|ch)ed$/i,
+          to: '$1$2',
+        },
+        // -ped
+        {
+          reg: /pped$/i,
+          to: 'p',
+        },
+        {
+          reg: /([aeiouy][aeiouy])ped$/i,//reaped
+          to: '$1p',
+        },
+        {
+          reg: /([^aeiouy][aeiouy])ped$/i,//wiped
+          to: '$1pe',
+        },
+        {
+          reg: /([^aeiouy])ped$/i,//cramped
+          to: '$1p',
+        },
+        // -red
+        {
+          reg: /rred$/i,
+          to: 'r',
+        },
+        {
+          reg: /(.uir)ed$/i,//aquired
+          to: '$1e',
+        },
+        {
+          reg: /([aeiou]{2,}r)ed$/i,//appeared, aired
+          to: '$1',
+        },
+        {
+          reg: /(..[csrtvhgkyw][oe]r)ed$/i,//restored, mustered
+          to: '$1',
+        },
+        {
+          reg: /(.[aeiou]r)ed$/i,//admired
+          to: '$1e',
+        },
+        // -sed
+        {
+          reg: /(ss)ed$/i,
+          to: '$1',
+        },
+        {
+          reg: /(us)ed$/i,
+          to: '$1e',
+        },
+        // -ted
+        {
+          reg: /([iu])ated$/i,//satiated
+          to: '$1ate',
+        },
+        {
+          reg: /(ou)ted$/i,//shouted
+          to: '$1t',
+        },
+        {
+          reg: /tted$/i,//admitted
+          to: 't',
+        },
+        {
+          reg: /(.[aeiou]{2})ted$/i, //rooted/boated/greeted/suited
+          to: '$1t',
+        },
+        {
+          reg: /([pfmdbk]et)ed$/i,//trumpeted/limited
+          to: '$1',
+        },
+        {
+          reg: /([brmsf])ited$/i,//visited, vomited
+          to: '$1it',
+        },
+        {
+          reg: /([^cl])asted$/i,//wasted, tasted
+          to: '$1aste',
+        },
+        {
+          reg: /(.[aeiou]t)ed$/i, //created, voted, attributed
+          to: '$1e',
+        },
+        {
+          reg: /(.[pfrlsc]t)ed$/i,//drifted, melted
+          to: '$1',
+        },
+        // -yed
+        {
+          reg: /([aeiou]y)ed$/i,
+          to: '$1',
+        },
+        // -zed
+        {
+          reg: /([aeiou]zz)ed$/i,
+          to: '$1',
+        },
+        {
+          reg: /([aeiou]tz)ed$/i,//blitzed
+          to: '$1',
+        },
+
+        // vowel-ed
+        {
+          reg: /aid$/i,//paid
+          to: 'ay',
+        },
+        {
+          reg: /ued$/i,
+          to: 'ue',
+        },
+        {
+          reg: /(^.ie)d$/i,//lied
+          to: '$1',
+        },
+        {
+          reg: /(.o)ed$/i,//echoed, vetoed
+          to: '$1',
+        },
+        {
+          reg: /(..)ied$/i,
+          to: '$1y',
+        },
+        {
+          reg: /(..i)ed$/i,
+          to: '$1',
+        },
+
+        // fallbacks
+        {
+          reg: /a([^aeiouy])ed$/i,
+          to: 'a$1e',
+        },
+        {
+          reg: /(.a[^aeiou])ed$/i,
+          to: '$1',
+        },
+        {
+          //owed, aced
+          reg: /([aeiou][^aeiou])ed$/i,
+          to: '$1e',
+        },
+        {
+          reg: /(..[^aeiouy])ed$/i,
+          to: '$1e',
+        },
+
+
+      ],
+    };
+    var rules$1 = rules;
+
+    let guessVerb = {
+      Gerund: ['ing'],
+      Actor: ['erer'],
+      Infinitive: [
+        'ate',
+        'ize',
+        'tion',
+        'rify',
+        'then',
+        'ress',
+        'ify',
+        'age',
+        'nce',
+        'ect',
+        'ise',
+        'ine',
+        'ish',
+        'ace',
+        'ash',
+        'ure',
+        'tch',
+        'end',
+        'ack',
+        'and',
+        'ute',
+        'ade',
+        'ock',
+        'ite',
+        'ase',
+        'ose',
+        'use',
+        'ive',
+        'int',
+        'nge',
+        'lay',
+        'est',
+        'ain',
+        'ant',
+        'ent',
+        'eed',
+        'er',
+        'le',
+        'unk',
+        'ung',
+        'en',
+      ],
+      PastTense: ['ept', 'ed', 'lt', 'nt', 'ew', 'ld'],
+      PresentTense: [
+        'upt',
+        'rks',
+        'cks',
+        'nks',
+        'ngs',
+        'mps',
+        'tes',
+        'zes',
+        'ers',
+        'les',
+        'acks',
+        'ends',
+        'ands',
+        'ocks',
+        'lays',
+        'eads',
+        'lls',
+        'els',
+        'ils',
+        'ows',
+        'nds',
+        'ays',
+        'ams',
+        'ars',
+        'ops',
+        'ffs',
+        'als',
+        'urs',
+        'lds',
+        'ews',
+        'ips',
+        'es',
+        'ts',
+        'ns',
+      ],
+      Participle: ['ken', 'wn']
+    };
+    //flip it into a lookup object
+    guessVerb = Object.keys(guessVerb).reduce((h, k) => {
+      guessVerb[k].forEach(a => (h[a] = k));
+      return h
+    }, {});
+    var guess = guessVerb;
+
+    /** it helps to know what we're conjugating from */
+    const getTense = function (str) {
+      let three = str.substr(str.length - 3);
+      if (guess.hasOwnProperty(three) === true) {
+        return guess[three]
+      }
+      let two = str.substr(str.length - 2);
+      if (guess.hasOwnProperty(two) === true) {
+        return guess[two]
+      }
+      let one = str.substr(str.length - 1);
+      if (one === 's') {
+        return 'PresentTense'
+      }
+      return null
+    };
+    var getTense$1 = getTense;
+
+    // lookup known irregular verb forms
+    const fromIrreg = function (str, model) {
+      let irregs = model.two.irregularVerbs;
+      let keys = Object.keys(irregs);
+      for (let i = 0; i < keys.length; i++) {
+        let forms = Object.keys(irregs[keys[i]]);
+        for (let o = 0; o < forms.length; o++) {
+          if (str === irregs[keys[i]][forms[o]]) {
+            return keys[i]
+          }
+        }
+      }
+    };
+
+    // transform verb from regular expressions
+    const fromReg = function (str, tense) {
+      // console.log(tense)
+      tense = tense || getTense$1(str);
+      if (tense && rules$1[tense]) {
+        for (let i = 0; i < rules$1[tense].length; i++) {
+          const rule = rules$1[tense][i];
+          if (rule.reg.test(str) === true) {
+            // console.log(rule)
+            return str.replace(rule.reg, rule.to)
+          }
+        }
+      }
+      return null
+    };
+
+    const toInfinitive = function (str, model, tense) {
+      if (!str) {
+        return ''
+      }
+      let prefixes = model.one.prefixes;
+      let prefix = '';
+      // pull-apart phrasal verb 'fall over'
+      let [verb, particle] = str.split(/ /);
+      // support 'over cleaned'
+      if (particle && prefixes[verb] === true) {
+        prefix = verb;
+        verb = particle;
+        particle = '';
+      }
+      // 1. look at known irregulars
+      // console.log(verb)
+      let inf = fromIrreg(verb, model);
+      // 2. give'r!
+      inf = inf || fromReg(verb, tense) || verb;
+      // stitch phrasal back on
+      if (particle) {
+        inf += ' ' + particle;
+      }
+      // stitch prefix back on
+      if (prefix) {
+        inf = prefix + ' ' + inf;
+      }
+      return inf
+    };
+    var verbToInfinitive = toInfinitive;
+
+    var suffixes = {
+      b: [
+        {
+          reg: /([^aeiou][aeiou])b$/i,
+          repl: {
+            pr: '$1bs',
+            pa: '$1bbed',
+            gr: '$1bbing',
+          },
+        },
+      ],
+      d: [
+        {
+          reg: /(end)$/i,
+          repl: {
+            pr: '$1s',
+            pa: 'ent',
+            gr: '$1ing',
+            ar: '$1er',
+          },
+        },
+        {
+          reg: /(eed)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+            ar: '$1er',
+          },
+        },
+        {
+          reg: /(ed)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ded',
+            ar: '$1der',
+            gr: '$1ding',
+          },
+        },
+        {
+          reg: /([^aeiou][ou])d$/i,
+          repl: {
+            pr: '$1ds',
+            pa: '$1dded',
+            gr: '$1dding',
+          },
+        },
+      ],
+      e: [
+        {
+          reg: /(eave)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1d',
+            gr: 'eaving',
+            ar: '$1r',
+          },
+        },
+        {
+          reg: /(ide)$/i,
+          repl: {
+            pr: '$1s',
+            pa: 'ode',
+            gr: 'iding',
+            ar: 'ider',
+          },
+        },
+        {
+          //shake
+          reg: /(t|sh?)(ake)$/i,
+          repl: {
+            pr: '$1$2s',
+            pa: '$1ook',
+            gr: '$1aking',
+            ar: '$1$2r',
+          },
+        },
+        {
+          //awake
+          reg: /w(ake)$/i,
+          repl: {
+            pr: 'w$1s',
+            pa: 'woke',
+            gr: 'waking',
+            ar: 'w$1r',
+          },
+        },
+        {
+          //make
+          reg: /m(ake)$/i,
+          repl: {
+            pr: 'm$1s',
+            pa: 'made',
+            gr: 'making',
+            ar: 'm$1r',
+          },
+        },
+        {
+          reg: /(a[tg]|i[zn]|ur|nc|gl|is)e$/i,
+          repl: {
+            pr: '$1es',
+            pa: '$1ed',
+            gr: '$1ing',
+            // prt: '$1en',
+          },
+        },
+        {
+          reg: /([bd]l)e$/i,
+          repl: {
+            pr: '$1es',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+        {
+          reg: /(om)e$/i,
+          repl: {
+            pr: '$1es',
+            pa: 'ame',
+            gr: '$1ing',
+          },
+        },
+      ],
+      g: [
+        {
+          reg: /([^aeiou][aou])g$/i,
+          repl: {
+            pr: '$1gs',
+            pa: '$1gged',
+            gr: '$1gging',
+          },
+        },
+      ],
+      h: [
+        {
+          reg: /(..)([cs]h)$/i,
+          repl: {
+            pr: '$1$2es',
+            pa: '$1$2ed',
+            gr: '$1$2ing',
+          },
+        },
+      ],
+      k: [
+        {
+          reg: /(ink)$/i,
+          repl: {
+            pr: '$1s',
+            pa: 'unk',
+            gr: '$1ing',
+            ar: '$1er',
+          },
+        },
+      ],
+      m: [
+        {
+          reg: /([^aeiou][aeiou])m$/i,
+          repl: {
+            pr: '$1ms',
+            pa: '$1mmed',
+            gr: '$1mming',
+          },
+        },
+      ],
+      n: [
+        {
+          reg: /(en)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+      ],
+      p: [
+        {
+          reg: /(e)(ep)$/i,
+          repl: {
+            pr: '$1$2s',
+            pa: '$1pt',
+            gr: '$1$2ing',
+            ar: '$1$2er',
+          },
+        },
+        {
+          reg: /([^aeiou][aeiou])p$/i,
+          repl: {
+            pr: '$1ps',
+            pa: '$1pped',
+            gr: '$1pping',
+          },
+        },
+        {
+          reg: /([aeiu])p$/i,
+          repl: {
+            pr: '$1ps',
+            pa: '$1p',
+            gr: '$1pping',
+          },
+        },
+      ],
+      r: [
+        {
+          reg: /([td]er)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+        {
+          reg: /(er)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+        {
+          reg: /(t|w)(ear)$/i, //wear, tear
+          repl: {
+            pa: '$1ore',
+          },
+        },
+      ],
+      s: [
+        {
+          reg: /(ish|tch|ess)$/i,
+          repl: {
+            pr: '$1es',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+      ],
+      t: [
+        {
+          reg: /(ion|end|e[nc]t)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+        {
+          reg: /(.eat)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+        {
+          reg: /([aeiu])t$/i,
+          repl: {
+            pr: '$1ts',
+            pa: '$1t',
+            gr: '$1tting',
+          },
+        },
+        {
+          reg: /([^aeiou][aeiou])t$/i,
+          repl: {
+            pr: '$1ts',
+            pa: '$1tted',
+            gr: '$1tting',
+          },
+        },
+      ],
+      w: [
+        {
+          reg: /(.llow)$/i,
+          repl: {
+            pr: '$1s',
+            pa: '$1ed',
+          },
+        },
+        {
+          reg: /(..)(ow)$/i,
+          repl: {
+            pr: '$1$2s',
+            pa: '$1ew',
+            gr: '$1$2ing',
+            prt: '$1$2n',
+          },
+        },
+      ],
+      y: [
+        {
+          reg: /(i|f|rr)y$/i,
+          repl: {
+            pr: '$1ies',
+            pa: '$1ied',
+            gr: '$1ying',
+          },
+        },
+      ],
+      z: [
+        {
+          reg: /([aeiou]zz)$/i,
+          repl: {
+            pr: '$1es',
+            pa: '$1ed',
+            gr: '$1ing',
+          },
+        },
+      ],
+    };
+
+    const posMap = {
+      pr: 'PresentTense',
+      pa: 'PastTense',
+      gr: 'Gerund',
+      prt: 'Participle',
+      ar: 'Actor',
+    };
+
+    const doTransform = function (str, obj) {
+      let found = {};
+      let keys = Object.keys(obj.repl);
+      for (let i = 0; i < keys.length; i += 1) {
+        let pos = keys[i];
+        found[posMap[pos]] = str.replace(obj.reg, obj.repl[pos]);
+      }
+      return found
+    };
+
+    //look at the end of the word for clues
+    const checkSuffix$1 = function (str = '') {
+      let c = str[str.length - 1];
+      if (suffixes.hasOwnProperty(c) === true) {
+        for (let r = 0; r < suffixes[c].length; r += 1) {
+          if (suffixes[c][r].reg.test(str) === true) {
+            return doTransform(str, suffixes[c][r])
+          }
+        }
+      }
+      return {}
+    };
+
+    var checkSuffix$2 = checkSuffix$1;
+
+    //non-specifc, 'hail-mary' transforms from infinitive, into other forms
+    const hasY = /[bcdfghjklmnpqrstvwxz]y$/;
+
+    const generic = {
+      Gerund: inf => {
+        if (inf.charAt(inf.length - 1) === 'e') {
+          return inf.replace(/e$/, 'ing')
+        }
+        return inf + 'ing'
+      },
+
+      PresentTense: inf => {
+        if (inf.charAt(inf.length - 1) === 's') {
+          return inf + 'es'
+        }
+        if (hasY.test(inf) === true) {
+          return inf.slice(0, -1) + 'ies'
+        }
+        return inf + 's'
+      },
+
+      PastTense: inf => {
+        if (inf.charAt(inf.length - 1) === 'e') {
+          return inf + 'd'
+        }
+        if (inf.substr(-2) === 'ed') {
+          return inf
+        }
+        if (hasY.test(inf) === true) {
+          return inf.slice(0, -1) + 'ied'
+        }
+        return inf + 'ed'
+      },
+    };
+    var genericFill = generic;
+
+    //we run this on every verb in the lexicon, so please keep it fast
+    //we assume the input word is a proper infinitive
+    const conjugate = function (inf, model) {
+      // ad-hoc Copula response
+      if (inf === 'be') {
+        return {
+          Infinitive: inf,
+          Gerund: 'being',
+          PastTense: 'was',
+          PresentTense: 'is',
+        }
+      }
+      let found = {};
+      const irregs = model.two.irregularVerbs;
+      let particle = '';
+      // pull-apart phrasal verb 'fall over'
+      if (/ /.test(inf)) {
+        let split = inf.split(/ /);
+        inf = split[0];
+        particle = split[1];
+      }
+      // 1. look at irregulars
+      //the lexicon doesn't pass this in
+      if (irregs && irregs.hasOwnProperty(inf) === true) {
+        found = Object.assign({}, irregs[inf]);
+      }
+      //2. rule-based regex
+      found = Object.assign({}, checkSuffix$2(inf), found);
+      //3. generic transformations
+      //'buzzing'
+      if (found.Gerund === undefined) {
+        found.Gerund = genericFill.Gerund(inf);
+      }
+      //'buzzed'
+      if (found.PastTense === undefined) {
+        found.PastTense = genericFill.PastTense(inf);
+      }
+      //'buzzes'
+      if (found.PresentTense === undefined) {
+        found.PresentTense = genericFill.PresentTense(inf);
+      }
+      // put phrasal-verbs back together again
+      if (particle) {
+        Object.keys(found).forEach(k => {
+          found[k] += ' ' + particle;
+        });
+      }
+      return found
+    };
+
+    var verbConjugate = conjugate;
+
+    //turn 'quick' into 'quickest'
+    const do_rules$1 = [/ght$/, /nge$/, /ough$/, /ain$/, /uel$/, /[au]ll$/, /ow$/, /oud$/, /...p$/];
+    const dont_rules$1 = [/ary$/];
+    const irregulars$1 = {
+      nice: 'nicest',
+      late: 'latest',
+      hard: 'hardest',
+      inner: 'innermost',
+      outer: 'outermost',
+      far: 'furthest',
+      worse: 'worst',
+      bad: 'worst',
+      good: 'best',
+      big: 'biggest',
+      large: 'largest',
+    };
+
+    const transforms$1 = [
+      {
+        reg: /y$/i,
+        repl: 'iest',
+      },
+      {
+        reg: /([aeiou])t$/i,
+        repl: '$1ttest',
+      },
+      {
+        reg: /([aeiou])(d|s)e$/i,
+        repl: '$1$2est',
+      },
+      {
+        reg: /nge$/i,
+        repl: 'ngest',
+      },
+      {
+        reg: /le$/i, //huble, simple
+        repl: 'lest',
+      },
+      {
+        reg: /([aeiou])te$/i,
+        repl: '$1test',
+      },
+    ];
+
+    const toSuperlative = function (str) {
+      //irregulars
+      if (irregulars$1.hasOwnProperty(str)) {
+        return irregulars$1[str]
+      }
+      //known transforms
+      for (let i = 0; i < transforms$1.length; i++) {
+        if (transforms$1[i].reg.test(str)) {
+          return str.replace(transforms$1[i].reg, transforms$1[i].repl)
+        }
+      }
+      //dont-rules
+      for (let i = 0; i < dont_rules$1.length; i++) {
+        if (dont_rules$1[i].test(str) === true) {
+          return null
+        }
+      }
+      //do-rules
+      for (let i = 0; i < do_rules$1.length; i++) {
+        if (do_rules$1[i].test(str) === true) {
+          if (str.charAt(str.length - 1) === 'e') {
+            return str + 'st'
+          }
+          return str + 'est'
+        }
+      }
+      return str + 'est'
+    };
+    var adjToSuperlative = toSuperlative;
+
+    // console.log(toSuperlative('humble'))
+
+    //turn 'quick' into 'quickly'
+    const do_rules = [/ght$/, /nge$/, /ough$/, /ain$/, /uel$/, /[au]ll$/, /ow$/, /old$/, /oud$/, /e[ae]p$/];
+    const dont_rules = [/ary$/, /ous$/];
+    const irregulars = {
+      grey: 'greyer',
+      gray: 'grayer',
+      green: 'greener',
+      yellow: 'yellower',
+      red: 'redder',
+      good: 'better',
+      well: 'better',
+      bad: 'worse',
+      sad: 'sadder',
+      big: 'bigger',
+    };
+    const transforms = [
+      {
+        reg: /y$/i,
+        repl: 'ier',
+      },
+      {
+        reg: /([aeiou])t$/i,
+        repl: '$1tter',
+      },
+      {
+        reg: /([aeou])de$/i,
+        repl: '$1der',
+      },
+      {
+        reg: /nge$/i,
+        repl: 'nger',
+      },
+    ];
+
+    const toComparative = function (str) {
+      //known-irregulars
+      if (irregulars.hasOwnProperty(str)) {
+        return irregulars[str]
+      }
+      //known-transforms
+      for (let i = 0; i < transforms.length; i++) {
+        if (transforms[i].reg.test(str) === true) {
+          return str.replace(transforms[i].reg, transforms[i].repl)
+        }
+      }
+      //dont-patterns
+      for (let i = 0; i < dont_rules.length; i++) {
+        if (dont_rules[i].test(str) === true) {
+          return null
+        }
+      }
+      //do-patterns
+      for (let i = 0; i < do_rules.length; i++) {
+        if (do_rules[i].test(str) === true) {
+          return str + 'er'
+        }
+      }
+      //easy-one
+      if (/e$/.test(str) === true) {
+        return str + 'r'
+      }
+      return str + 'er'
+    };
+    var adjToComparative = toComparative;
+
+    // console.log(toComparative('humble'))
+
+    var transform = {
+      nounToPlural, nounToSingular,
+      verbToInfinitive, getTense: getTense$1,
+      verbConjugate, adjToSuperlative, adjToComparative
+    };
+
+    // transformations to make on our lexicon
+    var fancyThings = {
+      // add plural forms of singular nouns
+      Singular: (word, lex, methods, model) => {
+        let plural = methods.two.transform.nounToPlural(word, model);
+        lex[plural] = lex[plural] || 'Plural';
+      },
+
+      // superlative/comparative forms for adjectives
+      Comparable: (word, lex, methods, model) => {
+        // fast -> fastest
+        let superlative = methods.two.transform.adjToSuperlative(word, model);
+        lex[superlative] = lex[superlative] || 'Superlative';
+        // fast -> faster
+        let comparative = methods.two.transform.adjToComparative(word, model);
+        lex[comparative] = lex[comparative] || 'Comparative';
+        // overwrite
+        lex[word] = 'Adjective';
+      },
+
+      // 'german' -> 'germains'
+      Demonym: (word, lex, methods, model) => {
+        let plural = methods.two.transform.nounToPlural(word, model);
+        lex[plural] = lex[plural] || ['Demonym', 'Plural'];
+      },
+
+      // conjugate all forms of these verbs
+      Infinitive: (word, lex, methods, model) => {
+        let all = methods.two.transform.verbConjugate(word, model);
+        Object.entries(all).forEach(a => {
+          lex[a[1]] = lex[a[1]] || a[0];
+        });
+      },
+
+      // 'walk up' should conjugate, too
+      PhrasalVerb: (word, lex, methods, model) => {
+        lex[word] = ['PhrasalVerb', 'Infinitive'];
+        let _multi = model.one._multiCache;
+        let [inf, rest] = word.split(' ');
+        // add root verb
+        lex[inf] = lex[inf] || 'Infinitive';
+        // conjugate it
+        let all = methods.two.transform.verbConjugate(inf, model);
+        Object.entries(all).forEach(a => {
+          // not 'walker up', or 'had taken up'
+          if (a[0] === 'Actor' || a[0] === 'PerfectTense' || a[0] === 'Pluperfect' || a[1] === '') {
+            return
+          }
+          // add the root verb, alone
+          if (lex[a[1]] === undefined) {
+            lex[a[1]] = lex[a[1]] || a[0];
+          }
+          _multi[a[1]] = true;
+          let str = a[1] + ' ' + rest;
+          lex[str] = lex[str] || [a[0], 'PhrasalVerb'];
+        });
+      },
+
+      // expand 'million'
+      Multiple: (word, lex) => {
+        lex[word] = ['Multiple', 'Cardinal'];
+        // 'millionth'
+        lex[word + 'th'] = ['Multiple', 'Ordinal'];
+        // 'millionths'
+        lex[word + 'ths'] = ['Multiple', 'Fraction'];
+      },
+      // expand number-words
+      Cardinal: (word, lex) => {
+        lex[word] = ['TextValue', 'Cardinal'];
+      },
+
+      // 'millionth'
+      Ordinal: (word, lex) => {
+        lex[word] = ['TextValue', 'Ordinal'];
+        lex[word + 's'] = ['TextValue', 'Fraction'];
+      },
+    };
+
+    // derive clever things from our lexicon key-value pairs
+    // this method runs as the pre-tagger plugin gets loaded
+    const expand$3 = function (words, world) {
+      const { methods, model } = world;
+      let lex = {};
+      // console.log('start:', Object.keys(lex).length)
+      let _multi = {};
+      // go through each word in this key-value obj:
+      Object.keys(words).forEach(word => {
+        let tag = words[word];
+        // normalize lexicon a little bit
+        word = word.toLowerCase().trim();
+        // cache multi-word terms
+        let split = word.split(/ /);
+        if (split.length > 1) {
+          _multi[split[0]] = true;
+        }
+        // do any clever-business, by it's tag
+        if (fancyThings.hasOwnProperty(tag) === true) {
+          fancyThings[tag](word, lex, methods, model);
+        }
+        lex[word] = lex[word] || tag;
+      });
+      // cleanup
+      delete lex[''];
+      delete lex[null];
+      delete lex[' '];
+      return { lex, _multi }
+    };
+    var expandLexicon$2 = expand$3;
+
+    // roughly, split a document by comma or semicolon
+
+    const splitOn = function (terms, i) {
+      let term = terms[i];
+      // early on, these may not be dates yet:
+      const maybeDate = new Set(['may', 'april', 'august', 'jan']);
+      if (!term) {
+        return false
+      }
+      // veggies, like figs
+      if (term.normal === 'like' || maybeDate.has(term.normal)) {
+        return false
+      }
+      // toronto, canada  - tuesday, march
+      if (term.tags.has('Place') || term.tags.has('Date')) {
+        return false
+      }
+      if (terms[i - 1]) {
+        if (terms[i - 1].tags.has('Date') || maybeDate.has(terms[i - 1].normal)) {
+          return false
+        }
+      }
+      return true
+    };
+
+    // kind-of a dirty sentence chunker
+    const quickSplit = function (document) {
+      const splitHere = /[,:;]/;
+      let arr = [];
+      document.forEach(terms => {
+        let start = 0;
+        terms.forEach((term, i) => {
+          // does it have a comma/semicolon ?
+          if (splitHere.test(term.post) && splitOn(terms, i + 1)) {
+            arr.push(terms.slice(start, i + 1));
+            start = i + 1;
+          }
+        });
+        if (start < terms.length) {
+          arr.push(terms.slice(start, terms.length));
+        }
+      });
+      return arr
+    };
+
+    var quickSplit$1 = quickSplit;
+
+    var methods$1 = {
+      two: {
+        quickSplit: quickSplit$1,
+        expandLexicon: expandLexicon$2,
+        transform,
+      },
+    };
+
+    // harvest list of irregulars for any juicy word-data
+    const expandIrregulars = function (model) {
+      const { irregularVerbs, irregularPlurals } = model.two;
+      const { lexicon, } = model.one;
+      // scounge irregulars for any interesting lexicon-data:
+      Object.entries(irregularVerbs).forEach(a => {
+        let [inf, conj] = a;
+        lexicon[inf] = lexicon[inf] || 'Infinitive';
+        Object.keys(conj).forEach(tag => {
+          let word = conj[tag];
+          if (word !== '') {
+            lexicon[word] = lexicon[word] || tag;
+          }
+        });
+      });
+      Object.entries(irregularPlurals).forEach(a => {
+        lexicon[a[0]] = lexicon[a[0]] || 'Singular';
+        lexicon[a[1]] = lexicon[a[1]] || 'Plural';
+      });
+      return model
+    };
+    var expandIrregulars$1 = expandIrregulars;
+
+    // defaults for switches
+    const variables$1 = {
+      // 'amusing'
+      'Adj|Gerund': 'Adjective',
+      // 'standard'
+      'Adj|Noun': 'Adjective',
+      // 'boiled'
+      'Adj|Past': 'Adjective',
+      // 'smooth'
+      'Adj|Present': 'Adjective',
+      // 'box'
+      'Noun|Verb': 'Singular',
+      //'singing'
+      'Noun|Gerund': 'Gerund',
+      // 'hope'
+      'Person|Noun': 'Noun',
+      // 'April'
+      'Person|Date': 'Month',
+      // 'rob'
+      'Person|Verb': 'Person',
+      // 'boxes'
+      'Plural|Verb': 'Plural',
+    };
+
+    const expandLexicon = function (words, model) {
+      // do clever tricks to grow the words
+      const world = { model, methods: methods$1 };
+      let { lex, _multi } = methods$1.two.expandLexicon(words, world);
+      // store multiple-word terms in a cache
+      Object.assign(model.one.lexicon, lex);
+      Object.assign(model.one._multiCache, _multi);
+      return model
+    };
+
+    // these words have no singular/plural conjugation
+    const addUncountables = function (words, model) {
+      Object.keys(words).forEach(k => {
+        if (words[k] === 'Uncountable') {
+          model.two.uncountable[k] = true;
+          words[k] = 'Noun';
+        }
+      });
+      return model
+    };
+
+    // harvest ambiguous words for any conjugations
+    const expandVariable = function (switchWords, model) {
+      let words = {};
+      //add first tag as an assumption for each variable word
+      Object.keys(switchWords).forEach(w => {
+        const name = switchWords[w];
+        words[w] = variables$1[name];
+      });
+      model = expandLexicon(words, model);
+      return model
+    };
+
+    const expand$2 = function (model) {
+      model = expandIrregulars$1(model);
+      model = expandLexicon(model.one.lexicon, model);
+      model = addUncountables(model.one.lexicon, model);
+      model = expandVariable(model.two.variables, model);
+      return model
+    };
+    var expandLexicon$1 = expand$2;
+
+    let model$2 = {
+      one: {
+        _multiCache: {},
+        lexicon,
+      },
+      two: {
+        irregularPlurals,
+        irregularVerbs,
+
+        suffixPatterns,
+        endsWith,
+        neighbours: neighbours$2,
+
+        regexNormal,
+        regexText,
+        regexNumbers,
+
+        variables: variables$2,
+        clues: clues$1,
+
+        uncountable: {},
+
+        orgWords: orgWords$1,
+      },
+
+    };
+    model$2 = expandLexicon$1(model$2);
+    var model$3 = model$2;
+
+    // console.log(model.one.lexicon.see)
+
+    const boringTags = new Set(['Auxiliary', 'Possessive']);
+
+    const sortByKids = function (tags, tagSet) {
+      tags = tags.sort((a, b) => {
+        // (unknown tags are interesting)
+        if (boringTags.has(a) || !tagSet.hasOwnProperty(b)) {
+          return 1
+        }
+        if (boringTags.has(b) || !tagSet.hasOwnProperty(a)) {
+          return -1
+        }
+        let kids = tagSet[a].children || [];
+        let aKids = kids.length;
+        kids = tagSet[b].children || [];
+        let bKids = kids.length;
+        return aKids - bKids
+      });
+      return tags
+    };
+
+    const tagRank = function (view) {
+      const { document, world } = view;
+      const tagSet = world.model.one.tagSet;
+      document.forEach(terms => {
+        terms.forEach(term => {
+          let tags = Array.from(term.tags);
+          term.tagRank = sortByKids(tags, tagSet);
+        });
+      });
+    };
+    var tagRank$1 = tagRank;
+
+    // verbose-mode tagger debuging
+    const log = (term, tag, reason = '') => {
+      const yellow = str => '\x1b[33m\x1b[3m' + str + '\x1b[0m';
+      const i = str => '\x1b[3m' + str + '\x1b[0m';
+      let word = term.text || '[' + term.implicit + ']';
+      if (typeof tag !== 'string' && tag.length > 2) {
+        tag = tag.slice(0, 2).join(', #') + ' +'; //truncate the list of tags
+      }
+      tag = typeof tag !== 'string' ? tag.join(', #') : tag;
+      console.log(` ${yellow(word).padEnd(24)} \x1b[32m→\x1b[0m #${tag.padEnd(25)}  ${i(reason)}`); // eslint-disable-line
+    };
+
+    // a faster version than the user-facing one in ./methods
+    const setTag$1 = function (term, tag, reason) {
+      if (!tag || tag.length === 0) {
+        return
+      }
+      // some logging for debugging
+      let env = typeof process === 'undefined' ? self.env || {} : process.env;
+      if (env && env.DEBUG_TAGS) {
+        log(term, tag, reason);
+      }
+      term.tags = term.tags || new Set();
+      if (typeof tag === 'string') {
+        term.tags.add(tag);
+      } else {
+        tag.forEach(tg => term.tags.add(tg));
+      }
+    };
+
+    var fastTag = setTag$1;
+
+    //similar to plural/singularize rules, but not the same
+    const isPlural = {
+      e: [
+        'mice',
+        'louse',
+        'antennae',
+        'formulae',
+        'nebulae',
+        'vertebrae',
+        'vitae',
+      ],
+      i: [
+        'tia',
+        'octopi',
+        'viri',
+        'radii',
+        'nuclei',
+        'fungi',
+        'cacti',
+        'stimuli',
+      ],
+      n: [
+        'men',
+      ]
+    };
+
+    const notPlural = [
+      'bus',
+      'mas',//christmas
+      'was',
+      'las',
+      'ias',//alias
+      'xas',
+      'vas',
+      'cis',//probocis
+      'lis',
+      'nis',//tennis
+      'ois',
+      'ris',
+      'sis',//thesis
+      'tis',//mantis, testis
+      'xis',
+      'aus',
+      'bus',
+      'cus',
+      'eus',//nucleus
+      'fus',//doofus
+      'gus',//fungus
+      'ius',//radius
+      'lus',//stimulus
+      'nus',
+      'ous',
+      'pus',//octopus
+      'rus',//virus
+      'sus',//census
+      'tus',//status,cactus
+      'xus',
+      '\'s',
+      'ss',
+    ];
+
+    const looksPlural = function (str) {
+      // not long enough to be plural
+      if (!str || str.length <= 3) {
+        return false
+      }
+      let end = str[str.length - 1];
+      // look at 'firemen'
+      if (isPlural.hasOwnProperty(end)) {
+        return isPlural[end].find(suff => str.endsWith(suff))
+      }
+      if (end !== 's') {
+        return false
+      }
+      // look for 'virus'
+      if (notPlural.find(end => str.endsWith(end))) {
+        return false
+      }
+      // ends with an s, seems plural i guess.
+      return true
+    };
+    var looksPlural$1 = looksPlural;
+
+    // tags that are neither plural or singular
+    const uncountable = [
+      'Acronym',
+      'Abbreviation',
+      'ProperNoun',
+      'Uncountable',
+      'Possessive',
+      'Pronoun',
+      'Activity',
+      'Honorific',
+    ];
+    // try to guess if each noun is a plural/singular
+    const setPluralSingular = function (term) {
+      if (!term.tags.has('Noun') || term.tags.has('Plural') || term.tags.has('Singular')) {
+        return
+      }
+      if (uncountable.find(tag => term.tags.has(tag))) {
+        return
+      }
+      if (looksPlural$1(term.normal)) {
+        fastTag(term, 'Plural', '3-plural-guess');
+      } else {
+        fastTag(term, 'Singular', '3-singular-guess');
+      }
+    };
+
+    // try to guess the tense of a naked verb
+    const setTense = function (term) {
+      let tags = term.tags;
+      if (tags.has('Verb') && tags.size === 1) {
+        let guess = getTense$1(term.normal);
+        if (guess) {
+          fastTag(term, guess, '3-verb-tense-guess');
+        }
+      }
+    };
+
+    //add deduced parent tags to our terms
+    const fillTags = function (terms, i, model) {
+      let term = terms[i];
+      //there is probably just one tag, but we'll allow more
+      let tags = Array.from(term.tags);
+      for (let k = 0; k < tags.length; k += 1) {
+        if (model.one.tagSet[tags[k]]) {
+          let toAdd = model.one.tagSet[tags[k]].parents;
+          fastTag(term, toAdd, `  -inferred by #${tags[k]}`);
+        }
+      }
+      // turn 'Noun' into Plural/Singular
+      setPluralSingular(term);
+      // turn 'Verb' into Present/PastTense
+      setTense(term);
+    };
+    var fillTags$1 = fillTags;
+
+    const titleCase$1 = /^[A-Z][a-z'\u00C0-\u00FF]/;
+    const hasNumber = /[0-9]/;
+
+    const notProper = ['Date', 'Month', 'WeekDay', 'Unit'];
+
+    // https://stackoverflow.com/a/267405/168877
+    const romanNumeral = /^[IVXLCDM]{2,}$/;
+    const romanNumValid = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+    const nope = {
+      li: true,
+      dc: true,
+      md: true,
+      dm: true,
+      ml: true,
+    };
+
+
+    // if it's a unknown titlecase word, it's a propernoun
+    const checkCase = function (terms, i, model) {
+      let term = terms[i];
+      // assume terms are already indexed
+      term.index = term.index || [0, 0];
+      let index = term.index[1];
+      let str = term.text; //need case info
+      // titlecase and not first word of sentence
+      if (index !== 0 && titleCase$1.test(str) === true && hasNumber.test(str) === false) {
+        if (notProper.find(tag => term.tags.has(tag))) {
+          return null
+        }
+        fillTags$1(terms, i, model);
+        if (!term.tags.has('Noun')) {
+          term.tags.clear();
+        }
+        fastTag(term, 'ProperNoun', '2-titlecase');
+        return true
+      }
+      //roman numberals - XVII
+      if (term.text.length >= 2 && romanNumeral.test(str) && romanNumValid.test(str) && !nope[term.normal]) {
+        fastTag(term, 'RomanNumeral', '2-xvii');
+        return true
+      }
+
+      return null
+    };
+    var checkCase$1 = checkCase;
+
+    //sweep-through all suffixes
+    const suffixLoop = function (str = '', suffixes = []) {
+      const len = str.length;
+      let max = 7;
+      if (len <= max) {
+        max = len - 1;
+      }
+      for (let i = max; i > 1; i -= 1) {
+        let suffix = str.substr(len - i, len);
+        if (suffixes[suffix.length].hasOwnProperty(suffix) === true) {
+          let tag = suffixes[suffix.length][suffix];
+          return tag
+        }
+      }
+      return null
+    };
+
+    // decide tag from the ending of the word
+    const tagBySuffix = function (terms, i, model) {
+      let term = terms[i];
+      if (term.tags.size === 0) {
+        let tag = suffixLoop(term.normal, model.two.suffixPatterns);
+        if (tag !== null) {
+          fastTag(term, tag, '2-suffix');
+          term.confidence = 0.7;
+          return true
+        }
+        // try implicit form of word, too
+        if (term.implicit) {
+          tag = suffixLoop(term.implicit, model.two.suffixPatterns);
+          if (tag !== null) {
+            fastTag(term, tag, '2-implicit-suffix');
+            term.confidence = 0.7;
+            return true
+          }
+        }
+      }
+      return null
+    };
+    var checkSuffix = tagBySuffix;
+
+    const prefixes = /^(anti|re|un|non|extra|inter|intra|over)([a-z-]{3})/;
+
+    // only allow prefixes on adjectives, verbs
+    const allowed = {
+      Adjective: true,
+      Verb: true,
+      PresentTense: true,
+      Infinitive: true,
+      PastTense: true,
+    };
+
+    // give 'overwork' the same tag as 'work'
+    const checkPrefix = function (terms, i, model) {
+      let term = terms[i];
+      if (prefixes.test(term.normal) === true) {
+        let root = term.normal.replace(prefixes, '$2');
+        root = root.replace(/^-/, '');
+        if (model.one.lexicon.hasOwnProperty(root) === true) {
+          let tag = model.one.lexicon[root];
+          if (allowed[tag] === true) {
+            fastTag(term, tag, '2-prefix');
+            term.confidence = 0.6;
+            return true
+          }
+        }
+      }
+      return null
+    };
+    var checkPrefix$1 = checkPrefix;
+
+    const hasApostrophe = /['‘’‛‵′`´]/;
+
+    // normal regexes
+    const doRegs = function (str, regs) {
+      for (let i = 0; i < regs.length; i += 1) {
+        if (regs[i][0].test(str) === true) {
+          return regs[i]
+        }
+      }
+      return null
+    };
+    // suffix-regexes, indexed by last-character
+    const doEndsWith = function (str = '', byEnd) {
+      let char = str[str.length - 1];
+      if (byEnd.hasOwnProperty(char) === true) {
+        let regs = byEnd[char] || [];
+        for (let r = 0; r < regs.length; r += 1) {
+          if (regs[r][0].test(str) === true) {
+            return regs[r]
+          }
+        }
+      }
+      return null
+    };
+
+    const checkRegex = function (terms, i, model) {
+      let { regexText, regexNormal, regexNumbers, endsWith } = model.two;
+      let term = terms[i];
+      let normal = term.machine || term.normal;
+      let text = term.text;
+      // keep dangling apostrophe?
+      if (hasApostrophe.test(term.post) && !hasApostrophe.test(term.pre)) {
+        text += term.post.trim();
+      }
+      let arr = doRegs(text, regexText) || doRegs(normal, regexNormal);
+      // hide a bunch of number regexes behind this one
+      if (!arr && /[0-9]/.test(normal)) {
+        arr = doRegs(normal, regexNumbers);
+      }
+      // only run endsWith if we're desperate
+      if (!arr && term.tags.size === 0) {
+        arr = doEndsWith(normal, endsWith);
+      }
+      if (arr) {
+        fastTag(term, arr[1], `2-regex- '${arr[2] || arr[0]}'`);
+        term.confidence = 0.6;
+        return true
+      }
+      return null
+    };
+    var checkRegex$1 = checkRegex;
+
+    const min = 1400;
+    const max = 2100;
+
+    const dateWords = new Set(['in', 'on', 'by', 'for', 'during', 'within', 'before', 'after', 'of', 'this', 'next', 'last', 'may']);
+
+    const seemsGood = function (term) {
+      if (!term) {
+        return false
+      }
+      if (dateWords.has(term.normal)) {
+        return true
+      }
+      if (term.tags.has('Date') || term.tags.has('Month') || term.tags.has('WeekDay')) {
+        return true
+      }
+      return false
+    };
+
+    // recognize '1993' as a year
+    const tagYear = function (terms, i) {
+      const term = terms[i];
+      if (term.tags.has('NumericValue') && term.tags.has('Cardinal')) {
+        let num = Number(term.normal);
+        // number between 1400 and 2100
+        if (num && !isNaN(num)) {
+          if (num > min && num < max) {
+            if (seemsGood(terms[i - 1]) || seemsGood(terms[i + 1])) {
+              return fastTag(term, 'Year', '2-tagYear')
+            }
+          }
+        }
+      }
+    };
+    var checkYear = tagYear;
+
+    const oneLetterAcronym = /^[A-Z]('s|,)?$/;
+    const isUpperCase = /^[A-Z-]+$/;
+    const periodAcronym = /([A-Z]\.)+[A-Z]?,?$/;
+    const noPeriodAcronym = /[A-Z]{2,}('s|,)?$/;
+    const lowerCaseAcronym = /([a-z]\.)+[a-z]\.?$/;
+
+    const oneLetterWord = {
+      I: true,
+      A: true,
+    };
+    // just uppercase acronyms, no periods - 'UNOCHA'
+    const isNoPeriodAcronym = function (term, model) {
+      let str = term.text;
+      // ensure it's all upper-case
+      if (isUpperCase.test(str) === false) {
+        return false
+      }
+      // long capitalized words are not usually either
+      if (str.length > 5) {
+        return false
+      }
+      // 'I' is not a acronym
+      if (oneLetterWord.hasOwnProperty(str)) {
+        return false
+      }
+      // known-words, like 'PIZZA' is not an acronym.
+      if (model.one.lexicon.hasOwnProperty(term.normal)) {
+        return false
+      }
+      //like N.D.A
+      if (periodAcronym.test(str) === true) {
+        return true
+      }
+      //like c.e.o
+      if (lowerCaseAcronym.test(str) === true) {
+        return true
+      }
+      //like 'F.'
+      if (oneLetterAcronym.test(str) === true) {
+        return true
+      }
+      //like NDA
+      if (noPeriodAcronym.test(str) === true) {
+        return true
+      }
+      return false
+    };
+
+    const isAcronym = function (terms, i, model) {
+      let term = terms[i];
+      //these are not acronyms
+      if (term.tags.has('RomanNumeral') || term.tags.has('Acronym')) {
+        return null
+      }
+      //non-period ones are harder
+      if (isNoPeriodAcronym(term, model)) {
+        term.tags.clear();
+        fastTag(term, ['Acronym', 'Noun'], '3-no-period-acronym');
+        return true
+      }
+      // one-letter acronyms
+      if (!oneLetterWord.hasOwnProperty(term.text) && oneLetterAcronym.test(term.text)) {
+        term.tags.clear();
+        fastTag(term, ['Acronym', 'Noun'], '3-one-letter-acronym');
+        return true
+      }
+      //if it's a very-short organization?
+      if (term.tags.has('Organization') && term.text.length <= 3) {
+        fastTag(term, 'Acronym', '3-org-acronym');
+        return true
+      }
+      // upper-case org, like UNESCO
+      if (term.tags.has('Organization') && isUpperCase.test(term.text) && term.text.length <= 6) {
+        fastTag(term, 'Acronym', '3-titlecase-acronym');
+        return true
+      }
+      return null
+    };
+    var checkAcronym = isAcronym;
+
+    const lookAtWord = function (term, words) {
+      if (!term) {
+        return null
+      }
+      // look at prev word <-
+      let found = words.find(a => term.normal === a[0]);
+      if (found) {
+        return found[1]
+      }
+      return null
+    };
+
+    const lookAtTag = function (term, tags) {
+      if (!term) {
+        return null
+      }
+      let found = tags.find(a => term.tags.has(a[0]));
+      if (found) {
+        return found[1]
+      }
+      return null
+    };
+
+    // look at neighbours for hints on unknown words
+    const neighbours = function (terms, i, model) {
+      const { leftTags, leftWords, rightWords, rightTags } = model.two.neighbours;
+      let term = terms[i];
+      if (term.tags.size === 0) {
+        let tag = null;
+        // look left <-
+        tag = tag || lookAtWord(terms[i - 1], leftWords);
+        // look right ->
+        tag = tag || lookAtWord(terms[i + 1], rightWords);
+        // look left <-
+        tag = tag || lookAtTag(terms[i - 1], leftTags);
+        // look right ->
+        tag = tag || lookAtTag(terms[i + 1], rightTags);
+        if (tag) {
+          fastTag(term, tag, '3-[neighbour]');
+          fillTags$1(terms, i, model);
+          terms[i].confidence = 0.2;
+          return true
+        }
+      }
+      return null
+    };
+    var neighbours$1 = neighbours;
+
+    const isTitleCase = function (str) {
+      return /^[A-Z][a-z'\u00C0-\u00FF]/.test(str)
+    };
+
+    const isOrg = function (term) {
+      if (!term) {
+        return false
+      }
+      if (term.tags.has('ProperNoun') || term.tags.has('Organization') || term.tags.has('Acronym')) {
+        return true
+      }
+      // allow anything titlecased to be an org
+      if (isTitleCase(term.text)) {
+        return true
+      }
+      return false
+    };
+
+    const tagOrgs = function (terms, i, model) {
+      const orgWords = model.two.orgWords;
+      let term = terms[i];
+      if (orgWords[term.normal] === true && isOrg(terms[i - 1])) {
+        terms[i].tags.add('Organization');
+        // loop backwards, tag organization-like things
+        for (let t = terms.length - 1; t >= 0; t -= 1) {
+          if (isOrg(terms[t])) {
+            terms[t].tags.add('Organization');
+          } else {
+            break
+          }
+        }
+      }
+      return null
+    };
+    var orgWords = tagOrgs;
+
+    const nounFallback = function (terms, i, model) {
+      if (terms[i].tags.size === 0) {
+        fastTag(terms[i], 'Noun', '3-[fallback]');
+        // try to give it singluar/plural tags, too
+        fillTags$1(terms, i, model);
+        terms[i].confidence = 0.1;
+      }
+    };
+    var nounFallback$1 = nounFallback;
+
+    const env = typeof process === 'undefined' ? self.env || {} : process.env; // eslint-disable-line
+
+    const isCapital = (terms, i) => {
+      if (terms[i].tags.has('ProperNoun')) {// 'Comfort Inn'
+        return 'Noun'
+      }
+    };
+    const isAloneVerb = (terms, i) => {
+      if (i === 0 && !terms[1]) {// 'Help'
+        return 'Verb'
+      }
+    };
+
+    const adhoc = {
+      'Adj|Gerund': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Adj|Noun': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Adj|Past': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Adj|Present': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Noun|Gerund': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Noun|Verb': (terms, i) => {
+        return isCapital(terms, i) || isAloneVerb(terms, i)
+      },
+      'Plural|Verb': (terms, i) => {
+        return isCapital(terms, i) || isAloneVerb(terms, i)
+      },
+      'Person|Noun': (terms, i) => {
+        return isCapital(terms, i)
+      },
+      'Person|Verb': (terms, i) => {
+        return isCapital(terms, i)
+      },
+    };
+
+
+    const checkWord = (term, obj) => {
+      if (!term || !obj) {
+        return null
+      }
+      const found = obj[term.normal];
+      if (found && env.DEBUG_TAGS) {
+        console.log(`\n  \x1b[2m\x1b[3m     ↓ - '${term.normal}' \x1b[0m`);
+      }
+      return found
+    };
+
+    const checkTag = (term, obj = {}, tagSet) => {
+      if (!term || !obj) {
+        return null
+      }
+      // rough sort, so 'Noun' is after ProperNoun, etc
+      let tags = Array.from(term.tags).sort((a, b) => {
+        let numA = tagSet[a] ? tagSet[a].parents.length : 0;
+        let numB = tagSet[b] ? tagSet[b].parents.length : 0;
+        return numA > numB ? -1 : 1
+      });
+      let found = tags.find(tag => obj[tag]);
+      if (found && env.DEBUG_TAGS) {
+        console.log(`\n  \x1b[2m\x1b[3m      ↓ - '${term.normal}' (#${found})  \x1b[0m`);
+      }
+      found = obj[found];
+      return found
+    };
+
+    const pickTag = function (terms, i, clues, model) {
+      if (!clues) {
+        return
+      }
+      const tagSet = model.one.tagSet;
+      // look -> right word, first
+      let tag = checkWord(terms[i + 1], clues.afterWords);
+      // look <- left word, second
+      tag = tag || checkWord(terms[i - 1], clues.beforeWords);
+      // look <- left tag 
+      tag = tag || checkTag(terms[i - 1], clues.beforeTags, tagSet);
+      // look -> right tag
+      tag = tag || checkTag(terms[i + 1], clues.afterTags, tagSet);
+      // console.log(clues)
+      return tag
+    };
+
+    const setTag = function (term, tag, model) {
+      if (!term.tags.has(tag)) {
+        term.tags.clear();
+        fastTag(term, tag, `3-[variable]`);
+        if (model.one.tagSet[tag]) {
+          let parents = model.one.tagSet[tag].parents;
+          fastTag(term, parents, `  -inferred by #${tag}`);
+        }
+      }
+    };
+
+    // words like 'bob' that can change between two tags
+    const doVariables = function (terms, i, model) {
+      const { variables, clues } = model.two;
+      const term = terms[i];
+      if (variables.hasOwnProperty(term.normal)) {
+        let form = variables[term.normal];
+        // console.log(`\n'${term.normal}'  : ${form}`)
+        // console.log(clues[form])
+        // skip propernouns, acronyms, etc
+        if (term.tags.has('Acronym') || term.tags.has('PhrasalVerb')) {
+          return
+        }
+        let tag = pickTag(terms, i, clues[form], model);
+        // lean-harder on some variable forms
+        if (adhoc[form]) {
+          tag = adhoc[form](terms, i) || tag;
+        }
+        // did we find anything?
+        if (tag) {
+          if (env.DEBUG_TAGS) {
+            console.log(`\n  \x1b[32m [variable] - '${term.normal}' - (${form}) → #${tag} \x1b[0m\n`);
+          }
+          setTag(term, tag, model);
+        } else if (env.DEBUG_TAGS) {
+          console.log(`\n -> X  - '${term.normal}'  : ${form}  `);
+        }
+      }
+    };
+    var variables = doVariables;
+
+    // 'out lived' is a verb-phrase
+    // 'over booked' is too
+    const doPrefix = function (terms, i, model) {
+      let nextTerm = terms[i + 1];
+      if (!nextTerm) {
+        return
+      }
+      let { prefixes } = model.one;
+      let term = terms[i];
+
+      // word like 'over'
+      if (prefixes[term.normal] === true) {
+        // 'over cooked'
+        if (nextTerm.tags.has('Verb')) {
+          term.tags.clear();
+          term.tags.add('Verb');
+          term.tags.add('Prefix');
+        }
+        // 'pseudo clean'
+        if (nextTerm.tags.has('Adjective')) {
+          term.tags.clear();
+          term.tags.add('Adjective');
+          term.tags.add('Prefix');
+        }
+      }
+
+    };
+    var checkHyphen = doPrefix;
+
+    const second = {
+      checkSuffix,
+      checkRegex: checkRegex$1,
+      checkCase: checkCase$1,
+      checkPrefix: checkPrefix$1,
+      checkHyphen,
+      checkYear,
+    };
+    const third = {
+      checkAcronym,
+      neighbours: neighbours$1,
+      orgWords,
+      nounFallback: nounFallback$1,
+      variables,
+    };
+
+
+
+    //
+    // these methods don't care about word-neighbours
+    const secondPass = function (terms, model) {
+      for (let i = 0; i < terms.length; i += 1) {
+        //  is it titlecased?
+        let found = second.checkCase(terms, i, model);
+
+        if (terms[i].tags.size === 0) {
+          // look at word ending
+          found = found || second.checkSuffix(terms, i, model);
+          // check for stem in lexicon
+          found = found || second.checkPrefix(terms, i, model);
+        }
+        // try look-like rules
+        second.checkRegex(terms, i, model);
+        // turn '1993' into a year
+        second.checkYear(terms, i, model);
+      }
+    };
+
+    const thirdPass = function (terms, model) {
+      for (let i = 0; i < terms.length; i += 1) {
+        // let these tags get layered
+        let found = third.checkAcronym(terms, i, model);
+        // deduce parent tags
+        fillTags$1(terms, i, model);
+        // look left+right for hints
+        found = found || third.neighbours(terms, i, model);
+        //  ¯\_(ツ)_/¯ - found nothing
+        found = found || third.nounFallback(terms, i, model);
+      }
+      for (let i = 0; i < terms.length; i += 1) {
+        // Johnson LLC
+        third.orgWords(terms, i, model);
+        // support 'out-lived'
+        second.checkHyphen(terms, i, model);
+        // verb-noun disambiguation, etc
+        third.variables(terms, i, model);
+      }
+    };
+
+    const preTagger = function (view) {
+      const { methods, model } = view;
+      // assign known-words
+      // view.compute('lexicon')
+      // roughly split sentences up by clause
+      let document = methods.two.quickSplit(view.docs);
+      // start with all terms
+      for (let n = 0; n < document.length; n += 1) {
+        let terms = document[n];
+        // firstPass(terms, model)
+        // guess by the letters
+        secondPass(terms, model);
+        // guess by the neighbours
+        thirdPass(terms, model);
+      }
+      // leave a nice cache for the next people
+      view.compute('cache');
+      return document
+    };
+
+    var preTagger$1 = preTagger;
+
+    const toRoot = {
+      // 'drinks' -> 'drink'
+      'Plural': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.nounToSingular(str, world.model)
+      },
+      // 'walked' -> 'walk'
+      'PastTense': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.verbToInfinitive(str, world.model)
+      },
+      // 'walks' -> 'walk'
+      'PresentTense': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.verbToInfinitive(str, world.model)
+      },
+    };
+
+    const getRoot = function (view) {
+      const world = view.world;
+      const keys = Object.keys(toRoot);
+      // console.log(world.methods.two.transform.nounToSingular)
+      view.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          const term = terms[i];
+          for (let k = 0; k < keys.length; k += 1) {
+            if (term.tags.has(keys[k])) {
+              const fn = toRoot[keys[k]];
+              term.root = fn(term, world);
+            }
+          }
+        }
+      });
+    };
+    var root = getRoot;
+
+    // rough connection between compromise tagset and Penn Treebank
+    // https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
+
+    const mapping = {
+      // adverbs
+      // 'Comparative': 'RBR',
+      // 'Superlative': 'RBS',
+      'Adverb': 'RB',
+
+      // adjectives
+      'Comparative': 'JJR',
+      'Superlative': 'JJS',
+      'Adjective': 'JJ',
+      'TO': 'Conjunction',
+
+      // verbs
+      'Modal': 'MD',
+      'Auxiliary': 'MD',
+      'Gerund': 'VBG', //throwing
+      'PastTense': 'VBD', //threw
+      'Participle': 'VBN', //thrown
+      'PresentTense': 'VBZ', //throws
+      'Infinitive': 'VB', //throw
+      'Particle': 'RP', //phrasal particle
+      'Verb': 'VB', // throw
+
+      // pronouns
+      'Pronoun': 'PRP',
+
+      // misc
+      'Cardinal': 'CD',
+      'Conjunction': 'CC',
+      'Determiner': 'DT',
+      'Preposition': 'IN',
+      // 'Determiner': 'WDT',
+      // 'Expression': 'FW',
+      'QuestionWord': 'WP',
+      'Expression': 'UH',
+
+      //nouns
+      'Possessive': 'POS',
+      'ProperNoun': 'NNP',
+      'Person': 'NNP',
+      'Place': 'NNP',
+      'Organization': 'NNP',
+      'Singular': 'NNP',
+      'Plural': 'NNS',
+      'Noun': 'NN',
+
+      // 'Noun':'EX', //'there'
+      // 'Adverb':'WRB',
+      // 'Noun':'PDT', //predeterminer
+      // 'Noun':'SYM', //symbol
+      // 'Noun':'NFP', //
+
+      //  WDT 	Wh-determiner
+      // 	WP 	Wh-pronoun
+      // 	WP$ 	Possessive wh-pronoun
+      // 	WRB 	Wh-adverb 
+    };
+
+    const toPenn = function (term) {
+      // try some ad-hoc ones
+      if (term.tags.has('ProperNoun') && term.tags.has('Plural')) {
+        return 'NNPS'
+      }
+      if (term.tags.has('Possessive') && term.tags.has('Pronoun')) {
+        return 'PRP$'
+      }
+      if (term.normal === 'there') {
+        return 'EX'
+      }
+      if (term.normal === 'to') {
+        return 'TO'
+      }
+      // run through an ordered list of tags
+      let arr = term.tagRank || [];
+      for (let i = 0; i < arr.length; i += 1) {
+        if (mapping.hasOwnProperty(arr[i])) {
+          return mapping[arr[i]]
+        }
+      }
+      return null
+    };
+
+    const pennTag = function (view) {
+      view.compute('tagRank');
+      view.docs.forEach(terms => {
+        terms.forEach(term => {
+          term.penn = toPenn(term);
+        });
+      });
+    };
+    var penn = pennTag;
+
+    var compute$2 = { preTagger: preTagger$1, tagRank: tagRank$1, root, penn };
+
+    const entity = ['Person', 'Place', 'Organization'];
+
+    var nouns = {
+      Noun: {
+        not: ['Verb', 'Adjective', 'Adverb', 'Value', 'Determiner'],
+      },
+      Singular: {
+        is: 'Noun',
+        not: ['Plural'],
+      },
+      ProperNoun: {
+        is: 'Noun',
+      },
+      Person: {
+        is: 'Singular',
+        also: ['ProperNoun'],
+        not: ['Place', 'Organization', 'Date'],
+      },
+      FirstName: {
+        is: 'Person',
+      },
+      MaleName: {
+        is: 'FirstName',
+        not: ['FemaleName', 'LastName'],
+      },
+      FemaleName: {
+        is: 'FirstName',
+        not: ['MaleName', 'LastName'],
+      },
+      LastName: {
+        is: 'Person',
+        not: ['FirstName'],
+      },
+      Honorific: {
+        is: 'Noun',
+        not: ['FirstName', 'LastName', 'Value'],
+      },
+      Place: {
+        is: 'Singular',
+        not: ['Person', 'Organization'],
+      },
+      Country: {
+        is: 'Place',
+        also: ['ProperNoun'],
+        not: ['City'],
+      },
+      City: {
+        is: 'Place',
+        also: ['ProperNoun'],
+        not: ['Country'],
+      },
+      Region: {
+        is: 'Place',
+        also: ['ProperNoun'],
+      },
+      Address: {
+        is: 'Place',
+      },
+      Organization: {
+        is: 'Singular',
+        also: ['ProperNoun'],
+        not: ['Person', 'Place'],
+      },
+      SportsTeam: {
+        is: 'Organization',
+      },
+      School: {
+        is: 'Organization',
+      },
+      Company: {
+        is: 'Organization',
+      },
+      Plural: {
+        is: 'Noun',
+        not: ['Singular'],
+      },
+      Uncountable: {
+        is: 'Noun',
+      },
+      Pronoun: {
+        is: 'Noun',
+        not: entity,
+      },
+      Actor: {
+        is: 'Noun',
+        not: entity,
+      },
+      Activity: {
+        is: 'Noun',
+        not: ['Person', 'Place'],
+      },
+      Unit: {
+        is: 'Noun',
+        not: entity,
+      },
+      Demonym: {
+        is: 'Noun',
+        also: ['ProperNoun'],
+        not: entity,
+      },
+      Possessive: {
+        is: 'Noun',
+      },
+    };
+
+    var verbs$1 = {
+      Verb: {
+        not: ['Noun', 'Adjective', 'Adverb', 'Value', 'Expression'],
+      },
+      PresentTense: {
+        is: 'Verb',
+        not: ['PastTense'],
+      },
+      Infinitive: {
+        is: 'PresentTense',
+        not: ['Gerund'],
+      },
+      Imperative: {
+        is: 'Infinitive',
+      },
+      Gerund: {
+        is: 'PresentTense',
+        not: ['Copula'],
+      },
+      PastTense: {
+        is: 'Verb',
+        not: ['PresentTense', 'Gerund'],
+      },
+      Copula: {
+        is: 'Verb',
+      },
+      Modal: {
+        is: 'Verb',
+        not: ['Infinitive'],
+      },
+      PerfectTense: {
+        is: 'Verb',
+        not: ['Gerund'],
+      },
+      Pluperfect: {
+        is: 'Verb',
+      },
+      Participle: {
+        is: 'PastTense',
+      },
+      PhrasalVerb: {
+        is: 'Verb',
+      },
+      Particle: {
+        is: 'PhrasalVerb',
+        not: ['PastTense', 'PresentTense', 'Copula', 'Gerund'],
+      },
+      Auxiliary: {
+        is: 'Verb',
+        not: ['PastTense', 'PresentTense', 'Gerund', 'Conjunction'],
+      },
+    };
+
+    var values = {
+      Value: {
+        not: ['Verb', 'Adjective', 'Adverb'],
+      },
+      Ordinal: {
+        is: 'Value',
+        not: ['Cardinal'],
+      },
+      Cardinal: {
+        is: 'Value',
+        not: ['Ordinal'],
+      },
+      Fraction: {
+        is: 'Value',
+        not: ['Noun'],
+      },
+      Multiple: {
+        is: 'Value',
+      },
+      RomanNumeral: {
+        is: 'Cardinal',
+        not: ['TextValue'],
+      },
+      TextValue: {
+        is: 'Value',
+        not: ['NumericValue'],
+      },
+      NumericValue: {
+        is: 'Value',
+        not: ['TextValue'],
+      },
+      Money: {
+        is: 'Cardinal',
+      },
+      Percent: {
+        is: 'Value',
+      },
+    };
+
+    var dates$1 = {
+      Date: {
+        not: ['Verb', 'Adverb', 'Preposition', 'Adjective'],
+      },
+      Month: {
+        is: 'Singular',
+        also: ['Date'],
+        not: ['Year', 'WeekDay', 'Time'],
+      },
+      WeekDay: {
+        is: 'Noun',
+        also: ['Date'],
+      },
+      Year: {
+        is: 'Date',
+        notA: ['RomanNumeral'],
+      },
+      FinancialQuarter: {
+        is: 'Date',
+        notA: 'Fraction',
+      },
+      // 'easter'
+      Holiday: {
+        is: 'Date',
+        also: ['Noun'],
+      },
+      // 'summer'
+      Season: {
+        is: 'Date',
+      },
+      Timezone: {
+        is: 'Noun',
+        also: ['Date'],
+        not: ['ProperNoun'],
+      },
+      Time: {
+        is: 'Date',
+        not: ['AtMention'],
+      },
+      // 'months'
+      Duration: {
+        is: 'Noun',
+        also: ['Date'],
+      },
+    };
+
+    const anything = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Value', 'QuestionWord'];
+
+    var misc$1 = {
+      Adjective: {
+        not: ['Noun', 'Verb', 'Adverb', 'Value'],
+      },
+      Comparable: {
+        is: 'Adjective',
+      },
+      Comparative: {
+        is: 'Adjective',
+      },
+      Superlative: {
+        is: 'Adjective',
+        not: ['Comparative'],
+      },
+      NumberRange: {},
+      Adverb: {
+        not: ['Noun', 'Verb', 'Adjective', 'Value'],
+      },
+
+      Determiner: {
+        not: ['Noun', 'Verb', 'Adjective', 'Adverb', 'QuestionWord', 'Conjunction'], //allow 'a' to be a Determiner/Value
+      },
+      Conjunction: {
+        not: anything,
+      },
+      Preposition: {
+        not: ['Noun', 'Verb', 'Adjective', 'Adverb', 'QuestionWord'],
+      },
+      QuestionWord: {
+        not: ['Determiner'],
+      },
+      Currency: {
+        is: 'Noun',
+      },
+      Expression: {
+        not: ['Noun', 'Adjective', 'Verb', 'Adverb'],
+      },
+      Abbreviation: {},
+      Url: {
+        not: ['HashTag', 'PhoneNumber', 'Verb', 'Adjective', 'Value', 'AtMention', 'Email'],
+      },
+      PhoneNumber: {
+        not: ['HashTag', 'Verb', 'Adjective', 'Value', 'AtMention', 'Email'],
+      },
+      HashTag: {},
+      AtMention: {
+        is: 'Noun',
+        not: ['HashTag', 'Email'],
+      },
+      Emoji: {
+        not: ['HashTag', 'Verb', 'Adjective', 'Value', 'AtMention'],
+      },
+      Emoticon: {
+        not: ['HashTag', 'Verb', 'Adjective', 'Value', 'AtMention'],
+      },
+      Email: {
+        not: ['HashTag', 'Verb', 'Adjective', 'Value', 'AtMention'],
+      },
+      Acronym: {
+        not: ['Plural', 'RomanNumeral'],
+      },
+      Negative: {
+        not: ['Noun', 'Adjective', 'Value'],
+      },
+      Condition: {
+        not: ['Verb', 'Adjective', 'Noun', 'Value'],
+      },
+    };
+
+    let allTags = Object.assign({}, nouns, verbs$1, values, dates$1, misc$1);
+    // const tagSet = compute(allTags)
+    var tags = allTags;
+
+    const plugin$2 = {
+      compute: compute$2,
+      methods: methods$1,
+      model: model$3,
+      tags,
+      hooks: ['preTagger'],//'root'
+    };
+    var preTag = plugin$2;
+
+    const postPunct = /[,)"';:\-–—.…]/;
+
+    const setContraction = function (m, suffix) {
+      if (!m.found) {
+        return
+      }
+      let terms = m.termList();
+      //avoid any problematic punctuation
+      for (let i = 0; i < terms.length - 1; i++) {
+        const t = terms[i];
+        if (postPunct.test(t.post)) {
+          return
+        }
+      }
+      // set them as implict
+      terms.forEach(t => {
+        t.implicit = t.normal;
+      });
+      // perform the contraction
+      terms[0].text += suffix;
+      // clean-up the others
+      terms.slice(1).forEach(t => {
+        t.text = '';
+      });
+      for (let i = 0; i < terms.length - 1; i++) {
+        const t = terms[i];
+        t.post = t.post.replace(/ /, '');
+      }
+    };
+
+    /** turn 'i am' into i'm */
+    const contract = function () {
+      let doc = this.not('@hasContraction');
+      // we are -> we're
+      let m = doc.match('(we|they|you) are');
+      setContraction(m, `'re`);
+      // they will -> they'll
+      m = doc.match('(he|she|they|it|we|you) will');
+      setContraction(m, `'ll`);
+      // she is -> she's
+      m = doc.match('(he|she|they|it|we) is');
+      setContraction(m, `'s`);
+      // spencer is -> spencer's
+      m = doc.match('#Person is');
+      setContraction(m, `'s`);
+      // spencer would -> spencer'd
+      m = doc.match('#Person would');
+      setContraction(m, `'d`);
+      // would not -> wouldn't
+      m = doc.match('(is|was|had|would|should|could|do|does|have|has|can) not');
+      setContraction(m, `n't`);
+      // i have -> i've
+      m = doc.match('(i|we|they) have');
+      setContraction(m, `'ve`);
+      // would have -> would've
+      m = doc.match('(would|should|could) have');
+      setContraction(m, `'ve`);
+      // i am -> i'm
+      m = doc.match('i am');
+      setContraction(m, `'m`);
+      // going to -> gonna
+      m = doc.match('going to');
+      return this
+    };
+    var contract$1 = contract;
+
+    const titleCase = /^[A-Z][a-z'’\u00C0-\u00FF]/;
+
+    const toTitleCase = function (str) {
+      str = str.replace(/^ *[a-z\u00C0-\u00FF]/, x => x.toUpperCase()); //TODO: support unicode
+      return str
+    };
+
+    const api$1 = function (View) {
+      /** */
+      class Contractions extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Contraction';
+        }
+        /** i've -> 'i have' */
+        expand() {
+          this.docs.forEach(terms => {
+            let isTitleCase = titleCase.test(terms[0].text);
+            terms.forEach((t, i) => {
+              t.text = t.implicit;
+              delete t.implicit;
+              //add whitespace
+              if (i < terms.length - 1 && t.post === '') {
+                t.post += ' ';
+              }
+              // flag it as dirty
+              t.dirty = true;
+            });
+            // make the first word title-case?
+            if (isTitleCase) {
+              terms[0].text = toTitleCase(terms[0].text);
+            }
+          });
+          this.compute('normal'); //re-set normalized text
+          return this
+        }
+      }
+      // add fn to View
+      View.prototype.contractions = function () {
+        let m = this.match('@hasContraction+');
+        return new Contractions(this.document, m.pointer)
+      };
+      View.prototype.contract = contract$1;
+    };
+
+    var api$2 = api$1;
+
+    var contractions$3 = [
+      // simple mappings
+      { word: '@', out: ['at'] },
+      { word: 'alot', out: ['a', 'lot'] },
+      { word: 'brb', out: ['be', 'right', 'back'] },
+      { word: 'cannot', out: ['can', 'not'] },
+      { word: 'cant', out: ['can', 'not'] },
+      { word: 'dont', out: ['do', 'not'] },
+      { word: 'dun', out: ['do', 'not'] },
+      { word: 'wont', out: ['will', 'not'] },
+      { word: "can't", out: ['can', 'not'] },
+      { word: "shan't", out: ['should', 'not'] },
+      { word: "won't", out: ['will', 'not'] },
+      { word: "that's", out: ['that', 'is'] },
+      { word: 'dunno', out: ['do', 'not', 'know'] },
+      { word: 'gonna', out: ['going', 'to'] },
+      { word: 'gotta', out: ['have', 'got', 'to'] }, //hmm
+      { word: 'gtg', out: ['got', 'to', 'go'] },
+      { word: 'im', out: ['i', 'am'] },
+      { word: 'imma', out: ['I', 'will'] },
+      { word: 'imo', out: ['in', 'my', 'opinion'] },
+      { word: 'irl', out: ['in', 'real', 'life'] },
+      { word: 'ive', out: ['i', 'have'] },
+      { word: 'rn', out: ['right', 'now'] },
+      { word: 'tbh', out: ['to', 'be', 'honest'] },
+      { word: 'wanna', out: ['want', 'to'] },
+      { word: 'howd', out: ['how', 'did'] },
+      { word: 'whatd', out: ['what', 'did'] },
+      { word: 'whend', out: ['when', 'did'] },
+      { word: 'whered', out: ['where', 'did'] },
+      { word: "when'd", out: ['when', 'did'] },
+      { word: "where'd", out: ['where', 'did'] },
+      { word: "'tis", out: ['it', 'is'] },
+      { word: "'twas", out: ['it', 'was'] },
+      { word: 'twas', out: ['it', 'was'] },
+      { word: 'y\'know', out: ['you', 'know'] },
+      { word: "ne'er", out: ['never'] },
+      { word: "o'er ", out: ['over'] },
+      // contraction-part mappings
+      { after: 'll', out: ['will'] },
+      { after: 've', out: ['have'] },
+      { after: 're', out: ['are'] },
+      { after: 'm', out: ['am'] },
+      // french contractions
+      { before: 'c', out: ['ce'] },
+      { before: 'm', out: ['me'] },
+      { before: 'n', out: ['ne'] },
+      { before: 'qu', out: ['que'] },
+      { before: 's', out: ['se'] },
+      { before: 't', out: ['tu'] }, // t'aime
+      // more-complex ones
+      // { after: 's', out: apostropheS }, //spencer's
+      // { after: 'd', out: apostropheD }, //i'd
+      // { after: 't', out: apostropheT }, //isn't
+      // { before: 'l', out: preL }, // l'amour
+      // { before: 'd', out: preD }, // d'amerique
+    ];
+
+    var model$1 = { two: { contractions: contractions$3 } };
+
+    // put n new words where 1 word was
+    const insertContraction = function (document, point, words) {
+      let [n, w] = point;
+      if (!words || words.length === 0) {
+        return
+      }
+      words = words.map((word) => {
+        let tags = new Set();
+        return {
+          text: '',
+          pre: '',
+          post: '',
+          normal: '',
+          implicit: word,
+          machine: word,
+          tags: tags,
+        }
+      });
+      if (words[0]) {
+        // move whitespace over
+        words[0].pre = document[n][w].pre;
+        words[words.length - 1].post = document[n][w].post;
+        // add the text/normal to the first term
+        words[0].text = document[n][w].text;
+        words[0].normal = document[n][w].normal; // move tags too?
+      }
+      // do the splice
+      document[n].splice(w, 1, ...words);
+    };
+    var splice = insertContraction;
+
+    const hasContraction$2 = /'/;
+    //look for a past-tense verb
+    const hasPastTense = (terms, i) => {
+      let after = terms.slice(i + 1, i + 3);
+      return after.some(t => t.tags.has('PastTense'))
+    };
+    // he'd walked -> had
+    // how'd -> did
+    // he'd go -> would
+    const _apostropheD = function (terms, i) {
+      let before = terms[i].normal.split(hasContraction$2)[0];
+      // what'd, how'd
+      if (before === 'how' || before === 'what') {
+        return [before, 'did']
+      }
+      if (hasPastTense(terms, i) === true) {
+        return [before, 'had']
+      }
+      // had/would/did
+      return [before, 'would']
+    };
+    var apostropheD = _apostropheD;
+
+    const hasContraction$1 = /'/;
+
+    const isHas = (terms, i) => {
+      //look for a past-tense verb
+      let after = terms.slice(i + 1, i + 3);
+      return after.some(t => t.tags.has('PastTense'))
+    };
+
+    // 's -> [possessive, 'has', or 'is']
+    const apostropheS = function (terms, i) {
+      // !possessive, is/has
+      let before = terms[i].normal.split(hasContraction$1)[0];
+      // spencer's got -> 'has'
+      if (isHas(terms, i)) {
+        return [before, 'has']
+      }
+      // let's
+      if (before === 'let') {
+        return [before, 'us']
+      }
+      // allow slang "there's" -> there are
+      if (before === 'there') {
+        let nextTerm = terms[i + 1];
+        if (nextTerm && nextTerm.tags.has('Plural')) {
+          return [before, 'are']
+        }
+      }
+      return [before, 'is']
+    };
+    var apostropheS$1 = apostropheS;
+
+    const lastNoun = function (terms, i) {
+      for (let n = i - 1; n >= 0; n -= 1) {
+        if (
+          terms[n].tags.has('Noun') ||
+          terms[n].tags.has('Pronoun') ||
+          terms[n].tags.has('Plural') ||
+          terms[n].tags.has('Singular')
+        ) {
+          return terms[n]
+        }
+      }
+      return null
+    };
+
+    const irregular = {
+      "can't": ['can', 'not'],
+      "won't": ['will', 'not'],
+    };
+
+    //ain't -> are/is not
+    const apostropheT = function (terms, i) {
+      if (terms[i].normal === "ain't" || terms[i].normal === 'aint') {
+        // we aint -> are not,   she aint -> is not
+        let noun = lastNoun(terms, i);
+        if (noun) {
+          // plural/singular pronouns
+          if (noun.normal === 'we' || noun.normal === 'they') {
+            return ['are', 'not']
+          }
+          // plural/singular tags
+          if (noun.tags && noun.tags.has('Plural')) {
+            return ['are', 'not']
+          }
+        }
+        return ['is', 'not']
+      }
+      if (irregular.hasOwnProperty(terms[i].normal)) {
+        return irregular[terms[i].normal]
+      }
+      let before = terms[i].normal.replace(/n't/, '');
+      return [before, 'not']
+    };
+
+    var apostropheT$1 = apostropheT;
+
+    const hasContraction = /'/;
+
+    // l'amour
+    const preL = (terms, i) => {
+      // le/la
+      let after = terms[i].normal.split(hasContraction)[1];
+      // quick french gender disambig (rough)
+      if (after && after.endsWith('e')) {
+        return ['la', after]
+      }
+      return ['le', after]
+    };
+
+    // d'amerique
+    const preD = (terms, i) => {
+      let after = terms[i].normal.split(hasContraction)[1];
+      // quick guess for noun-agreement (rough)
+      if (after && after.endsWith('e')) {
+        return ['du', after]
+      } else if (after && after.endsWith('s')) {
+        return ['des', after]
+      }
+      return ['de', after]
+    };
+
+    // j'aime
+    const preJ = (terms, i) => {
+      let after = terms[i].normal.split(hasContraction)[1];
+      return ['je', after]
+    };
+
+    var french = {
+      preJ,
+      preL,
+      preD,
+    };
+
+    const isRange = /^([0-9.]{1,3}[a-z]{0,2}) ?[-–—] ?([0-9]{1,3}[a-z]{0,2})$/i;
+    const timeRange = /^([0-9]{1,2}(:[0-9][0-9])?(am|pm)?) ?[-–—] ?([0-9]{1,2}(:[0-9][0-9])?(am|pm)?)$/i;
+
+    const numberRange = function (terms, i) {
+      let term = terms[i];
+      if (term.tags.has('PhoneNumber') === true) {
+        return null
+      }
+      let parts = term.text.match(isRange);
+      if (parts !== null) {
+        return [parts[1], 'to', parts[2]]
+      } else {
+        parts = term.text.match(timeRange);
+        if (parts !== null) {
+          return [parts[1], 'to', parts[4]]
+        }
+      }
+      return null
+    };
+    var numberRange$1 = numberRange;
+
+    const banList = {
+      that: true,
+      there: true,
+    };
+    const hereThere = {
+      here: true,
+      there: true,
+      everywhere: true,
+    };
+
+    const isPossessive = (terms, i) => {
+      let term = terms[i];
+      // these can't be possessive
+      if (hereThere.hasOwnProperty(term.machine)) {
+        return false
+      }
+      // if we already know it
+      if (term.tags.has('Possessive')) {
+        return true
+      }
+      //a pronoun can't be possessive - "he's house"
+      if (term.tags.has('Pronoun') || term.tags.has('QuestionWord')) {
+        return false
+      }
+      if (banList.hasOwnProperty(term.normal)) {
+        return false
+      }
+      //if end of sentence, it is possessive - "was spencer's"
+      let nextTerm = terms[i + 1];
+      if (!nextTerm) {
+        return true
+      }
+      //a gerund suggests 'is walking'
+      if (nextTerm.tags.has('Verb')) {
+        //fix 'jamie's bite'
+        if (nextTerm.tags.has('Infinitive')) {
+          return true
+        }
+        //fix 'spencer's runs'
+        if (nextTerm.tags.has('PresentTense')) {
+          return true
+        }
+        return false
+      }
+      //spencer's house
+      if (nextTerm.tags.has('Noun')) {
+        // 'spencer's here'
+        if (hereThere.hasOwnProperty(nextTerm.normal) === true) {
+          return false
+        }
+        return true
+      }
+      //rocket's red glare
+      let twoTerm = terms[i + 2];
+      if (twoTerm && twoTerm.tags.has('Noun') && !twoTerm.tags.has('Pronoun')) {
+        return true
+      }
+      //othwerwise, an adjective suggests 'is good'
+      if (nextTerm.tags.has('Adjective') || nextTerm.tags.has('Adverb') || nextTerm.tags.has('Verb')) {
+        return false
+      }
+      return false
+    };
+    var isPossessive$1 = isPossessive;
+
+    const byApostrophe = /'/;
+    const numDash = /^[0-9][^-–—]*[-–—].*?[0-9]/;
+
+    // run tagger on our new implicit terms
+    const reTag = function (terms, view) {
+      let tmp = view.update();
+      tmp.document = [terms];
+      tmp.compute(['lexicon', 'preTagger']);
+    };
+
+    const byEnd = {
+      // ain't
+      t: (terms, i) => apostropheT$1(terms, i),
+      // how'd
+      d: (terms, i) => apostropheD(terms, i),
+      // bob's
+      s: (terms, i, world) => {
+        // [bob's house] vs [bob's cool]
+        if (isPossessive$1(terms, i)) {
+          world.methods.one.setTag([terms[i]], 'Possessive', world);
+        } else {
+          return apostropheS$1(terms, i)
+        }
+      },
+    };
+
+    const byStart = {
+      // j'aime
+      j: (terms, i) => french.preJ(terms, i),
+      // l'amour
+      l: (terms, i) => french.preL(terms, i),
+      // d'amerique
+      d: (terms, i) => french.preD(terms, i),
+    };
+
+    // pull-apart known contractions from model
+    const knownOnes = function (list, term, before, after) {
+      for (let i = 0; i < list.length; i += 1) {
+        let o = list[i];
+        // look for word-word match (cannot-> [can, not])
+        if (o.word === term.normal) {
+          return o.out
+        }
+        // look for after-match ('re -> [_, are])
+        else if (after !== null && after === o.after) {
+          return [before].concat(o.out)
+        }
+        // look for before-match (l' -> [le, _])
+        else if (before !== null && before === o.before) {
+          return o.out.concat(after)
+          // return [o.out, after] //typeof o.out === 'string' ? [o.out, after] : o.out(terms, i)
+        }
+      }
+      return null
+    };
+
+    //really easy ones
+    const contractions$1 = (view) => {
+      let { world, document } = view;
+      const { model, methods } = world;
+      let list = model.two.contractions || [];
+      // each sentence
+      document.forEach((terms, n) => {
+        // loop through terms backwards
+        for (let i = terms.length - 1; i >= 0; i -= 1) {
+          let before = null;
+          let after = null;
+          if (byApostrophe.test(terms[i].normal) === true) {
+            [before, after] = terms[i].normal.split(byApostrophe);
+          }
+          // any known-ones, like 'dunno'?
+          let words = knownOnes(list, terms[i], before, after);
+          // ['foo', 's']
+          if (!words && byEnd.hasOwnProperty(after)) {
+            words = byEnd[after](terms, i, world);
+          }
+          // ['j', 'aime']
+          if (!words && byStart.hasOwnProperty(before)) {
+            words = byStart[before](terms, i);
+          }
+          // actually insert the new terms
+          if (words) {
+            splice(document, [n, i], words);
+            reTag(document[n], view);
+            // reTag(view, n)
+            continue
+          }
+          // '44-2' has special care
+          if (numDash.test(terms[i].normal)) {
+            words = numberRange$1(terms, i);
+            if (words) {
+              splice(document, [n, i], words);
+              methods.one.setTag(terms, 'NumberRange', world);//add custom tag
+              reTag(document[n], view);
+            }
+          }
+        }
+      });
+    };
+    var contractions$2 = contractions$1;
+
+    var compute$1 = { contractions: contractions$2 };
+
+    const plugin$1 = {
+      model: model$1,
+      compute: compute$1,
+      api: api$2,
+      hooks: ['contractions'],
+    };
+    var contractions = plugin$1;
+
+    var adj = [
+      // all fell apart
+      { match: '[(all|both)] #Determiner #Noun', group: 0, tag: 'Noun', reason: 'all-noun' },
+      //sometimes not-adverbs
+      { match: '#Copula [(just|alone)]$', group: 0, tag: 'Adjective', reason: 'not-adverb' },
+      //jack is guarded
+      { match: '#Singular is #Adverb? [#PastTense$]', group: 0, tag: 'Adjective', reason: 'is-filled' },
+      // smoked poutine is
+      { match: '[#PastTense] #Singular is', group: 0, tag: 'Adjective', reason: 'smoked-poutine' },
+      // baked onions are
+      { match: '[#PastTense] #Plural are', group: 0, tag: 'Adjective', reason: 'baked-onions' },
+      // well made
+      { match: 'well [#PastTense]', group: 0, tag: 'Adjective', reason: 'well-made' },
+      // is f*ed up
+      { match: '#Copula [fucked up?]', group: 0, tag: 'Adjective', reason: 'swears-adjective' },
+      //jack seems guarded
+      { match: '#Singular (seems|appears) #Adverb? [#PastTense$]', group: 0, tag: 'Adjective', reason: 'seems-filled' },
+      // jury is out - preposition ➔ adjective
+      { match: '#Copula #Adjective? [(out|in|through)]$', group: 0, tag: 'Adjective', reason: 'still-out' },
+      // shut the door
+      { match: '^[#Adjective] (the|your) #Noun', group: 0, ifNo: ['all', 'even'], tag: 'Infinitive', reason: 'shut-the' },
+      // the said card
+      { match: 'the [said] #Noun', group: 0, tag: 'Adjective', reason: 'the-said-card' },
+      // a myth that uncovered wounds heal
+      {
+        match: '#Noun (that|which|whose) [#PastTense] #Noun',
+        ifNo: '#Copula',
+        group: 0,
+        tag: 'Adjective',
+        reason: 'that-past-noun',
+      },
+
+      { match: 'too much', tag: 'Adverb Adjective', reason: 'bit-4' },
+      { match: 'a bit much', tag: 'Determiner Adverb Adjective', reason: 'bit-3' },
+    ];
+
+    const adverbAdj = `(dark|bright|flat|light|soft|pale|dead|dim|faux|little|wee|sheer|most|near|good|extra|all)`;
+    var advAdj = [
+      // kinda sparkly
+      // { match: `#Adverb [#Adverb]$`, ifNo: ['very', 'really', 'so'], group: 0, tag: 'Adjective', reason: 'kinda-sparkly' },
+      { match: `#Adverb [#Adverb] (and|or|then)`, group: 0, tag: 'Adjective', reason: 'kinda-sparkly-and' },
+      // dark green
+      { match: `[${adverbAdj}] #Adjective`, group: 0, tag: 'Adverb', reason: 'dark-green' },
+    ];
+
+    var gerundAdj = [
+      // Gerund-Adjectives - 'amusing, annoying'
+      //a staggering cost
+      { match: '(a|an) [#Gerund]', group: 0, tag: 'Adjective', reason: 'a|an' },
+      //as amusing as
+      { match: 'as [#Gerund] as', group: 0, tag: 'Adjective', reason: 'as-gerund-as' },
+      // more amusing than
+      { match: 'more [#Gerund] than', group: 0, tag: 'Adjective', reason: 'more-gerund-than' },
+      // very amusing
+      { match: '(so|very|extremely) [#Gerund]', group: 0, tag: 'Adjective', reason: 'so-gerund' },
+      // it was amusing
+      // {
+      //   match: '(it|he|she|everything|something) #Adverb? was #Adverb? [#Gerund]',
+      //   group: 0,
+      //   tag: 'Adjective',
+      //   reason: 'it-was-gerund',
+      // },
+      // found it amusing
+      { match: '(found|found) it #Adverb? [#Gerund]', group: 0, tag: 'Adjective', reason: 'found-it-gerund' },
+      // a bit amusing
+      { match: 'a (little|bit|wee) bit? [#Gerund]', group: 0, tag: 'Adjective', reason: 'a-bit-gerund' },
+      // the amusing world
+      { match: '(#Determiner|#Possessive) [#Gerund] #Noun', group: 0, tag: 'Adjective', reason: 'amusing-world' },
+    ];
+
+    var nounAdj = [
+      //the above is clear
+      { match: '#Determiner [#Adjective] #Copula', group: 0, tag: 'Noun', reason: 'the-adj-is' },
+      //real evil is
+      { match: '#Adjective [#Adjective] #Copula', group: 0, tag: 'Noun', reason: 'adj-adj-is' },
+      //his fine
+      { match: '(his|her|its) [#Adjective]', group: 0, tag: 'Noun', reason: 'his-fine' },
+      //is all
+      { match: '#Copula #Adverb? [all]', group: 0, tag: 'Noun', reason: 'is-all' },
+      //the orange is
+      // { match: '#Determiner [#Adjective] (#Copula|#PastTense|#Auxiliary)', group: 0, tag: 'Noun', reason: 'the-orange-is' },
+      // have fun
+      { match: `(have|had) [#Adjective] #Preposition .`, group: 0, tag: 'Noun', reason: 'have-fun' },
+      // brewing giant
+      { match: `#Gerund (giant|capital|center|zone|application)`, tag: 'Noun', reason: 'brewing-giant' },
+      // the orange
+      // {
+      //   match: '#Determiner [#Adjective]$',
+      //   ifNo: ['Comparative', 'Superlative', 'much'],
+      //   group: 0,
+      //   tag: 'Noun',
+      //   reason: 'the-orange',
+      // },
+    ];
+
+    var adjVerb = [
+      // amusing his aunt
+      // { match: '[#Adjective] #Possessive #Noun', group: 0, tag: 'Verb', reason: 'gerund-his-noun' },
+      // loving you
+      // { match: '[#Adjective] (us|you)', group: 0, tag: 'Gerund', reason: 'loving-you' },
+      // slowly stunning
+      { match: '(slowly|quickly) [#Adjective]', group: 0, tag: 'Verb', reason: 'slowly-adj' },
+      // does mean
+      { match: 'does (#Adverb|not)? [#Adjective]', group: 0, tag: 'PresentTense', reason: 'does-mean' },
+      // i mean
+      { match: 'i (#Adverb|do)? not? [mean]', group: 0, tag: 'PresentTense', reason: 'i-mean' },
+      //will secure our
+      { match: 'will #Adjective', tag: 'Auxiliary Infinitive', reason: 'will-adj' },
+      //he disguised the thing
+      { match: '#Pronoun [#Adjective] #Determiner #Adjective? #Noun', group: 0, tag: 'Verb', reason: 'he-adj-the' },
+      //is eager to go
+      { match: '#Copula [#Adjective] to #Verb', group: 0, tag: 'Verb', reason: 'adj-to' },
+      //want to be sedated
+      // { match: '(want|try|need) to be [#PastTense]', group: 0, tag: 'Adjective', reason: 'want-to-be' },
+      //should be sedated
+      // { match: '#Modal be [#PastTense]', group: 0, tag: 'Adjective', reason: 'should-be-x' },
+      // rude and insulting
+      { match: '#Adjective and [#Gerund] !#Preposition?', group: 0, tag: 'Adjective', reason: 'rude-and-x' },
+      // were over cooked
+      { match: '#Copula #Adverb? (over|under) [#PastTense]', group: 0, tag: 'Adjective', reason: 'over-cooked' },
+      // was bland and overcooked
+      { match: '#Copula #Adjective+ (and|or) [#PastTense]$', group: 0, tag: 'Adjective', reason: 'bland-and-overcooked' },
+      //felt loved
+      {
+        match: '(seem|seems|seemed|appear|appeared|appears|feel|feels|felt|sound|sounds|sounded) (#Adverb|#Adjective)? [#PastTense]',
+        group: 0,
+        tag: 'Adjective',
+        reason: 'felt-loved',
+      },
+    ];
+
+    // const adverbAdj = '(dark|bright|flat|light|soft|pale|dead|dim|faux|little|wee|sheer|most|near|good|extra|all)'
+
+    var adv = [
+      //still good
+      { match: '[still] #Adjective', group: 0, tag: 'Adverb', reason: 'still-advb' },
+      //still make
+      { match: '[still] #Verb', group: 0, tag: 'Adverb', reason: 'still-verb' },
+      // so hot
+      { match: '[so] #Adjective', group: 0, tag: 'Adverb', reason: 'so-adv' },
+      // way hotter
+      { match: '[way] #Comparative', group: 0, tag: 'Adverb', reason: 'way-adj' },
+      // way too hot
+      { match: '[way] #Adverb #Adjective', group: 0, tag: 'Adverb', reason: 'way-too-adj' },
+      // all singing
+      { match: '[all] #Verb', group: 0, tag: 'Adverb', reason: 'all-verb' },
+      // sing like an angel
+      { match: '#Verb  [like]', group: 0, ifNo: ['#Modal', '#PhrasalVerb'], tag: 'Adverb', reason: 'verb-like' },
+      //barely even walk
+      { match: '(barely|hardly) even', tag: 'Adverb', reason: 'barely-even' },
+      //even held
+      { match: '[even] #Verb', group: 0, tag: 'Adverb', reason: 'even-walk' },
+      // even the greatest
+      { match: '[even] (#Determiner|#Possessive)', group: 0, tag: '#Adverb', reason: 'even-the' },
+      // even left
+      { match: 'even left', tag: '#Adverb #Verb', reason: 'even-left' },
+      // way over
+      { match: '[way] #Adjective', group: 0, tag: '#Adverb', reason: 'way-over' },
+      //cheering hard - dropped -ly's
+      {
+        match: '#PresentTense [(hard|quick|long|bright|slow|fast|backwards|forwards)]',
+        ifNo: '#Copula',
+        group: 0,
+        tag: 'Adverb',
+        reason: 'lazy-ly',
+      },
+      // much appreciated
+      { match: '[much] #Adjective', group: 0, tag: 'Adverb', reason: 'bit-1' },
+      // is well
+      { match: '#Copula [#Adverb]$', group: 0, tag: 'Adjective', reason: 'is-well' },
+      // a bit cold
+      { match: 'a [(little|bit|wee) bit?] #Adjective', group: 0, tag: 'Adverb', reason: 'a-bit-cold' },
+      // super strong
+      { match: `[(super|pretty)] #Adjective`, group: 0, tag: 'Adverb', reason: 'super-strong' },
+      // become overly weakened
+      { match: '(become|fall|grow) #Adverb? [#PastTense]', group: 0, tag: 'Adjective', reason: 'overly-weakened' },
+      // a completely beaten man
+      { match: '(a|an) #Adverb [#Participle] #Noun', group: 0, tag: 'Adjective', reason: 'completely-beaten' },
+      //a close
+      { match: '#Determiner #Adverb? [close]', group: 0, tag: 'Adjective', reason: 'a-close' },
+      //walking close
+      { match: '#Gerund #Adverb? [close]', group: 0, tag: 'Adverb', reason: 'being-close' },
+      // a blown motor
+      { match: '(the|those|these|a|an) [#Participle] #Noun', group: 0, tag: 'Adjective', reason: 'blown-motor' },
+      // charged back
+      { match: '(#PresentTense|#PastTense) [back]', group: 0, tag: 'Adverb', reason: 'charge-back' },
+    ];
+
+    var dates = [
+      // ==== Holiday ====
+      { match: '#Holiday (day|eve)', tag: 'Holiday', reason: 'holiday-day' },
+      //5th of March
+      { match: '#Value of #Month', tag: 'Date', reason: 'value-of-month' },
+      //5 March
+      { match: '#Cardinal #Month', tag: 'Date', reason: 'cardinal-month' },
+      //march 5 to 7
+      { match: '#Month #Value to #Value', tag: 'Date', reason: 'value-to-value' },
+      //march the 12th
+      { match: '#Month the #Value', tag: 'Date', reason: 'month-the-value' },
+      //june 7
+      { match: '(#WeekDay|#Month) #Value', tag: 'Date', reason: 'date-value' },
+      //7 june
+      { match: '#Value (#WeekDay|#Month)', tag: 'Date', reason: 'value-date' },
+      //may twenty five
+      { match: '(#TextValue && #Date) #TextValue', tag: 'Date', reason: 'textvalue-date' },
+      // 'aug 20-21'
+      { match: `#Month #NumberRange`, tag: 'Date', reason: 'aug 20-21' },
+      // wed march 5th
+      { match: `#WeekDay #Month #Ordinal`, tag: 'Date', reason: 'week mm-dd' },
+      // aug 5th 2021
+      { match: `#Month #Ordinal #Cardinal`, tag: 'Date', reason: 'mm-dd-yyy' },
+
+      // === timezones ===
+      // china standard time
+      { match: `(#Place|#Demonmym|#Time) (standard|daylight|central|mountain)? time`, tag: 'Timezone', reason: 'std-time' },
+      // eastern time
+      {
+        match: `(eastern|mountain|pacific|central|atlantic) (standard|daylight|summer)? time`,
+        tag: 'Timezone',
+        reason: 'eastern-time',
+      },
+      // 5pm central
+      { match: `#Time [(eastern|mountain|pacific|central|est|pst|gmt)]`, group: 0, tag: 'Timezone', reason: '5pm-central' },
+      // central european time
+      { match: `(central|western|eastern) european time`, tag: 'Timezone', reason: 'cet' },
+    ];
+
+    var ambigDates = [
+      // ==== WeekDay ====
+      // sun the 5th
+      { match: '[sun] the #Ordinal', tag: 'WeekDay', reason: 'sun-the-5th' },
+      //sun feb 2
+      { match: '[sun] #Date', group: 0, tag: 'WeekDay', reason: 'sun-feb' },
+      //1pm next sun
+      { match: '#Date (on|this|next|last|during)? [sun]', group: 0, tag: 'WeekDay', reason: '1pm-sun' },
+      //this sat
+      { match: `(in|by|before|during|on|until|after|of|within|all) [sat]`, group: 0, tag: 'WeekDay', reason: 'sat' },
+      { match: `(in|by|before|during|on|until|after|of|within|all) [wed]`, group: 0, tag: 'WeekDay', reason: 'wed' },
+      { match: `(in|by|before|during|on|until|after|of|within|all) [march]`, group: 0, tag: 'Month', reason: 'march' },
+      //sat november
+      { match: '[sat] #Date', group: 0, tag: 'WeekDay', reason: 'sat-feb' },
+
+      // ==== Month ====
+      //all march
+      { match: `#Preposition [(march|may)]`, group: 0, tag: 'Month', reason: 'in-month' },
+      //this march
+      { match: `(this|next|last) [(march|may)]`, tag: '#Date #Month', reason: 'this-month' },
+      // march 5th
+      { match: `(march|may) the? #Value`, tag: '#Month #Date #Date', reason: 'march-5th' },
+      // 5th of march
+      { match: `#Value of? (march|may)`, tag: '#Date #Date #Month', reason: '5th-of-march' },
+      // march and feb
+      { match: `[(march|may)] .? #Date`, group: 0, tag: 'Month', reason: 'march-and-feb' },
+      // feb to march
+      { match: `#Date .? [(march|may)]`, group: 0, tag: 'Month', reason: 'feb-and-march' },
+      //quickly march
+      { match: `#Adverb [(march|may)]`, group: 0, tag: 'Verb', reason: 'quickly-march' },
+      //march quickly
+      { match: `[(march|may)] #Adverb`, group: 0, tag: 'Verb', reason: 'march-quickly' },
+    ];
+
+    const infNouns =
+      '(feel|sense|process|rush|side|bomb|bully|challenge|cover|crush|dump|exchange|flow|function|issue|lecture|limit|march|process)';
+    var noun = [
+      //'more' is not always an adverb
+      { match: 'more #Noun', tag: 'Noun', reason: 'more-noun' },
+      { match: '(right|rights) of .', tag: 'Noun', reason: 'right-of' },
+      { match: 'a [bit]', group: 0, tag: 'Noun', reason: 'bit-2' },
+
+      //some pressing issues
+      { match: 'some [#Verb] #Plural', group: 0, tag: 'Noun', reason: 'determiner6' },
+      // my first thought
+      { match: '#Possessive #Ordinal [#PastTense]', group: 0, tag: 'Noun', reason: 'first-thought' },
+      //the nice swim
+      { match: '(the|this|those|these) #Adjective [#Verb]', group: 0, tag: 'Noun', reason: 'the-adj-verb' },
+      // the truly nice swim
+      { match: '(the|this|those|these) #Adverb #Adjective [#Verb]', group: 0, tag: 'Noun', reason: 'determiner4' },
+      //the wait to vote
+      { match: 'the [#Verb] #Preposition .', group: 0, tag: 'Noun', reason: 'determiner1' },
+      //a sense of
+      { match: '#Determiner [#Verb] of', group: 0, tag: 'Noun', reason: 'the-verb-of' },
+      //the threat of force
+      { match: '#Determiner #Noun of [#Verb]', group: 0, tag: 'Noun', ifNo: '#Gerund', reason: 'noun-of-noun' },
+      //Grandma's cooking, my tiptoing
+      // { match: '#Possessive [#Gerund]', group: 0, tag: 'Noun', reason: 'grandmas-cooking' },
+      // ended in ruins
+      { match: '#PastTense #Preposition [#PresentTense]', group: 0, ifNo: ['#Gerund'], tag: 'Noun', reason: 'ended-in-ruins' },
+
+      //'u' as pronoun
+      { match: '#Conjunction [u]', group: 0, tag: 'Pronoun', reason: 'u-pronoun-2' },
+      { match: '[u] #Verb', group: 0, tag: 'Pronoun', reason: 'u-pronoun-1' },
+      //the western line
+      {
+        match: '#Determiner [(western|eastern|northern|southern|central)] #Noun',
+        group: 0,
+        tag: 'Noun',
+        reason: 'western-line',
+      },
+      //linear algebra
+      {
+        match: '(#Determiner|#Value) [(linear|binary|mobile|lexical|technical|computer|scientific|formal)] #Noun',
+        group: 0,
+        tag: 'Noun',
+        reason: 'technical-noun',
+      },
+      //air-flow
+      { match: '(#Noun && @hasHyphen) #PresentTense', tag: 'Noun', reason: 'hyphen-verb' },
+      //is no walk
+      { match: 'is no [#Verb]', group: 0, tag: 'Noun', reason: 'is-no-verb' },
+      //different views than
+      // { match: '[#Verb] than', group: 0, tag: 'Noun', reason: 'verb-than' },
+      //do so
+      { match: 'do [so]', group: 0, tag: 'Noun', reason: 'so-noun' },
+      // what the hell
+      { match: '#Determiner [(shit|damn|hell)]', group: 0, tag: 'Noun', reason: 'swears-noun' },
+      // the staff were
+      { match: '(the|these) [#Singular] (were|are)', group: 0, tag: 'Plural', reason: 'singular-were' },
+      // a comdominium, or simply condo
+      { match: `a #Noun+ or #Adverb+? [#Verb]`, group: 0, tag: 'Noun', reason: 'noun-or-noun' },
+      // walk the walk
+      { match: '(the|those|these|a|an) #Adjective? [#Infinitive]', group: 0, tag: 'Noun', reason: 'det-inf' },
+      {
+        match: '(the|those|these|a|an) #Adjective? [#PresentTense]',
+        ifNo: ['#Gerund', '#Copula'],
+        group: 0,
+        tag: 'Noun',
+        reason: 'det-pres',
+      },
+      { match: '(the|those|these|a|an) #Adjective? [#PastTense]', group: 0, tag: 'Noun', reason: 'det-past' },
+
+      // ==== Actor ====
+      //Aircraft designer
+      { match: '#Noun #Actor', tag: 'Actor', reason: 'thing-doer' },
+      // co-founder
+      { match: `co #Noun`, tag: 'Actor', reason: 'co-noun' },
+
+      // ==== Singular ====
+      //the sun
+      { match: '#Determiner [sun]', group: 0, tag: 'Singular', reason: 'the-sun' },
+      //did a 900, paid a 20
+      { match: '#Verb (a|an) [#Value]', group: 0, tag: 'Singular', reason: 'did-a-value' },
+      //'the can'
+      { match: 'the [(can|will|may)]', group: 0, tag: 'Singular', reason: 'the can' },
+
+      // ==== Possessive ====
+      //spencer kelly's
+      { match: '#FirstName #Acronym? (#Possessive && #LastName)', tag: 'Possessive', reason: 'name-poss' },
+      //Super Corp's fundraiser
+      { match: '#Organization+ #Possessive', tag: 'Possessive', reason: 'org-possessive' },
+      //Los Angeles's fundraiser
+      { match: '#Place+ #Possessive', tag: 'Possessive', reason: 'place-possessive' },
+      // 10th of a second
+      { match: '#Value of a [second]', group: 0, unTag: 'Value', tag: 'Singular', reason: '10th-of-a-second' },
+      // 10 seconds
+      { match: '#Value [seconds]', group: 0, unTag: 'Value', tag: 'Plural', reason: '10-seconds' },
+      // in time
+      { match: 'in [#Infinitive]', group: 0, tag: 'Singular', reason: 'in-age' },
+      // a minor in
+      { match: 'a [#Adjective] #Preposition', group: 0, tag: 'Noun', reason: 'a-minor-in' },
+
+      //the repairer said
+      { match: '#Determiner [#Noun] said', group: 0, tag: 'Actor', reason: 'the-actor-said' },
+      //the euro sense
+      {
+        match: `#Determiner #Noun [${infNouns}] !(#Preposition|to|#Adverb)?`,
+        group: 0,
+        tag: 'Noun',
+        reason: 'the-noun-sense',
+      },
+    ];
+
+    var gerundNouns = [
+      // watching the working
+      // { match: `#Gerund #Determiner [#Gerund]`, group: 0, tag: 'Noun', reason: 'sleeping-aid' },
+      // operating system
+      // { match: `[#Gerund] (system|aid|method|utility|tool|reform|therapy|philosophy|room)`, group: 0, tag: 'Noun', reason: 'operating-system' },
+      // the planning processes
+      { match: '(this|that|the|a|an) [#Gerund #Infinitive]', group: 0, tag: 'Singular', reason: 'the-planning-process' },
+      // the paving stones
+      { match: '(that|the) [#Gerund #PresentTense]', group: 0, tag: 'Plural', reason: 'the-paving-stones' },
+      // this swimming
+      { match: '(this|that|the) [#Gerund]', group: 0, tag: 'Noun', reason: 'this-gerund' },
+      // i think tipping sucks
+      { match: `#Pronoun #Infinitive [#Gerund] #PresentTense`, group: 0, tag: 'Noun', reason: 'tipping-sucks' },
+      // early warning
+      { match: '#Adjective [#Gerund]', group: 0, tag: 'Noun', reason: 'early-warning' },
+      // /her polling number
+      // { match: '#Possessive [#Gerund] #Noun', group: 0, tag: 'Noun', reason: 'her-polling' },
+      //her fines
+      // { match: '#Possessive [#PresentTense]', group: 0, tag: 'Noun', reason: 'its-polling' },
+      //walking is cool
+      { match: '[#Gerund] #Adverb? not? #Copula', group: 0, tag: 'Activity', reason: 'gerund-copula' },
+      //walking should be fun
+      { match: '[#Gerund] #Modal', group: 0, tag: 'Activity', reason: 'gerund-modal' },
+      // finish listening
+      // { match: '#Infinitive [#Gerund]', group: 0, tag: 'Activity', reason: 'finish-listening' },
+    ];
+
+    var presNouns = [
+      // do the dance
+      { match: '#Infinitive (this|that|the) [#Infinitive]', group: 0, tag: 'Noun', reason: 'do-this-dance' },
+      //running-a-show
+      { match: '#Gerund #Determiner [#Infinitive]', group: 0, tag: 'Noun', reason: 'running-a-show' },
+      //the-only-reason
+      { match: '#Determiner #Adverb [#Infinitive]', group: 0, tag: 'Noun', reason: 'the-reason' },
+      // a stream runs
+      { match: '(the|this|a|an) [#Infinitive] #Adverb? #Verb', group: 0, tag: 'Noun', reason: 'determiner5' },
+      //the test string
+      { match: '#Determiner [#Infinitive] #Noun', group: 0, tag: 'Noun', reason: 'determiner7' },
+      //a nice deal
+      { match: '#Determiner #Adjective #Adjective? [#Infinitive]', group: 0, tag: 'Noun', reason: 'a-nice-inf' },
+      // the mexican train
+      { match: '#Determiner #Demonym [#PresentTense]', group: 0, tag: 'Noun', reason: 'mexican-train' },
+      //next career move
+      { match: '#Adjective #Noun+ [#Infinitive] #Copula', group: 0, tag: 'Noun', reason: 'career-move' },
+      // at some point
+      { match: 'at some [#Infinitive]', group: 0, tag: 'Noun', reason: 'at-some-inf' },
+      // goes to sleep
+      { match: '(go|goes|went) to [#Infinitive]', group: 0, tag: 'Noun', reason: 'goes-to-verb' },
+      //a close watch on
+      { match: '(a|an) #Adjective? #Noun [#Infinitive] (#Preposition|#Noun)', group: 0, tag: 'Noun', reason: 'a-noun-inf' },
+      //a tv show
+      { match: '(a|an) #Noun [#Infinitive]$', group: 0, tag: 'Noun', reason: 'a-noun-inf2' },
+      //is mark hughes
+      { match: '#Copula [#Infinitive] #Noun', group: 0, tag: 'Noun', reason: 'is-pres-noun' },
+      // good wait staff
+      { match: '#Adjective [#Infinitive] #Noun', group: 0, tag: 'Noun', reason: 'good-wait-staff' },
+      // running for congress
+      { match: '#Gerund #Adjective? for [#Infinitive]', group: 0, tag: 'Noun', reason: 'running-for' },
+      // running to work
+      { match: '#Gerund #Adjective to [#Infinitive]', group: 0, tag: 'Noun', reason: 'running-to' },
+      // 1 train
+      { match: '(one|1) [#Infinitive]', group: 0, tag: 'Singular', reason: '1-trains' },
+      // about love
+      { match: 'about [#Infinitive]', group: 0, tag: 'Singular', reason: 'about-love' },
+      // on stage
+      { match: 'on [#Infinitive]', group: 0, tag: 'Noun', reason: 'on-stage' },
+      // any charge
+      { match: 'any [#Infinitive]', group: 0, tag: 'Noun', reason: 'any-charge' },
+      // no doubt
+      { match: 'no [#Infinitive]', group: 0, tag: 'Noun', reason: 'no-doubt' },
+      // number of seats
+      { match: 'number of [#PresentTense]', group: 0, tag: 'Noun', reason: 'number-of-x' },
+      // teaches/taught
+      { match: '(taught|teaches|learns|learned) [#PresentTense]', group: 0, tag: 'Noun', reason: 'teaches-x' },
+
+      // use reverse
+      {
+        match: '(try|use|attempt|build|make) [#Verb]',
+        ifNo: ['#Copula', '#PhrasalVerb'],
+        group: 0,
+        tag: 'Noun',
+        reason: 'do-verb',
+      },
+
+      // checkmate is
+      { match: '^[#Infinitive] (is|was)', group: 0, tag: 'Noun', reason: 'checkmate-is' },
+      // get much sleep
+      { match: '#Infinitive much [#Infinitive]', group: 0, tag: 'Noun', reason: 'get-much' },
+      // cause i gotta
+      { match: '[cause] #Pronoun #Verb', group: 0, tag: 'Conjunction', reason: 'cause-cuz' },
+      // the cardio dance party
+      { match: 'the #Singular [#Infinitive] #Noun', group: 0, tag: 'Noun', reason: 'cardio-dance' },
+      // the dining experience
+      // { match: 'the #Noun [#Infinitive] #Copula', group: 0, tag: 'Noun', reason: 'dining-experience' },
+
+      // that should smoke
+      { match: '#Determiner #Modal [#Noun]', group: 0, tag: 'PresentTense', reason: 'should-smoke' },
+      //this rocks
+      { match: '(this|that) [#Plural]', group: 0, tag: 'PresentTense', reason: 'this-verbs' },
+      //let him glue
+      {
+        match: '(let|make|made) (him|her|it|#Person|#Place|#Organization)+ [#Singular] (a|an|the|it)',
+        group: 0,
+        tag: 'Infinitive',
+        reason: 'let-him-glue',
+      },
+
+      // assign all tasks
+      {
+        match: '#Verb (all|every|each|most|some|no) [#PresentTense]',
+        ifNo: '#Modal',
+        group: 0,
+        tag: 'Noun',
+        reason: 'all-presentTense',
+      },
+      // PresentTense/Noun ambiguities
+      // big dreams, critical thinking
+      // have big dreams
+      { match: '(had|have|#PastTense) #Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'adj-presentTense' },
+      // excellent answer spencer
+      // { match: '^#Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'start adj-presentTense' },
+      // one big reason
+      { match: '#Value #Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'one-big-reason' },
+      // won widespread support
+      { match: '#PastTense #Adjective+ [#PresentTense]', group: 0, tag: 'Noun', reason: 'won-wide-support' },
+      // many poses
+      { match: '(many|few|several|couple) [#PresentTense]', group: 0, tag: 'Noun', reason: 'many-poses' },
+      // very big dreams
+      { match: '#Adverb #Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'very-big-dream' },
+      // adorable little store
+      { match: '#Adjective #Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'adorable-little-store' },
+      // of basic training
+      // { match: '#Preposition #Adjective [#PresentTense]', group: 0, tag: 'Noun', reason: 'of-basic-training' },
+      // justifiying higher costs
+      { match: '#Gerund #Adverb? #Comparative [#PresentTense]', group: 0, tag: 'Noun', reason: 'higher-costs' },
+
+      { match: '(#Noun && @hasComma) #Noun (and|or) [#PresentTense]', group: 0, tag: 'Noun', reason: 'noun-list' },
+
+      // any questions for
+      { match: '(many|any|some|several) [#PresentTense] for', group: 0, tag: 'Noun', reason: 'any-verbs-for' },
+      // to facilitate gas exchange with
+      { match: `to #PresentTense #Noun [#PresentTense] #Preposition`, group: 0, tag: 'Noun', reason: 'gas-exchange' },
+      // waited until release
+      {
+        match: `#PastTense (until|as|through|without) [#PresentTense]`,
+        group: 0,
+        tag: 'Noun',
+        reason: 'waited-until-release',
+      },
+      // selling like hot cakes
+      { match: `#Gerund like #Adjective? [#PresentTense]`, group: 0, tag: 'Plural', reason: 'like-hot-cakes' },
+      // some valid reason
+      { match: `some #Adjective [#PresentTense]`, group: 0, tag: 'Noun', reason: 'some-reason' },
+      // for some reason
+      { match: `for some [#PresentTense]`, group: 0, tag: 'Noun', reason: 'for-some-reason' },
+      // same kind of shouts
+      { match: `(same|some|the|that|a) kind of [#PresentTense]`, group: 0, tag: 'Noun', reason: 'some-kind-of' },
+      // a type of shout
+      { match: `(same|some|the|that|a) type of [#PresentTense]`, group: 0, tag: 'Noun', reason: 'some-type-of' },
+      // doing better for fights
+      { match: `#Gerund #Adjective #Preposition [#PresentTense]`, group: 0, tag: 'Noun', reason: 'doing-better-for-x' },
+      // get better aim
+      { match: `(get|got|have|had) #Comparative [#PresentTense]`, group: 0, tag: 'Noun', reason: 'got-better-aim' },
+      // whose name was
+      { match: 'whose [#PresentTense] #Copula', group: 0, tag: 'Noun', reason: 'whos-name-was' },
+      // give up on reason
+      { match: `#PhrasalVerb #PhrasalVerb #Preposition [#PresentTense]`, group: 0, tag: 'Noun', reason: 'given-up-on-x' },
+      //there are reasons
+      { match: 'there (are|were) #Adjective? [#PresentTense]', group: 0, tag: 'Plural', reason: 'there-are' },
+
+      // 30 trains
+      {
+        match: '#Value [#PresentTense]',
+        group: 0,
+        ifNo: ['one', '1', '#Copula'],
+        tag: 'Plural',
+        reason: '2-trains',
+      },
+      // compromises are possible
+      { match: '[#PresentTense] (are|were|was) #Adjective', group: 0, tag: 'Plural', reason: 'compromises-are-possible' },
+      // hope i helped
+      { match: '^[(hope|guess|thought|think)] #Pronoun #Verb', group: 0, tag: 'Infinitive', reason: 'suppose-i' },
+      //pursue its dreams
+      { match: '#PresentTense #Possessive [#PresentTense]', group: 0, tag: 'Plural', reason: 'pursue-its-dreams' },
+      // our unyielding support
+      { match: '#Possessive #Adjective [#Verb]', group: 0, tag: 'Noun', reason: 'our-full-support' },
+      // they do serve fish
+      { match: '(do|did|will) [#Singular] #Noun', group: 0, tag: 'PresentTense', reason: 'do-serve-fish' },
+      // tastes good
+      { match: '[(tastes|smells)] #Adverb? #Adjective', group: 0, tag: 'PresentTense', reason: 'tastes-good' },
+      // are you plauing golf
+      { match: '^are #Pronoun [#Noun]', group: 0, ifNo: ['here', 'there'], tag: 'Verb', reason: 'are-you-x' },
+      // ignoring commute
+      {
+        match: '#Copula #Gerund [#PresentTense] !by?',
+        group: 0,
+        tag: 'Noun',
+        ifNo: ['going'],
+        reason: 'ignoring-commute',
+      },
+      // noun-pastTense variables
+      { match: '#Determiner #Adjective? [(shed|thought|rose|bid|saw|spelt)]', group: 0, tag: 'Noun', reason: 'noun-past' },
+    ];
+
+    var money = [
+      { match: '#Money and #Money #Currency?', tag: 'Money', reason: 'money-and-money' },
+
+      // // $5.032 is invalid money
+      // doc
+      //   .match('#Money')
+      //   .not('#TextValue')
+      //   .match('/\\.[0-9]{3}$/')
+      //   .unTag('#Money', 'three-decimal money')
+
+      // cleanup currency false-positives
+      // { match: '#Currency #Verb', ifNo: '#Value', unTag: 'Currency', reason: 'no-currency' },
+      // 6 dollars and 5 cents
+      { match: '#Value #Currency [and] #Value (cents|ore|centavos|sens)', group: 0, tag: 'money', reason: 'and-5-cents' },
+      // maybe currencies
+      { match: '#Value (mark|rand|won|rub|ore)', tag: '#Money #Currency', reason: '4 mark' },
+    ];
+
+    //   {match:'', tag:'',reason:''},
+    //   {match:'', tag:'',reason:''},
+    //   {match:'', tag:'',reason:''},
+
+    var fractions = [
+      // half a penny
+      { match: '[(half|quarter)] of? (a|an)', group: 0, tag: 'Fraction', reason: 'millionth' },
+      // nearly half
+      { match: '#Adverb [half]', group: 0, tag: 'Fraction', reason: 'nearly-half' },
+      // half the
+      { match: '[half] the', group: 0, tag: 'Fraction', reason: 'half-the' },
+      // and a half
+      { match: '#Cardinal and a half', tag: 'Fraction', reason: 'and-a-half' },
+      // two-halves
+      { match: '#Value (halves|halfs|quarters)', tag: 'Fraction', reason: 'two-halves' },
+
+      // ---ordinals as fractions---
+      // a fifth
+      { match: 'a #Ordinal', tag: 'Fraction', reason: 'a-quarter' },
+      // seven fifths
+      { match: '[#Cardinal+] (#Fraction && /s$/)', tag: 'Fraction', reason: 'seven-fifths' },
+      // doc.match('(#Fraction && /s$/)').lookBefore('#Cardinal+$').tag('Fraction')
+      // one third of ..
+      { match: '[#Cardinal+ #Ordinal] of .', group: 0, tag: 'Fraction', reason: 'ordinal-of' },
+      // 100th of
+      { match: '[(#NumericValue && #Ordinal)] of .', group: 0, tag: 'Fraction', reason: 'num-ordinal-of' },
+      // a twenty fifth
+      { match: '(a|one) #Cardinal?+ #Ordinal', tag: 'Fraction', reason: 'a-ordinal' },
+
+      // //  '3 out of 5'
+      { match: '#Cardinal+ out? of every? #Cardinal', tag: 'Fraction', reason: 'out-of' },
+    ];
+
+    // {match:'', tag:'',reason:''},
+
+    var numbers = [
+      // ==== Ambiguous numbers ====
+      // 'second'
+      { match: `#Cardinal [second]`, tag: 'Unit', reason: 'one-second' },
+      //'a/an' can mean 1 - "a hour"
+      {
+        match: '!once? [(a|an)] (#Duration|hundred|thousand|million|billion|trillion)',
+        group: 0,
+        tag: 'Value',
+        reason: 'a-is-one',
+      },
+      // ==== PhoneNumber ====
+      //1 800 ...
+      { match: '1 #Value #PhoneNumber', tag: 'PhoneNumber', reason: '1-800-Value' },
+      //(454) 232-9873
+      { match: '#NumericValue #PhoneNumber', tag: 'PhoneNumber', reason: '(800) PhoneNumber' },
+
+      // ==== Currency ====
+      // chinese yuan
+      { match: '#Demonym #Currency', tag: 'Currency', reason: 'demonym-currency' },
+      // ten bucks
+      { match: '(#Value|a) [(buck|bucks|grand)]', group: 0, tag: 'Currency', reason: 'value-bucks' },
+      // ==== Money ====
+      { match: '[#Value+] #Currency', group: 0, tag: 'Money', reason: '15 usd' },
+
+      // ==== Ordinal ====
+      { match: '[second] #Noun', group: 0, tag: 'Ordinal', reason: 'second-noun' },
+
+      // ==== Units ====
+      //5 yan
+      { match: '#Value+ [#Currency]', group: 0, tag: 'Unit', reason: '5-yan' },
+      { match: '#Value [(foot|feet)]', group: 0, tag: 'Unit', reason: 'foot-unit' },
+      //5 kg.
+      { match: '#Value [#Abbreviation]', group: 0, tag: 'Unit', reason: 'value-abbr' },
+      { match: '#Value [k]', group: 0, tag: 'Unit', reason: 'value-k' },
+      { match: '#Unit an hour', tag: 'Unit', reason: 'unit-an-hour' },
+
+      // ==== Magnitudes ====
+      //minus 7
+      { match: '(minus|negative) #Value', tag: 'Value', reason: 'minus-value' },
+      //seven point five
+      { match: '#Value (point|decimal) #Value', tag: 'Value', reason: 'value-point-value' },
+      //quarter million
+      { match: '#Determiner [(half|quarter)] #Ordinal', group: 0, tag: 'Value', reason: 'half-ordinal' },
+      // thousand and two
+      {
+        match: `#Multiple+ and #Value`,
+        tag: 'Value',
+        reason: 'magnitude-and-value',
+      },
+    ];
+
+    var person = [
+      // ==== Honorifics ====
+      { match: '[(1st|2nd|first|second)] #Honorific', group: 0, tag: 'Honorific', reason: 'ordinal-honorific' },
+      {
+        match: '[(private|general|major|corporal|lord|lady|secretary|premier)] #Honorific? #Person',
+        group: 0,
+        tag: 'Honorific',
+        reason: 'ambg-honorifics',
+      },
+      // ==== FirstNames ====
+      //is foo Smith
+      { match: '#Copula [(#Noun|#PresentTense)] #LastName', group: 0, tag: 'FirstName', reason: 'copula-noun-lastname' },
+      //pope francis
+      {
+        match: '(lady|queen|sister|king|pope|father) #ProperNoun',
+        tag: 'Person',
+        reason: 'lady-titlecase',
+        safe: true,
+      },
+
+      // ==== Nickname ====
+      // Dwayne 'the rock' Johnson
+      { match: '#FirstName [#Determiner #Noun] #LastName', group: 0, tag: 'Person', reason: 'first-noun-last' },
+      {
+        match: '#ProperNoun (b|c|d|e|f|g|h|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z) #ProperNoun',
+        tag: 'Person',
+        reason: 'titlecase-acronym-titlecase',
+        safe: true,
+      },
+      { match: '#Acronym #LastName', tag: 'Person', reason: 'acronym-lastname', safe: true },
+      { match: '#Person (jr|sr|md)', tag: 'Person', reason: 'person-honorific' },
+      //remove single 'mr'
+      { match: '#Honorific #Acronym', tag: 'Person', reason: 'Honorific-TitleCase' },
+      { match: '#Person #Person the? #RomanNumeral', tag: 'Person', reason: 'roman-numeral' },
+      { match: '#FirstName [/^[^aiurck]$/]', group: 0, tag: ['Acronym', 'Person'], reason: 'john-e' },
+      //j.k Rowling
+      { match: '#Noun van der? #Noun', tag: 'Person', reason: 'van der noun', safe: true },
+      //king of spain
+      { match: '(king|queen|prince|saint|lady) of #Noun', tag: 'Person', reason: 'king-of-noun', safe: true },
+      //lady Florence
+      { match: '(prince|lady) #Place', tag: 'Person', reason: 'lady-place' },
+      //saint Foo
+      { match: '(king|queen|prince|saint) #ProperNoun', tag: 'Person', reason: 'saint-foo' },
+
+      // al sharpton
+      { match: 'al (#Person|#ProperNoun)', tag: 'Person', reason: 'al-borlen', safe: true },
+      //ferdinand de almar
+      { match: '#FirstName de #Noun', tag: 'Person', reason: 'bill-de-noun' },
+      //Osama bin Laden
+      { match: '#FirstName (bin|al) #Noun', tag: 'Person', reason: 'bill-al-noun' },
+      //John L. Foo
+      { match: '#FirstName #Acronym #ProperNoun', tag: 'Person', reason: 'bill-acronym-title' },
+      //Andrew Lloyd Webber
+      { match: '#FirstName #FirstName #ProperNoun', tag: 'Person', reason: 'bill-firstname-title' },
+      //Mr Foo
+      { match: '#Honorific #FirstName? #ProperNoun', tag: 'Person', reason: 'dr-john-Title' },
+      //peter the great
+      { match: '#FirstName the #Adjective', tag: 'Person', reason: 'name-the-great' },
+
+      // dick van dyke
+      { match: '#ProperNoun (van|al|bin) #ProperNoun', tag: 'Person', reason: 'title-van-title', safe: true },
+      //jose de Sucre
+      { match: '#ProperNoun (de|du) la? #ProperNoun', tag: 'Person', reason: 'title-de-title' },
+      //Jani K. Smith
+      { match: '#Singular #Acronym #LastName', tag: '#FirstName #Person .', reason: 'title-acro-noun', safe: true },
+      //Foo Ford
+      { match: '[#ProperNoun] #Person', group: 0, tag: 'Person', reason: 'proper-person', safe: true },
+      // john keith jones
+      {
+        match: '#Person [#ProperNoun #ProperNoun]',
+        group: 0,
+        tag: 'Person',
+        reason: 'three-name-person',
+        safe: true,
+      },
+      //John Foo
+      {
+        match: '#FirstName #Acronym? [#ProperNoun]',
+        group: 0,
+        tag: 'LastName',
+        reason: 'firstname-titlecase',
+        // safe: true,
+      },
+      // john stewart
+      { match: '#FirstName [#FirstName]', group: 0, tag: 'LastName', reason: 'firstname-firstname' },
+      //Joe K. Sombrero
+      { match: '#FirstName #Acronym #Noun', tag: 'Person', reason: 'n-acro-noun', safe: true },
+      //Anthony de Marco
+      { match: '#FirstName [(de|di|du|van|von)] #Person', group: 0, tag: 'LastName', reason: 'de-firstname' },
+      //Joe springer sr
+      { match: '#ProperNoun [#Honorific]', group: 0, tag: 'Person', reason: 'last-sr' },
+      // dr john foobar
+      { match: '#Honorific #FirstName [#Singular]', group: 0, tag: 'LastName', reason: 'dr-john-foo', safe: true },
+      //his-excellency
+      {
+        match: '[(his|her) (majesty|honour|worship|excellency|honorable)] #Person',
+        group: 0,
+        tag: ['Honorific', 'Person'],
+        reason: 'his-excellency',
+      },
+      //general pearson
+      { match: '#Honorific #Person', tag: 'Person', reason: 'honorific-person' },
+    ];
+
+    // const personDate = '(april|june|may|jan|august|eve)'
+    // const personMonth = '(january|april|may|june|jan|sep)'
+    const personAdj = '(misty|rusty|dusty|rich|randy|sandy|young|earnest|frank|brown)';
+    const personVerb = '(drew|pat|wade|ollie|will|rob|buck|bob|mark|jack)';
+
+    var personName = [
+      // ===person-date===
+      // in june
+      // { match: `(in|during|on|by|after|#Date) [${personDate}]`, group: 0, tag: 'Date', reason: 'in-june' },
+      // // june 1992
+      // { match: `${personDate} (#Value|#Date)`, tag: 'Date', reason: 'june-5th' },
+      // // June Smith
+      // { match: `${personDate} #ProperNoun`, tag: 'Person', reason: 'june-smith', safe: true },
+      // // june m. Cooper
+      // { match: `${personDate} #Acronym? #ProperNoun`, tag: 'Person', ifNo: '#Month', reason: 'june-smith-jr' },
+      // // ---person-month---
+      // //give to april
+      // {
+      //   match: `#Infinitive #Determiner? #Adjective? #Noun? (to|for) [${personMonth}]`,
+      //   group: 0,
+      //   tag: 'Person',
+      //   reason: 'ambig-person',
+      // },
+      // // remind june
+      // { match: `#Infinitive [${personMonth}]`, group: 0, tag: 'Person', reason: 'infinitive-person' },
+      // // april will
+      // { match: `[${personMonth}] #Modal`, group: 0, tag: 'Person', reason: 'ambig-modal' },
+      // // would april
+      // { match: `#Modal [${personMonth}]`, group: 0, tag: 'Person', reason: 'modal-ambig' },
+      // // it is may
+      // { match: `#Copula [${personMonth}]`, group: 0, tag: 'Person', reason: 'is-may' },
+      // // may is
+      // { match: `[${personMonth}] #Copula`, group: 0, tag: 'Person', reason: 'may-is' },
+      // // with april
+      // { match: `(that|with|for) [${personMonth}]`, group: 0, tag: 'Person', reason: 'that-month' },
+      // // may 5th
+      // { match: `[${personMonth}] the? #Value`, group: 0, tag: 'Month', reason: 'may-5th' },
+      // // 5th of may
+      // { match: `#Value of [${personMonth}]`, group: 0, tag: 'Month', reason: '5th-of-may' },
+
+      // ===person-adjective===
+      // rusty smith
+      { match: `${personAdj} #Person`, tag: 'Person', reason: 'randy-smith' },
+      // rusty a. smith
+      { match: `${personAdj} #Acronym? #ProperNoun`, tag: 'Person', reason: 'rusty-smith' },
+      // very rusty
+      { match: `#Adverb [${personAdj}]`, group: 0, tag: 'Adjective', reason: 'really-rich' },
+
+      // ===person-verb===
+      // would wade
+      { match: `#Modal [${personVerb}]`, group: 0, tag: 'Verb', reason: 'would-mark' },
+      { match: `#Adverb [${personVerb}]`, group: 0, tag: 'Verb', reason: 'really-mark' },
+      // drew closer
+      { match: `[${personVerb}] (#Adverb|#Comparative)`, group: 0, tag: 'Verb', reason: 'drew-closer' },
+      // wade smith
+      { match: `${personVerb} #Person`, tag: 'Person', reason: 'rob-smith' },
+      // wade m. Cooper
+      { match: `${personVerb} #Acronym #ProperNoun`, tag: 'Person', reason: 'rob-a-smith' },
+      //to mark
+      // { match: '(to|#Modal) [mark]', group: 0, tag: 'PresentTense', reason: 'to-mark' },
+      // will go
+      { match: '[will] #Verb', group: 0, tag: 'Modal', reason: 'will-verb' },
+    ];
+
+    var verbs = [
+      //sometimes adverbs - 'pretty good','well above'
+      {
+        match: '#Copula (pretty|dead|full|well|sure) (#Adjective|#Noun)',
+        tag: '#Copula #Adverb #Adjective',
+        reason: 'sometimes-adverb',
+      },
+      //i better ..
+      { match: '(#Pronoun|#Person) (had|#Adverb)? [better] #PresentTense', group: 0, tag: 'Modal', reason: 'i-better' },
+      // adj -> gerund
+      // like
+      { match: '(#Modal|i|they|we|do) not? [like]', group: 0, tag: 'PresentTense', reason: 'modal-like' },
+      // do not simply like
+      {
+        match: 'do (simply|just|really|not)+ [(#Adjective|like)]',
+        group: 0,
+        tag: 'Verb',
+        reason: 'do-simply-like',
+      },
+      // ==== Tense ====
+      //he left
+      { match: '#Noun #Adverb? [left]', group: 0, tag: 'PastTense', reason: 'left-verb' },
+
+      // ==== Copula ====
+      //will be running (not copula)
+      { match: 'will #Adverb? not? #Adverb? [be] #Gerund', group: 0, tag: 'Copula', reason: 'will-be-copula' },
+      //for more complex forms, just tag 'be'
+      { match: 'will #Adverb? not? #Adverb? [be] #Adjective', group: 0, tag: 'Copula', reason: 'be-copula' },
+      // ==== Infinitive ====
+      //march to
+      { match: '[march] (up|down|back|to|toward)', group: 0, tag: 'Infinitive', reason: 'march-to' },
+      //must march
+      { match: '#Modal [march]', group: 0, tag: 'Infinitive', reason: 'must-march' },
+      // may be
+      { match: `[may] be`, group: 0, tag: 'Verb', reason: 'may-be' },
+      // subject to
+      { match: `[(subject|subjects|subjected)] to`, group: 0, tag: 'Verb', reason: 'subject to' },
+      // subject to
+      { match: `[home] to`, group: 0, tag: 'PresentTense', reason: 'home to' },
+
+      // === misc==
+      // side with
+      // { match: '[(side|fool|monkey)] with', group: 0, tag: 'Infinitive', reason: 'fool-with' },
+      // open the door
+      { match: '[open] #Determiner', group: 0, tag: 'Infinitive', reason: 'open-the' },
+      //were being run
+      { match: `(were|was) being [#PresentTense]`, group: 0, tag: 'PastTense', reason: 'was-being' },
+      //had been broken
+      { match: `(had|has|have) [been /en$/]`, group: 0, tag: 'Auxiliary Participle', reason: 'had-been-broken' },
+      //had been smoked
+      { match: `(had|has|have) [been /ed$/]`, group: 0, tag: 'Auxiliary PastTense', reason: 'had-been-smoked' },
+      //were being run
+      { match: `(had|has) #Adverb? [been] #Adverb? #PastTense`, group: 0, tag: 'Auxiliary', reason: 'had-been-adj' },
+      //had to walk
+      { match: `(had|has) to [#Noun] (#Determiner|#Possessive)`, group: 0, tag: 'Infinitive', reason: 'had-to-noun' },
+      // have read
+      { match: `have [#PresentTense]`, group: 0, tag: 'PastTense', ifNo: ['come', 'gotten'], reason: 'have-read' },
+      // does that work
+      { match: `(does|will|#Modal) that [work]`, group: 0, tag: 'PastTense', reason: 'does-that-work' },
+      // sounds fun
+      { match: `[(sound|sounds)] #Adjective`, group: 0, tag: 'PresentTense', reason: 'sounds-fun' },
+      // look good
+      { match: `[(look|looks)] #Adjective`, group: 0, tag: 'PresentTense', reason: 'looks-good' },
+      //were under cooked
+      {
+        match: `(is|was|were) [(under|over) #PastTense]`,
+        group: 0,
+        tag: 'Adverb Adjective',
+        reason: 'was-under-cooked',
+      },
+
+      // damn them
+      { match: '[shit] (#Determiner|#Possessive|them)', group: 0, tag: 'Verb', reason: 'swear1-verb' },
+      { match: '[damn] (#Determiner|#Possessive|them)', group: 0, tag: 'Verb', reason: 'swear2-verb' },
+      { match: '[fuck] (#Determiner|#Possessive|them)', group: 0, tag: 'Verb', reason: 'swear3-verb' },
+    ];
+
+    // these are some of our heaviest-used matches
+    var auxiliary = [
+      // ==== Auxiliary ====
+      //was walking
+      { match: `[#Copula] (#Adverb|not)+? (#Gerund|#PastTense)`, group: 0, tag: 'Auxiliary', reason: 'copula-walking' },
+      //would walk
+      { match: `#Adverb+? [(#Modal|did)+] (#Adverb|not)+? #Verb`, group: 0, tag: 'Auxiliary', reason: 'modal-verb' },
+      //would have had
+      {
+        match: `#Modal (#Adverb|not)+? [have] (#Adverb|not)+? [had] (#Adverb|not)+? #Verb`,
+        group: 0,
+        tag: 'Auxiliary',
+        reason: 'would-have',
+      },
+      //support a splattering of auxillaries before a verb
+      { match: `[(has|had)] (#Adverb|not)+? #PastTense`, group: 0, tag: 'Auxiliary', reason: 'had-walked' },
+      // will walk
+      {
+        match: '[(do|does|did|will|have|had|has|got)] (not|#Adverb)+? #Verb',
+        group: 0,
+        tag: 'Auxiliary',
+        reason: 'have-had',
+      },
+      // about to go
+      { match: '[about to] #Adverb? #Verb', group: 0, tag: ['Auxiliary', 'Verb'], reason: 'about-to' },
+      //would be walking
+      { match: `#Modal (#Adverb|not)+? [be] (#Adverb|not)+? #Verb`, group: 0, tag: 'Auxiliary', reason: 'would-be' },
+      //had been walking
+      {
+        match: `[(#Modal|had|has)] (#Adverb|not)+? [been] (#Adverb|not)+? #Verb`,
+        group: 0,
+        tag: 'Auxiliary',
+        reason: 'had-been',
+      },
+      // was being driven
+      { match: '[(be|being|been)] #Participle', group: 0, tag: 'Auxiliary', reason: 'being-driven' },
+      // may want
+      { match: '[may] #Adverb? #Infinitive', group: 0, tag: 'Auxiliary', reason: 'may-want' },
+
+      // was being walked
+      {
+        match: '#Copula (#Adverb|not)+? [(be|being|been)] #Adverb+? #PastTense',
+        group: 0,
+        tag: 'Auxiliary',
+        reason: 'being-walked',
+      },
+      // will be walked
+      { match: 'will [be] #PastTense', group: 0, tag: 'Auxiliary', reason: 'will-be-x' },
+      // been walking
+      { match: '[(be|been)] (#Adverb|not)+? #Gerund', group: 0, tag: 'Auxiliary', reason: 'been-walking' },
+      // used to walk
+      { match: '[used to] #PresentTense', group: 0, tag: 'Auxiliary', reason: 'used-to-walk' },
+      // was going to walk
+      {
+        match: '#Copula (#Adverb|not)+? [going to] #Adverb+? #PresentTense',
+        group: 0,
+        tag: 'Auxiliary',
+        reason: 'going-to-walk',
+      },
+    ];
+
+    var phrasal = [
+      // ==== Phrasal ====
+      //'foo-up'
+      { match: '(#Verb && @hasHyphen) up', tag: 'PhrasalVerb', reason: 'foo-up' },
+      { match: '(#Verb && @hasHyphen) off', tag: 'PhrasalVerb', reason: 'foo-off' },
+      { match: '(#Verb && @hasHyphen) over', tag: 'PhrasalVerb', reason: 'foo-over' },
+      { match: '(#Verb && @hasHyphen) out', tag: 'PhrasalVerb', reason: 'foo-out' },
+      // walk in on
+      {
+        match: '[#Verb (in|out|up|down|off|back)] (on|in)',
+        ifNo: ['#Copula'],
+        tag: 'PhrasalVerb Particle',
+        reason: 'walk-in-on',
+      },
+      //fall over
+      { match: '#PhrasalVerb [#PhrasalVerb]', group: 0, tag: 'Particle', reason: 'phrasal-particle' },
+      // went on for
+      { match: '(lived|went|crept|go) [on] for', group: 0, tag: 'PhrasalVerb', reason: 'went-on' },
+      // got me thinking
+      // { match: '(got|had) me [#Noun]', group: 0, tag: 'Verb', reason: 'got-me-gerund' },
+      // help stop
+      { match: 'help [(stop|end|make|start)]', group: 0, tag: 'Infinitive', reason: 'help-stop' },
+      // start listening
+      { match: '[(stop|start|finish|help)] #Gerund', group: 0, tag: 'Infinitive', reason: 'start-listening' },
+      // mis-fired
+      // { match: '[(mis)] #Verb', group: 0, tag: 'Verb', reason: 'mis-firedsa' },
+      //back it up
+      {
+        match: '#Verb (him|her|it|us|himself|herself|itself|everything|something) [(up|down)]',
+        group: 0,
+        tag: 'Adverb',
+        reason: 'phrasal-pronoun-advb',
+      },
+    ];
+
+    // this is really hard to do
+    const notIf = ['i', 'we', 'they']; //we do not go
+    var imperative = [
+
+      // do not go
+      { match: '^do not? [#Infinitive #Particle?]', notIf, group: 0, tag: 'Imperative', reason: 'do-eat' },
+      // please go
+      { match: '^please do? not? [#Infinitive #Particle?]', group: 0, tag: 'Imperative', reason: 'please-go' },
+      // do it better
+      { match: '^[#Infinitive] it #Comparative', notIf, group: 0, tag: 'Imperative', reason: 'do-it-better' },
+      // do it again
+      { match: '^[#Infinitive] it (please|now|again|plz)', notIf, group: 0, tag: 'Imperative', reason: 'do-it-please' },
+      // go!
+      // { match: '^[#Infinitive]$', group: 0, tag: 'Imperative', reason: 'go' },
+      { match: '^[#Infinitive] (#Adjective|#Adverb)$', group: 0, tag: 'Imperative', reason: 'go' },
+      // turn down the noise
+      { match: '^[#Infinitive] (up|down|over) #Determiner', group: 0, tag: 'Imperative', reason: 'turn-down' },
+      // eat my shorts
+      { match: '^[#Infinitive] (your|my|the|some|a|an)', group: 0, tag: 'Imperative', reason: 'eat-my-shorts' },
+    ];
+
+    // order matters
+    let matches$1 = [
+      // u r cool
+      { match: 'u r', tag: '#Pronoun #Copula', reason: 'u r' },
+      { match: '#Noun [(who|whom)]', group: 0, tag: 'Determiner', reason: 'captain-who' },
+
+      // ==== Conditions ====
+      // had he survived,
+      { match: '[had] #Noun+ #PastTense', group: 0, tag: 'Condition', reason: 'had-he' },
+      // were he to survive
+      { match: '[were] #Noun+ to #Infinitive', group: 0, tag: 'Condition', reason: 'were-he' },
+
+      //swear-words as non-expression POS
+      { match: 'holy (shit|fuck|hell)', tag: 'Expression', reason: 'swears-expression' },
+      // well..
+      { match: '^(well|so|okay)', tag: 'Expression', reason: 'well-' },
+      // some sort of
+      { match: 'some sort of', tag: 'Adjective Noun Conjunction', reason: 'some-sort-of' },
+      // of some sort
+      { match: 'of some sort', tag: 'Conjunction Adjective Noun', reason: 'of-some-sort' },
+
+      // such skill
+      { match: '[such] (a|an|is)? #Noun', group: 0, tag: 'Determiner', reason: 'such-skill' },
+      // sorry
+      { match: '(say|says|said) [sorry]', group: 0, tag: 'Expression', reason: 'say-sorry' },
+
+      // double-prepositions
+      // rush out of
+      {
+        match: '#Verb [(out|for|through|about|around|in|down|up|on|off)] #Preposition',
+        group: 0,
+        ifNo: ['#Copula'],//were out
+        tag: 'Particle',
+        reason: 'rush-out',
+      },
+      // at about
+      { match: '#Preposition [about]', group: 0, tag: 'Adjective', reason: 'at-about' },
+      // dude we should
+      { match: '^[(dude|man|girl)] #Pronoun', group: 0, tag: 'Expression', reason: 'dude-i' },
+      // are welcome
+      { match: '#Copula [#Expression]', group: 0, tag: 'Noun', reason: 'are-welcome' },
+    ];
+    var misc = matches$1;
+
+    // import orgWords from './_orgWords.js'
+    // let orgMap = `(${orgWords.join('|')})`
+
+    /*
+    const multi = [
+      'building society',
+      'central bank',
+      'department store',
+      'institute of technology',
+      'liberation army',
+      'people party',
+      'social club',
+      'state police',
+      'state university',
+    ]
+    */
+
+    var orgs = [
+      // Foo University
+      // { match: `#Noun ${orgMap}`, tag: 'Organization', safe: true, reason: 'foo-university' },
+      // // University of Toronto
+      // { match: `${orgMap} of #Place`, tag: 'Organization', safe: true, reason: 'university-of-foo' },
+
+      // // foo regional health authority
+      // { match: `${orgMap} (health|local|regional)+ authority`, tag: 'Organization', reason: 'regional-health' },
+      // // foo stock exchange
+      // { match: `${orgMap} (stock|mergantile)+ exchange`, tag: 'Organization', reason: 'stock-exchange' },
+      // // foo news service
+      // { match: `${orgMap} (daily|evening|local)+ news service?`, tag: 'Organization', reason: 'foo-news' },
+
+      //John & Joe's
+      { match: '#Noun (&|n) #Noun', tag: 'Organization', reason: 'Noun-&-Noun' },
+      // teachers union of Ontario
+      { match: '#Organization of the? #ProperNoun', tag: 'Organization', reason: 'org-of-place', safe: true },
+      //walmart USA
+      { match: '#Organization #Country', tag: 'Organization', reason: 'org-country' },
+      //organization
+      { match: '#ProperNoun #Organization', tag: 'Organization', reason: 'titlecase-org' },
+      //FitBit Inc
+      { match: '#ProperNoun (ltd|co|inc|dept|assn|bros)', tag: 'Organization', reason: 'org-abbrv' },
+      // the OCED
+      { match: 'the [#Acronym]', group: 0, tag: 'Organization', reason: 'the-acronym', safe: true },
+      // global trade union
+      {
+        match: '(world|global|international|national|#Demonym) #Organization',
+        tag: 'Organization',
+        reason: 'global-org',
+      },
+      // schools
+      { match: '#Noun+ (public|private) school', tag: 'School', reason: 'noun-public-school' },
+    ];
+
+    var places = [
+      // ==== Region ====
+      //West Norforlk
+      {
+        match: '(west|north|south|east|western|northern|southern|eastern)+ #Place',
+        tag: 'Region',
+        reason: 'west-norfolk',
+      },
+      //some us-state acronyms (exlude: al, in, la, mo, hi, me, md, ok..)
+      {
+        match: '#City [(al|ak|az|ar|ca|ct|dc|fl|ga|id|il|nv|nh|nj|ny|oh|pa|sc|tn|tx|ut|vt|pr)]',
+        group: 0,
+        tag: 'Region',
+        reason: 'us-state',
+      },
+      // portland oregon
+      {
+        match: 'portland [or]',
+        group: 0,
+        tag: 'Region',
+        reason: 'portland-or',
+      },
+      //Foo District
+      {
+        match: '#ProperNoun+ (district|region|province|county|prefecture|municipality|territory|burough|reservation)',
+        tag: 'Region',
+        reason: 'foo-district',
+      },
+      //District of Foo
+      {
+        match: '(district|region|province|municipality|territory|burough|state) of #ProperNoun',
+        tag: 'Region',
+        reason: 'district-of-Foo',
+      },
+      // in Foo California
+      {
+        match: 'in [#ProperNoun] #Place',
+        group: 0,
+        tag: 'Place',
+        reason: 'propernoun-place',
+      },
+      // ==== Address ====
+      {
+        match: '#Value #Noun (st|street|rd|road|crescent|cr|way|tr|terrace|avenue|ave)',
+        tag: 'Address',
+        reason: 'address-st',
+      },
+    ];
+
+    var conjunctions = [
+      // ==== Conjunctions ====
+      { match: '[so] #Noun', group: 0, tag: 'Conjunction', reason: 'so-conj' },
+      //how he is driving
+      {
+        match: '[(who|what|where|why|how|when)] #Noun #Copula #Adverb? (#Verb|#Adjective)',
+        group: 0,
+        tag: 'Conjunction',
+        reason: 'how-he-is-x',
+      },
+      // when he
+      { match: '#Copula [(who|what|where|why|how|when)] #Noun', group: 0, tag: 'Conjunction', reason: 'when-he' },
+      // says that he..
+      { match: '#Verb [that] #Pronoun', group: 0, tag: 'Conjunction', reason: 'said-that-he' },
+      // things that are required
+      { match: '#Noun [that] #Copula', group: 0, tag: 'Conjunction', reason: 'that-are' },
+      // things that seem cool
+      { match: '#Noun [that] #Verb #Adjective', group: 0, tag: 'Conjunction', reason: 'that-seem' },
+      // wasn't that wide..
+      { match: '#Noun #Copula not? [that] #Adjective', group: 0, tag: 'Adverb', reason: 'that-adj' },
+
+      // ==== Prepositions ====
+      //all students
+      { match: '#Verb #Adverb? #Noun [(that|which)]', group: 0, tag: 'Preposition', reason: 'that-prep' },
+      //work, which has been done.
+      { match: '@hasComma [which] (#Pronoun|#Verb)', group: 0, tag: 'Preposition', reason: 'which-copula' },
+      { match: '#Copula just [like]', group: 0, tag: 'Preposition', reason: 'like-preposition' },
+      //folks like her
+      { match: '#Noun [like] #Noun', group: 0, tag: 'Preposition', reason: 'noun-like' },
+
+
+
+
+      // ==== Questions ====
+      // where
+      // why
+      // when
+      // who
+      // whom
+      // whose
+      // what
+      // which
+      //the word 'how many'
+      // { match: '^(how|which)', tag: 'QuestionWord', reason: 'how-question' },
+      // how-he, when the
+      { match: '[#QuestionWord] (#Pronoun|#Determiner)', group: 0, tag: 'Preposition', reason: 'how-he' },
+      // when stolen
+      { match: '[#QuestionWord] #Participle', group: 0, tag: 'Preposition', reason: 'when-stolen' },
+      // how is
+      { match: '[how] (#Determiner|#Copula|#Modal|#PastTense)', group: 0, tag: 'QuestionWord', reason: 'how-is' },
+      // children who dance
+      { match: '#Plural [(who|which|when)] .', group: 0, tag: 'Preposition', reason: 'people-who' },
+    ];
+
+    let matches = [].concat(
+      adj,
+      advAdj,
+      gerundAdj,
+      nounAdj,
+      adv,
+      ambigDates,
+      dates,
+      noun,
+      gerundNouns,
+      presNouns,
+      money,
+      fractions,
+      numbers,
+      person,
+      personName,
+      verbs,
+      adjVerb,
+      auxiliary,
+      phrasal,
+      imperative,
+      misc,
+      orgs,
+      places,
+      conjunctions
+    );
+    var model = {
+      two: {
+        matches,
+      },
+    };
+
+    // runs all match/tag patterns in model.two.matches
+    const postTagger = function (view) {
+      const { world } = view;
+      const { model, methods } = world;
+      let byGroup = methods.two.compile(model.two.matches, methods);
+      // perform these matches on a comma-seperated document
+      let document = methods.two.quickSplit(view.document);
+      let found = methods.two.bulkMatch(document, byGroup, methods);
+      // console.log(found.length, 'found')
+      methods.two.bulkTagger(found, document, world);
+      // 2nd time?
+      // let subset = new Set(found.map(todo => todo.pointer[0]))
+      // subset = Array.from(subset).map(n => document[n])
+      // found = methods.two.bulkMatch(subset, byGroup, methods)
+      // methods.two.bulkTagger(found, subset, world)
+      // leave a nice cache for the next person?
+      // view.compute('cache')
+      view.uncache();
+      return document
+    };
+
+    var compute = { postTagger };
+
+    const parse = function (matches, methods) {
+      const parseMatch = methods.one.parseMatch;
+      matches.forEach(obj => {
+        obj.regs = parseMatch(obj.match);
+        // wrap these ifNo properties into an array
+        if (typeof obj.ifNo === 'string') {
+          obj.ifNo = [obj.ifNo];
+        }
+      });
+      return matches
+    };
+
+    var parse$1 = parse;
+
+    const growFastOr = function (obj, index) {
+      let or = obj.regs[index];
+      return Array.from(or.fastOr).map(str => {
+        let cpy = Object.assign({}, or);
+        delete cpy.fastOr;
+        delete cpy.operator;
+        cpy.word = str;
+        return cpy
+      })
+    };
+
+    const growSlowOr = function (obj, index) {
+      let or = obj.regs[index];
+      return or.choices.map(regs => {
+        if (regs.length === 1) {
+          return regs[0]
+        }
+        return { choices: regs, operator: or.operator }
+      })
+    };
+
+    const expand = function (matches) {
+      let all = [];
+      matches.forEach(obj => {
+        // expand simple '(one|two)' matches
+        let foundOr = obj.regs.findIndex(reg => reg.operator === 'or' && reg.fastOr && !reg.optional && !reg.negative);
+        if (foundOr !== -1) {
+          let more = growFastOr(obj, foundOr);
+          more.forEach(mo => {
+            let newObj = Object.assign({}, obj); //clone
+            newObj.regs = obj.regs.slice(0); //clone
+            newObj.regs[foundOr] = mo;
+            newObj._expanded = true;
+            all.push(newObj);
+          });
+          return
+        }
+        // expand '(#Foo|two three)' matches
+        foundOr = obj.regs.findIndex(reg => reg.operator === 'or' && reg.choices && !reg.optional && !reg.negative);
+        if (foundOr !== -1) {
+          let more = growSlowOr(obj, foundOr);
+          more.forEach(mo => {
+            let newObj = Object.assign({}, obj); //clone
+            newObj.regs = obj.regs.slice(0); //clone
+            newObj.regs[foundOr] = mo;
+            newObj._expanded = true;
+            all.push(newObj);
+          });
+          return
+        }
+        all.push(obj);
+      });
+      return all
+    };
+
+    var expand$1 = expand;
+
+    const cache = function (matches, methods) {
+      const cacheMatch = methods.one.cacheMatch;
+      matches.forEach(obj => {
+        obj.needs = Array.from(cacheMatch(obj.regs));
+      });
+      return matches
+    };
+
+    var cache$1 = cache;
+
+    const groupBy = function (matches) {
+      let byGroup = {};
+      matches.forEach(obj => {
+        obj.needs.forEach(need => {
+          byGroup[need] = byGroup[need] || [];
+          byGroup[need].push(obj);
+        });
+      });
+      return byGroup
+    };
+
+    var group = groupBy;
+
+    // do some indexing on the list of matches
+    const compile = function (matches, methods) {
+      // turn match-syntax into json
+      matches = parse$1(matches, methods);
+      // convert (a|b) to ['a', 'b']
+      matches = expand$1(matches);
+      matches = expand$1(matches); // run this twice
+      // retrieve the needs of each match statement
+      matches = cache$1(matches, methods);
+
+      // organize them according to need...
+      let byGroup = group(matches, methods);
+
+      // Every sentence has a Noun/Verb,
+      // assume any match will be found on another need
+      // this is true now,
+      // but we should stay careful about this.
+      delete byGroup['#Noun'];
+      delete byGroup['#Verb'];
+      // console.log(matches.filter(o => o.needs.length === 1)) //check!
+
+      return byGroup
+    };
+
+    var compile$1 = compile;
+
+    // for each cached-sentence, find a list of possible matches
+    const matchUp = function (docNeeds, matchGroups) {
+      return docNeeds.map(needs => {
+        let maybes = [];
+        needs.forEach(need => {
+          if (matchGroups.hasOwnProperty(need)) {
+            maybes = maybes.concat(matchGroups[need]);
+          }
+        });
+        return new Set(maybes)
+      })
+    };
+
+    var matchUp$1 = matchUp;
+
+    // filter-down list of maybe-matches
+    const localTrim = function (maybeList, docCache) {
+      docCache.forEach((haves, n) => {
+        // ensure all stated-needs of the match are met
+        maybeList[n] = Array.from(maybeList[n]).filter(obj => {
+          return obj.needs.every(need => haves.has(need))
+        });
+        // ensure nothing matches in our 'ifNo' property
+        maybeList[n] = maybeList[n].filter(obj => {
+          if (obj.ifNo !== undefined && obj.ifNo.some(no => docCache[n].has(no)) === true) {
+            return false
+          }
+          return true
+        });
+      });
+      return maybeList
+    };
+    var localTrim$1 = localTrim;
+
+    // finally,
+    // actually run these match-statements on the terms
+    const runMatch = function (maybeList, document, one) {
+      let results = [];
+      maybeList.forEach((allPossible, n) => {
+        allPossible.forEach(m => {
+          let res = one.match([document[n]], m);
+          if (res.ptrs.length > 0) {
+            res.ptrs.forEach(ptr => {
+              ptr[0] = n; // fix the sentence pointer
+              let todo = Object.assign({}, m, { pointer: ptr });
+              if (m.unTag !== undefined) {
+                todo.unTag = m.unTag;
+              }
+              results.push(todo);
+            });
+          }
+        });
+      });
+      return results
+    };
+    var runMatch$1 = runMatch;
+
+    const matcher = function (document, byGroup, methods) {
+      const one = methods.one;
+      // find suitable matches to attempt, on each sentence
+      let docCache = one.cacheDoc(document);
+      // collect possible matches for this document
+      let maybeList = matchUp$1(docCache, byGroup);
+      // ensure all defined needs are met for each match
+      maybeList = localTrim$1(maybeList, docCache);
+      // now actually run the matches
+      let results = runMatch$1(maybeList, document, one);
+      // console.dir(results, { depth: 5 })
+      return results
+    };
+    var bulkMatch = matcher;
+
+    const logger = function (todo, document) {
+      let [n, start, end] = todo.pointer;
+      let terms = document[n];
+      let i = start > 4 ? start - 2 : 0;
+      let tag = typeof todo.tag !== 'string' ? todo.tag.join(' #') : todo.tag;
+      let msg = `  [${todo.reason}]`.padEnd(20) + ' - ';
+      const yellow = str => '\x1b[2m' + str + '\x1b[0m';
+      for (; i < terms.length; i += 1) {
+        if (i > end + 2) {
+          break
+        }
+        let str = terms[i].machine || terms[i].normal;
+        msg += i > start && i < end ? `\x1b[32m${str}\x1b[0m ` : `${yellow(str)} `; // matched terms are green
+      }
+      msg += '  \x1b[32m→\x1b[0m #' + tag.padEnd(12) + '  ';
+      console.log(msg); //eslint-disable-line
+    };
+    var logger$1 = logger;
+
+    const tagger = function (list, document, world) {
+      const { model, methods } = world;
+      const { getDoc, setTag, unTag } = methods.one;
+      if (list.length === 0) {
+        return list
+      }
+      // some logging for debugging
+      let env = typeof process === 'undefined' ? self.env || {} : process.env;
+      if (env.DEBUG_TAGS) {
+        console.log(`\n  \x1b[32m→ ${list.length} corrections:\x1b[0m`); //eslint-disable-line
+      }
+      return list.map(todo => {
+        if (!todo.tag) {
+          return
+        }
+        if (env.DEBUG_TAGS) {
+          logger$1(todo, document);
+        }
+        let terms = getDoc([todo.pointer], document)[0];
+        // handle 'safe' tag
+        if (todo.safe === true) {
+          // check for conflicting tags
+          if (methods.two.canBe(terms, todo.tag, model) === false) {
+            return
+          }
+          // dont tag half of a hyphenated word
+          if (terms[terms.length - 1].post === '-') {
+            return
+          }
+        }
+        if (todo.tag !== undefined) {
+          setTag(terms, todo.tag, world, todo.safe);
+          // quick and dirty plural tagger
+          if (terms.length === 1 && todo.tag === 'Noun') {
+            if (terms[0].text && terms[0].text.match(/..s$/) !== null) {
+              setTag(terms, 'Plural', world, todo.safe);
+            }
+          }
+        }
+        if (todo.unTag !== undefined) {
+          unTag(terms, todo.unTag, world, todo.safe);
+        }
+      })
+    };
+    var bulkTagger = tagger;
+
+    // is this tag consistent with the tags they already have?
+    const canBe = function (terms, tag, model) {
+      let tagSet = model.one.tagSet;
+      if (!tagSet.hasOwnProperty(tag)) {
+        return true
+      }
+      let not = tagSet[tag].not || [];
+      for (let i = 0; i < terms.length; i += 1) {
+        let term = terms[i];
+        for (let k = 0; k < not.length; k += 1) {
+          if (term.tags.has(not[k]) === true) {
+            return false //found a tag conflict - bail!
+          }
+        }
+      }
+      return true
+    };
+    var canBe$1 = canBe;
+
+    var methods = {
+      two: {
+        compile: compile$1,
+        bulkMatch,
+        bulkTagger,
+        canBe: canBe$1,
+      },
+    };
+
+    const round = n => Math.round(n * 100) / 100;
+
+    function api (View) {
+      View.prototype.confidence = function () {
+        let sum = 0;
+        let count = 0;
+        this.docs.forEach(terms => {
+          terms.forEach(term => {
+            count += 1;
+            sum += term.confidence || 1;
+          });
+        });
+        if (count === 0) {
+          return 1
+        }
+        return round(sum / count)
+      };
     }
 
-    // (20:2) <Two>
-    function create_default_slot_7$1(ctx) {
-    	let div2;
-    	let div0;
-    	let grid;
-    	let t0;
-    	let div1;
-    	let t1;
-    	let span0;
-    	let t3;
-    	let span1;
-    	let t5;
-    	let current;
+    const plugin = {
+      api,
+      compute,
+      methods,
+      model,
+      hooks: ['postTagger'],
+    };
+    var postTag = plugin;
 
-    	grid = new Grid({
-    			props: { seed: "8935149fa5750c247c9" },
-    			$$inline: true
-    		});
+    nlp$1.plugin(preTag); //~85kb
+    nlp$1.plugin(contractions); //~6kb
+    nlp$1.plugin(postTag); //~33kb
 
-    	const block = {
-    		c: function create() {
-    			div2 = element("div");
-    			div0 = element("div");
-    			create_component(grid.$$.fragment);
-    			t0 = space();
-    			div1 = element("div");
-    			t1 = text$1("and we can\n        ");
-    			span0 = element("span");
-    			span0.textContent = "search";
-    			t3 = text$1("\n        it, or ");
-    			span1 = element("span");
-    			span1.textContent = "read";
-    			t5 = text$1(" it-");
-    			set_style(div0, "max-width", "180px");
-    			set_style(div0, "margin-bottom", "1rem");
-    			add_location(div0, file$a, 21, 6, 559);
-    			attr_dev(span0, "class", "sky");
-    			add_location(span0, file$a, 26, 8, 706);
-    			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$a, 27, 15, 754);
-    			add_location(div1, file$a, 24, 6, 673);
-    			attr_dev(div2, "class", "tab down f09 col");
-    			add_location(div2, file$a, 20, 4, 522);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
-    			mount_component(grid, div0, null);
-    			append_dev(div2, t0);
-    			append_dev(div2, div1);
-    			append_dev(div1, t1);
-    			append_dev(div1, span0);
-    			append_dev(div1, t3);
-    			append_dev(div1, span1);
-    			append_dev(div1, t5);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
-    			destroy_component(grid);
-    		}
-    	};
+    /* lib/Tagger.svelte generated by Svelte v3.43.0 */
+    const file$2 = "lib/Tagger.svelte";
 
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_7$1.name,
-    		type: "slot",
-    		source: "(20:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[2] = list[i];
+    	child_ctx[4] = i;
+    	return child_ctx;
     }
 
-    // (32:2) <One>
-    function create_default_slot_6$3(ctx) {
-    	let div5;
-    	let span0;
-    	let t1;
-    	let div2;
-    	let div0;
-    	let t3;
-    	let div1;
-    	let span1;
-    	let t5;
-    	let span2;
-    	let t7;
-    	let span3;
-    	let t9;
-    	let div3;
-    	let sup;
-    	let t11;
-    	let sub;
-    	let t13;
-    	let span4;
-    	let t15;
-    	let span5;
-    	let t17;
-    	let div4;
-    	let span6;
-    	let t19;
-    	let i;
-    	let t21;
-    	let t22;
-    	let grid0;
-    	let t23;
-    	let div6;
-    	let t24;
-    	let div7;
-    	let t26;
-    	let div8;
-    	let t27;
-    	let grid1;
-    	let current;
-
-    	grid0 = new Grid({
-    			props: { seed: "d6ba2837558e747e314" },
-    			$$inline: true
-    		});
-
-    	grid1 = new Grid({
-    			props: { seed: "6daf3fd1a93ca04509c" },
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			div5 = element("div");
-    			span0 = element("span");
-    			span0.textContent = "but we can't";
-    			t1 = space();
-    			div2 = element("div");
-    			div0 = element("div");
-    			div0.textContent = "get";
-    			t3 = space();
-    			div1 = element("div");
-    			span1 = element("span");
-    			span1.textContent = "the";
-    			t5 = space();
-    			span2 = element("span");
-    			span2.textContent = "actual";
-    			t7 = space();
-    			span3 = element("span");
-    			span3.textContent = "information";
-    			t9 = space();
-    			div3 = element("div");
-    			sup = element("sup");
-    			sup.textContent = "-◡";
-    			t11 = text$1("\n        back\n        ");
-    			sub = element("sub");
-    			sub.textContent = " ?";
-    			t13 = space();
-    			span4 = element("span");
-    			span4.textContent = "◜";
-    			t15 = space();
-    			span5 = element("span");
-    			span5.textContent = "-◡";
-    			t17 = space();
-    			div4 = element("div");
-    			span6 = element("span");
-    			span6.textContent = "like";
-    			t19 = text$1(", to ");
-    			i = element("i");
-    			i.textContent = "use it";
-    			t21 = text$1("  again.");
-    			t22 = space();
-    			create_component(grid0.$$.fragment);
-    			t23 = space();
-    			div6 = element("div");
-    			t24 = space();
-    			div7 = element("div");
-    			div7.textContent = "which is weird actually.";
-    			t26 = space();
-    			div8 = element("div");
-    			t27 = space();
-    			create_component(grid1.$$.fragment);
-    			attr_dev(span0, "class", "down i");
-    			add_location(span0, file$a, 33, 6, 854);
-    			attr_dev(div0, "class", "sea i f2 sky");
-    			add_location(div0, file$a, 35, 8, 929);
-    			attr_dev(span1, "class", "red ");
-    			add_location(span1, file$a, 37, 10, 1035);
-    			attr_dev(span2, "class", "red f09 i");
-    			add_location(span2, file$a, 38, 10, 1077);
-    			attr_dev(span3, "class", "sea b i f2");
-    			set_style(span3, "top", "22px");
-    			set_style(span3, "left", "32px");
-    			set_style(span3, "position", "absolute");
-    			add_location(span3, file$a, 39, 10, 1127);
-    			set_style(div1, "position", "relative");
-    			set_style(div1, "margin-top", "1.2rem");
-    			add_location(div1, file$a, 36, 8, 973);
-    			attr_dev(div2, "class", "tab ");
-    			add_location(div2, file$a, 34, 6, 902);
-    			set_style(sup, "font-size", "12px");
-    			add_location(sup, file$a, 43, 8, 1346);
-    			set_style(sub, "font-size", "1.1rem");
-    			add_location(sub, file$a, 45, 8, 1407);
-    			set_style(span4, "margin-left", "0.4rem");
-    			set_style(span4, "font-size", "12px");
-    			add_location(span4, file$a, 46, 8, 1460);
-    			set_style(span5, "font-size", "12px");
-    			add_location(span5, file$a, 48, 8, 1602);
-    			attr_dev(div3, "class", "sky i ");
-    			set_style(div3, "font-size", "2.0rem");
-    			set_style(div3, "margin-left", "20px");
-    			set_style(div3, "margin-top", "2.3rem");
-    			add_location(div3, file$a, 42, 6, 1253);
-    			set_style(span6, "font-size", "12px");
-    			add_location(span6, file$a, 50, 32, 1687);
-    			add_location(i, file$a, 50, 78, 1733);
-    			attr_dev(div4, "class", "tab down f09");
-    			add_location(div4, file$a, 50, 6, 1661);
-    			attr_dev(div5, "style", "");
-    			add_location(div5, file$a, 32, 4, 833);
-    			set_style(div6, "margin-top", "3rem");
-    			add_location(div6, file$a, 53, 4, 1823);
-    			attr_dev(div7, "class", "tab down f09");
-    			add_location(div7, file$a, 55, 4, 1971);
-    			attr_dev(div8, "class", "tab down f09");
-    			add_location(div8, file$a, 56, 4, 2032);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div5, anchor);
-    			append_dev(div5, span0);
-    			append_dev(div5, t1);
-    			append_dev(div5, div2);
-    			append_dev(div2, div0);
-    			append_dev(div2, t3);
-    			append_dev(div2, div1);
-    			append_dev(div1, span1);
-    			append_dev(div1, t5);
-    			append_dev(div1, span2);
-    			append_dev(div1, t7);
-    			append_dev(div1, span3);
-    			append_dev(div5, t9);
-    			append_dev(div5, div3);
-    			append_dev(div3, sup);
-    			append_dev(div3, t11);
-    			append_dev(div3, sub);
-    			append_dev(div3, t13);
-    			append_dev(div3, span4);
-    			append_dev(div3, t15);
-    			append_dev(div3, span5);
-    			append_dev(div5, t17);
-    			append_dev(div5, div4);
-    			append_dev(div4, span6);
-    			append_dev(div4, t19);
-    			append_dev(div4, i);
-    			append_dev(div4, t21);
-    			append_dev(div5, t22);
-    			mount_component(grid0, div5, null);
-    			insert_dev(target, t23, anchor);
-    			insert_dev(target, div6, anchor);
-    			insert_dev(target, t24, anchor);
-    			insert_dev(target, div7, anchor);
-    			insert_dev(target, t26, anchor);
-    			insert_dev(target, div8, anchor);
-    			insert_dev(target, t27, anchor);
-    			mount_component(grid1, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid0.$$.fragment, local);
-    			transition_in(grid1.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid0.$$.fragment, local);
-    			transition_out(grid1.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div5);
-    			destroy_component(grid0);
-    			if (detaching) detach_dev(t23);
-    			if (detaching) detach_dev(div6);
-    			if (detaching) detach_dev(t24);
-    			if (detaching) detach_dev(div7);
-    			if (detaching) detach_dev(t26);
-    			if (detaching) detach_dev(div8);
-    			if (detaching) detach_dev(t27);
-    			destroy_component(grid1, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_6$3.name,
-    		type: "slot",
-    		source: "(32:2) <One>",
-    		ctx
-    	});
-
-    	return block;
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[5] = list[i];
+    	child_ctx[7] = i;
+    	return child_ctx;
     }
 
-    // (70:2) <Two>
-    function create_default_slot_5$4(ctx) {
-    	let div0;
-    	let t1;
-    	let div1;
-    	let t3;
-    	let div2;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "and people";
-    			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "keep typing";
-    			t3 = space();
-    			div2 = element("div");
-    			div2.textContent = "more of it.";
-    			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$a, 70, 4, 2545);
-    			attr_dev(div1, "class", "i sea tab");
-    			add_location(div1, file$a, 71, 4, 2583);
-    			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$a, 72, 4, 2628);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div1, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div2, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_5$4.name,
-    		type: "slot",
-    		source: "(70:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (76:2) <Two>
-    function create_default_slot_4$4(ctx) {
+    // (13:8) {#each p.terms as term, i}
+    function create_each_block_1(ctx) {
     	let div;
-    	let t;
-    	let grid;
-    	let current;
-
-    	grid = new Grid({
-    			props: { seed: "1a30de68df4ea7e7bef" },
-    			$$inline: true
-    		});
+    	let t0_value = /*term*/ ctx[5].pre + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*term*/ ctx[5].text + "";
+    	let t2;
+    	let t3;
+    	let t4_value = /*term*/ ctx[5].post + "";
+    	let t4;
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			t = space();
-    			create_component(grid.$$.fragment);
-    			set_style(div, "width", "250px");
-    			add_location(div, file$a, 76, 4, 2689);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(grid, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t);
-    			destroy_component(grid, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_4$4.name,
-    		type: "slot",
-    		source: "(76:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (82:2) <One>
-    function create_default_slot_3$5(ctx) {
-    	let div0;
-    	let t0;
-    	let div2;
-    	let b;
-    	let t2;
-    	let div1;
-    	let t4;
-    	let ul;
-    	let div3;
-    	let t6;
-    	let div5;
-    	let t7;
-    	let div4;
-    	let t9;
-    	let div6;
-    	let t11;
-    	let div7;
-    	let t13;
-    	let div8;
-    	let t14;
-    	let i;
-    	let t16;
-    	let t17;
-    	let div9;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			t0 = space();
-    			div2 = element("div");
-    			b = element("b");
-    			b.textContent = "compromise";
-    			t2 = text$1("  is a set\n      ");
-    			div1 = element("div");
-    			div1.textContent = "of tools and standards -";
-    			t4 = space();
-    			ul = element("ul");
-    			div3 = element("div");
-    			div3.textContent = "to mess with it.";
-    			t6 = space();
-    			div5 = element("div");
-    			t7 = text$1("like a crowbar, ");
-    			div4 = element("div");
-    			div4.textContent = "for text.";
-    			t9 = space();
-    			div6 = element("div");
-    			div6.textContent = "so you can pull a chunk out, or";
-    			t11 = space();
-    			div7 = element("div");
-    			div7.textContent = "ask a question off of -";
-    			t13 = space();
-    			div8 = element("div");
-    			t14 = text$1("and ");
-    			i = element("i");
-    			i.textContent = "get something back";
-    			t16 = text$1(", from words.");
-    			t17 = space();
-    			div9 = element("div");
-    			attr_dev(div0, "class", "space");
-    			add_location(div0, file$a, 82, 4, 2843);
-    			attr_dev(b, "class", "sky f2");
-    			add_location(b, file$a, 84, 6, 2881);
-    			attr_dev(div1, "class", "tab");
-    			set_style(div1, "margin-top", "1.4rem");
-    			add_location(div1, file$a, 85, 6, 2935);
-    			add_location(div2, file$a, 83, 4, 2869);
-    			add_location(div3, file$a, 89, 6, 3101);
-    			attr_dev(div4, "style", "");
-    			add_location(div4, file$a, 95, 24, 3380);
-    			attr_dev(div5, "class", "sea down tab f2 ");
-    			set_style(div5, "position", "relative");
-    			set_style(div5, "margin", "4rem");
-    			add_location(div5, file$a, 94, 6, 3285);
-    			attr_dev(div6, "class", "f09 i down");
-    			add_location(div6, file$a, 97, 6, 3429);
-    			attr_dev(div7, "class", "down");
-    			add_location(div7, file$a, 101, 6, 3588);
-    			add_location(i, file$a, 102, 32, 3668);
-    			attr_dev(div8, "class", "down f09");
-    			add_location(div8, file$a, 102, 6, 3642);
-    			add_location(ul, file$a, 88, 4, 3090);
-    			attr_dev(div9, "class", "down");
-    			add_location(div9, file$a, 108, 4, 3865);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, b);
-    			append_dev(div2, t2);
-    			append_dev(div2, div1);
-    			insert_dev(target, t4, anchor);
-    			insert_dev(target, ul, anchor);
-    			append_dev(ul, div3);
-    			append_dev(ul, t6);
-    			append_dev(ul, div5);
-    			append_dev(div5, t7);
-    			append_dev(div5, div4);
-    			append_dev(ul, t9);
-    			append_dev(ul, div6);
-    			append_dev(ul, t11);
-    			append_dev(ul, div7);
-    			append_dev(ul, t13);
-    			append_dev(ul, div8);
-    			append_dev(div8, t14);
-    			append_dev(div8, i);
-    			append_dev(div8, t16);
-    			insert_dev(target, t17, anchor);
-    			insert_dev(target, div9, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t4);
-    			if (detaching) detach_dev(ul);
-    			if (detaching) detach_dev(t17);
-    			if (detaching) detach_dev(div9);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3$5.name,
-    		type: "slot",
-    		source: "(82:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (112:2) <Left accent="steelblue">
-    function create_default_slot_2$5(ctx) {
-    	let div0;
-    	let t0;
-    	let hr;
-    	let t1;
-    	let i;
-    	let t3;
-    	let div1;
-    	let t4;
-    	let a;
-    	let t6;
-    	let t7;
-    	let div2;
-    	let t9;
-    	let div4;
-    	let div3;
-    	let t11;
-    	let div6;
-    	let t12;
-    	let div5;
-    	let t14;
-    	let div7;
-    	let t15;
-    	let div8;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			t0 = space();
-    			hr = element("hr");
-    			t1 = text$1("\n    we think that  ");
-    			i = element("i");
-    			i.textContent = "open-source, web-focused";
-    			t3 = text$1("  tools\n    ");
-    			div1 = element("div");
-    			t4 = text$1("and a ");
-    			a = element("a");
-    			a.textContent = "stupidly-good";
-    			t6 = text$1("  group of contributers -");
-    			t7 = space();
-    			div2 = element("div");
-    			div2.textContent = "focusing on configurability";
-    			t9 = space();
-    			div4 = element("div");
-    			div3 = element("div");
-    			div3.textContent = "avoiding fancy engineering";
-    			t11 = space();
-    			div6 = element("div");
-    			t12 = text$1("and,\n      ");
-    			div5 = element("div");
-    			div5.textContent = "keeping filesize tiny.";
-    			t14 = space();
-    			div7 = element("div");
-    			t15 = space();
-    			div8 = element("div");
-    			div8.textContent = "that's the best way to build this.";
-    			attr_dev(div0, "class", "down");
-    			add_location(div0, file$a, 112, 4, 3928);
-    			set_style(hr, "height", "3px");
-    			set_style(hr, "background-color", "#50617A");
-    			set_style(hr, "width", "250px");
-    			set_style(hr, "margin-bottom", "3rem");
-    			set_style(hr, "margin-top", "4rem");
-    			add_location(hr, file$a, 113, 4, 3953);
-    			add_location(i, file$a, 114, 24, 4080);
-    			attr_dev(a, "class", "sea b i");
-    			attr_dev(a, "href", "https://github.com/spencermountain/compromise/graphs/contributors");
-    			add_location(a, file$a, 116, 12, 4167);
-    			attr_dev(div1, "class", "tab f09 down");
-    			add_location(div1, file$a, 115, 4, 4128);
-    			attr_dev(div2, "class", "down f2 fuscia tab");
-    			add_location(div2, file$a, 119, 4, 4329);
-    			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$a, 121, 6, 4476);
-    			attr_dev(div4, "class", "down f2 tulip");
-    			set_style(div4, "margin-top", "100px");
-    			set_style(div4, "margin-left", "25%");
-    			add_location(div4, file$a, 120, 4, 4399);
-    			attr_dev(div5, "class", "tab f2 blue");
-    			add_location(div5, file$a, 125, 6, 4623);
-    			attr_dev(div6, "class", "down ");
-    			set_style(div6, "margin-top", "100px");
-    			set_style(div6, "margin-left", "100px");
-    			add_location(div6, file$a, 123, 4, 4541);
-    			set_style(div7, "margin-top", "100px");
-    			add_location(div7, file$a, 130, 4, 4834);
-    			attr_dev(div8, "class", "down tab");
-    			add_location(div8, file$a, 131, 4, 4872);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, hr, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, i, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, t4);
-    			append_dev(div1, a);
-    			append_dev(div1, t6);
-    			insert_dev(target, t7, anchor);
-    			insert_dev(target, div2, anchor);
-    			insert_dev(target, t9, anchor);
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, div3);
-    			insert_dev(target, t11, anchor);
-    			insert_dev(target, div6, anchor);
-    			append_dev(div6, t12);
-    			append_dev(div6, div5);
-    			insert_dev(target, t14, anchor);
-    			insert_dev(target, div7, anchor);
-    			insert_dev(target, t15, anchor);
-    			insert_dev(target, div8, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(hr);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(i);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t7);
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t9);
-    			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t11);
-    			if (detaching) detach_dev(div6);
-    			if (detaching) detach_dev(t14);
-    			if (detaching) detach_dev(div7);
-    			if (detaching) detach_dev(t15);
-    			if (detaching) detach_dev(div8);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_2$5.name,
-    		type: "slot",
-    		source: "(112:2) <Left accent=\\\"steelblue\\\">",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (137:2) <One>
-    function create_default_slot_1$5(ctx) {
-    	let grid0;
-    	let t0;
-    	let div1;
-    	let div0;
-    	let t2;
-    	let kbd0;
-    	let t4;
-    	let kbd1;
-    	let t6;
-    	let grid1;
-    	let current;
-
-    	grid0 = new Grid({
-    			props: { seed: "0e387bb94350923b76a" },
-    			$$inline: true
-    		});
-
-    	grid1 = new Grid({
-    			props: { seed: "80bb8622591df22c704" },
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(grid0.$$.fragment);
-    			t0 = space();
-    			div1 = element("div");
-    			div0 = element("div");
-    			div0.textContent = "seriously -";
-    			t2 = space();
-    			kbd0 = element("kbd");
-    			kbd0.textContent = "<script src=\"https://unpkg.com/compromise\"></script>";
-    			t4 = space();
-    			kbd1 = element("kbd");
-    			kbd1.textContent = "npm install compromise";
-    			t6 = space();
-    			create_component(grid1.$$.fragment);
-    			attr_dev(div0, "class", "sea f09");
-    			add_location(div0, file$a, 139, 6, 5094);
-    			add_location(kbd0, file$a, 140, 6, 5139);
-    			add_location(kbd1, file$a, 141, 6, 5221);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$a, 138, 4, 5070);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(grid0, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, div0);
-    			append_dev(div1, t2);
-    			append_dev(div1, kbd0);
-    			append_dev(div1, t4);
-    			append_dev(div1, kbd1);
-    			insert_dev(target, t6, anchor);
-    			mount_component(grid1, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid0.$$.fragment, local);
-    			transition_in(grid1.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid0.$$.fragment, local);
-    			transition_out(grid1.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(grid0, detaching);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t6);
-    			destroy_component(grid1, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1$5.name,
-    		type: "slot",
-    		source: "(137:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (5:0) <Page>
-    function create_default_slot$5(ctx) {
-    	let two0;
-    	let t0;
-    	let one0;
-    	let t1;
-    	let two1;
-    	let t2;
-    	let one1;
-    	let t3;
-    	let two2;
-    	let t4;
-    	let two3;
-    	let t5;
-    	let two4;
-    	let t6;
-    	let div;
-    	let t8;
-    	let one2;
-    	let t9;
-    	let left;
-    	let t10;
-    	let one3;
-    	let current;
-    	two0 = new Two({ $$inline: true });
-
-    	one0 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_8$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two1 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_7$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one1 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_6$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two2 = new Two({ $$inline: true });
-
-    	two3 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_5$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two4 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_4$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one2 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_3$5] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	left = new Left({
-    			props: {
-    				accent: "steelblue",
-    				$$slots: { default: [create_default_slot_2$5] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one3 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_1$5] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(two0.$$.fragment);
-    			t0 = space();
-    			create_component(one0.$$.fragment);
+    			t0 = text$1(t0_value);
     			t1 = space();
-    			create_component(two1.$$.fragment);
-    			t2 = space();
-    			create_component(one1.$$.fragment);
+    			t2 = text$1(t2_value);
     			t3 = space();
-    			create_component(two2.$$.fragment);
-    			t4 = space();
-    			create_component(two3.$$.fragment);
-    			t5 = space();
-    			create_component(two4.$$.fragment);
-    			t6 = space();
-    			div = element("div");
-    			div.textContent = "why does a sentence have to kill our information?";
-    			t8 = space();
-    			create_component(one2.$$.fragment);
-    			t9 = space();
-    			create_component(left.$$.fragment);
-    			t10 = space();
-    			create_component(one3.$$.fragment);
-    			add_location(div, file$a, 79, 2, 2769);
+    			t4 = text$1(t4_value);
+    			attr_dev(div, "class", "term svelte-10l4whr");
+    			add_location(div, file$2, 13, 10, 347);
     		},
     		m: function mount(target, anchor) {
-    			mount_component(two0, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(two1, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(one1, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(two2, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(two3, target, anchor);
-    			insert_dev(target, t5, anchor);
-    			mount_component(two4, target, anchor);
-    			insert_dev(target, t6, anchor);
     			insert_dev(target, div, anchor);
-    			insert_dev(target, t8, anchor);
-    			mount_component(one2, target, anchor);
-    			insert_dev(target, t9, anchor);
-    			mount_component(left, target, anchor);
-    			insert_dev(target, t10, anchor);
-    			mount_component(one3, target, anchor);
-    			current = true;
+    			append_dev(div, t0);
+    			append_dev(div, t1);
+    			append_dev(div, t2);
+    			append_dev(div, t3);
+    			append_dev(div, t4);
     		},
     		p: function update(ctx, dirty) {
-    			const one0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one0.$set(one0_changes);
-    			const two1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two1.$set(two1_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
-    			const two3_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two3_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two3.$set(two3_changes);
-    			const two4_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two4_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two4.$set(two4_changes);
-    			const one2_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one2_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one2.$set(one2_changes);
-    			const left_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left.$set(left_changes);
-    			const one3_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one3_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one3.$set(one3_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(two0.$$.fragment, local);
-    			transition_in(one0.$$.fragment, local);
-    			transition_in(two1.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
-    			transition_in(two2.$$.fragment, local);
-    			transition_in(two3.$$.fragment, local);
-    			transition_in(two4.$$.fragment, local);
-    			transition_in(one2.$$.fragment, local);
-    			transition_in(left.$$.fragment, local);
-    			transition_in(one3.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(two0.$$.fragment, local);
-    			transition_out(one0.$$.fragment, local);
-    			transition_out(two1.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
-    			transition_out(two2.$$.fragment, local);
-    			transition_out(two3.$$.fragment, local);
-    			transition_out(two4.$$.fragment, local);
-    			transition_out(one2.$$.fragment, local);
-    			transition_out(left.$$.fragment, local);
-    			transition_out(one3.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(two0, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(two1, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(one1, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(two2, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(two3, detaching);
-    			if (detaching) detach_dev(t5);
-    			destroy_component(two4, detaching);
-    			if (detaching) detach_dev(t6);
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t8);
-    			destroy_component(one2, detaching);
-    			if (detaching) detach_dev(t9);
-    			destroy_component(left, detaching);
-    			if (detaching) detach_dev(t10);
-    			destroy_component(one3, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$5.name,
-    		type: "slot",
-    		source: "(5:0) <Page>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$b(ctx) {
-    	let page;
-    	let current;
-
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot$5] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(page.$$.fragment);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(page, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page.$set(page_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(page.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(page.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(page, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$b.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$b($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Intro', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Intro> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({ Page, One, Two, Three: Three$1, Left, Grid });
-    	return [];
-    }
-
-    class Intro extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$b, create_fragment$b, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Intro",
-    			options,
-    			id: create_fragment$b.name
-    		});
-    	}
-    }
-
-    /* home/demos/Tokenize.svelte generated by Svelte v3.43.0 */
-
-    const file$9 = "home/demos/Tokenize.svelte";
-
-    function create_fragment$a(ctx) {
-    	let div1;
-    	let textarea;
-    	let t0;
-    	let div0;
-    	let pre;
-    	let t1_value = JSON.stringify(/*json*/ ctx[0], null, 1) + "";
-    	let t1;
-    	let current;
-
-    	textarea = new TextArea({
-    			props: {
-    				value: /*text*/ ctx[1],
-    				size: "18px",
-    				cb: /*onchange*/ ctx[2]
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			create_component(textarea.$$.fragment);
-    			t0 = space();
-    			div0 = element("div");
-    			pre = element("pre");
-    			t1 = text$1(t1_value);
-    			add_location(pre, file$9, 30, 4, 1000);
-    			attr_dev(div0, "class", "json down svelte-rgvpo4");
-    			add_location(div0, file$9, 29, 2, 972);
-    			set_style(div1, "min-width", "800px");
-    			add_location(div1, file$9, 27, 0, 885);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			mount_component(textarea, div1, null);
-    			append_dev(div1, t0);
-    			append_dev(div1, div0);
-    			append_dev(div0, pre);
-    			append_dev(pre, t1);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if ((!current || dirty & /*json*/ 1) && t1_value !== (t1_value = JSON.stringify(/*json*/ ctx[0], null, 1) + "")) set_data_dev(t1, t1_value);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(textarea.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(textarea.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    			destroy_component(textarea);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$a.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$a($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Tokenize', slots, []);
-    	let text = `Maybe it's the beer talking, Marge. But you've got a butt that won't quit. They've got these big chewy pretzels here <undecipherable slurring> five dollars?! Get outta here!`;
-
-    	let json = nlp$1(text).json({
-    		terms: {
-    			tags: false,
-    			index: false,
-    			machine: false
-    		}
-    	});
-
-    	const onchange = function (txt) {
-    		$$invalidate(0, json = nlp$1(txt).json());
-    	};
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Tokenize> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({ Textarea: TextArea, nlp: nlp$1, text, json, onchange });
-
-    	$$self.$inject_state = $$props => {
-    		if ('text' in $$props) $$invalidate(1, text = $$props.text);
-    		if ('json' in $$props) $$invalidate(0, json = $$props.json);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [json, text, onchange];
-    }
-
-    class Tokenize extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$a, create_fragment$a, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Tokenize",
-    			options,
-    			id: create_fragment$a.name
-    		});
-    	}
-    }
-
-    /* tmp/filesize/App.svelte generated by Svelte v3.43.0 */
-
-    const { console: console_1 } = globals;
-    const file$8 = "tmp/filesize/App.svelte";
-
-    // (1:0) <script>   import { Page, TextArea }
-    function create_catch_block(ctx) {
-    	const block = { c: noop, m: noop, p: noop, d: noop };
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_catch_block.name,
-    		type: "catch",
-    		source: "(1:0) <script>   import { Page, TextArea }",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (19:2) {:then p}
-    function create_then_block(ctx) {
-    	let div4;
-    	let div1;
-    	let div0;
-    	let t0;
-    	let t1;
-    	let div2;
-    	let t2;
-    	let div3;
-
-    	const block = {
-    		c: function create() {
-    			div4 = element("div");
-    			div1 = element("div");
-    			div0 = element("div");
-    			t0 = text$1(/*txt*/ ctx[0]);
-    			t1 = space();
-    			div2 = element("div");
-    			t2 = space();
-    			div3 = element("div");
-    			div3.textContent = "- 32 kb";
-    			add_location(div0, file$8, 22, 8, 542);
-    			attr_dev(div1, "class", "size col svelte-1miou4l");
-    			add_location(div1, file$8, 21, 6, 511);
-    			attr_dev(div2, "class", "bar svelte-1miou4l");
-    			add_location(div2, file$8, 26, 6, 598);
-    			attr_dev(div3, "class", "label svelte-1miou4l");
-    			add_location(div3, file$8, 27, 6, 624);
-    			attr_dev(div4, "class", "row svelte-1miou4l");
-    			add_location(div4, file$8, 20, 4, 487);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, div1);
-    			append_dev(div1, div0);
-    			append_dev(div0, t0);
-    			append_dev(div4, t1);
-    			append_dev(div4, div2);
-    			append_dev(div4, t2);
-    			append_dev(div4, div3);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*txt*/ 1) set_data_dev(t0, /*txt*/ ctx[0]);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div4);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_then_block.name,
-    		type: "then",
-    		source: "(19:2) {:then p}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (17:12)      <p>...waiting</p>   {:then p}
-    function create_pending_block(ctx) {
-    	let p_1;
-
-    	const block = {
-    		c: function create() {
-    			p_1 = element("p");
-    			p_1.textContent = "...waiting";
-    			add_location(p_1, file$8, 17, 4, 422);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p_1, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p_1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_pending_block.name,
-    		type: "pending",
-    		source: "(17:12)      <p>...waiting</p>   {:then p}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$9(ctx) {
-    	let div;
-
-    	let info = {
-    		ctx,
-    		current: null,
-    		token: null,
-    		hasCatch: false,
-    		pending: create_pending_block,
-    		then: create_then_block,
-    		catch: create_catch_block,
-    		value: 1
-    	};
-
-    	handle_promise(/*p*/ ctx[1], info);
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			info.block.c();
-    			add_location(div, file$8, 15, 0, 399);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			info.block.m(div, info.anchor = null);
-    			info.mount = () => div;
-    			info.anchor = null;
-    		},
-    		p: function update(new_ctx, [dirty]) {
-    			ctx = new_ctx;
-    			update_await_block_branch(info, ctx, dirty);
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			info.block.d();
-    			info.token = null;
-    			info = null;
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$9.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$9($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('App', slots, []);
-    	let txt = '';
-
-    	let p = fetch('./tmp/filesize/one.txt').// let p = fetch('./three.txt')
-    	// let p = fetch('https://unpkg.com/compromise@13.11.4-rc4/builds/compromise.js')
-    	then(response => response.text()).then(data => {
-    		console.log(data);
-    		$$invalidate(0, txt = data);
-    	});
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({ Page, TextArea, txt, p });
-
-    	$$self.$inject_state = $$props => {
-    		if ('txt' in $$props) $$invalidate(0, txt = $$props.txt);
-    		if ('p' in $$props) $$invalidate(1, p = $$props.p);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [txt, p];
-    }
-
-    class App$1 extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$9, create_fragment$9, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "App",
-    			options,
-    			id: create_fragment$9.name
-    		});
-    	}
-    }
-
-    /* home/One.svelte generated by Svelte v3.43.0 */
-    const file$7 = "home/One.svelte";
-
-    // (15:2) <Left>
-    function create_default_slot_6$2(ctx) {
-    	let div0;
-    	let t1;
-    	let div1;
-    	let t3;
-    	let div2;
-    	let t4;
-    	let div3;
-    	let t5;
-    	let span;
-    	let t7;
-    	let t8;
-    	let div4;
-    	let t10;
-    	let div5;
-    	let tokenize;
-    	let current;
-    	tokenize = new Tokenize({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "compromise/one";
-    			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "tokenization";
-    			t3 = space();
-    			div2 = element("div");
-    			t4 = space();
-    			div3 = element("div");
-    			t5 = text$1("- ");
-    			span = element("span");
-    			span.textContent = "  splitting - it - up  ";
-    			t7 = text$1(" -");
-    			t8 = space();
-    			div4 = element("div");
-    			div4.textContent = "turn your novel into JSON -";
-    			t10 = space();
-    			div5 = element("div");
-    			create_component(tokenize.$$.fragment);
-    			attr_dev(div0, "class", "lib");
-    			add_location(div0, file$7, 15, 4, 452);
-    			attr_dev(div1, "class", "plugin");
-    			add_location(div1, file$7, 16, 4, 494);
-    			set_style(div2, "margin-top", "2rem");
-    			add_location(div2, file$7, 17, 4, 537);
-    			set_style(span, "border-bottom", "4px solid #D68881");
-    			set_style(span, "padding-bottom", "5px");
-    			add_location(span, file$7, 19, 8, 625);
-    			attr_dev(div3, "class", "tab");
-    			set_style(div3, "font-size", "1rem");
-    			add_location(div3, file$7, 18, 4, 574);
-    			attr_dev(div4, "class", "down tab");
-    			add_location(div4, file$7, 21, 4, 749);
-    			attr_dev(div5, "class", "");
-    			set_style(div5, "margin-top", "4.5rem");
-    			add_location(div5, file$7, 22, 4, 809);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div1, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div2, anchor);
-    			insert_dev(target, t4, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, t5);
-    			append_dev(div3, span);
-    			append_dev(div3, t7);
-    			insert_dev(target, t8, anchor);
-    			insert_dev(target, div4, anchor);
-    			insert_dev(target, t10, anchor);
-    			insert_dev(target, div5, anchor);
-    			mount_component(tokenize, div5, null);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(tokenize.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(tokenize.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t4);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t8);
-    			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t10);
-    			if (detaching) detach_dev(div5);
-    			destroy_component(tokenize);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_6$2.name,
-    		type: "slot",
-    		source: "(15:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (27:2) <One>
-    function create_default_slot_5$3(ctx) {
-    	let div1;
-    	let t0;
-    	let div0;
-    	let t2;
-    	let div2;
-    	let t3;
-    	let span0;
-    	let t5;
-    	let span1;
-    	let t7;
-    	let span2;
-    	let t9;
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			t0 = text$1("with a one-liner-\n\n      ");
-    			div0 = element("div");
-    			div0.textContent = "in a couple milliseconds";
-    			t2 = space();
-    			div2 = element("div");
-    			t3 = text$1("split text into ");
-    			span0 = element("span");
-    			span0.textContent = "sentences";
-    			t5 = text$1(" and ");
-    			span1 = element("span");
-    			span1.textContent = "words";
-    			t7 = text$1(" and\n      ");
-    			span2 = element("span");
-    			span2.textContent = "punctuation";
-    			t9 = text$1(".");
-    			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$7, 33, 6, 1128);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 30, 4, 1079);
-    			attr_dev(span0, "class", "cherry");
-    			add_location(span0, file$7, 36, 22, 1231);
-    			attr_dev(span1, "class", "rose");
-    			add_location(span1, file$7, 36, 64, 1273);
-    			attr_dev(span2, "class", "sky");
-    			add_location(span2, file$7, 37, 6, 1315);
-    			attr_dev(div2, "class", "tab");
-    			add_location(div2, file$7, 35, 4, 1191);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, t0);
-    			append_dev(div1, div0);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, t3);
-    			append_dev(div2, span0);
-    			append_dev(div2, t5);
-    			append_dev(div2, span1);
-    			append_dev(div2, t7);
-    			append_dev(div2, span2);
-    			append_dev(div2, t9);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_5$3.name,
-    		type: "slot",
-    		source: "(27:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (42:2) <One>
-    function create_default_slot_4$3(ctx) {
-    	let div0;
-    	let t1;
-    	let div3;
-    	let t2;
-    	let div1;
-    	let t4;
-    	let div2;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "the tokenizer's been refined over 10 ruthless github-years";
-    			t1 = space();
-    			div3 = element("div");
-    			t2 = text$1("when someone tells you it's impossible,\n      ");
-    			div1 = element("div");
-    			div1.textContent = "give a polite shrug.";
-    			t4 = space();
-    			div2 = element("div");
-    			div2.textContent = "haha, i dunno man!";
-    			attr_dev(div0, "class", "down");
-    			add_location(div0, file$7, 42, 4, 1386);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$7, 50, 6, 1898);
-    			attr_dev(div2, "class", "tab i f09 down");
-    			add_location(div2, file$7, 51, 6, 1948);
-    			attr_dev(div3, "class", "tab down f09");
-    			add_location(div3, file$7, 48, 4, 1819);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, t2);
-    			append_dev(div3, div1);
-    			append_dev(div3, t4);
-    			append_dev(div3, div2);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div3);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_4$3.name,
-    		type: "slot",
-    		source: "(42:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (56:2) <One>
-    function create_default_slot_3$4(ctx) {
-    	let div1;
-    	let kbd;
-    	let t1;
-    	let div0;
-    	let t3;
-    	let grid;
-    	let current;
-
-    	grid = new Grid({
-    			props: { seed: "1645e30c3c09ed478e5" },
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/one";
-    			t1 = space();
-    			div0 = element("div");
-    			div0.textContent = "is 20kb of javascript:";
-    			t3 = space();
-    			create_component(grid.$$.fragment);
-    			add_location(kbd, file$7, 57, 6, 2046);
-    			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$7, 58, 6, 2078);
-    			add_location(div1, file$7, 56, 4, 2034);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, kbd);
-    			append_dev(div1, t1);
-    			append_dev(div1, div0);
-    			insert_dev(target, t3, anchor);
-    			mount_component(grid, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(grid, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3$4.name,
-    		type: "slot",
-    		source: "(56:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (69:2) <Two>
-    function create_default_slot_2$4(ctx) {
-    	let div;
-    	let t1;
-    	let ul;
-    	let li0;
-    	let a0;
-    	let span0;
-    	let t3;
-    	let caret0;
-    	let t4;
-    	let li1;
-    	let a1;
-    	let span1;
-    	let t6;
-    	let caret1;
-    	let t7;
-    	let li2;
-    	let a2;
-    	let span2;
-    	let t9;
-    	let caret2;
-    	let current;
-    	caret0 = new Caret({ $$inline: true });
-    	caret1 = new Caret({ $$inline: true });
-    	caret2 = new Caret({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			div.textContent = "so you can do:";
-    			t1 = space();
-    			ul = element("ul");
-    			li0 = element("li");
-    			a0 = element("a");
-    			span0 = element("span");
-    			span0.textContent = "Phrase Lookup";
-    			t3 = space();
-    			create_component(caret0.$$.fragment);
-    			t4 = space();
-    			li1 = element("li");
-    			a1 = element("a");
-    			span1 = element("span");
-    			span1.textContent = "TypeAhead";
-    			t6 = space();
-    			create_component(caret1.$$.fragment);
-    			t7 = space();
-    			li2 = element("li");
-    			a2 = element("a");
-    			span2 = element("span");
-    			span2.textContent = "Syllable parsing";
-    			t9 = space();
-    			create_component(caret2.$$.fragment);
-    			attr_dev(div, "class", "down f09");
-    			add_location(div, file$7, 69, 4, 2326);
-    			attr_dev(span0, "class", "choose");
-    			set_style(span0, "color", "white");
-    			add_location(span0, file$7, 72, 31, 2451);
-    			attr_dev(a0, "href", "./one/lookup");
-    			add_location(a0, file$7, 72, 8, 2428);
-    			attr_dev(li0, "class", "down");
-    			add_location(li0, file$7, 71, 6, 2402);
-    			attr_dev(span1, "class", "choose");
-    			set_style(span1, "color", "white");
-    			add_location(span1, file$7, 75, 34, 2598);
-    			attr_dev(a1, "href", "./one/typeahead");
-    			add_location(a1, file$7, 75, 8, 2572);
-    			attr_dev(li1, "class", "down");
-    			add_location(li1, file$7, 74, 6, 2546);
-    			attr_dev(span2, "class", "choose");
-    			set_style(span2, "color", "white");
-    			add_location(span2, file$7, 78, 34, 2741);
-    			attr_dev(a2, "href", "./one/syllables");
-    			add_location(a2, file$7, 78, 8, 2715);
-    			attr_dev(li2, "class", "down");
-    			add_location(li2, file$7, 77, 6, 2689);
-    			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$7, 70, 4, 2373);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, ul, anchor);
-    			append_dev(ul, li0);
-    			append_dev(li0, a0);
-    			append_dev(a0, span0);
-    			append_dev(a0, t3);
-    			mount_component(caret0, a0, null);
-    			append_dev(ul, t4);
-    			append_dev(ul, li1);
-    			append_dev(li1, a1);
-    			append_dev(a1, span1);
-    			append_dev(a1, t6);
-    			mount_component(caret1, a1, null);
-    			append_dev(ul, t7);
-    			append_dev(ul, li2);
-    			append_dev(li2, a2);
-    			append_dev(a2, span2);
-    			append_dev(a2, t9);
-    			mount_component(caret2, a2, null);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(caret0.$$.fragment, local);
-    			transition_in(caret1.$$.fragment, local);
-    			transition_in(caret2.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(caret0.$$.fragment, local);
-    			transition_out(caret1.$$.fragment, local);
-    			transition_out(caret2.$$.fragment, local);
-    			current = false;
+    			if (dirty & /*res*/ 2 && t0_value !== (t0_value = /*term*/ ctx[5].pre + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*res*/ 2 && t2_value !== (t2_value = /*term*/ ctx[5].text + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*res*/ 2 && t4_value !== (t4_value = /*term*/ ctx[5].post + "")) set_data_dev(t4, t4_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(ul);
-    			destroy_component(caret0);
-    			destroy_component(caret1);
-    			destroy_component(caret2);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_2$4.name,
-    		type: "slot",
-    		source: "(69:2) <Two>",
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(13:8) {#each p.terms as term, i}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (84:2) <Left>
-    function create_default_slot_1$4(ctx) {
-    	let div3;
-    	let div0;
-    	let span;
-    	let t1;
-    	let t2;
-    	let img;
-    	let img_src_value;
-    	let t3;
-    	let div2;
-    	let t4;
-    	let div1;
-
-    	const block = {
-    		c: function create() {
-    			div3 = element("div");
-    			div0 = element("div");
-    			span = element("span");
-    			span.textContent = "compromise/one";
-    			t1 = text$1(" is 32kb");
-    			t2 = space();
-    			img = element("img");
-    			t3 = space();
-    			div2 = element("div");
-    			t4 = text$1("it can do ~1.2mbs of text per second,\n        ");
-    			div1 = element("div");
-    			div1.textContent = "or a novel every 3 seconds";
-    			attr_dev(span, "class", "lib");
-    			add_location(span, file$7, 86, 8, 2909);
-    			add_location(div0, file$7, 85, 6, 2895);
-    			attr_dev(img, "class", "clean svelte-hv3m6d");
-    			set_style(img, "width", "300px");
-    			if (!src_url_equal(img.src, img_src_value = "./home/img/one.jpg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "compromise/one filesize");
-    			add_location(img, file$7, 90, 6, 3005);
-    			add_location(div1, file$7, 93, 8, 3169);
-    			add_location(div2, file$7, 91, 6, 3109);
-    			attr_dev(div3, "class", "down col svelte-hv3m6d");
-    			add_location(div3, file$7, 84, 4, 2866);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, div0);
-    			append_dev(div0, span);
-    			append_dev(div0, t1);
-    			append_dev(div3, t2);
-    			append_dev(div3, img);
-    			append_dev(div3, t3);
-    			append_dev(div3, div2);
-    			append_dev(div2, t4);
-    			append_dev(div2, div1);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div3);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1$4.name,
-    		type: "slot",
-    		source: "(84:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (14:0) <Page>
-    function create_default_slot$4(ctx) {
-    	let left0;
-    	let t0;
-    	let one0;
-    	let t1;
-    	let one1;
-    	let t2;
-    	let one2;
-    	let t3;
-    	let two;
-    	let t4;
-    	let left1;
-    	let t5;
-    	let div3;
-    	let div0;
-    	let t7;
-    	let div1;
-    	let t9;
-    	let div2;
-    	let current;
-
-    	left0 = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_6$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one0 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_5$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one1 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_4$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one2 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_3$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_2$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	left1 = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_1$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(left0.$$.fragment);
-    			t0 = space();
-    			create_component(one0.$$.fragment);
-    			t1 = space();
-    			create_component(one1.$$.fragment);
-    			t2 = space();
-    			create_component(one2.$$.fragment);
-    			t3 = space();
-    			create_component(two.$$.fragment);
-    			t4 = space();
-    			create_component(left1.$$.fragment);
-    			t5 = space();
-    			div3 = element("div");
-    			div0 = element("div");
-    			div0.textContent = "sometimes just splitting things up is enough.";
-    			t7 = space();
-    			div1 = element("div");
-    			div1.textContent = "it feels like data now, a little.";
-    			t9 = space();
-    			div2 = element("div");
-    			div2.textContent = "or swing harder ↓";
-    			add_location(div0, file$7, 98, 4, 3253);
-    			attr_dev(div1, "class", "m1");
-    			add_location(div1, file$7, 99, 4, 3314);
-    			attr_dev(div2, "class", "m2 sea down f09");
-    			add_location(div2, file$7, 100, 4, 3374);
-    			add_location(div3, file$7, 97, 2, 3243);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(left0, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(one1, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(one2, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(two, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(left1, target, anchor);
-    			insert_dev(target, t5, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, div0);
-    			append_dev(div3, t7);
-    			append_dev(div3, div1);
-    			append_dev(div3, t9);
-    			append_dev(div3, div2);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const left0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left0.$set(left0_changes);
-    			const one0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one0.$set(one0_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
-    			const one2_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one2_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one2.$set(one2_changes);
-    			const two_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two.$set(two_changes);
-    			const left1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left1.$set(left1_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(left0.$$.fragment, local);
-    			transition_in(one0.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
-    			transition_in(one2.$$.fragment, local);
-    			transition_in(two.$$.fragment, local);
-    			transition_in(left1.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(left0.$$.fragment, local);
-    			transition_out(one0.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
-    			transition_out(one2.$$.fragment, local);
-    			transition_out(two.$$.fragment, local);
-    			transition_out(left1.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(left0, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(one1, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(one2, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(two, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(left1, detaching);
-    			if (detaching) detach_dev(t5);
-    			if (detaching) detach_dev(div3);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$4.name,
-    		type: "slot",
-    		source: "(14:0) <Page>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$8(ctx) {
-    	let block;
-    	let t;
-    	let page;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#D68881" },
-    			$$inline: true
-    		});
-
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot$4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    			t = space();
-    			create_component(page.$$.fragment);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(page, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page.$set(page_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			transition_in(page.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			transition_out(page.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    			if (detaching) detach_dev(t);
-    			destroy_component(page, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_fragment$8.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    function instance$8($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('One', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<One> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({
-    		Page,
-    		One,
-    		Two,
-    		Grid,
-    		Left,
-    		Caret,
-    		Block,
-    		Tokenize,
-    		Filesize: App$1
-    	});
-
-    	return [];
-    }
-
-    class One_1 extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$8, create_fragment$8, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "One_1",
-    			options,
-    			id: create_fragment$8.name
-    		});
-    	}
-    }
-
-    /* home/demos/Tagger.svelte generated by Svelte v3.43.0 */
-
-    const file$6 = "home/demos/Tagger.svelte";
-
-    function create_fragment$7(ctx) {
-    	let div1;
-    	let textarea;
-    	let t0;
-    	let div0;
-    	let current;
-
-    	textarea = new TextArea({
-    			props: {
-    				value: /*text*/ ctx[0],
-    				size: "18px",
-    				cb: /*onchange*/ ctx[1]
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			create_component(textarea.$$.fragment);
-    			t0 = space();
-    			div0 = element("div");
-    			div0.textContent = "here";
-    			attr_dev(div0, "class", "json down svelte-rgvpo4");
-    			add_location(div0, file$6, 29, 2, 1139);
-    			set_style(div1, "min-width", "800px");
-    			add_location(div1, file$6, 27, 0, 1052);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			mount_component(textarea, div1, null);
-    			append_dev(div1, t0);
-    			append_dev(div1, div0);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(textarea.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(textarea.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    			destroy_component(textarea);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$7.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$7($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Tagger', slots, []);
-    	let text = `Like the time I caught the ferry over to Shelbyville - I needed a new heel for my shoe, so I decided to go to Morganville which is what they called Shelbyville in those days. So, I tied an onion to my belt which was the style at the time. Now, to take the ferry cost a nickel. And in those days, nickels had pictures of bumblebees on ‘em.`;
-
-    	let json = nlp$1(text).json({
-    		terms: {
-    			tags: false,
-    			index: false,
-    			machine: false
-    		}
-    	});
-
-    	const onchange = function (txt) {
-    		json = nlp$1(txt).json();
-    	};
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Tagger> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({ Textarea: TextArea, nlp: nlp$1, text, json, onchange });
-
-    	$$self.$inject_state = $$props => {
-    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
-    		if ('json' in $$props) json = $$props.json;
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [text, onchange];
-    }
-
-    class Tagger extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$7, create_fragment$7, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Tagger",
-    			options,
-    			id: create_fragment$7.name
-    		});
-    	}
-    }
-
-    /* home/Two.svelte generated by Svelte v3.43.0 */
-    const file$5 = "home/Two.svelte";
-
-    // (15:2) <Left>
-    function create_default_slot_9(ctx) {
-    	let kbd;
-    	let span0;
-    	let t2;
-    	let div0;
-    	let t3;
-    	let div1;
-    	let t4;
-    	let span4;
-    	let t5;
-    	let span1;
-    	let t7;
-    	let span2;
-    	let t9;
-    	let span3;
-    	let t11;
-    	let t12;
-    	let t13;
-    	let div2;
-    	let t15;
-    	let div3;
-
-    	const block = {
-    		c: function create() {
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/two";
-    			span0 = element("span");
-    			span0.textContent = ":";
-    			t2 = space();
-    			div0 = element("div");
-    			t3 = space();
-    			div1 = element("div");
-    			t4 = text$1("- ");
-    			span4 = element("span");
-    			t5 = text$1(" \n        ");
-    			span1 = element("span");
-    			span1.textContent = "buffalo";
-    			t7 = text$1("/\n        ");
-    			span2 = element("span");
-    			span2.textContent = "buffalo";
-    			t9 = text$1("/\n        ");
-    			span3 = element("span");
-    			span3.textContent = "buffalo";
-    			t11 = text$1("  ");
-    			t12 = text$1(" -");
-    			t13 = space();
-    			div2 = element("div");
-    			div2.textContent = "identify words as Noun/Verb/Adjective";
-    			t15 = space();
-    			div3 = element("div");
-    			div3.textContent = "which is more handy than you may think -";
-    			set_style(kbd, "font-size", "2rem");
-    			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$5, 15, 4, 438);
-    			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$5, 15, 70, 504);
-    			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$5, 16, 4, 534);
-    			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$5, 20, 8, 730);
-    			attr_dev(span2, "class", "rose");
-    			add_location(span2, file$5, 21, 8, 772);
-    			attr_dev(span3, "class", "red");
-    			add_location(span3, file$5, 22, 8, 815);
-    			set_style(span4, "border-bottom", "4px solid #D68881");
-    			set_style(span4, "padding-bottom", "5px");
-    			add_location(span4, file$5, 18, 8, 638);
-    			attr_dev(div1, "class", "tab");
-    			set_style(div1, "font-size", "1.5rem");
-    			set_style(div1, "color", "#949a9e");
-    			add_location(div1, file$5, 17, 4, 571);
-    			attr_dev(div2, "class", "down tab");
-    			add_location(div2, file$5, 25, 4, 886);
-    			attr_dev(div3, "class", "down f09");
-    			add_location(div3, file$5, 26, 4, 956);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, kbd, anchor);
-    			insert_dev(target, span0, anchor);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, t4);
-    			append_dev(div1, span4);
-    			append_dev(span4, t5);
-    			append_dev(span4, span1);
-    			append_dev(span4, t7);
-    			append_dev(span4, span2);
-    			append_dev(span4, t9);
-    			append_dev(span4, span3);
-    			append_dev(span4, t11);
-    			append_dev(div1, t12);
-    			insert_dev(target, t13, anchor);
-    			insert_dev(target, div2, anchor);
-    			insert_dev(target, t15, anchor);
-    			insert_dev(target, div3, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(kbd);
-    			if (detaching) detach_dev(span0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t13);
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t15);
-    			if (detaching) detach_dev(div3);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_9.name,
-    		type: "slot",
-    		source: "(15:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (30:2) <One>
-    function create_default_slot_8(ctx) {
-    	let tagger;
-    	let current;
-    	tagger = new Tagger({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			create_component(tagger.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(tagger, target, anchor);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(tagger.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(tagger.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(tagger, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_8.name,
-    		type: "slot",
-    		source: "(30:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (34:2) <One>
-    function create_default_slot_7(ctx) {
-    	let div0;
-    	let t1;
-    	let div3;
-    	let t2;
-    	let b0;
-    	let t4;
-    	let b1;
-    	let t6;
-    	let div1;
-    	let t8;
-    	let div2;
-    	let t10;
-    	let div4;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "it's nice because,";
-    			t1 = space();
-    			div3 = element("div");
-    			t2 = text$1("you can say that ");
-    			b0 = element("b");
-    			b0.textContent = "'buffalo'";
-    			t4 = text$1(" and ");
-    			b1 = element("b");
-    			b1.textContent = "'hamilton'";
-    			t6 = space();
-    			div1 = element("div");
-    			div1.textContent = "are";
-    			t8 = space();
-    			div2 = element("div");
-    			div2.textContent = "#Nouns";
-    			t10 = space();
-    			div4 = element("div");
-    			div4.textContent = "without actually knowing what those things are.";
-    			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$5, 34, 4, 1081);
-    			attr_dev(b0, "class", "f2 sea");
-    			add_location(b0, file$5, 36, 23, 1168);
-    			attr_dev(b1, "class", "f2 sky");
-    			add_location(b1, file$5, 36, 59, 1204);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 37, 6, 1243);
-    			attr_dev(div2, "class", "f2 red tab down");
-    			add_location(div2, file$5, 38, 6, 1276);
-    			attr_dev(div3, "class", "tab");
-    			add_location(div3, file$5, 35, 4, 1127);
-    			attr_dev(div4, "class", "tab down i");
-    			add_location(div4, file$5, 40, 4, 1333);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, t2);
-    			append_dev(div3, b0);
-    			append_dev(div3, t4);
-    			append_dev(div3, b1);
-    			append_dev(div3, t6);
-    			append_dev(div3, div1);
-    			append_dev(div3, t8);
-    			append_dev(div3, div2);
-    			insert_dev(target, t10, anchor);
-    			insert_dev(target, div4, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t10);
-    			if (detaching) detach_dev(div4);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_7.name,
-    		type: "slot",
-    		source: "(34:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (43:2) <Two>
-    function create_default_slot_6$1(ctx) {
-    	let div0;
-    	let t1;
-    	let ul;
-    	let kbd0;
-    	let t3;
-    	let kbd1;
-    	let t5;
-    	let kbd2;
-    	let t7;
-    	let div1;
-    	let a;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "and sometimes this is helpful:";
-    			t1 = space();
-    			ul = element("ul");
-    			kbd0 = element("kbd");
-    			kbd0.textContent = "it was the #Adjective of times";
-    			t3 = space();
-    			kbd1 = element("kbd");
-    			kbd1.textContent = "simon says [#Verb+ the? <Noun>]";
-    			t5 = space();
-    			kbd2 = element("kbd");
-    			kbd2.textContent = "#FirstName is on #Ordinal";
-    			t7 = space();
-    			div1 = element("div");
-    			a = element("a");
-    			a.textContent = "- match docs";
-    			attr_dev(div0, "class", "down");
-    			add_location(div0, file$5, 43, 4, 1432);
-    			attr_dev(kbd0, "class", "blue f2 i");
-    			add_location(kbd0, file$5, 45, 6, 1502);
-    			attr_dev(kbd1, "class", "blue f2 i down");
-    			add_location(kbd1, file$5, 46, 6, 1568);
-    			attr_dev(kbd2, "class", "blue f2 i down");
-    			add_location(kbd2, file$5, 47, 6, 1646);
-    			add_location(ul, file$5, 44, 4, 1491);
-    			attr_dev(a, "href", "https://observablehq.com/@spencermountain/compromise-match-syntax");
-    			attr_dev(a, "class", "red tab");
-    			add_location(a, file$5, 50, 6, 1744);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 49, 4, 1720);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, ul, anchor);
-    			append_dev(ul, kbd0);
-    			append_dev(ul, t3);
-    			append_dev(ul, kbd1);
-    			append_dev(ul, t5);
-    			append_dev(ul, kbd2);
-    			insert_dev(target, t7, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, a);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(ul);
-    			if (detaching) detach_dev(t7);
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_6$1.name,
-    		type: "slot",
-    		source: "(43:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (54:2) <One>
-    function create_default_slot_5$2(ctx) {
-    	let div0;
-    	let t1;
-    	let div1;
-    	let t3;
-    	let div2;
-    	let t5;
-    	let div3;
-    	let t7;
-    	let div4;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "these match-templates -";
-    			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "can scoop-up information -";
-    			t3 = space();
-    			div2 = element("div");
-    			div2.textContent = "like some kind of little database -";
-    			t5 = space();
-    			div3 = element("div");
-    			div3.textContent = "your matches can be clumsy, ad-hoc";
-    			t7 = space();
-    			div4 = element("div");
-    			div4.textContent = "they can be written by non-programmers.";
-    			add_location(div0, file$5, 54, 4, 1886);
-    			attr_dev(div1, "class", "tab i");
-    			add_location(div1, file$5, 55, 4, 1925);
-    			attr_dev(div2, "class", "tab sky i");
-    			add_location(div2, file$5, 56, 4, 1981);
-    			attr_dev(div3, "class", "down");
-    			add_location(div3, file$5, 58, 4, 2122);
-    			attr_dev(div4, "class", "tab");
-    			add_location(div4, file$5, 59, 4, 2185);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div1, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div2, anchor);
-    			insert_dev(target, t5, anchor);
-    			insert_dev(target, div3, anchor);
-    			insert_dev(target, t7, anchor);
-    			insert_dev(target, div4, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t5);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t7);
-    			if (detaching) detach_dev(div4);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_5$2.name,
-    		type: "slot",
-    		source: "(54:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (62:2) <Two>
-    function create_default_slot_4$2(ctx) {
-    	let div2;
-    	let t0;
-    	let div0;
-    	let t1;
-    	let span0;
-    	let t3;
-    	let t4;
-    	let div1;
-    	let t6;
-    	let br;
-    	let t7;
-    	let t8;
-    	let ul;
-    	let li0;
-    	let a0;
-    	let span1;
-    	let t10;
-    	let caret0;
-    	let t11;
-    	let li1;
-    	let a1;
-    	let span2;
-    	let t13;
-    	let caret1;
-    	let t14;
-    	let li2;
-    	let a2;
-    	let span3;
-    	let t16;
-    	let caret2;
-    	let current;
-    	caret0 = new Caret({ $$inline: true });
-    	caret1 = new Caret({ $$inline: true });
-    	caret2 = new Caret({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			div2 = element("div");
-    			t0 = text$1("this can do helpful -\n      ");
-    			div0 = element("div");
-    			t1 = text$1("before some crazy ");
-    			span0 = element("span");
-    			span0.textContent = "AI-thing";
-    			t3 = text$1(" -");
-    			t4 = space();
-    			div1 = element("div");
-    			div1.textContent = "just does it all,";
-    			t6 = space();
-    			br = element("br");
-    			t7 = text$1("\n      or more often, some person's tired eyes:");
-    			t8 = space();
-    			ul = element("ul");
-    			li0 = element("li");
-    			a0 = element("a");
-    			span1 = element("span");
-    			span1.textContent = "Match-syntax";
-    			t10 = space();
-    			create_component(caret0.$$.fragment);
-    			t11 = space();
-    			li1 = element("li");
-    			a1 = element("a");
-    			span2 = element("span");
-    			span2.textContent = "Redaction";
-    			t13 = space();
-    			create_component(caret1.$$.fragment);
-    			t14 = space();
-    			li2 = element("li");
-    			a2 = element("a");
-    			span3 = element("span");
-    			span3.textContent = "Contractions";
-    			t16 = space();
-    			create_component(caret2.$$.fragment);
-    			attr_dev(span0, "class", "red ");
-    			add_location(span0, file$5, 64, 44, 2375);
-    			attr_dev(div0, "class", "tab f2");
-    			add_location(div0, file$5, 64, 6, 2337);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$5, 65, 6, 2424);
-    			add_location(br, file$5, 66, 6, 2471);
-    			set_style(div2, "margin-bottom", "3rem");
-    			add_location(div2, file$5, 62, 4, 2269);
-    			attr_dev(span1, "class", "choose down");
-    			set_style(span1, "color", "white");
-    			add_location(span1, file$5, 70, 32, 2595);
-    			attr_dev(a0, "href", "./two/match");
-    			add_location(a0, file$5, 70, 10, 2573);
-    			add_location(li0, file$5, 70, 6, 2569);
-    			attr_dev(span2, "class", "choose");
-    			set_style(span2, "color", "white");
-    			add_location(span2, file$5, 72, 34, 2739);
-    			attr_dev(a1, "href", "./two/radaction");
-    			add_location(a1, file$5, 72, 8, 2713);
-    			attr_dev(li1, "class", "down");
-    			add_location(li1, file$5, 71, 6, 2687);
-    			attr_dev(span3, "class", "choose");
-    			set_style(span3, "color", "white");
-    			add_location(span3, file$5, 75, 37, 2885);
-    			attr_dev(a2, "href", "./two/contractions");
-    			add_location(a2, file$5, 75, 8, 2856);
-    			attr_dev(li2, "class", "down");
-    			add_location(li2, file$5, 74, 6, 2830);
-    			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$5, 69, 4, 2540);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, t0);
-    			append_dev(div2, div0);
-    			append_dev(div0, t1);
-    			append_dev(div0, span0);
-    			append_dev(div0, t3);
-    			append_dev(div2, t4);
-    			append_dev(div2, div1);
-    			append_dev(div2, t6);
-    			append_dev(div2, br);
-    			append_dev(div2, t7);
-    			insert_dev(target, t8, anchor);
-    			insert_dev(target, ul, anchor);
-    			append_dev(ul, li0);
-    			append_dev(li0, a0);
-    			append_dev(a0, span1);
-    			append_dev(a0, t10);
-    			mount_component(caret0, a0, null);
-    			append_dev(ul, t11);
-    			append_dev(ul, li1);
-    			append_dev(li1, a1);
-    			append_dev(a1, span2);
-    			append_dev(a1, t13);
-    			mount_component(caret1, a1, null);
-    			append_dev(ul, t14);
-    			append_dev(ul, li2);
-    			append_dev(li2, a2);
-    			append_dev(a2, span3);
-    			append_dev(a2, t16);
-    			mount_component(caret2, a2, null);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(caret0.$$.fragment, local);
-    			transition_in(caret1.$$.fragment, local);
-    			transition_in(caret2.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(caret0.$$.fragment, local);
-    			transition_out(caret1.$$.fragment, local);
-    			transition_out(caret2.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
-    			if (detaching) detach_dev(t8);
-    			if (detaching) detach_dev(ul);
-    			destroy_component(caret0);
-    			destroy_component(caret1);
-    			destroy_component(caret2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_4$2.name,
-    		type: "slot",
-    		source: "(62:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (82:2) <One>
-    function create_default_slot_3$3(ctx) {
-    	let div1;
-    	let kbd;
-    	let t1;
-    	let div0;
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/two";
-    			t1 = space();
-    			div0 = element("div");
-    			div0.textContent = "is 130kb minified.";
-    			add_location(kbd, file$5, 83, 6, 3139);
-    			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$5, 84, 6, 3171);
-    			add_location(div1, file$5, 82, 4, 3127);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, kbd);
-    			append_dev(div1, t1);
-    			append_dev(div1, div0);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3$3.name,
-    		type: "slot",
-    		source: "(82:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (88:2) <Two>
-    function create_default_slot_2$3(ctx) {
-    	let div;
-    	let t1;
-    	let img;
-    	let img_src_value;
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			div.textContent = "so is this gif";
-    			t1 = space();
-    			img = element("img");
-    			attr_dev(div, "class", "i");
-    			add_location(div, file$5, 89, 4, 3357);
-    			if (!src_url_equal(img.src, img_src_value = "./build/assets/jesus.gif")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "jesus gif");
-    			add_location(img, file$5, 90, 4, 3397);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, img, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(img);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_2$3.name,
-    		type: "slot",
-    		source: "(88:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (93:2) <Three>
-    function create_default_slot_1$3(ctx) {
+    // (11:4) {#each res as p, n}
+    function create_each_block(ctx) {
     	let div;
     	let t;
-    	let grid;
-    	let current;
+    	let each_value_1 = /*p*/ ctx[2].terms;
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
 
-    	grid = new Grid({
-    			props: { seed: "76b36bcb2b4e1fec394" },
-    			$$inline: true
-    		});
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
 
     	const block = {
     		c: function create() {
     			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
     			t = space();
-    			create_component(grid.$$.fragment);
-    			set_style(div, "width", "200px");
-    			add_location(div, file$5, 93, 4, 3475);
+    			attr_dev(div, "class", "row svelte-10l4whr");
+    			add_location(div, file$2, 11, 6, 284);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(grid, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t);
-    			destroy_component(grid, detaching);
-    		}
-    	};
 
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1$3.name,
-    		type: "slot",
-    		source: "(93:2) <Three>",
-    		ctx
-    	});
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
 
-    	return block;
-    }
-
-    // (14:0) <Page>
-    function create_default_slot$3(ctx) {
-    	let left;
-    	let t0;
-    	let one0;
-    	let t1;
-    	let one1;
-    	let t2;
-    	let two0;
-    	let t3;
-    	let one2;
-    	let t4;
-    	let two1;
-    	let t5;
-    	let one3;
-    	let t6;
-    	let two2;
-    	let t7;
-    	let three;
-    	let current;
-
-    	left = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_9] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one0 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_8] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one1 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_7] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two0 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_6$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one2 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_5$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two1 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_4$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one3 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_3$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two2 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_2$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	three = new Three$1({
-    			props: {
-    				$$slots: { default: [create_default_slot_1$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(left.$$.fragment);
-    			t0 = space();
-    			create_component(one0.$$.fragment);
-    			t1 = space();
-    			create_component(one1.$$.fragment);
-    			t2 = space();
-    			create_component(two0.$$.fragment);
-    			t3 = space();
-    			create_component(one2.$$.fragment);
-    			t4 = space();
-    			create_component(two1.$$.fragment);
-    			t5 = space();
-    			create_component(one3.$$.fragment);
-    			t6 = space();
-    			create_component(two2.$$.fragment);
-    			t7 = space();
-    			create_component(three.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(left, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(one1, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(two0, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(one2, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(two1, target, anchor);
-    			insert_dev(target, t5, anchor);
-    			mount_component(one3, target, anchor);
-    			insert_dev(target, t6, anchor);
-    			mount_component(two2, target, anchor);
-    			insert_dev(target, t7, anchor);
-    			mount_component(three, target, anchor);
-    			current = true;
+    			append_dev(div, t);
     		},
     		p: function update(ctx, dirty) {
-    			const left_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left.$set(left_changes);
-    			const one0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one0.$set(one0_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
-    			const two0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two0.$set(two0_changes);
-    			const one2_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one2_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one2.$set(one2_changes);
-    			const two1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two1.$set(two1_changes);
-    			const one3_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one3_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one3.$set(one3_changes);
-    			const two2_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two2_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two2.$set(two2_changes);
-    			const three_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				three_changes.$$scope = { dirty, ctx };
-    			}
-
-    			three.$set(three_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(left.$$.fragment, local);
-    			transition_in(one0.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
-    			transition_in(two0.$$.fragment, local);
-    			transition_in(one2.$$.fragment, local);
-    			transition_in(two1.$$.fragment, local);
-    			transition_in(one3.$$.fragment, local);
-    			transition_in(two2.$$.fragment, local);
-    			transition_in(three.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(left.$$.fragment, local);
-    			transition_out(one0.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
-    			transition_out(two0.$$.fragment, local);
-    			transition_out(one2.$$.fragment, local);
-    			transition_out(two1.$$.fragment, local);
-    			transition_out(one3.$$.fragment, local);
-    			transition_out(two2.$$.fragment, local);
-    			transition_out(three.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(left, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(one1, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(two0, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(one2, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(two1, detaching);
-    			if (detaching) detach_dev(t5);
-    			destroy_component(one3, detaching);
-    			if (detaching) detach_dev(t6);
-    			destroy_component(two2, detaching);
-    			if (detaching) detach_dev(t7);
-    			destroy_component(three, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$3.name,
-    		type: "slot",
-    		source: "(14:0) <Page>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$6(ctx) {
-    	let block;
-    	let t;
-    	let page;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#978BA3" },
-    			$$inline: true
-    		});
-
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot$3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    			t = space();
-    			create_component(page.$$.fragment);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(page, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page.$set(page_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			transition_in(page.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			transition_out(page.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    			if (detaching) detach_dev(t);
-    			destroy_component(page, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_fragment$6.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    function instance$6($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Two', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Two> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({
-    		Page,
-    		One,
-    		Two,
-    		Three: Three$1,
-    		Left,
-    		Caret,
-    		Block,
-    		Tagger,
-    		Grid
-    	});
-
-    	return [];
-    }
-
-    class Two_1 extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$6, create_fragment$6, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Two_1",
-    			options,
-    			id: create_fragment$6.name
-    		});
-    	}
-    }
-
-    /* home/demos/Chunker.svelte generated by Svelte v3.43.0 */
-
-    const file$4 = "home/demos/Chunker.svelte";
-
-    function create_fragment$5(ctx) {
-    	let div1;
-    	let textarea;
-    	let t0;
-    	let div0;
-    	let current;
-
-    	textarea = new TextArea({
-    			props: {
-    				value: /*text*/ ctx[0],
-    				size: "18px",
-    				cb: /*onchange*/ ctx[1]
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			div1 = element("div");
-    			create_component(textarea.$$.fragment);
-    			t0 = space();
-    			div0 = element("div");
-    			div0.textContent = "here";
-    			attr_dev(div0, "class", "json down svelte-rgvpo4");
-    			add_location(div0, file$4, 29, 2, 1139);
-    			set_style(div1, "min-width", "800px");
-    			add_location(div1, file$4, 27, 0, 1052);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div1, anchor);
-    			mount_component(textarea, div1, null);
-    			append_dev(div1, t0);
-    			append_dev(div1, div0);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(textarea.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(textarea.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div1);
-    			destroy_component(textarea);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$5.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$5($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Chunker', slots, []);
-    	let text = `Like the time I caught the ferry over to Shelbyville - I needed a new heel for my shoe, so I decided to go to Morganville which is what they called Shelbyville in those days. So, I tied an onion to my belt which was the style at the time. Now, to take the ferry cost a nickel. And in those days, nickels had pictures of bumblebees on ‘em.`;
-
-    	let json = nlp$1(text).json({
-    		terms: {
-    			tags: false,
-    			index: false,
-    			machine: false
-    		}
-    	});
-
-    	const onchange = function (txt) {
-    		json = nlp$1(txt).json();
-    	};
-
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Chunker> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({ Textarea: TextArea, nlp: nlp$1, text, json, onchange });
-
-    	$$self.$inject_state = $$props => {
-    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
-    		if ('json' in $$props) json = $$props.json;
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [text, onchange];
-    }
-
-    class Chunker extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$5, create_fragment$5, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Chunker",
-    			options,
-    			id: create_fragment$5.name
-    		});
-    	}
-    }
-
-    /* home/Three.svelte generated by Svelte v3.43.0 */
-    const file$3 = "home/Three.svelte";
-
-    // (14:2) <Left>
-    function create_default_slot_6(ctx) {
-    	let kbd;
-    	let span0;
-    	let t2;
-    	let div0;
-    	let t3;
-    	let div1;
-    	let t4;
-    	let span1;
-    	let t6;
-
-    	const block = {
-    		c: function create() {
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/three";
-    			span0 = element("span");
-    			span0.textContent = ":";
-    			t2 = space();
-    			div0 = element("div");
-    			t3 = space();
-    			div1 = element("div");
-    			t4 = text$1("- ");
-    			span1 = element("span");
-    			span1.textContent = "  chunks / phrases / clauses";
-    			t6 = text$1(" -");
-    			set_style(kbd, "font-size", "2rem");
-    			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$3, 14, 4, 354);
-    			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$3, 14, 72, 422);
-    			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$3, 15, 4, 452);
-    			set_style(span1, "border-bottom", "4px solid #D68881");
-    			set_style(span1, "padding-bottom", "5px");
-    			add_location(span1, file$3, 17, 8, 542);
-    			attr_dev(div1, "class", "tab");
-    			set_style(div1, "font-size", "1.8rem");
-    			add_location(div1, file$3, 16, 4, 489);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, kbd, anchor);
-    			insert_dev(target, span0, anchor);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, t4);
-    			append_dev(div1, span1);
-    			append_dev(div1, t6);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(kbd);
-    			if (detaching) detach_dev(span0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_6.name,
-    		type: "slot",
-    		source: "(14:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (22:2) <One>
-    function create_default_slot_5$1(ctx) {
-    	let chunker;
-    	let current;
-    	chunker = new Chunker({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			create_component(chunker.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(chunker, target, anchor);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(chunker.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(chunker.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(chunker, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_5$1.name,
-    		type: "slot",
-    		source: "(22:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (26:2) <One>
-    function create_default_slot_4$1(ctx) {
-    	let div7;
-    	let div2;
-    	let div0;
-    	let t1;
-    	let div1;
-    	let t3;
-    	let div6;
-    	let div3;
-    	let t4;
-    	let span0;
-    	let t6;
-    	let div4;
-    	let span1;
-    	let t8;
-    	let div5;
-    	let t9;
-    	let span2;
-    	let t11;
-    	let t12;
-    	let div8;
-    	let t13;
-    	let div11;
-    	let div10;
-    	let t14;
-    	let div9;
-
-    	const block = {
-    		c: function create() {
-    			div7 = element("div");
-    			div2 = element("div");
-    			div0 = element("div");
-    			div0.textContent = "'captain of the football team'";
-    			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "is one thing.";
-    			t3 = space();
-    			div6 = element("div");
-    			div3 = element("div");
-    			t4 = text$1("so is ");
-    			span0 = element("span");
-    			span0.textContent = "'jet skiing'";
-    			t6 = space();
-    			div4 = element("div");
-    			span1 = element("span");
-    			span1.textContent = "'breaking up'";
-    			t8 = space();
-    			div5 = element("div");
-    			t9 = text$1("and ");
-    			span2 = element("span");
-    			span2.textContent = "'Calgary Alberta'";
-    			t11 = text$1(".");
-    			t12 = space();
-    			div8 = element("div");
-    			t13 = space();
-    			div11 = element("div");
-    			div10 = element("div");
-    			t14 = text$1("a word can be two things,\n        ");
-    			div9 = element("div");
-    			div9.textContent = "or a 3rd of a thing.";
-    			attr_dev(div0, "class", "blue");
-    			add_location(div0, file$3, 28, 8, 823);
-    			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$3, 29, 8, 886);
-    			attr_dev(div2, "class", "f2");
-    			add_location(div2, file$3, 27, 6, 798);
-    			attr_dev(span0, "class", "sea i");
-    			add_location(span0, file$3, 32, 36, 996);
-    			attr_dev(div3, "class", "down tab");
-    			add_location(div3, file$3, 32, 8, 968);
-    			attr_dev(span1, "class", "sky i");
-    			add_location(span1, file$3, 33, 26, 1068);
-    			attr_dev(div4, "class", "down");
-    			add_location(div4, file$3, 33, 8, 1050);
-    			attr_dev(span2, "class", "rose i");
-    			add_location(span2, file$3, 34, 34, 1149);
-    			attr_dev(div5, "class", "down tab");
-    			add_location(div5, file$3, 34, 8, 1123);
-    			attr_dev(div6, "class", "tab");
-    			add_location(div6, file$3, 31, 6, 942);
-    			add_location(div7, file$3, 26, 4, 786);
-    			attr_dev(div8, "class", "mt4");
-    			add_location(div8, file$3, 37, 4, 1230);
-    			attr_dev(div9, "class", "tab f09");
-    			add_location(div9, file$3, 42, 8, 1377);
-    			attr_dev(div10, "class", "");
-    			add_location(div10, file$3, 40, 6, 1320);
-    			attr_dev(div11, "class", "tab");
-    			add_location(div11, file$3, 38, 4, 1254);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div7, anchor);
-    			append_dev(div7, div2);
-    			append_dev(div2, div0);
-    			append_dev(div2, t1);
-    			append_dev(div2, div1);
-    			append_dev(div7, t3);
-    			append_dev(div7, div6);
-    			append_dev(div6, div3);
-    			append_dev(div3, t4);
-    			append_dev(div3, span0);
-    			append_dev(div6, t6);
-    			append_dev(div6, div4);
-    			append_dev(div4, span1);
-    			append_dev(div6, t8);
-    			append_dev(div6, div5);
-    			append_dev(div5, t9);
-    			append_dev(div5, span2);
-    			append_dev(div5, t11);
-    			insert_dev(target, t12, anchor);
-    			insert_dev(target, div8, anchor);
-    			insert_dev(target, t13, anchor);
-    			insert_dev(target, div11, anchor);
-    			append_dev(div11, div10);
-    			append_dev(div10, t14);
-    			append_dev(div10, div9);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div7);
-    			if (detaching) detach_dev(t12);
-    			if (detaching) detach_dev(div8);
-    			if (detaching) detach_dev(t13);
-    			if (detaching) detach_dev(div11);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_4$1.name,
-    		type: "slot",
-    		source: "(26:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (47:2) <One>
-    function create_default_slot_3$2(ctx) {
-    	let div0;
-    	let t0;
-    	let i;
-    	let t2;
-    	let t3;
-    	let div3;
-    	let div1;
-    	let t5;
-    	let div2;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			t0 = text$1("in practice, people want a ");
-    			i = element("i");
-    			i.textContent = "group";
-    			t2 = text$1(" -");
-    			t3 = space();
-    			div3 = element("div");
-    			div1 = element("div");
-    			div1.textContent = "and not trip-over some #Adverb,";
-    			t5 = space();
-    			div2 = element("div");
-    			div2.textContent = "or contraction, or something.";
-    			attr_dev(i, "class", "sea");
-    			add_location(i, file$3, 47, 36, 1502);
-    			add_location(div0, file$3, 47, 4, 1470);
-    			attr_dev(div1, "class", "down sky");
-    			add_location(div1, file$3, 50, 6, 1604);
-    			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$3, 51, 6, 1670);
-    			attr_dev(div3, "class", "tab i");
-    			add_location(div3, file$3, 48, 4, 1539);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			append_dev(div0, t0);
-    			append_dev(div0, i);
-    			append_dev(div0, t2);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, div1);
-    			append_dev(div3, t5);
-    			append_dev(div3, div2);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div3);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3$2.name,
-    		type: "slot",
-    		source: "(47:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (70:2) <Two>
-    function create_default_slot_2$2(ctx) {
-    	let div;
-    	let t1;
-    	let ul;
-    	let li0;
-    	let a0;
-    	let span0;
-    	let t3;
-    	let caret0;
-    	let t4;
-    	let li1;
-    	let a1;
-    	let span1;
-    	let t6;
-    	let caret1;
-    	let t7;
-    	let li2;
-    	let a2;
-    	let span2;
-    	let t9;
-    	let caret2;
-    	let current;
-    	caret0 = new Caret({ $$inline: true });
-    	caret1 = new Caret({ $$inline: true });
-    	caret2 = new Caret({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			div.textContent = "this also lets things happen:";
-    			t1 = space();
-    			ul = element("ul");
-    			li0 = element("li");
-    			a0 = element("a");
-    			span0 = element("span");
-    			span0.textContent = "Number parsing";
-    			t3 = space();
-    			create_component(caret0.$$.fragment);
-    			t4 = space();
-    			li1 = element("li");
-    			a1 = element("a");
-    			span1 = element("span");
-    			span1.textContent = "Date parsing";
-    			t6 = space();
-    			create_component(caret1.$$.fragment);
-    			t7 = space();
-    			li2 = element("li");
-    			a2 = element("a");
-    			span2 = element("span");
-    			span2.textContent = "Tense conjugation";
-    			t9 = space();
-    			create_component(caret2.$$.fragment);
-    			attr_dev(div, "class", "down f09");
-    			add_location(div, file$3, 70, 4, 2313);
-    			attr_dev(span0, "class", "choose");
-    			set_style(span0, "color", "white");
-    			add_location(span0, file$3, 72, 22, 2420);
-    			attr_dev(a0, "href", "#");
-    			add_location(a0, file$3, 72, 10, 2408);
-    			add_location(li0, file$3, 72, 6, 2404);
-    			attr_dev(span1, "class", "choose");
-    			set_style(span1, "color", "white");
-    			add_location(span1, file$3, 73, 35, 2538);
-    			attr_dev(a1, "href", "#");
-    			add_location(a1, file$3, 73, 23, 2526);
-    			attr_dev(li1, "class", "down");
-    			add_location(li1, file$3, 73, 6, 2509);
-    			attr_dev(span2, "class", "choose");
-    			set_style(span2, "color", "white");
-    			add_location(span2, file$3, 74, 35, 2654);
-    			attr_dev(a2, "href", "#");
-    			add_location(a2, file$3, 74, 23, 2642);
-    			attr_dev(li2, "class", "down");
-    			add_location(li2, file$3, 74, 6, 2625);
-    			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$3, 71, 4, 2375);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, ul, anchor);
-    			append_dev(ul, li0);
-    			append_dev(li0, a0);
-    			append_dev(a0, span0);
-    			append_dev(a0, t3);
-    			mount_component(caret0, a0, null);
-    			append_dev(ul, t4);
-    			append_dev(ul, li1);
-    			append_dev(li1, a1);
-    			append_dev(a1, span1);
-    			append_dev(a1, t6);
-    			mount_component(caret1, a1, null);
-    			append_dev(ul, t7);
-    			append_dev(ul, li2);
-    			append_dev(li2, a2);
-    			append_dev(a2, span2);
-    			append_dev(a2, t9);
-    			mount_component(caret2, a2, null);
-    			current = true;
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(caret0.$$.fragment, local);
-    			transition_in(caret1.$$.fragment, local);
-    			transition_in(caret2.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(caret0.$$.fragment, local);
-    			transition_out(caret1.$$.fragment, local);
-    			transition_out(caret2.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(ul);
-    			destroy_component(caret0);
-    			destroy_component(caret1);
-    			destroy_component(caret2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_2$2.name,
-    		type: "slot",
-    		source: "(70:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (80:2) <One>
-    function create_default_slot_1$2(ctx) {
-    	let t0;
-    	let div0;
-    	let t2;
-    	let div1;
-    	let t4;
-    	let div3;
-    	let span0;
-    	let t6;
-    	let div2;
-    	let t7;
-    	let span1;
-    	let t9;
-    	let span2;
-    	let t11;
-    	let t12;
-    	let div4;
-    	let t13;
-    	let b;
-    	let t15;
-    	let t16;
-    	let div5;
-
-    	const block = {
-    		c: function create() {
-    			t0 = text$1("If you’re cautious, and worried this won’t work,\n    ");
-    			div0 = element("div");
-    			div0.textContent = "you are very clever.";
-    			t2 = space();
-    			div1 = element("div");
-    			div1.textContent = "but remember -";
-    			t4 = space();
-    			div3 = element("div");
-    			span0 = element("span");
-    			span0.textContent = "\"ripped\"";
-    			t6 = space();
-    			div2 = element("div");
-    			t7 = text$1("can mean ");
-    			span1 = element("span");
-    			span1.textContent = "torn";
-    			t9 = text$1(" or\n        ");
-    			span2 = element("span");
-    			span2.textContent = "drunk";
-    			t11 = text$1(".");
-    			t12 = space();
-    			div4 = element("div");
-    			t13 = text$1("but both times it's just an ");
-    			b = element("b");
-    			b.textContent = "#Adjective";
-    			t15 = text$1(" -");
-    			t16 = space();
-    			div5 = element("div");
-    			div5.textContent = "so the hard problem, still ahead ↓";
-    			attr_dev(div0, "class", "tab sea");
-    			add_location(div0, file$3, 81, 4, 2835);
-    			attr_dev(div1, "class", "tab down");
-    			add_location(div1, file$3, 82, 4, 2887);
-    			attr_dev(span0, "class", "sky i");
-    			add_location(span0, file$3, 84, 6, 2962);
-    			attr_dev(span1, "class", "rose i");
-    			add_location(span1, file$3, 86, 17, 3066);
-    			attr_dev(span2, "class", "red i");
-    			add_location(span2, file$3, 87, 8, 3110);
-    			attr_dev(div2, "class", "tab");
-    			set_style(div2, "font-size", "1.2rem");
-    			add_location(div2, file$3, 85, 6, 3004);
-    			attr_dev(div3, "class", "f2 down");
-    			add_location(div3, file$3, 83, 4, 2934);
-    			attr_dev(b, "class", "sky i");
-    			add_location(b, file$3, 91, 34, 3225);
-    			attr_dev(div4, "class", "down");
-    			add_location(div4, file$3, 90, 4, 3172);
-    			attr_dev(div5, "class", "down tab f09");
-    			add_location(div5, file$3, 93, 4, 3274);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div1, anchor);
-    			insert_dev(target, t4, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, span0);
-    			append_dev(div3, t6);
-    			append_dev(div3, div2);
-    			append_dev(div2, t7);
-    			append_dev(div2, span1);
-    			append_dev(div2, t9);
-    			append_dev(div2, span2);
-    			append_dev(div2, t11);
-    			insert_dev(target, t12, anchor);
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, t13);
-    			append_dev(div4, b);
-    			append_dev(div4, t15);
-    			insert_dev(target, t16, anchor);
-    			insert_dev(target, div5, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div1);
-    			if (detaching) detach_dev(t4);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t12);
-    			if (detaching) detach_dev(div4);
-    			if (detaching) detach_dev(t16);
-    			if (detaching) detach_dev(div5);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1$2.name,
-    		type: "slot",
-    		source: "(80:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (13:0) <Page>
-    function create_default_slot$2(ctx) {
-    	let left;
-    	let t0;
-    	let one0;
-    	let t1;
-    	let one1;
-    	let t2;
-    	let one2;
-    	let t3;
-    	let two;
-    	let t4;
-    	let one3;
-    	let t5;
-    	let one4;
-    	let current;
-
-    	left = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_6] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one0 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_5$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one1 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_4$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one2 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_3$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_2$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one3 = new One({ $$inline: true });
-
-    	one4 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_1$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(left.$$.fragment);
-    			t0 = space();
-    			create_component(one0.$$.fragment);
-    			t1 = space();
-    			create_component(one1.$$.fragment);
-    			t2 = space();
-    			create_component(one2.$$.fragment);
-    			t3 = space();
-    			create_component(two.$$.fragment);
-    			t4 = space();
-    			create_component(one3.$$.fragment);
-    			t5 = space();
-    			create_component(one4.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(left, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(one1, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(one2, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(two, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(one3, target, anchor);
-    			insert_dev(target, t5, anchor);
-    			mount_component(one4, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const left_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left.$set(left_changes);
-    			const one0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one0.$set(one0_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
-    			const one2_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one2_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one2.$set(one2_changes);
-    			const two_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two.$set(two_changes);
-    			const one4_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one4_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one4.$set(one4_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(left.$$.fragment, local);
-    			transition_in(one0.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
-    			transition_in(one2.$$.fragment, local);
-    			transition_in(two.$$.fragment, local);
-    			transition_in(one3.$$.fragment, local);
-    			transition_in(one4.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(left.$$.fragment, local);
-    			transition_out(one0.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
-    			transition_out(one2.$$.fragment, local);
-    			transition_out(two.$$.fragment, local);
-    			transition_out(one3.$$.fragment, local);
-    			transition_out(one4.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(left, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(one1, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(one2, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(two, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(one3, detaching);
-    			if (detaching) detach_dev(t5);
-    			destroy_component(one4, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$2.name,
-    		type: "slot",
-    		source: "(13:0) <Page>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$4(ctx) {
-    	let block;
-    	let t;
-    	let page;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#e6b3bc" },
-    			$$inline: true
-    		});
-
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot$2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    			t = space();
-    			create_component(page.$$.fragment);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(page, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page.$set(page_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			transition_in(page.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			transition_out(page.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    			if (detaching) detach_dev(t);
-    			destroy_component(page, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_fragment$4.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    function instance$4($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Three', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Three> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$capture_state = () => ({
-    		Page,
-    		One,
-    		Two,
-    		Left,
-    		Caret,
-    		Block,
-    		Chunker
-    	});
-
-    	return [];
-    }
-
-    class Three extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Three",
-    			options,
-    			id: create_fragment$4.name
-    		});
-    	}
-    }
-
-    /* lib/Row.svelte generated by Svelte v3.43.0 */
-
-    const file$2 = "lib/Row.svelte";
-
-    function create_fragment$3(ctx) {
-    	let div;
-    	let current;
-    	const default_slot_template = /*#slots*/ ctx[1].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[0], null);
-
-    	const block = {
-    		c: function create() {
-    			div = element("div");
-    			if (default_slot) default_slot.c();
-    			attr_dev(div, "class", "row svelte-hha4zt");
-    			add_location(div, file$2, 5, 0, 73);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-
-    			if (default_slot) {
-    				default_slot.m(div, null);
-    			}
-
-    			current = true;
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 1)) {
-    					update_slot_base(
-    						default_slot,
-    						default_slot_template,
-    						ctx,
-    						/*$$scope*/ ctx[0],
-    						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[0])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[0], dirty, null),
-    						null
-    					);
+    			if (dirty & /*res*/ 2) {
+    				each_value_1 = /*p*/ ctx[2].terms;
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div, t);
+    					}
     				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
     			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(default_slot, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(default_slot, local);
-    			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
-    			if (default_slot) default_slot.d(detaching);
+    			destroy_each(each_blocks, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$3($$self, $$props, $$invalidate) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Row', slots, ['default']);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Row> was created with unknown prop '${key}'`);
-    	});
-
-    	$$self.$$set = $$props => {
-    		if ('$$scope' in $$props) $$invalidate(0, $$scope = $$props.$$scope);
-    	};
-
-    	return [$$scope, slots];
-    }
-
-    class Row extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Row",
-    			options,
-    			id: create_fragment$3.name
-    		});
-    	}
-    }
-
-    /* home/Four.svelte generated by Svelte v3.43.0 */
-    const file$1 = "home/Four.svelte";
-
-    // (15:2) <Left>
-    function create_default_slot_3$1(ctx) {
-    	let kbd;
-    	let span0;
-    	let t2;
-    	let div0;
-    	let t3;
-    	let div1;
-    	let t4;
-    	let span1;
-    	let t6;
-
-    	const block = {
-    		c: function create() {
-    			kbd = element("kbd");
-    			kbd.textContent = "compromise/four";
-    			span0 = element("span");
-    			span0.textContent = ":";
-    			t2 = space();
-    			div0 = element("div");
-    			t3 = space();
-    			div1 = element("div");
-    			t4 = text$1("- ");
-    			span1 = element("span");
-    			span1.textContent = "  word-sense";
-    			t6 = text$1(" -");
-    			set_style(kbd, "font-size", "2rem");
-    			set_style(kbd, "line-height", "2rem");
-    			add_location(kbd, file$1, 15, 4, 390);
-    			attr_dev(span0, "class", "f2");
-    			add_location(span0, file$1, 15, 71, 457);
-    			set_style(div0, "margin-top", "2rem");
-    			add_location(div0, file$1, 16, 4, 487);
-    			set_style(span1, "border-bottom", "4px solid #D68881");
-    			set_style(span1, "padding-bottom", "5px");
-    			add_location(span1, file$1, 18, 8, 577);
-    			attr_dev(div1, "class", "tab");
-    			set_style(div1, "font-size", "1.8rem");
-    			add_location(div1, file$1, 17, 4, 524);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, kbd, anchor);
-    			insert_dev(target, span0, anchor);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, t4);
-    			append_dev(div1, span1);
-    			append_dev(div1, t6);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(kbd);
-    			if (detaching) detach_dev(span0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3$1.name,
-    		type: "slot",
-    		source: "(15:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (23:2) <One>
-    function create_default_slot_2$1(ctx) {
-    	let t0;
-    	let div;
-
-    	const block = {
-    		c: function create() {
-    			t0 = text$1("hahaha,\n    ");
-    			div = element("div");
-    			div.textContent = "ya right.";
-    			attr_dev(div, "class", "tab i");
-    			add_location(div, file$1, 24, 4, 783);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, div, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(div);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_2$1.name,
-    		type: "slot",
-    		source: "(23:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (33:2) <Two>
-    function create_default_slot_1$1(ctx) {
-    	let div0;
-    	let t1;
-    	let div1;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			div0.textContent = "this work is in development,";
-    			t1 = space();
-    			div1 = element("div");
-    			div1.textContent = "- probably forever.";
-    			add_location(div0, file$1, 33, 4, 1052);
-    			attr_dev(div1, "class", "f09 tab");
-    			add_location(div1, file$1, 34, 4, 1096);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, div1, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1$1.name,
-    		type: "slot",
-    		source: "(33:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (14:0) <Page>
-    function create_default_slot$1(ctx) {
-    	let left;
-    	let t0;
-    	let one;
-    	let t1;
-    	let two;
-    	let current;
-
-    	left = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_3$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_2$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_1$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(left.$$.fragment);
-    			t0 = space();
-    			create_component(one.$$.fragment);
-    			t1 = space();
-    			create_component(two.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(left, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(two, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const left_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left.$set(left_changes);
-    			const one_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one.$set(one_changes);
-    			const two_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two.$set(two_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(left.$$.fragment, local);
-    			transition_in(one.$$.fragment, local);
-    			transition_in(two.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(left.$$.fragment, local);
-    			transition_out(one.$$.fragment, local);
-    			transition_out(two.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(left, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(two, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot$1.name,
-    		type: "slot",
-    		source: "(14:0) <Page>",
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(11:4) {#each res as p, n}",
     		ctx
     	});
 
@@ -25714,663 +28228,608 @@ var app = (function () {
     }
 
     function create_fragment$2(ctx) {
-    	let block;
+    	let div1;
+    	let textarea;
     	let t;
-    	let page;
+    	let div0;
     	let current;
 
-    	block = new Block({
-    			props: { color: "#6699cc" },
+    	textarea = new TextArea({
+    			props: { value: /*text*/ ctx[0], height: "1.4rem" },
     			$$inline: true
     		});
 
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot$1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
+    	let each_value = /*res*/ ctx[1];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
 
-    	const block_1 = {
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const block = {
     		c: function create() {
-    			create_component(block.$$.fragment);
+    			div1 = element("div");
+    			create_component(textarea.$$.fragment);
     			t = space();
-    			create_component(page.$$.fragment);
+    			div0 = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(div0, "class", "res col svelte-10l4whr");
+    			add_location(div0, file$2, 9, 2, 232);
+    			add_location(div1, file$2, 7, 0, 180);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			insert_dev(target, t, anchor);
-    			mount_component(page, target, anchor);
+    			insert_dev(target, div1, anchor);
+    			mount_component(textarea, div1, null);
+    			append_dev(div1, t);
+    			append_dev(div1, div0);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div0, null);
+    			}
+
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
+    			const textarea_changes = {};
+    			if (dirty & /*text*/ 1) textarea_changes.value = /*text*/ ctx[0];
+    			textarea.$set(textarea_changes);
 
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
+    			if (dirty & /*res*/ 2) {
+    				each_value = /*res*/ ctx[1];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
     			}
-
-    			page.$set(page_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			transition_in(page.$$.fragment, local);
+    			transition_in(textarea.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			transition_out(page.$$.fragment, local);
+    			transition_out(textarea.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    			if (detaching) detach_dev(t);
-    			destroy_component(page, detaching);
+    			if (detaching) detach_dev(div1);
+    			destroy_component(textarea);
+    			destroy_each(each_blocks, detaching);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
+    		block,
     		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
     	});
 
-    	return block_1;
+    	return block;
     }
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let res;
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Four', slots, []);
-    	const writable_props = [];
+    	validate_slots('Tagger', slots, []);
+    	let { text = `` } = $$props;
+    	const writable_props = ['text'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Four> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Tagger> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({
-    		Page,
-    		One,
-    		Two,
-    		Three: Three$1,
-    		Left,
-    		Row,
-    		Block,
-    		Grid
-    	});
+    	$$self.$$set = $$props => {
+    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
+    	};
 
-    	return [];
+    	$$self.$capture_state = () => ({ TextArea, nlp: nlp$1, text, res });
+
+    	$$self.$inject_state = $$props => {
+    		if ('text' in $$props) $$invalidate(0, text = $$props.text);
+    		if ('res' in $$props) $$invalidate(1, res = $$props.res);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*text*/ 1) {
+    			$$invalidate(1, res = nlp$1(text).json());
+    		}
+    	};
+
+    	return [text, res];
     }
 
-    class Four extends SvelteComponentDev {
+    class Tagger extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { text: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Four",
+    			tagName: "Tagger",
     			options,
     			id: create_fragment$2.name
     		});
     	}
+
+    	get text() {
+    		throw new Error("<Tagger>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set text(value) {
+    		throw new Error("<Tagger>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
     }
 
-    /* home/Out.svelte generated by Svelte v3.43.0 */
-    const file = "home/Out.svelte";
+    /* two/lexicon/Graph.svelte generated by Svelte v3.43.0 */
 
-    // (15:2) <One>
-    function create_default_slot_5(ctx) {
-    	let div0;
-    	let t0;
-    	let b;
-    	let t2;
-    	let div3;
-    	let t3;
-    	let div1;
-    	let t5;
-    	let div2;
-    	let t6;
-    	let a;
-    	let t8;
-    	let div4;
-    	let t9;
-    	let span;
+    const file$1 = "two/lexicon/Graph.svelte";
 
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			t0 = text$1("Compromise was created ");
-    			b = element("b");
-    			b.textContent = "in 2010";
-    			t2 = space();
-    			div3 = element("div");
-    			t3 = text$1("the benevolent dictator,\n      ");
-    			div1 = element("div");
-    			div1.textContent = "and territorial benefactor -";
-    			t5 = space();
-    			div2 = element("div");
-    			t6 = text$1("is ");
-    			a = element("a");
-    			a.textContent = "Spencer Kelly";
-    			t8 = space();
-    			div4 = element("div");
-    			t9 = text$1("PRs are ");
-    			span = element("span");
-    			span.textContent = "well-respected.";
-    			add_location(b, file, 15, 32, 395);
-    			add_location(div0, file, 15, 4, 367);
-    			attr_dev(div1, "class", "f09 tab sea");
-    			add_location(div1, file, 20, 6, 551);
-    			attr_dev(a, "href", "https://spencermounta.in/");
-    			attr_dev(a, "class", "sky");
-    			add_location(a, file, 22, 11, 646);
-    			attr_dev(div2, "class", "tab");
-    			add_location(div2, file, 21, 6, 617);
-    			attr_dev(div3, "class", "down f09");
-    			add_location(div3, file, 18, 4, 491);
-    			attr_dev(span, "class", "sky i");
-    			add_location(span, file, 26, 34, 869);
-    			attr_dev(div4, "class", "down f09");
-    			add_location(div4, file, 26, 4, 839);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			append_dev(div0, t0);
-    			append_dev(div0, b);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div3, anchor);
-    			append_dev(div3, t3);
-    			append_dev(div3, div1);
-    			append_dev(div3, t5);
-    			append_dev(div3, div2);
-    			append_dev(div2, t6);
-    			append_dev(div2, a);
-    			insert_dev(target, t8, anchor);
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, t9);
-    			append_dev(div4, span);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t8);
-    			if (detaching) detach_dev(div4);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_5.name,
-    		type: "slot",
-    		source: "(15:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (29:2) <Two>
-    function create_default_slot_4(ctx) {
-    	let div0;
-    	let t0;
-    	let b0;
-    	let t2;
-    	let div1;
-    	let b1;
-    	let t4;
-
-    	const block = {
-    		c: function create() {
-    			div0 = element("div");
-    			t0 = text$1("Web-Assembly ");
-    			b0 = element("b");
-    			b0.textContent = "<should definetly happen>";
-    			t2 = space();
-    			div1 = element("div");
-    			b1 = element("b");
-    			b1.textContent = "Non-english versions";
-    			t4 = text$1(" <are happening slowly>.");
-    			add_location(b0, file, 29, 39, 974);
-    			attr_dev(div0, "class", "f09 down");
-    			add_location(div0, file, 29, 4, 939);
-    			attr_dev(b1, "class", "sea");
-    			add_location(b1, file, 30, 22, 1041);
-    			attr_dev(div1, "class", "down");
-    			add_location(div1, file, 30, 4, 1023);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div0, anchor);
-    			append_dev(div0, t0);
-    			append_dev(div0, b0);
-    			insert_dev(target, t2, anchor);
-    			insert_dev(target, div1, anchor);
-    			append_dev(div1, b1);
-    			append_dev(div1, t4);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div0);
-    			if (detaching) detach_dev(t2);
-    			if (detaching) detach_dev(div1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_4.name,
-    		type: "slot",
-    		source: "(29:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (34:2) <Left>
-    function create_default_slot_3(ctx) {
-    	let div2;
-    	let div0;
-    	let a0;
-    	let img0;
-    	let img0_src_value;
-    	let t0;
-    	let t1;
-    	let div1;
-    	let a1;
-    	let img1;
-    	let img1_src_value;
-    	let t2;
-
-    	const block = {
-    		c: function create() {
-    			div2 = element("div");
-    			div0 = element("div");
-    			a0 = element("a");
-    			img0 = element("img");
-    			t0 = text$1("\n          Github");
-    			t1 = space();
-    			div1 = element("div");
-    			a1 = element("a");
-    			img1 = element("img");
-    			t2 = text$1("\n          Twitter");
-    			if (!src_url_equal(img0.src, img0_src_value = "")) attr_dev(img0, "src", img0_src_value);
-    			attr_dev(img0, "alt", "");
-    			add_location(img0, file, 38, 10, 1327);
-    			attr_dev(a0, "href", "https://github.com/spencermountain/compromise/");
-    			add_location(a0, file, 37, 8, 1259);
-    			add_location(div0, file, 36, 6, 1245);
-    			if (!src_url_equal(img1.src, img1_src_value = "")) attr_dev(img1, "src", img1_src_value);
-    			attr_dev(img1, "alt", "");
-    			add_location(img1, file, 44, 10, 1468);
-    			attr_dev(a1, "href", "https://twitter.com/nlp_compromise");
-    			add_location(a1, file, 43, 8, 1412);
-    			add_location(div1, file, 42, 6, 1398);
-    			attr_dev(div2, "class", "row ");
-    			set_style(div2, "font-size", "1.5rem");
-    			add_location(div2, file, 35, 4, 1194);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
-    			append_dev(div0, a0);
-    			append_dev(a0, img0);
-    			append_dev(a0, t0);
-    			append_dev(div2, t1);
-    			append_dev(div2, div1);
-    			append_dev(div1, a1);
-    			append_dev(a1, img1);
-    			append_dev(a1, t2);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_3.name,
-    		type: "slot",
-    		source: "(34:2) <Left>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (52:2) <One>
-    function create_default_slot_2(ctx) {
-    	let div2;
-    	let div0;
-    	let t0;
-    	let div1;
-    	let a;
-    	let img;
-    	let img_src_value;
-    	let t1;
-
-    	const block = {
-    		c: function create() {
-    			div2 = element("div");
-    			div0 = element("div");
-    			t0 = space();
-    			div1 = element("div");
-    			a = element("a");
-    			img = element("img");
-    			t1 = text$1("\n          Observable");
-    			add_location(div0, file, 53, 6, 1619);
-    			if (!src_url_equal(img.src, img_src_value = "")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "");
-    			add_location(img, file, 61, 10, 1828);
-    			attr_dev(a, "href", "https://observablehq.com/@spencermountain/nlp-compromise");
-    			add_location(a, file, 60, 8, 1750);
-    			add_location(div1, file, 59, 6, 1736);
-    			attr_dev(div2, "class", "row ");
-    			set_style(div2, "font-size", "1.5rem");
-    			add_location(div2, file, 52, 4, 1568);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div2, anchor);
-    			append_dev(div2, div0);
-    			append_dev(div2, t0);
-    			append_dev(div2, div1);
-    			append_dev(div1, a);
-    			append_dev(a, img);
-    			append_dev(a, t1);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div2);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_2.name,
-    		type: "slot",
-    		source: "(52:2) <One>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (68:2) <Two>
-    function create_default_slot_1(ctx) {
+    function create_fragment$1(ctx) {
     	let div;
+    	let svg;
+    	let style;
     	let t0;
-    	let grid;
+    	let g0;
+    	let text0;
     	let t1;
-    	let current;
-
-    	grid = new Grid({
-    			props: { seed: "114a2660d759a54cd70" },
-    			$$inline: true
-    		});
+    	let text1;
+    	let t2;
+    	let text2;
+    	let t3;
+    	let text3;
+    	let t4;
+    	let line0;
+    	let text4;
+    	let t5;
+    	let g1;
+    	let text5;
+    	let t6;
+    	let text6;
+    	let t7;
+    	let text7;
+    	let t8;
+    	let text8;
+    	let t9;
+    	let text9;
+    	let t10;
+    	let line1;
+    	let text10;
+    	let path0;
+    	let path1;
+    	let path2;
+    	let g2;
+    	let text11;
+    	let tspan0;
+    	let t11;
+    	let tspan1;
+    	let t12;
+    	let tspan2;
+    	let t13;
+    	let path3;
+    	let g3;
+    	let text12;
+    	let tspan3;
+    	let t14;
+    	let tspan4;
+    	let t15;
+    	let path4;
+    	let g4;
+    	let text13;
+    	let tspan5;
+    	let t16;
+    	let tspan6;
+    	let t17;
+    	let tspan7;
+    	let t18;
+    	let tspan8;
+    	let t19;
+    	let text14;
+    	let t20;
 
     	const block = {
     		c: function create() {
     			div = element("div");
-    			t0 = space();
-    			create_component(grid.$$.fragment);
-    			t1 = text$1("\n    MIT");
-    			set_style(div, "width", "300px");
-    			add_location(div, file, 68, 4, 1929);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, div, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(grid, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(grid.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(grid.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(grid, detaching);
-    			if (detaching) detach_dev(t1);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_default_slot_1.name,
-    		type: "slot",
-    		source: "(68:2) <Two>",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (13:0) <Page>
-    function create_default_slot(ctx) {
-    	let block;
-    	let t0;
-    	let one0;
-    	let t1;
-    	let two0;
-    	let t2;
-    	let left;
-    	let t3;
-    	let one1;
-    	let t4;
-    	let two1;
-    	let current;
-
-    	block = new Block({
-    			props: { color: "#bfb0b3" },
-    			$$inline: true
-    		});
-
-    	one0 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_5] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two0 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_4] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	left = new Left({
-    			props: {
-    				$$slots: { default: [create_default_slot_3] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	one1 = new One({
-    			props: {
-    				$$slots: { default: [create_default_slot_2] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	two1 = new Two({
-    			props: {
-    				$$slots: { default: [create_default_slot_1] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block_1 = {
-    		c: function create() {
-    			create_component(block.$$.fragment);
-    			t0 = space();
-    			create_component(one0.$$.fragment);
-    			t1 = space();
-    			create_component(two0.$$.fragment);
-    			t2 = space();
-    			create_component(left.$$.fragment);
-    			t3 = space();
-    			create_component(one1.$$.fragment);
-    			t4 = space();
-    			create_component(two1.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(block, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(two0, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(left, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(one1, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(two1, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const one0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one0.$set(one0_changes);
-    			const two0_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two0_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two0.$set(two0_changes);
-    			const left_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
-    			}
-
-    			left.$set(left_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
-    			const two1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				two1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			two1.$set(two1_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(block.$$.fragment, local);
-    			transition_in(one0.$$.fragment, local);
-    			transition_in(two0.$$.fragment, local);
-    			transition_in(left.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
-    			transition_in(two1.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(block.$$.fragment, local);
-    			transition_out(one0.$$.fragment, local);
-    			transition_out(two0.$$.fragment, local);
-    			transition_out(left.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
-    			transition_out(two1.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(block, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(two0, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(left, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(one1, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(two1, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block: block_1,
-    		id: create_default_slot.name,
-    		type: "slot",
-    		source: "(13:0) <Page>",
-    		ctx
-    	});
-
-    	return block_1;
-    }
-
-    function create_fragment$1(ctx) {
-    	let page;
-    	let current;
-
-    	page = new Page({
-    			props: {
-    				$$slots: { default: [create_default_slot] },
-    				$$scope: { ctx }
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(page.$$.fragment);
+    			svg = svg_element("svg");
+    			style = svg_element("style");
+    			t0 = text$1(".somehow-legible {\n        font-size: 2px;\n      }\n      @media (max-width: 600px) {\n        .somehow-legible {\n          font-size: 4px;\n        }\n      }\n      .grow:hover {\n        stroke-width: 6px;\n      }\n    ");
+    			g0 = svg_element("g");
+    			text0 = svg_element("text");
+    			t1 = text$1("1k");
+    			text1 = svg_element("text");
+    			t2 = text$1("5k");
+    			text2 = svg_element("text");
+    			t3 = text$1("9k");
+    			text3 = svg_element("text");
+    			t4 = text$1("13k");
+    			line0 = svg_element("line");
+    			text4 = svg_element("text");
+    			t5 = text$1("# of words →");
+    			g1 = svg_element("g");
+    			text5 = svg_element("text");
+    			t6 = text$1("10%");
+    			text6 = svg_element("text");
+    			t7 = text$1("30%");
+    			text7 = svg_element("text");
+    			t8 = text$1("50%");
+    			text8 = svg_element("text");
+    			t9 = text$1("70%");
+    			text9 = svg_element("text");
+    			t10 = text$1("90%");
+    			line1 = svg_element("line");
+    			text10 = svg_element("text");
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			path2 = svg_element("path");
+    			g2 = svg_element("g");
+    			text11 = svg_element("text");
+    			tspan0 = svg_element("tspan");
+    			t11 = text$1("80%");
+    			tspan1 = svg_element("tspan");
+    			t12 = text$1("coverage");
+    			tspan2 = svg_element("tspan");
+    			t13 = text$1("(1k words)");
+    			path3 = svg_element("path");
+    			g3 = svg_element("g");
+    			text12 = svg_element("text");
+    			tspan3 = svg_element("tspan");
+    			t14 = text$1("90%");
+    			tspan4 = svg_element("tspan");
+    			t15 = text$1("(5k words)");
+    			path4 = svg_element("path");
+    			g4 = svg_element("g");
+    			text13 = svg_element("text");
+    			tspan5 = svg_element("tspan");
+    			t16 = text$1("compromise");
+    			tspan6 = svg_element("tspan");
+    			t17 = text$1("lexicon");
+    			tspan7 = svg_element("tspan");
+    			t18 = text$1("(14k");
+    			tspan8 = svg_element("tspan");
+    			t19 = text$1("words)");
+    			text14 = svg_element("text");
+    			t20 = text$1("Vocabulary Size");
+    			attr_dev(style, "scoped", "true");
+    			add_location(style, file$1, 2, 5, 161);
+    			attr_dev(text0, "x", "6.2%");
+    			attr_dev(text0, "y", "46");
+    			attr_dev(text0, "fill", "#d7d5d2");
+    			attr_dev(text0, "text-anchor", "middle");
+    			attr_dev(text0, "class", "somehow-legible");
+    			add_location(text0, file$1, 15, 7, 422);
+    			attr_dev(text1, "x", "31.2%");
+    			attr_dev(text1, "y", "46");
+    			attr_dev(text1, "fill", "#d7d5d2");
+    			attr_dev(text1, "text-anchor", "middle");
+    			attr_dev(text1, "class", "somehow-legible");
+    			add_location(text1, file$1, 15, 98, 513);
+    			attr_dev(text2, "x", "56.2%");
+    			attr_dev(text2, "y", "46");
+    			attr_dev(text2, "fill", "#d7d5d2");
+    			attr_dev(text2, "text-anchor", "middle");
+    			attr_dev(text2, "class", "somehow-legible");
+    			add_location(text2, file$1, 21, 7, 652);
+    			attr_dev(text3, "x", "81.2%");
+    			attr_dev(text3, "y", "46");
+    			attr_dev(text3, "fill", "#d7d5d2");
+    			attr_dev(text3, "text-anchor", "middle");
+    			attr_dev(text3, "class", "somehow-legible");
+    			add_location(text3, file$1, 21, 99, 744);
+    			attr_dev(line0, "x1", "0");
+    			attr_dev(line0, "y1", "43");
+    			attr_dev(line0, "x2", "100");
+    			attr_dev(line0, "y2", "43");
+    			attr_dev(line0, "stroke", "#d7d5d2");
+    			attr_dev(line0, "stroke-width", "1");
+    			attr_dev(line0, "vector-effect", "non-scaling-stroke");
+    			add_location(line0, file$1, 27, 7, 884);
+    			attr_dev(text4, "x", "50%");
+    			attr_dev(text4, "y", "115%");
+    			attr_dev(text4, "fill", "#d7d5d2");
+    			attr_dev(text4, "font-size", "2px");
+    			set_style(text4, "text-anchor", "middle");
+    			add_location(text4, file$1, 35, 8, 1055);
+    			add_location(g0, file$1, 14, 12, 412);
+    			attr_dev(text5, "x", "0");
+    			attr_dev(text5, "y", "90%");
+    			attr_dev(text5, "dy", "0");
+    			attr_dev(text5, "dx", "-2px");
+    			attr_dev(text5, "fill", "#d7d5d2");
+    			attr_dev(text5, "text-anchor", "end");
+    			attr_dev(text5, "class", "somehow-legible");
+    			add_location(text5, file$1, 37, 7, 1175);
+    			attr_dev(text6, "x", "0");
+    			attr_dev(text6, "y", "70%");
+    			attr_dev(text6, "dy", "0");
+    			attr_dev(text6, "dx", "-2px");
+    			attr_dev(text6, "fill", "#d7d5d2");
+    			attr_dev(text6, "text-anchor", "end");
+    			attr_dev(text6, "class", "somehow-legible");
+    			add_location(text6, file$1, 37, 111, 1279);
+    			attr_dev(text7, "x", "0");
+    			attr_dev(text7, "y", "50%");
+    			attr_dev(text7, "dy", "0");
+    			attr_dev(text7, "dx", "-2px");
+    			attr_dev(text7, "fill", "#d7d5d2");
+    			attr_dev(text7, "text-anchor", "end");
+    			attr_dev(text7, "class", "somehow-legible");
+    			add_location(text7, file$1, 45, 7, 1446);
+    			attr_dev(text8, "x", "0");
+    			attr_dev(text8, "y", "30%");
+    			attr_dev(text8, "dy", "0");
+    			attr_dev(text8, "dx", "-2px");
+    			attr_dev(text8, "fill", "#d7d5d2");
+    			attr_dev(text8, "text-anchor", "end");
+    			attr_dev(text8, "class", "somehow-legible");
+    			add_location(text8, file$1, 45, 111, 1550);
+    			attr_dev(text9, "x", "0");
+    			attr_dev(text9, "y", "10%");
+    			attr_dev(text9, "dy", "0");
+    			attr_dev(text9, "dx", "-2px");
+    			attr_dev(text9, "fill", "#d7d5d2");
+    			attr_dev(text9, "text-anchor", "end");
+    			attr_dev(text9, "class", "somehow-legible");
+    			add_location(text9, file$1, 53, 7, 1717);
+    			attr_dev(line1, "x1", "0");
+    			attr_dev(line1, "y1", "0");
+    			attr_dev(line1, "x2", "0");
+    			attr_dev(line1, "y2", "43");
+    			attr_dev(line1, "stroke", "#d7d5d2");
+    			attr_dev(line1, "stroke-width", "1");
+    			attr_dev(line1, "vector-effect", "non-scaling-stroke");
+    			add_location(line1, file$1, 53, 111, 1821);
+    			attr_dev(text10, "x", "-5%");
+    			attr_dev(text10, "y", "50%");
+    			attr_dev(text10, "font-size", "2px");
+    			attr_dev(text10, "fill", "#d7d5d2");
+    			set_style(text10, "text-anchor", "end");
+    			add_location(text10, file$1, 61, 8, 1989);
+    			add_location(g1, file$1, 36, 5, 1165);
+    			attr_dev(path0, "fill", "none");
+    			attr_dev(path0, "stroke", "#6699cc");
+    			attr_dev(path0, "shape-rendering", "optimizeQuality");
+    			attr_dev(path0, "vector-effect", "non-scaling-stroke");
+    			attr_dev(path0, "stroke-width", "4");
+    			attr_dev(path0, "stroke-linecap", "round");
+    			attr_dev(path0, "d", "M0,43L0,42.166666666666664C0,41.333333333333336,0,39.666666666666664,0,36C0,32.333333333333336,0,26.666666666666668,0.16666666666666666,23C0.3333333333333333,19.333333333333332,0.6666666666666666,17.666666666666668,1.1666666666666667,16.333333333333332C1.6666666666666667,15,2.3333333333333335,14,3.3333333333333335,13C4.333333333333333,12,5.666666666666667,11,6.833333333333333,10.333333333333334C8,9.666666666666666,9,9.333333333333334,9.833333333333334,9C10.666666666666666,8.666666666666666,11.333333333333334,8.333333333333334,12.166666666666666,8C13,7.666666666666667,14,7.333333333333333,14.833333333333334,7C15.666666666666666,6.666666666666667,16.333333333333332,6.333333333333333,17.166666666666668,6.166666666666667C18,6,19,6,19.833333333333332,5.833333333333333C20.666666666666668,5.666666666666667,21.333333333333332,5.333333333333333,22.166666666666668,5.166666666666667C23,5,24,5,24.833333333333332,4.833333333333333C25.666666666666668,4.666666666666667,26.333333333333332,4.333333333333333,27.166666666666668,4.166666666666667C28,4,29,4,29.833333333333332,3.8333333333333335C30.666666666666668,3.6666666666666665,31.333333333333332,3.3333333333333335,32.166666666666664,3.1666666666666665C33,3,34,3,34.833333333333336,3C35.666666666666664,3,36.333333333333336,3,37.166666666666664,3C38,3,39,3,39.833333333333336,2.8333333333333335C40.666666666666664,2.6666666666666665,41.333333333333336,2.3333333333333335,42.166666666666664,2.1666666666666665C43,2,44,2,44.833333333333336,2C45.666666666666664,2,46.333333333333336,2,47.166666666666664,2C48,2,49,2,49.833333333333336,1.8333333333333333C50.666666666666664,1.6666666666666667,51.333333333333336,1.3333333333333333,52.166666666666664,1.1666666666666667C53,1,54,1,54.833333333333336,1C55.666666666666664,1,56.333333333333336,1,57.166666666666664,1C58,1,59,1,59.833333333333336,1C60.666666666666664,1,61.333333333333336,1,62.166666666666664,0.8333333333333334C63,0.6666666666666666,64,0.3333333333333333,64.83333333333333,0.16666666666666666C65.66666666666667,0,66.33333333333333,0,67.16666666666667,0C68,0,69,0,69.83333333333333,0C70.66666666666667,0,71.33333333333333,0,72.16666666666667,0C73,0,74,0,74.83333333333333,0C75.66666666666667,0,76.33333333333333,0,77.16666666666667,0C78,0,79,0,79.83333333333333,0C80.66666666666667,0,81.33333333333333,0,82.16666666666667,0C83,0,84,0,84.83333333333333,0C85.66666666666667,0,86.33333333333333,0,87.16666666666667,0C88,0,89,0,89.83333333333333,0C90.66666666666667,0,91.33333333333333,0,92.16666666666667,0C93,0,94,0,94.83333333333333,0C95.66666666666667,0,96.33333333333333,0,96.66666666666667,0L97,0");
+    			attr_dev(path0, "id", "input-46024");
+    			attr_dev(path0, "class", "");
+    			attr_dev(path0, "style", "");
+    			add_location(path0, file$1, 62, 5, 2078);
+    			attr_dev(path1, "fill", "none");
+    			attr_dev(path1, "stroke", "#949a9e");
+    			attr_dev(path1, "shape-rendering", "optimizeQuality");
+    			attr_dev(path1, "vector-effect", "non-scaling-stroke");
+    			attr_dev(path1, "stroke-width", "0.5");
+    			attr_dev(path1, "stroke-linecap", "round");
+    			attr_dev(path1, "stroke-dasharray", "4");
+    			attr_dev(path1, "d", "M0,0L100,0");
+    			attr_dev(path1, "id", "input-62780");
+    			attr_dev(path1, "class", "");
+    			attr_dev(path1, "style", "");
+    			add_location(path1, file$1, 73, 6, 4936);
+    			attr_dev(path2, "fill", "none");
+    			attr_dev(path2, "stroke", "#949a9e");
+    			attr_dev(path2, "shape-rendering", "optimizeQuality");
+    			attr_dev(path2, "vector-effect", "non-scaling-stroke");
+    			attr_dev(path2, "stroke-width", "0.5");
+    			attr_dev(path2, "stroke-linecap", "round");
+    			attr_dev(path2, "stroke-dasharray", "4");
+    			attr_dev(path2, "d", "M6,43L6,0");
+    			attr_dev(path2, "id", "input-11630");
+    			attr_dev(path2, "class", "");
+    			attr_dev(path2, "style", "");
+    			add_location(path2, file$1, 85, 6, 5225);
+    			attr_dev(tspan0, "x", "0");
+    			attr_dev(tspan0, "dy", "1.2em");
+    			add_location(tspan0, file$1, 109, 9, 5870);
+    			attr_dev(tspan1, "x", "0");
+    			attr_dev(tspan1, "dy", "1.2em");
+    			add_location(tspan1, file$1, 109, 44, 5905);
+    			attr_dev(tspan2, "x", "0");
+    			attr_dev(tspan2, "dy", "1.2em");
+    			add_location(tspan2, file$1, 109, 84, 5945);
+    			attr_dev(text11, "fill", "#949a9e");
+    			attr_dev(text11, "stroke", "none");
+    			attr_dev(text11, "shape-rendering", "optimizeQuality");
+    			attr_dev(text11, "vector-effect", "non-scaling-stroke");
+    			attr_dev(text11, "stroke-width", "1");
+    			attr_dev(text11, "stroke-linecap", "round");
+    			attr_dev(text11, "font-size", "5");
+    			attr_dev(text11, "text-anchor", "middle");
+    			set_style(text11, "font-size", "1.8px");
+    			attr_dev(text11, "class", "");
+    			add_location(text11, file$1, 98, 7, 5568);
+    			attr_dev(g2, "transform", "translate(11 14.899999999999999)");
+    			add_location(g2, file$1, 97, 6, 5513);
+    			attr_dev(path3, "fill", "none");
+    			attr_dev(path3, "stroke", "#949a9e");
+    			attr_dev(path3, "shape-rendering", "optimizeQuality");
+    			attr_dev(path3, "vector-effect", "non-scaling-stroke");
+    			attr_dev(path3, "stroke-width", "0.5");
+    			attr_dev(path3, "stroke-linecap", "round");
+    			attr_dev(path3, "stroke-dasharray", "4");
+    			attr_dev(path3, "d", "M31,43L31,0");
+    			attr_dev(path3, "id", "input-85786");
+    			attr_dev(path3, "class", "");
+    			attr_dev(path3, "style", "");
+    			add_location(path3, file$1, 113, 5, 6030);
+    			attr_dev(tspan3, "x", "0");
+    			attr_dev(tspan3, "dy", "1.2em");
+    			add_location(tspan3, file$1, 136, 17, 6654);
+    			attr_dev(tspan4, "x", "0");
+    			attr_dev(tspan4, "dy", "1.2em");
+    			add_location(tspan4, file$1, 136, 52, 6689);
+    			attr_dev(text12, "fill", "#949a9e");
+    			attr_dev(text12, "stroke", "none");
+    			attr_dev(text12, "shape-rendering", "optimizeQuality");
+    			attr_dev(text12, "vector-effect", "non-scaling-stroke");
+    			attr_dev(text12, "stroke-width", "1");
+    			attr_dev(text12, "stroke-linecap", "round");
+    			attr_dev(text12, "font-size", "5");
+    			attr_dev(text12, "text-anchor", "middle");
+    			set_style(text12, "font-size", "1.8px");
+    			attr_dev(text12, "class", "");
+    			add_location(text12, file$1, 126, 7, 6361);
+    			attr_dev(g3, "transform", "translate(37 21.6)");
+    			add_location(g3, file$1, 125, 6, 6320);
+    			attr_dev(path4, "fill", "none");
+    			attr_dev(path4, "stroke", "#949a9e");
+    			attr_dev(path4, "shape-rendering", "optimizeQuality");
+    			attr_dev(path4, "vector-effect", "non-scaling-stroke");
+    			attr_dev(path4, "stroke-width", "0.5");
+    			attr_dev(path4, "stroke-linecap", "round");
+    			attr_dev(path4, "stroke-dasharray", "4");
+    			attr_dev(path4, "d", "M87,43L87,0");
+    			attr_dev(path4, "id", "input-74537");
+    			attr_dev(path4, "class", "");
+    			attr_dev(path4, "style", "");
+    			add_location(path4, file$1, 138, 5, 6754);
+    			attr_dev(tspan5, "x", "0");
+    			attr_dev(tspan5, "dy", "1.2em");
+    			add_location(tspan5, file$1, 162, 9, 7387);
+    			attr_dev(tspan6, "x", "0");
+    			attr_dev(tspan6, "dy", "1.2em");
+    			add_location(tspan6, file$1, 162, 52, 7430);
+    			attr_dev(tspan7, "x", "0");
+    			attr_dev(tspan7, "dy", "1.2em");
+    			add_location(tspan7, file$1, 162, 91, 7469);
+    			attr_dev(tspan8, "x", "0");
+    			attr_dev(tspan8, "dy", "1.2em");
+    			add_location(tspan8, file$1, 164, 9, 7525);
+    			attr_dev(text13, "fill", "#949a9e");
+    			attr_dev(text13, "stroke", "none");
+    			attr_dev(text13, "shape-rendering", "optimizeQuality");
+    			attr_dev(text13, "vector-effect", "non-scaling-stroke");
+    			attr_dev(text13, "stroke-width", "1");
+    			attr_dev(text13, "stroke-linecap", "round");
+    			attr_dev(text13, "font-size", "5");
+    			attr_dev(text13, "text-anchor", "middle");
+    			set_style(text13, "font-size", "1.8px");
+    			attr_dev(text13, "class", "");
+    			add_location(text13, file$1, 151, 7, 7085);
+    			attr_dev(g4, "transform", "translate(93 10.2)");
+    			add_location(g4, file$1, 150, 6, 7044);
+    			attr_dev(text14, "fill", "#838B91");
+    			attr_dev(text14, "stroke", "none");
+    			attr_dev(text14, "shape-rendering", "optimizeQuality");
+    			attr_dev(text14, "vector-effect", "non-scaling-stroke");
+    			attr_dev(text14, "stroke-width", "2");
+    			attr_dev(text14, "stroke-linecap", "round");
+    			attr_dev(text14, "font-size", "5");
+    			attr_dev(text14, "text-anchor", "middle");
+    			attr_dev(text14, "class", "somehow-legible");
+    			attr_dev(text14, "x", "50%");
+    			attr_dev(text14, "y", "-5%");
+    			add_location(text14, file$1, 166, 5, 7586);
+    			attr_dev(svg, "viewBox", "0,0,100,43");
+    			attr_dev(svg, "preserveAspectRatio", "xMidYMid meet");
+    			set_style(svg, "overflow", "visible");
+    			set_style(svg, "margin", "10px 20px 25px 25px");
+    			add_location(svg, file$1, 1, 2, 39);
+    			attr_dev(div, "class", "maxw10");
+    			attr_dev(div, "id", "zipf-chart");
+    			add_location(div, file$1, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(page, target, anchor);
-    			current = true;
+    			insert_dev(target, div, anchor);
+    			append_dev(div, svg);
+    			append_dev(svg, style);
+    			append_dev(style, t0);
+    			append_dev(svg, g0);
+    			append_dev(g0, text0);
+    			append_dev(text0, t1);
+    			append_dev(g0, text1);
+    			append_dev(text1, t2);
+    			append_dev(g0, text2);
+    			append_dev(text2, t3);
+    			append_dev(g0, text3);
+    			append_dev(text3, t4);
+    			append_dev(g0, line0);
+    			append_dev(g0, text4);
+    			append_dev(text4, t5);
+    			append_dev(svg, g1);
+    			append_dev(g1, text5);
+    			append_dev(text5, t6);
+    			append_dev(g1, text6);
+    			append_dev(text6, t7);
+    			append_dev(g1, text7);
+    			append_dev(text7, t8);
+    			append_dev(g1, text8);
+    			append_dev(text8, t9);
+    			append_dev(g1, text9);
+    			append_dev(text9, t10);
+    			append_dev(g1, line1);
+    			append_dev(g1, text10);
+    			append_dev(svg, path0);
+    			append_dev(svg, path1);
+    			append_dev(svg, path2);
+    			append_dev(svg, g2);
+    			append_dev(g2, text11);
+    			append_dev(text11, tspan0);
+    			append_dev(tspan0, t11);
+    			append_dev(text11, tspan1);
+    			append_dev(tspan1, t12);
+    			append_dev(text11, tspan2);
+    			append_dev(tspan2, t13);
+    			append_dev(svg, path3);
+    			append_dev(svg, g3);
+    			append_dev(g3, text12);
+    			append_dev(text12, tspan3);
+    			append_dev(tspan3, t14);
+    			append_dev(text12, tspan4);
+    			append_dev(tspan4, t15);
+    			append_dev(svg, path4);
+    			append_dev(svg, g4);
+    			append_dev(g4, text13);
+    			append_dev(text13, tspan5);
+    			append_dev(tspan5, t16);
+    			append_dev(text13, tspan6);
+    			append_dev(tspan6, t17);
+    			append_dev(text13, tspan7);
+    			append_dev(tspan7, t18);
+    			append_dev(text13, tspan8);
+    			append_dev(tspan8, t19);
+    			append_dev(svg, text14);
+    			append_dev(text14, t20);
     		},
-    		p: function update(ctx, [dirty]) {
-    			const page_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				page_changes.$$scope = { dirty, ctx };
-    			}
-
-    			page.$set(page_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(page.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(page.$$.fragment, local);
-    			current = false;
-    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
-    			destroy_component(page, detaching);
+    			if (detaching) detach_dev(div);
     		}
     	};
 
@@ -26385,118 +28844,603 @@ var app = (function () {
     	return block;
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
+    function instance$1($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Out', slots, []);
+    	validate_slots('Graph', slots, []);
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Out> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Graph> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Page, One, Two, Left, Row, Grid, Block });
     	return [];
     }
 
-    class Out extends SvelteComponentDev {
+    class Graph extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
     		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Out",
+    			tagName: "Graph",
     			options,
     			id: create_fragment$1.name
     		});
     	}
     }
 
-    /* App.svelte generated by Svelte v3.43.0 */
+    /* two/lexicon/App.svelte generated by Svelte v3.43.0 */
+    const file = "two/lexicon/App.svelte";
 
-    function create_fragment(ctx) {
-    	let intro;
-    	let t0;
-    	let one;
-    	let t1;
-    	let two;
-    	let t2;
-    	let three;
-    	let t3;
-    	let four;
-    	let t4;
-    	let out;
+    // (23:6) <Two>
+    function create_default_slot_3(ctx) {
+    	let t;
+    	let code;
     	let current;
-    	intro = new Intro({ $$inline: true });
-    	one = new One_1({ $$inline: true });
-    	two = new Two_1({ $$inline: true });
-    	three = new Three({ $$inline: true });
-    	four = new Four({ $$inline: true });
-    	out = new Out({ $$inline: true });
+
+    	code = new Code({
+    			props: {
+    				js: "let words = nlp.model().one.lexicon",
+    				width: "500px"
+    			},
+    			$$inline: true
+    		});
 
     	const block = {
     		c: function create() {
-    			create_component(intro.$$.fragment);
-    			t0 = space();
-    			create_component(one.$$.fragment);
+    			t = text$1("if you want to take a look at them, for whatever reason:\n        ");
+    			create_component(code.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    			mount_component(code, target, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(code.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(code.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    			destroy_component(code, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_3.name,
+    		type: "slot",
+    		source: "(23:6) <Two>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (31:6) <Left >
+    function create_default_slot_2(ctx) {
+    	let div0;
+    	let t1;
+    	let div1;
+    	let t3;
+    	let tagger;
+    	let current;
+
+    	tagger = new Tagger({
+    			props: { text: "there's a new mexico?" },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			div0 = element("div");
+    			div0.textContent = "our tagger messes-around a lot afterwards,";
     			t1 = space();
-    			create_component(two.$$.fragment);
-    			t2 = space();
-    			create_component(three.$$.fragment);
+    			div1 = element("div");
+    			div1.textContent = "that's how we do this:";
     			t3 = space();
-    			create_component(four.$$.fragment);
+    			create_component(tagger.$$.fragment);
+    			attr_dev(div0, "class", "f09");
+    			add_location(div0, file, 32, 8, 1482);
+    			attr_dev(div1, "class", "f09 tab");
+    			add_location(div1, file, 33, 8, 1556);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div0, anchor);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, div1, anchor);
+    			insert_dev(target, t3, anchor);
+    			mount_component(tagger, target, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tagger.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tagger.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(t3);
+    			destroy_component(tagger, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_2.name,
+    		type: "slot",
+    		source: "(31:6) <Left >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (10:2) <Page bottom="40px">
+    function create_default_slot_1(ctx) {
+    	let div0;
+    	let t1;
+    	let div1;
+    	let t3;
+    	let div2;
+    	let graph;
+    	let t4;
+    	let div3;
+    	let table;
+    	let tbody;
+    	let tr0;
+    	let td0;
+    	let td1;
+    	let tr1;
+    	let td2;
+    	let td3;
+    	let tr2;
+    	let td4;
+    	let td5;
+    	let tr3;
+    	let td6;
+    	let td7;
+    	let tr4;
+    	let td8;
+    	let td9;
+    	let tr5;
+    	let td10;
+    	let td11;
+    	let tr6;
+    	let td12;
+    	let td13;
+    	let tr7;
+    	let td14;
+    	let td15;
+    	let tr8;
+    	let td16;
+    	let td17;
+    	let t23;
+    	let div5;
+    	let t24;
+    	let div4;
+    	let t26;
+    	let two0;
+    	let t27;
+    	let div6;
+    	let t29;
+    	let tagger;
+    	let t30;
+    	let two1;
+    	let t31;
+    	let left;
+    	let current;
+    	graph = new Graph({ $$inline: true });
+
+    	two0 = new Two({
+    			props: {
+    				$$slots: { default: [create_default_slot_3] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	tagger = new Tagger({
+    			props: { text: "new mexico" },
+    			$$inline: true
+    		});
+
+    	two1 = new Two({ $$inline: true });
+
+    	left = new Left({
+    			props: {
+    				$$slots: { default: [create_default_slot_2] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			div0 = element("div");
+    			div0.textContent = "compromise/two/lexicon";
+    			t1 = space();
+    			div1 = element("div");
+    			div1.textContent = "our list of known-words";
+    			t3 = space();
+    			div2 = element("div");
+    			create_component(graph.$$.fragment);
     			t4 = space();
-    			create_component(out.$$.fragment);
+    			div3 = element("div");
+    			table = element("table");
+    			tbody = element("tbody");
+    			tr0 = element("tr");
+    			td0 = element("td");
+    			td0.textContent = "# of words";
+    			td1 = element("td");
+    			td1.textContent = "% coverage";
+    			tr1 = element("tr");
+    			td2 = element("td");
+    			td2.textContent = "1";
+    			td3 = element("td");
+    			td3.textContent = "10%";
+    			tr2 = element("tr");
+    			td4 = element("td");
+    			td4.textContent = "100";
+    			td5 = element("td");
+    			td5.textContent = "50%";
+    			tr3 = element("tr");
+    			td6 = element("td");
+    			td6.textContent = "300";
+    			td7 = element("td");
+    			td7.textContent = "65%";
+    			tr4 = element("tr");
+    			td8 = element("td");
+    			td8.textContent = "600";
+    			td9 = element("td");
+    			td9.textContent = "70%";
+    			tr5 = element("tr");
+    			td10 = element("td");
+    			td10.textContent = "1,000";
+    			td11 = element("td");
+    			td11.textContent = "80%";
+    			tr6 = element("tr");
+    			td12 = element("td");
+    			td12.textContent = "5,000";
+    			td13 = element("td");
+    			td13.textContent = "90%";
+    			tr7 = element("tr");
+    			td14 = element("td");
+    			td14.textContent = "10,000";
+    			td15 = element("td");
+    			td15.textContent = "98%";
+    			tr8 = element("tr");
+    			td16 = element("td");
+    			td16.textContent = "14,000";
+    			td17 = element("td");
+    			td17.textContent = "99.99%";
+    			t23 = space();
+    			div5 = element("div");
+    			t24 = text$1("this list is created by storing a small-number of words,\n          ");
+    			div4 = element("div");
+    			div4.textContent = "and then conjugating all their various forms, at run-time.";
+    			t26 = space();
+    			create_component(two0.$$.fragment);
+    			t27 = space();
+    			div6 = element("div");
+    			div6.textContent = "that's how we do this:";
+    			t29 = space();
+    			create_component(tagger.$$.fragment);
+    			t30 = space();
+    			create_component(two1.$$.fragment);
+    			t31 = space();
+    			create_component(left.$$.fragment);
+    			attr_dev(div0, "class", "lib");
+    			add_location(div0, file, 10, 6, 344);
+    			attr_dev(div1, "class", "down tab");
+    			add_location(div1, file, 11, 6, 396);
+    			attr_dev(div2, "class", "res svelte-1ipgrgh");
+    			add_location(div2, file, 12, 6, 454);
+    			attr_dev(td0, "class", "blue top svelte-1ipgrgh");
+    			add_location(td0, file, 16, 67, 594);
+    			attr_dev(td1, "class", "red top svelte-1ipgrgh");
+    			add_location(td1, file, 16, 103, 630);
+    			attr_dev(tr0, "class", "b");
+    			add_location(tr0, file, 16, 53, 580);
+    			add_location(td2, file, 16, 147, 674);
+    			add_location(td3, file, 16, 157, 684);
+    			add_location(tr1, file, 16, 143, 670);
+    			add_location(td4, file, 16, 178, 705);
+    			add_location(td5, file, 16, 190, 717);
+    			add_location(tr2, file, 16, 174, 701);
+    			add_location(td6, file, 16, 211, 738);
+    			add_location(td7, file, 16, 223, 750);
+    			add_location(tr3, file, 16, 207, 734);
+    			add_location(td8, file, 16, 244, 771);
+    			add_location(td9, file, 16, 256, 783);
+    			add_location(tr4, file, 16, 240, 767);
+    			add_location(td10, file, 16, 277, 804);
+    			add_location(td11, file, 16, 291, 818);
+    			add_location(tr5, file, 16, 273, 800);
+    			add_location(td12, file, 16, 312, 839);
+    			add_location(td13, file, 16, 326, 853);
+    			add_location(tr6, file, 16, 308, 835);
+    			add_location(td14, file, 16, 347, 874);
+    			add_location(td15, file, 16, 362, 889);
+    			add_location(tr7, file, 16, 343, 870);
+    			add_location(td16, file, 16, 383, 910);
+    			add_location(td17, file, 16, 398, 925);
+    			add_location(tr8, file, 16, 379, 906);
+    			add_location(tbody, file, 16, 46, 573);
+    			attr_dev(table, "class", "w8 mt2 center f1 grey svelte-1ipgrgh");
+    			add_location(table, file, 16, 9, 536);
+    			attr_dev(div3, "class", "res svelte-1ipgrgh");
+    			add_location(div3, file, 15, 6, 509);
+    			attr_dev(div4, "class", "tab");
+    			add_location(div4, file, 20, 10, 1086);
+    			attr_dev(div5, "class", "down f09");
+    			add_location(div5, file, 18, 7, 986);
+    			attr_dev(div6, "class", "down f09");
+    			add_location(div6, file, 26, 6, 1360);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div0, anchor);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, div1, anchor);
+    			insert_dev(target, t3, anchor);
+    			insert_dev(target, div2, anchor);
+    			mount_component(graph, div2, null);
+    			insert_dev(target, t4, anchor);
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, table);
+    			append_dev(table, tbody);
+    			append_dev(tbody, tr0);
+    			append_dev(tr0, td0);
+    			append_dev(tr0, td1);
+    			append_dev(tbody, tr1);
+    			append_dev(tr1, td2);
+    			append_dev(tr1, td3);
+    			append_dev(tbody, tr2);
+    			append_dev(tr2, td4);
+    			append_dev(tr2, td5);
+    			append_dev(tbody, tr3);
+    			append_dev(tr3, td6);
+    			append_dev(tr3, td7);
+    			append_dev(tbody, tr4);
+    			append_dev(tr4, td8);
+    			append_dev(tr4, td9);
+    			append_dev(tbody, tr5);
+    			append_dev(tr5, td10);
+    			append_dev(tr5, td11);
+    			append_dev(tbody, tr6);
+    			append_dev(tr6, td12);
+    			append_dev(tr6, td13);
+    			append_dev(tbody, tr7);
+    			append_dev(tr7, td14);
+    			append_dev(tr7, td15);
+    			append_dev(tbody, tr8);
+    			append_dev(tr8, td16);
+    			append_dev(tr8, td17);
+    			insert_dev(target, t23, anchor);
+    			insert_dev(target, div5, anchor);
+    			append_dev(div5, t24);
+    			append_dev(div5, div4);
+    			insert_dev(target, t26, anchor);
+    			mount_component(two0, target, anchor);
+    			insert_dev(target, t27, anchor);
+    			insert_dev(target, div6, anchor);
+    			insert_dev(target, t29, anchor);
+    			mount_component(tagger, target, anchor);
+    			insert_dev(target, t30, anchor);
+    			mount_component(two1, target, anchor);
+    			insert_dev(target, t31, anchor);
+    			mount_component(left, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const two0_changes = {};
+
+    			if (dirty & /*$$scope*/ 2) {
+    				two0_changes.$$scope = { dirty, ctx };
+    			}
+
+    			two0.$set(two0_changes);
+    			const left_changes = {};
+
+    			if (dirty & /*$$scope*/ 2) {
+    				left_changes.$$scope = { dirty, ctx };
+    			}
+
+    			left.$set(left_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(graph.$$.fragment, local);
+    			transition_in(two0.$$.fragment, local);
+    			transition_in(tagger.$$.fragment, local);
+    			transition_in(two1.$$.fragment, local);
+    			transition_in(left.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(graph.$$.fragment, local);
+    			transition_out(two0.$$.fragment, local);
+    			transition_out(tagger.$$.fragment, local);
+    			transition_out(two1.$$.fragment, local);
+    			transition_out(left.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(div2);
+    			destroy_component(graph);
+    			if (detaching) detach_dev(t4);
+    			if (detaching) detach_dev(div3);
+    			if (detaching) detach_dev(t23);
+    			if (detaching) detach_dev(div5);
+    			if (detaching) detach_dev(t26);
+    			destroy_component(two0, detaching);
+    			if (detaching) detach_dev(t27);
+    			if (detaching) detach_dev(div6);
+    			if (detaching) detach_dev(t29);
+    			destroy_component(tagger, detaching);
+    			if (detaching) detach_dev(t30);
+    			destroy_component(two1, detaching);
+    			if (detaching) detach_dev(t31);
+    			destroy_component(left, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_1.name,
+    		type: "slot",
+    		source: "(10:2) <Page bottom=\\\"40px\\\">",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (39:2) <Below>
+    function create_default_slot(ctx) {
+    	let a0;
+    	let t1;
+    	let a1;
+
+    	const block = {
+    		c: function create() {
+    			a0 = element("a");
+    			a0.textContent = "docs";
+    			t1 = space();
+    			a1 = element("a");
+    			a1.textContent = "github";
+    			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/compromise-lexicon");
+    			attr_dev(a0, "class", "");
+    			add_location(a0, file, 39, 4, 1693);
+    			attr_dev(a1, "href", "https://github.com/spencermountain/compromise#two");
+    			attr_dev(a1, "class", "");
+    			add_location(a1, file, 40, 4, 1786);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, a0, anchor);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, a1, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(a0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(a1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot.name,
+    		type: "slot",
+    		source: "(39:2) <Below>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment(ctx) {
+    	let div;
+    	let back;
+    	let t0;
+    	let page;
+    	let t1;
+    	let below;
+    	let current;
+    	back = new Back({ $$inline: true });
+
+    	page = new Page({
+    			props: {
+    				bottom: "40px",
+    				$$slots: { default: [create_default_slot_1] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	below = new Below({
+    			props: {
+    				$$slots: { default: [create_default_slot] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(back.$$.fragment);
+    			t0 = space();
+    			create_component(page.$$.fragment);
+    			t1 = space();
+    			create_component(below.$$.fragment);
+    			attr_dev(div, "class", "col svelte-1ipgrgh");
+    			add_location(div, file, 7, 0, 286);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(intro, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(one, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(two, target, anchor);
-    			insert_dev(target, t2, anchor);
-    			mount_component(three, target, anchor);
-    			insert_dev(target, t3, anchor);
-    			mount_component(four, target, anchor);
-    			insert_dev(target, t4, anchor);
-    			mount_component(out, target, anchor);
+    			insert_dev(target, div, anchor);
+    			mount_component(back, div, null);
+    			append_dev(div, t0);
+    			mount_component(page, div, null);
+    			append_dev(div, t1);
+    			mount_component(below, div, null);
     			current = true;
     		},
-    		p: noop,
-    		i: function intro$1(local) {
+    		p: function update(ctx, [dirty]) {
+    			const page_changes = {};
+
+    			if (dirty & /*$$scope*/ 2) {
+    				page_changes.$$scope = { dirty, ctx };
+    			}
+
+    			page.$set(page_changes);
+    			const below_changes = {};
+
+    			if (dirty & /*$$scope*/ 2) {
+    				below_changes.$$scope = { dirty, ctx };
+    			}
+
+    			below.$set(below_changes);
+    		},
+    		i: function intro(local) {
     			if (current) return;
-    			transition_in(intro.$$.fragment, local);
-    			transition_in(one.$$.fragment, local);
-    			transition_in(two.$$.fragment, local);
-    			transition_in(three.$$.fragment, local);
-    			transition_in(four.$$.fragment, local);
-    			transition_in(out.$$.fragment, local);
+    			transition_in(back.$$.fragment, local);
+    			transition_in(page.$$.fragment, local);
+    			transition_in(below.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(intro.$$.fragment, local);
-    			transition_out(one.$$.fragment, local);
-    			transition_out(two.$$.fragment, local);
-    			transition_out(three.$$.fragment, local);
-    			transition_out(four.$$.fragment, local);
-    			transition_out(out.$$.fragment, local);
+    			transition_out(back.$$.fragment, local);
+    			transition_out(page.$$.fragment, local);
+    			transition_out(below.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(intro, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(one, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(two, detaching);
-    			if (detaching) detach_dev(t2);
-    			destroy_component(three, detaching);
-    			if (detaching) detach_dev(t3);
-    			destroy_component(four, detaching);
-    			if (detaching) detach_dev(t4);
-    			destroy_component(out, detaching);
+    			if (detaching) detach_dev(div);
+    			destroy_component(back);
+    			destroy_component(page);
+    			destroy_component(below);
     		}
     	};
 
@@ -26514,13 +29458,29 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
+    	const example = `let words = nlp.model().one.lexicon`;
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Intro, One: One_1, Two: Two_1, Three, Four, Out });
+    	$$self.$capture_state = () => ({
+    		Page,
+    		Back,
+    		One,
+    		Left,
+    		Two,
+    		CodeMirror: CodeMirror_1,
+    		Below,
+    		Code,
+    		TextArea,
+    		Tagger,
+    		Graph,
+    		nlp: nlp$1,
+    		example
+    	});
+
     	return [];
     }
 
