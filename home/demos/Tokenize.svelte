@@ -25,9 +25,6 @@
 </script>
 
 <div class="col">
-      <div class="lib">compromise/one/tokenize</div>
-      <!-- <div class="plugin">match-syntax</div> -->
-      <div class="down tab desc">text is more useful when it's json.</div>
       <CodeMirror bind:text={str} />
     
       <div class="res col">
