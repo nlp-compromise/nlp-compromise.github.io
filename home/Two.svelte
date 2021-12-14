@@ -68,11 +68,14 @@
       or more often, some person's tired eyes:
     </div>
     <ul class="list down">
-      <li><a href="#"><span class="choose down" style="color:white;">Match-syntax</span> <Caret /></a></li>
+      <li><a href="./two/match"><span class="choose down" style="color:white;">Match-syntax</span> <Caret /></a></li>
       <li class="down">
-        <a href="#"><span class="choose" style="color:white;">Automated Redaction</span> <Caret /></a>
+        <a href="./two/radaction"><span class="choose" style="color:white;">Redaction</span> <Caret /></a>
       </li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Chat bots</span> <Caret /></a></li>
+      <li class="down">
+        <a href="./two/contractions"><span class="choose" style="color:white;">Contractions</span> <Caret /></a>
+      </li>
+      <!-- <li class="down"><a href="#"><span class="choose" style="color:white;">Chat bots</span> <Caret /></a></li> -->
     </ul>
   </Two>
 

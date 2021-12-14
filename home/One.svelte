@@ -68,13 +68,14 @@
   <Two>
     <div class="down f09">so you can do:</div>
     <ul class="list down">
-      <li class="down"><a href="./"><span class="choose" style="color:white;">Contractions</span> <Caret /></a></li>
       <li class="down">
-        <a href="./one/syllables"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a>
+        <a href="./one/lookup"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a>
       </li>
-      <li class="down"><a href="./"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a></li>
       <li class="down">
         <a href="./one/typeahead"><span class="choose" style="color:white;">TypeAhead</span> <Caret /></a>
+      </li>
+      <li class="down">
+        <a href="./one/syllables"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a>
       </li>
     </ul>
   </Two>

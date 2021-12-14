@@ -1,19 +1,24 @@
 <script>
-  import { Page, Back, One, Two, Three, Left, CodeMirror, TextArea } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
-  let text = `Like the time I caught the ferry over to Shelbyville - I needed a new heel for my shoe, so I decided to go to Morganville which is what they called Shelbyville in those days. So, I tied an onion to my belt which was the style at the time. Now, to take the ferry cost a nickel. And in those days, nickels had pictures of bumblebees on ‘em.`
-  let res = nlp(text).text()
+  import { Page, Back, One, Two, Three, Left, CodeMirror, TextArea, Code, Below } from '../../lib/index.js'
+  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
+  import text from './text.js'
+  let res = nlp(text).redact().text()
   const onchange = function (txt) {
-    res = nlp(txt).text()
+    res = nlp(txt).redact().text()
   }
+let example=`let doc = nlp('my number is 416-555-6732')
+doc.redact()
+doc.text()`
 </script>
 
 <style >
   .res {
-    font-size:10px; 
-    line-height:12px; 
-    max-height:250px; 
-    max-width:500px; 
+    font-size:1rem; 
+    margin-top:5rem;
+    margin-left:5rem;
+    line-height:1.2rem; 
+    height:300px; 
+    width:80%; 
     overflow:scroll; 
     border:1px solid lightgrey; 
     border-radius:4px;
@@ -30,20 +35,18 @@
 
 <Back />
 <Page bottom='40px'>
-  <Left>
-    <kbd style="font-size:1.7rem; line-height:2rem">compromise/three/redact</kbd>
-    <div style="margin-top:2rem;" />
-    <div class="down tab">turn your novel into JSON -</div>
-  </Left>
-
-<One >
-  <TextArea value={text} size="18px" cb={onchange} />
-  <div class="res down">
+    <div class="lib">compromise/three/redact</div>
+    <div class="down tab desc">hide identifiable information in a document -</div>
+    <!-- <div class="plugin">.readact()</div> -->
+  <TextArea value={text} size="18px" height="400px" cb={onchange} />
+  <pre class="res down">
     {res}
-  </div>
-</One>
-  
+  </pre>
+  <One>
+    <Code js={example} width="500px"/>
+  </One>    
 </Page>
-<div class="right light f09">
-  <a href="https://github.com/spencermountain/compromise/" class="">github</a>
-</div>
+<Below> 
+  <a href="https://observablehq.com/@spencermountain/compromise-lookup" class="">docs</a>
+  <a href="https://github.com/spencermountain/compromise#one" class="">github</a>
+</Below>

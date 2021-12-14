@@ -2432,7 +2432,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			textarea = element("textarea");
-    			attr_dev(textarea, "class", "input svelte-1gzfkwt");
+    			attr_dev(textarea, "class", "input svelte-19ejfsy");
     			textarea.readOnly = /*readonly*/ ctx[2];
     			set_style(textarea, "width", /*width*/ ctx[1]);
     			set_style(textarea, "height", /*height*/ ctx[3]);
@@ -2440,7 +2440,7 @@ var app = (function () {
     			set_style(textarea, "line-height", "1.5rem");
     			attr_dev(textarea, "spellcheck", "false");
     			attr_dev(textarea, "type", "text");
-    			add_location(textarea, file$b, 17, 0, 346);
+    			add_location(textarea, file$b, 18, 0, 374);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2513,7 +2513,7 @@ var app = (function () {
 
     	let { width = '60%' } = $$props;
     	let { readonly = undefined } = $$props;
-    	let { height = '142px' } = $$props;
+    	let { height = '' } = $$props;
     	let { size = '1.2rem' } = $$props;
 
     	const callback = function (e) {
@@ -12919,7 +12919,7 @@ var app = (function () {
      * @returns {string}
      */
     function lookahead(re) {
-      return concat('(?=', re, ')');
+      return concat$1('(?=', re, ')');
     }
 
     /**
@@ -12927,7 +12927,7 @@ var app = (function () {
      * @returns {string}
      */
     function anyNumberOfTimes(re) {
-      return concat('(?:', re, ')*');
+      return concat$1('(?:', re, ')*');
     }
 
     /**
@@ -12935,14 +12935,14 @@ var app = (function () {
      * @returns {string}
      */
     function optional(re) {
-      return concat('(?:', re, ')?');
+      return concat$1('(?:', re, ')?');
     }
 
     /**
      * @param {...(RegExp | string) } args
      * @returns {string}
      */
-    function concat(...args) {
+    function concat$1(...args) {
       const joined = args.map((x) => source(x)).join("");
       return joined;
     }
@@ -13065,7 +13065,7 @@ var app = (function () {
     const SHEBANG = (opts = {}) => {
       const beginShebang = /^#![ ]*\//;
       if (opts.binary) {
-        opts.begin = concat(
+        opts.begin = concat$1(
           beginShebang,
           /.*\b/,
           opts.binary,
@@ -13167,7 +13167,7 @@ var app = (function () {
           // for a visual example please see:
           // https://github.com/highlightjs/highlight.js/issues/2827
 
-          begin: concat(
+          begin: concat$1(
             /[ ]+/, // necessary to prevent us gobbling up doctags like /* @author Bob Mcgill */
             '(',
             ENGLISH_WORD,
@@ -13395,7 +13395,7 @@ var app = (function () {
       Object.keys(mode).forEach((key) => { delete mode[key]; });
 
       mode.keywords = originalMode.keywords;
-      mode.begin = concat(originalMode.beforeMatch, lookahead(originalMode.begin));
+      mode.begin = concat$1(originalMode.beforeMatch, lookahead(originalMode.begin));
       mode.starts = {
         relevance: 0,
         contains: [
@@ -15068,7 +15068,7 @@ var app = (function () {
       hljs.versionString = version$1;
 
       hljs.regex = {
-        concat: concat,
+        concat: concat$1,
         lookahead: lookahead,
         either: either,
         optional: optional,
@@ -16358,9 +16358,9 @@ var app = (function () {
 
     var tmp = { methods: methods$m, model: model$3, compute: compute$7, hooks };
 
-    const isArray$4 = input => Object.prototype.toString.call(input) === '[object Array]';
+    const isArray$6 = input => Object.prototype.toString.call(input) === '[object Array]';
 
-    const fns$3 = {
+    const fns$4 = {
       /** add metadata to term objects */
       compute: function (input) {
         const { world } = this;
@@ -16370,7 +16370,7 @@ var app = (function () {
           compute[input](this);
         }
         // allow a list of methods
-        else if (isArray$4(input)) {
+        else if (isArray$6(input)) {
           input.forEach(name => world.compute.hasOwnProperty(name) && compute[name](this));
         }
         // allow a custom compute function
@@ -16382,7 +16382,7 @@ var app = (function () {
         return this
       },
     };
-    var compute$6 = fns$3;
+    var compute$6 = fns$4;
 
     const forEach = function (cb) {
       let ptrs = this.fullPointer;
@@ -16557,6 +16557,7 @@ var app = (function () {
           return count
         }, 0)
       },
+
     };
     utils.group = utils.groups;
     utils.fullSentence = utils.fullSentences;
@@ -16694,6 +16695,17 @@ var app = (function () {
         // m._cache = this._cache // share this full thing
         return m
       }
+
+      fromText(input) {
+        const { methods, world } = this;
+        //assume ./01-tokenize is installed
+        let document = methods.one.tokenize(input, world);
+        let doc = new View(document);
+        doc.world = world;
+        // doc.compute(world.hooks)
+        doc.compute(['normal', 'lexicon', 'preTagger']);
+        return doc
+      }
       clone() {
         // clone the whole document
         let document = this.document.slice(0);
@@ -16714,7 +16726,7 @@ var app = (function () {
     Object.assign(View.prototype, api$9);
     var View$1 = View;
 
-    var version = '14rc';
+    var version = '13.11.4-rc4';
 
     const isObject$4 = function (item) {
       // let isSet = item instanceof Set
@@ -16787,7 +16799,7 @@ var app = (function () {
     };
     var extend$1 = extend;
 
-    const isArray$3 = arr => Object.prototype.toString.call(arr) === '[object Array]';
+    const isArray$5 = arr => Object.prototype.toString.call(arr) === '[object Array]';
 
     const isObject$3 = item => item && typeof item === 'object' && !Array.isArray(item);
 
@@ -16800,7 +16812,7 @@ var app = (function () {
         if (isObject$3(model[key])) {
           model[key] = Object.assign({}, model[key]);
           model[key] = deepClone$1(model[key]); //recursive
-        } else if (isArray$3(model[key])) {
+        } else if (isArray$5(model[key])) {
           model[key] = model[key].slice(0);
         } else if (isSet(model[key])) {
           model[key] = new Set(model[key]);
@@ -16814,7 +16826,7 @@ var app = (function () {
 
     /** log the decision-making to console */
     const verbose = function (set) {
-      let env = typeof process === 'undefined' ? self.env : process.env; //use window, in browser
+      let env = typeof process === 'undefined' ? self.env || {} : process.env; //use window, in browser
       env.DEBUG_TAGS = set === 'tagger' || set === true ? true : '';
       env.DEBUG_MATCH = set === 'match' || set === true ? true : '';
       env.DEBUG_CHUNKS = set === 'chunker' || set === true ? true : '';
@@ -16943,6 +16955,8 @@ var app = (function () {
 
     // splice an array into an array
     const spliceArr = (parent, index, child) => {
+      // tag them as dirty
+      child.forEach(term => term.dirty = true);
       let args = [index, 0].concat(child);
       Array.prototype.splice.apply(parent, args);
       return parent
@@ -17025,7 +17039,6 @@ var app = (function () {
     const cleanAppend = function (home, ptr, needle, document) {
       let [n, , end] = ptr;
       let total = document[n].length;
-
       if (end < total) {
         // are we in the middle?
         // add trailing space on self
@@ -17041,36 +17054,55 @@ var app = (function () {
       spliceArr(home, ptr[2], needle);
     };
 
-    const insert = function (str, view, prepend) {
-      const { methods, document, world } = view;
+    // are we inserting inside a contraction?
+    // expand it first
+    const expand$1 = function (m) {
+      if (m.has('@hasContraction')) {
+        let more = m.grow('@hasContraction');
+        more.contractions().expand();
+      }
+    };
+
+    const isArray$4 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+
+    const getTerms = function (input, world) {
+      const { methods } = world;
+      // create our terms from a string
+      if (typeof input === 'string') {
+        return methods.one.tokenize(input, world)[0] //assume one sentence
+      }
+      //allow a view object
+      if (typeof input === 'object' && input.isView) {
+        return input.docs[0] //assume one sentence
+      }
+      //allow an array of terms, too
+      if (isArray$4(input)) {
+        return isArray$4(input[0]) ? input[0] : input
+      }
+      return []
+    };
+
+    const insert = function (input, view, prepend) {
+      const { document, world } = view;
       // insert words at end of each doc
       let ptrs = view.fullPointer;
       let selfPtrs = view.fullPointer;
-      // are we inserting inside a contraction?
-      // expand, it first
-      if (view.has('@hasContraction')) {
-        let more = view.grow('@hasContraction');
-        more.contractions().expand();
-      }
       ptrs.forEach((ptr, i) => {
         let [n] = ptr;
         // add-in the words
         let home = document[n];
-        let needle = [];
-        if (typeof str === 'string') {
-          needle = methods.one.tokenize(str, world)[0]; //assume one sentence
-        } else if (typeof str === 'object' && str.docs) {
-          needle = str.docs[0]; //assume one sentence
-        }
+        let terms = getTerms(input, world);
         if (prepend) {
-          cleanPrepend(home, ptr, needle, document);
+          expand$1(view.update([ptr]).firstTerm());
+          cleanPrepend(home, ptr, terms, document);
         } else {
-          cleanAppend(home, ptr, needle, document);
+          expand$1(view.update([ptr]).lastTerm());
+          cleanAppend(home, ptr, terms, document);
         }
         // change self backwards by len
         selfPtrs[i] = ptr;
         // extend the pointer
-        ptr[2] += needle.length;
+        ptr[2] += terms.length;
       });
       // convert them to whole sentences
       // ptrs = ptrs.map(a => [a[0]])
@@ -17082,46 +17114,31 @@ var app = (function () {
       return doc
     };
 
-    const fns$2 = {
+    const fns$3 = {
       insertAfter: function (input) {
         return insert(input, this, false)
       },
       insertBefore: function (input) {
         return insert(input, this, true)
       },
-      // add string as new sentence
-      concat: function (input) {
-        const { methods, document, world } = this;
-        // parse and splice-in new terms
-        if (typeof input === 'string') {
-          let json = methods.one.tokenize(input, world);
-          let ptrs = this.fullPointer;
-          let lastN = ptrs[ptrs.length - 1][0];
-          spliceArr(document, lastN + 1, json);
-          return this.compute('index')
-        }
-        // is it other pointers from the same document?
-        if (this.document === input.document) {
-          let ptrs = this.fullPointer.concat(input.fullPointer);
-          return this.toView(ptrs).compute('index')
-        }
-        return this
-      },
+
     };
-    fns$2.append = fns$2.insertAfter;
-    fns$2.prepend = fns$2.insertBefore;
-    fns$2.insert = fns$2.insertAfter;
+    fns$3.append = fns$3.insertAfter;
+    fns$3.prepend = fns$3.insertBefore;
+    fns$3.insert = fns$3.insertAfter;
 
-    var insert$1 = fns$2;
+    var insert$1 = fns$3;
 
-    const fns$1 = {};
+    const fns$2 = {};
 
-    fns$1.replaceWith = function (input) {
+    fns$2.replaceWith = function (input) {
       let ptrs = this.fullPointer;
+      // const insert = this.fromText(input).docs
+      let original = this.update(ptrs).freeze();
       // slide this in
       this.insertAfter(input);
+      this.match(original); //todo: fix me December '21
       // delete the original terms
-      let original = this.update(ptrs);
       // are we replacing part of a contraction?
       if (original.has('@hasContraction')) {
         let more = this.growLeft('@hasContraction+').growRight('@hasContraction+');
@@ -17132,7 +17149,7 @@ var app = (function () {
       return this.toView(ptrs).compute(['index', 'lexicon', 'preTagger'])
     };
 
-    fns$1.replace = function (match, input) {
+    fns$2.replace = function (match, input) {
       if (match && !input) {
         return this.replaceWith(match)
       }
@@ -17142,7 +17159,7 @@ var app = (function () {
       }
       return m.replaceWith(input)
     };
-    var replace = fns$1;
+    var replace = fns$2;
 
     // transfer sentence-ending punctuation
     const repairPunct = function (terms, len) {
@@ -17509,7 +17526,63 @@ var app = (function () {
     };
     var fork = methods$g;
 
-    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork);
+    const isArray$3 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+
+    // append a new document, somehow
+    const combineDocs = function (homeDocs, inputDocs) {
+      // add a space
+      let end = homeDocs[homeDocs.length - 1];
+      let last = end[end.length - 1];
+      if (/ /.test(last.post) === false) {
+        last.post += ' ';
+      }
+      homeDocs = homeDocs.concat(inputDocs);
+      return homeDocs
+    };
+
+    const combineViews = function (home, input) {
+      // is it a view from the same document?
+      if (home.document === input.document) {
+        let ptrs = home.fullPointer.concat(input.fullPointer);
+        return home.toView(ptrs).compute('index')
+      }
+      // update n of new pointer, to end of our pointer
+      let ptrs = input.fullPointer;
+      ptrs = ptrs.map(a => {
+        a[0] += home.document.length;
+        return a
+      });
+      home.document = combineDocs(home.document, input.document);
+      return home.all()
+    };
+
+    var concat = {
+      // add string as new match/sentence
+      concat: function (input) {
+        const { methods, document, world } = this;
+        // parse and splice-in new terms
+        if (typeof input === 'string') {
+          let json = methods.one.tokenize(input, world);
+          let ptrs = this.fullPointer;
+          let lastN = ptrs[ptrs.length - 1][0];
+          spliceArr(document, lastN + 1, json);
+          return this.compute('index')
+        }
+        // plop some view objects together
+        if (typeof input === 'object' && input.isView) {
+          return combineViews(this, input)
+        }
+        // assume it's an array of terms
+        if (isArray$3(input)) {
+          let docs = combineDocs(this.document, input);
+          this.document = docs;
+          return this.all()
+        }
+        return this
+      },
+    };
+
+    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork, concat);
 
     const addAPI$3 = function (View) {
       Object.assign(View.prototype, methods$f);
@@ -17720,10 +17793,10 @@ var app = (function () {
         m = view.match(reg, group);
       }
       // are we splitting within a contraction?
-      if (m.has('@hasContraction')) {
-        let more = m.grow('@hasContraction');
-        more.contractions().expand();
-      }
+      // if (m.has('@hasContraction')) {
+      //   let more = m.grow('@hasContraction')
+      //   more.contractions().expand()
+      // }
       return m
     };
 
@@ -18434,7 +18507,7 @@ var app = (function () {
     };
     var matchTerm = wrapMatch;
 
-    const env = typeof process === 'undefined' ? self.env : process.env;
+    const env = typeof process === 'undefined' ? self.env || {} : process.env;
     const log$1 = msg => {
       if (env.DEBUG_MATCH) {
         console.log(`\n  \x1b[32m ${msg} \x1b[0m`); // eslint-disable-line
@@ -18580,7 +18653,7 @@ var app = (function () {
     };
 
     // const log = msg => {
-    //   const env = typeof process === 'undefined' ? self.env : process.env
+    //   const env = typeof process === 'undefined' ? self.env || {} : process.env
     //   if (env.DEBUG_MATCH === true) {
     //     console.log(`\n  \x1b[32m ${msg} \x1b[0m`) // eslint-disable-line
     //   }
@@ -19149,7 +19222,7 @@ var app = (function () {
     var debug$1 = debug;
 
     /** some named output formats */
-    const out$1 = function (method) {
+    const out = function (method) {
       // text out formats
       if (method === 'text') {
         return this.text()
@@ -19208,7 +19281,15 @@ var app = (function () {
       }
       return this.text()
     };
-    var out$2 = out$1;
+
+    const methods$9 = {
+      /** */
+      debug: debug$1,
+      /** */
+      out: out,
+    };
+
+    var out$1 = methods$9;
 
     const trimEnd = /[,:;)\]*.?~!\u0022\uFF02\u201D\u2019\u00BB\u203A\u2032\u2033\u2034\u301E\u00B4—-]+$/;
     const trimStart =
@@ -19274,78 +19355,6 @@ var app = (function () {
       return text
     };
 
-    const termJSON = function (terms) {
-      return terms.map(t => {
-        let term = Object.assign({}, t);
-        term.tags = Array.from(t.tags);
-        return term
-      })
-    };
-    const defaults$1 = {
-      text: true,
-      terms: true,
-    };
-
-    const toJson = function (view, opts) {
-      opts = opts || {};
-      if (typeof opts === 'string') {
-        opts = {};
-      }
-      opts = Object.assign({}, defaults$1, opts);
-      // run any necessary upfront steps
-      if (opts.offset) {
-        view.compute('offset');
-      }
-      return view.docs.map((terms, i) => {
-        let res = {};
-        if (opts.text) {
-          res.text = textFromTerms(terms, { keepPunct: true }, false);
-        }
-        if (opts.normal || opts.machine || opts.reduced) {
-          res.normal = textFromTerms(terms, { use: 'normal', punctuation: 'some' }, false);
-        }
-        if (opts.terms) {
-          res.terms = termJSON(terms);
-        }
-        if (opts.offset) {
-          let len = res.text.length;
-          res.offset = {
-            index: terms[0].offset.index,
-            start: terms[0].offset.start,
-            length: len,
-          };
-        }
-        if (opts.confidence && view.confidence) {
-          res.confidence = view.eq(i).confidence();
-        }
-        if (opts.syllables && view.syllables) {
-          res.syllables = view.syllables();
-        }
-        return res
-      })
-    };
-    var json = toJson;
-
-    const methods$9 = {
-      /** return data */
-      json: function (n) {
-        let res = json(this, n);
-        if (typeof n === 'number') {
-          return res[n]
-        }
-        return res
-      },
-
-      /** */
-      debug: debug$1,
-      /** */
-      out: out$2,
-    };
-    // aliases
-    methods$9.data = methods$9.json;
-
-    var out = methods$9;
-
     const isObject$2 = val => {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
@@ -19405,7 +19414,79 @@ var app = (function () {
       },
     };
 
-    const methods$8 = Object.assign({}, out, text);
+    const defaults$1 = {
+      text: true,
+      terms: true,
+    };
+
+    const fns$1 = {
+      text: (terms) => {
+        let o = { keepPunct: true };
+        return textFromTerms(terms, o, false)
+      },
+      normal: (terms) => {
+        let o = { use: 'normal', punctuation: 'some' };
+        return textFromTerms(terms, o, false)
+      },
+      offset: (terms) => {
+        let len = fns$1.text(terms).length;
+        return {
+          index: terms[0].offset.index,
+          start: terms[0].offset.start,
+          length: len,
+        }
+      },
+      terms: (terms) => {
+        return terms.map(t => {
+          let term = Object.assign({}, t);
+          term.tags = Array.from(t.tags);
+          return term
+        })
+      },
+      confidence: (_terms, m) => m.confidence(),
+      syllables: (_terms, m) => m.syllables(),
+      sentence: (_terms, m) => m.fullSentence().text(),
+      dirty: (terms) => terms.some(t => t.dirty === true)
+    };
+    fns$1.sentences = fns$1.sentence;
+
+    const toJSON = function (view, opts) {
+      opts = opts || {};
+      if (typeof opts === 'string') {
+        opts = {};
+      }
+      opts = Object.assign({}, defaults$1, opts);
+      // run any necessary upfront steps
+      if (opts.offset) {
+        view.compute('offset');
+      }
+      return view.docs.map((terms, i) => {
+        let res = {};
+        Object.keys(opts).forEach(k => {
+          if (opts[k] && fns$1[k]) {
+            res[k] = fns$1[k](terms, view.eq(i));
+          }
+        });
+        return res
+      })
+    };
+
+
+    var json = {
+      /** return data */
+      json: function (n) {
+        let res = toJSON(this, n);
+        if (typeof n === 'number') {
+          return res[n]
+        }
+        return res
+      },
+    };
+
+    const methods$8 = Object.assign({}, out$1, text, json);
+
+    // aliases
+    methods$8.data = methods$8.json;
 
     const addAPI$2 = function (View) {
       Object.assign(View.prototype, methods$8);
@@ -19805,6 +19886,8 @@ var app = (function () {
       }
       // finally, add our tag
       term.tags.add(tag);
+      // now it's dirty
+      term.dirty = true;
       // add a chunk too, if it's easy
       addChunk(term, tag);
       return true
@@ -21672,7 +21755,7 @@ var app = (function () {
         return
       }
       // some logging for debugging
-      let env = typeof process === 'undefined' ? self.env : process.env;
+      let env = typeof process === 'undefined' ? self.env || {} : process.env;
       if (env && env.DEBUG_TAGS) {
         log(term, tag, reason);
       }
@@ -22299,32 +22382,32 @@ var app = (function () {
     			add_location(div, file$7, 68, 4, 2274);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$7, 70, 36, 2380);
-    			attr_dev(a0, "href", "./");
-    			add_location(a0, file$7, 70, 23, 2367);
+    			add_location(span0, file$7, 71, 37, 2405);
+    			attr_dev(a0, "href", "./one/contractions");
+    			add_location(a0, file$7, 71, 8, 2376);
     			attr_dev(li0, "class", "down");
     			add_location(li0, file$7, 70, 6, 2350);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$7, 72, 34, 2519);
+    			add_location(span1, file$7, 74, 34, 2551);
     			attr_dev(a1, "href", "./one/syllables");
-    			add_location(a1, file$7, 72, 8, 2493);
+    			add_location(a1, file$7, 74, 8, 2525);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$7, 71, 6, 2467);
+    			add_location(li1, file$7, 73, 6, 2499);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$7, 74, 36, 2647);
-    			attr_dev(a2, "href", "./");
-    			add_location(a2, file$7, 74, 23, 2634);
+    			add_location(span2, file$7, 77, 31, 2698);
+    			attr_dev(a2, "href", "./one/lookup");
+    			add_location(a2, file$7, 77, 8, 2675);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$7, 74, 6, 2617);
+    			add_location(li2, file$7, 76, 6, 2649);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$7, 76, 34, 2787);
+    			add_location(span3, file$7, 80, 34, 2845);
     			attr_dev(a3, "href", "./one/typeahead");
-    			add_location(a3, file$7, 76, 8, 2761);
+    			add_location(a3, file$7, 80, 8, 2819);
     			attr_dev(li3, "class", "down");
-    			add_location(li3, file$7, 75, 6, 2735);
+    			add_location(li3, file$7, 79, 6, 2793);
     			attr_dev(ul, "class", "list down");
     			add_location(ul, file$7, 69, 4, 2321);
     		},
@@ -22473,11 +22556,11 @@ var app = (function () {
     			t8 = space();
     			div2 = element("div");
     			div2.textContent = "or swing harder ↓";
-    			add_location(div0, file$7, 81, 2, 2894);
+    			add_location(div0, file$7, 85, 2, 2952);
     			attr_dev(div1, "class", "m1");
-    			add_location(div1, file$7, 82, 2, 2953);
+    			add_location(div1, file$7, 86, 2, 3011);
     			attr_dev(div2, "class", "m2 sea down f09");
-    			add_location(div2, file$7, 83, 2, 3011);
+    			add_location(div2, file$7, 87, 2, 3069);
     		},
     		m: function mount(target, anchor) {
     			mount_component(left, target, anchor);

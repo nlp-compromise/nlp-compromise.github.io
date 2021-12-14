@@ -3,7 +3,7 @@
 var app = (function () {
     'use strict';
 
-    function noop$1() { }
+    function noop() { }
     function assign(tar, src) {
         // @ts-ignore
         for (const k in src)
@@ -88,17 +88,26 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
     function svg_element(name) {
         return document.createElementNS('http://www.w3.org/2000/svg', name);
     }
-    function text$2(data) {
+    function text$1(data) {
         return document.createTextNode(data);
     }
     function space() {
-        return text$2(' ');
+        return text$1(' ');
+    }
+    function empty() {
+        return text$1('');
     }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
@@ -118,6 +127,9 @@ var app = (function () {
     }
     function set_style(node, key, value, important) {
         node.style.setProperty(key, value, important ? 'important' : '');
+    }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
     }
     function custom_event(type, detail, bubbles = false) {
         const e = document.createEvent('CustomEvent');
@@ -152,6 +164,9 @@ var app = (function () {
     }
     function add_render_callback(fn) {
         render_callbacks.push(fn);
+    }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
     }
     let flushing = false;
     const seen_callbacks = new Set();
@@ -225,6 +240,20 @@ var app = (function () {
             block.o(local);
         }
     }
+
+    const globals = (typeof window !== 'undefined'
+        ? window
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : global);
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
+        }
+    }
     function create_component(block) {
         block && block.c();
     }
@@ -275,7 +304,7 @@ var app = (function () {
             ctx: null,
             // state
             props,
-            update: noop$1,
+            update: noop,
             not_equal,
             bound: blank_object(),
             // lifecycle
@@ -334,7 +363,7 @@ var app = (function () {
     class SvelteComponent {
         $destroy() {
             destroy_component(this, 1);
-            this.$destroy = noop$1;
+            this.$destroy = noop;
         }
         $on(type, callback) {
             const callbacks = (this.$$.callbacks[type] || (this.$$.callbacks[type] = []));
@@ -399,6 +428,15 @@ var app = (function () {
             return;
         dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -642,7 +680,7 @@ var app = (function () {
     const file$9 = "lib/One.svelte";
 
     // (11:4) {#if accent}
-    function create_if_block$4(ctx) {
+    function create_if_block$5(ctx) {
     	let div;
 
     	const block = {
@@ -667,7 +705,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(11:4) {#if accent}",
     		ctx
@@ -683,7 +721,7 @@ var app = (function () {
     	let t1;
     	let div0;
     	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$4(ctx);
+    	let if_block = /*accent*/ ctx[0] && create_if_block$5(ctx);
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
@@ -725,7 +763,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$4(ctx);
+    					if_block = create_if_block$5(ctx);
     					if_block.c();
     					if_block.m(div1, t0);
     				}
@@ -847,7 +885,7 @@ var app = (function () {
     const file$8 = "lib/Two.svelte";
 
     // (13:6) {#if accent}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let div;
 
     	const block = {
@@ -872,7 +910,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(13:6) {#if accent}",
     		ctx
@@ -889,7 +927,7 @@ var app = (function () {
     	let div1;
     	let t1;
     	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$3(ctx);
+    	let if_block = /*accent*/ ctx[0] && create_if_block$4(ctx);
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
@@ -935,7 +973,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$3(ctx);
+    					if_block = create_if_block$4(ctx);
     					if_block.c();
     					if_block.m(div1, t1);
     				}
@@ -1057,7 +1095,7 @@ var app = (function () {
     const file$7 = "lib/Three.svelte";
 
     // (12:4) {#if accent}
-    function create_if_block$2(ctx) {
+    function create_if_block$3(ctx) {
     	let div;
 
     	const block = {
@@ -1082,7 +1120,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$2.name,
+    		id: create_if_block$3.name,
     		type: "if",
     		source: "(12:4) {#if accent}",
     		ctx
@@ -1098,7 +1136,7 @@ var app = (function () {
     	let div1;
     	let t1;
     	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$2(ctx);
+    	let if_block = /*accent*/ ctx[0] && create_if_block$3(ctx);
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
@@ -1140,7 +1178,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$2(ctx);
+    					if_block = create_if_block$3(ctx);
     					if_block.c();
     					if_block.m(div1, t1);
     				}
@@ -1269,7 +1307,7 @@ var app = (function () {
     const file$6 = "lib/Left.svelte";
 
     // (11:4) {#if accent}
-    function create_if_block$1(ctx) {
+    function create_if_block$2(ctx) {
     	let div;
 
     	const block = {
@@ -1294,7 +1332,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$1.name,
+    		id: create_if_block$2.name,
     		type: "if",
     		source: "(11:4) {#if accent}",
     		ctx
@@ -1310,7 +1348,7 @@ var app = (function () {
     	let t1;
     	let div1;
     	let current;
-    	let if_block = /*accent*/ ctx[0] && create_if_block$1(ctx);
+    	let if_block = /*accent*/ ctx[0] && create_if_block$2(ctx);
     	const default_slot_template = /*#slots*/ ctx[3].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
 
@@ -1352,7 +1390,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$1(ctx);
+    					if_block = create_if_block$2(ctx);
     					if_block.c();
     					if_block.m(div0, t0);
     				}
@@ -1530,8 +1568,8 @@ var app = (function () {
     				set_input_value(textarea, /*value*/ ctx[0]);
     			}
     		},
-    		i: noop$1,
-    		o: noop$1,
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(textarea);
     			/*textarea_binding*/ ctx[9](null);
@@ -1711,7 +1749,7 @@ var app = (function () {
     const file$4 = "lib/Back.svelte";
 
     // (19:2) {#if hover}
-    function create_if_block(ctx) {
+    function create_if_block$1(ctx) {
     	let div;
 
     	const block = {
@@ -1731,7 +1769,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block.name,
+    		id: create_if_block$1.name,
     		type: "if",
     		source: "(19:2) {#if hover}",
     		ctx
@@ -1746,7 +1784,7 @@ var app = (function () {
     	let g;
     	let path;
     	let t;
-    	let if_block = /*hover*/ ctx[2] && create_if_block(ctx);
+    	let if_block = /*hover*/ ctx[2] && create_if_block$1(ctx);
 
     	const block = {
     		c: function create() {
@@ -1795,8 +1833,8 @@ var app = (function () {
     				attr_dev(a, "href", /*href*/ ctx[0]);
     			}
     		},
-    		i: noop$1,
-    		o: noop$1,
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(a);
     			if (if_block) if_block.d();
@@ -11699,8 +11737,8 @@ var app = (function () {
     				prop_dev(textarea, "value", /*text*/ ctx[0]);
     			}
     		},
-    		i: noop$1,
-    		o: noop$1,
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			/*textarea_binding*/ ctx[5](null);
@@ -15293,7 +15331,7 @@ var app = (function () {
     		c: function create() {
     			pre = element("pre");
     			code = element("code");
-    			t = text$2(/*js*/ ctx[0]);
+    			t = text$1(/*js*/ ctx[0]);
     			attr_dev(code, "class", "language-javascript mine svelte-5ej3m3");
     			set_style(code, "width", /*width*/ ctx[1]);
     			add_location(code, file$1, 14, 5, 358);
@@ -15314,8 +15352,8 @@ var app = (function () {
     				set_style(code, "width", /*width*/ ctx[1]);
     			}
     		},
-    		i: noop$1,
-    		o: noop$1,
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(pre);
     		}
@@ -15410,14 +15448,14 @@ var app = (function () {
       two: {},
       three: {},
     };
-    let compute$b = {};
+    let compute$a = {};
     let hooks = [];
 
-    var tmp = { methods: methods$o, model: model$7, compute: compute$b, hooks };
+    var tmp = { methods: methods$o, model: model$7, compute: compute$a, hooks };
 
     const isArray$6 = input => Object.prototype.toString.call(input) === '[object Array]';
 
-    const fns$5 = {
+    const fns$4 = {
       /** add metadata to term objects */
       compute: function (input) {
         const { world } = this;
@@ -15439,7 +15477,7 @@ var app = (function () {
         return this
       },
     };
-    var compute$a = fns$5;
+    var compute$9 = fns$4;
 
     const forEach = function (cb) {
       let ptrs = this.fullPointer;
@@ -15481,7 +15519,7 @@ var app = (function () {
       return this.update(ptrs)
     };
 
-    const find$c = function (cb) {
+    const find = function (cb) {
       let ptrs = this.fullPointer;
       let found = ptrs.find((ptr, i) => {
         let view = this.update([ptr]);
@@ -15509,7 +15547,7 @@ var app = (function () {
       ptrs = ptrs.slice(r, r + n);
       return this.update(ptrs)
     };
-    var loops = { forEach, map, filter, find: find$c, some, random };
+    var loops = { forEach, map, filter, find, some, random };
 
     const utils = {
       /** */
@@ -15637,11 +15675,11 @@ var app = (function () {
     };
     var freeze = methods$n;
 
-    const methods$m = Object.assign({}, util, compute$a, loops, freeze);
+    const methods$m = Object.assign({}, util, compute$9, loops, freeze);
 
     // aliases
     methods$m.get = methods$m.eq;
-    var api$n = methods$m;
+    var api$c = methods$m;
 
     const getPtrs = function (view) {
       const { methods, frozen, ptrs, document } = view;
@@ -15780,7 +15818,7 @@ var app = (function () {
         return m
       }
     }
-    Object.assign(View.prototype, api$n);
+    Object.assign(View.prototype, api$c);
     var View$1 = View;
 
     var version = '13.11.4-rc4';
@@ -16171,7 +16209,7 @@ var app = (function () {
       return doc
     };
 
-    const fns$4 = {
+    const fns$3 = {
       insertAfter: function (input) {
         return insert(input, this, false)
       },
@@ -16180,15 +16218,15 @@ var app = (function () {
       },
 
     };
-    fns$4.append = fns$4.insertAfter;
-    fns$4.prepend = fns$4.insertBefore;
-    fns$4.insert = fns$4.insertAfter;
+    fns$3.append = fns$3.insertAfter;
+    fns$3.prepend = fns$3.insertBefore;
+    fns$3.insert = fns$3.insertAfter;
 
-    var insert$1 = fns$4;
+    var insert$1 = fns$3;
 
-    const fns$3 = {};
+    const fns$2 = {};
 
-    fns$3.replaceWith = function (input) {
+    fns$2.replaceWith = function (input) {
       let ptrs = this.fullPointer;
       // const insert = this.fromText(input).docs
       let original = this.update(ptrs).freeze();
@@ -16206,7 +16244,7 @@ var app = (function () {
       return this.toView(ptrs).compute(['index', 'lexicon', 'preTagger'])
     };
 
-    fns$3.replace = function (match, input) {
+    fns$2.replace = function (match, input) {
       if (match && !input) {
         return this.replaceWith(match)
       }
@@ -16216,7 +16254,7 @@ var app = (function () {
       }
       return m.replaceWith(input)
     };
-    var replace = fns$3;
+    var replace = fns$2;
 
     // transfer sentence-ending punctuation
     const repairPunct = function (terms, len) {
@@ -16644,10 +16682,10 @@ var app = (function () {
     const addAPI$3 = function (View) {
       Object.assign(View.prototype, methods$h);
     };
-    var api$m = addAPI$3;
+    var api$b = addAPI$3;
 
     var change = {
-      api: api$m,
+      api: api$b,
     };
 
     const relPointer = function (ptrs, parent) {
@@ -16930,7 +16968,7 @@ var app = (function () {
     const matchAPI = function (View) {
       Object.assign(View.prototype, methods$f);
     };
-    var api$l = matchAPI;
+    var api$a = matchAPI;
 
     // match  'foo /yes/' and not 'foo/no/bar'
     const bySlashes = /(?:^|\s)([![^]*(?:<[^<]*>)?\/.*?[^\\/]\/[?\]+*$~]*)(?:\s|$)/;
@@ -16946,7 +16984,7 @@ var app = (function () {
       return /^[![^]*(<[^<]*>)?\//.test(str) && /\/[?\]+*$~]*$/.test(str)
     };
 
-    const cleanUp$1 = function (arr) {
+    const cleanUp = function (arr) {
       arr = arr.map(str => str.trim());
       arr = arr.filter(str => str);
       return arr
@@ -16964,7 +17002,7 @@ var app = (function () {
         }
         res = res.concat(str.split(byParentheses));
       });
-      res = cleanUp$1(res);
+      res = cleanUp(res);
       // split by spaces, now
       let final = [];
       res.forEach(str => {
@@ -16976,7 +17014,7 @@ var app = (function () {
           final = final.concat(str.split(byWord));
         }
       });
-      final = cleanUp$1(final);
+      final = cleanUp(final);
       return final
     };
     var parseBlocks$1 = parseBlocks;
@@ -18083,7 +18121,7 @@ var app = (function () {
     };
 
     var match = {
-      api: api$l,
+      api: api$a,
       methods: methods$d,
       lib: lib$3,
     };
@@ -18446,7 +18484,7 @@ var app = (function () {
     fmts.reduced = fmts.root;
     fmts.implicit = fmts.machine;
 
-    var text$1 = {
+    var text = {
       /** */
       text: function (fmt) {
         let opts = {
@@ -18471,12 +18509,12 @@ var app = (function () {
       },
     };
 
-    const defaults$2 = {
+    const defaults$1 = {
       text: true,
       terms: true,
     };
 
-    const fns$2 = {
+    const fns$1 = {
       text: (terms) => {
         let o = { keepPunct: true };
         return textFromTerms(terms, o, false)
@@ -18486,7 +18524,7 @@ var app = (function () {
         return textFromTerms(terms, o, false)
       },
       offset: (terms) => {
-        let len = fns$2.text(terms).length;
+        let len = fns$1.text(terms).length;
         return {
           index: terms[0].offset.index,
           start: terms[0].offset.start,
@@ -18505,14 +18543,14 @@ var app = (function () {
       sentence: (_terms, m) => m.fullSentence().text(),
       dirty: (terms) => terms.some(t => t.dirty === true)
     };
-    fns$2.sentences = fns$2.sentence;
+    fns$1.sentences = fns$1.sentence;
 
-    const toJSON$4 = function (view, opts) {
+    const toJSON = function (view, opts) {
       opts = opts || {};
       if (typeof opts === 'string') {
         opts = {};
       }
-      opts = Object.assign({}, defaults$2, opts);
+      opts = Object.assign({}, defaults$1, opts);
       // run any necessary upfront steps
       if (opts.offset) {
         view.compute('offset');
@@ -18520,8 +18558,8 @@ var app = (function () {
       return view.docs.map((terms, i) => {
         let res = {};
         Object.keys(opts).forEach(k => {
-          if (opts[k] && fns$2[k]) {
-            res[k] = fns$2[k](terms, view.eq(i));
+          if (opts[k] && fns$1[k]) {
+            res[k] = fns$1[k](terms, view.eq(i));
           }
         });
         return res
@@ -18532,7 +18570,7 @@ var app = (function () {
     var json = {
       /** return data */
       json: function (n) {
-        let res = toJSON$4(this, n);
+        let res = toJSON(this, n);
         if (typeof n === 'number') {
           return res[n]
         }
@@ -18540,7 +18578,7 @@ var app = (function () {
       },
     };
 
-    const methods$a = Object.assign({}, out$1, text$1, json);
+    const methods$a = Object.assign({}, out$1, text, json);
 
     // aliases
     methods$a.data = methods$a.json;
@@ -18548,10 +18586,10 @@ var app = (function () {
     const addAPI$2 = function (View) {
       Object.assign(View.prototype, methods$a);
     };
-    var api$k = addAPI$2;
+    var api$9 = addAPI$2;
 
     var output = {
-      api: api$k,
+      api: api$9,
     };
 
     // do the pointers intersect?
@@ -18893,11 +18931,11 @@ var app = (function () {
       // add set/intersection/union
       Object.assign(View.prototype, sets);
     };
-    var api$j = addAPI$1;
+    var api$8 = addAPI$1;
 
     var pointers = {
       methods: methods$9,
-      api: api$j,
+      api: api$8,
     };
 
     const isMulti = / /;
@@ -19013,7 +19051,7 @@ var app = (function () {
     };
     var unTag$1 = unTag;
 
-    const e$1=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t$1=/^ *(#|\/\/)/,n$2=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e$1({id:t}))),n}return [e$1({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r$1=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i$1=e=>"[object Array]"===Object.prototype.toString.call(e),c$1=e=>(e=e||"").trim(),s$1=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t$1.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n$2(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e$1(s),s}(c):i$1(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e$1({});return t.forEach((t=>{if((t=e$1(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r$1(s=c).forEach(e$1),s);var s;},h$1=e=>"[31m"+e+"[0m",o$1=e=>"[2m"+e+"[0m",l$1=function(e,t){let n="-> ";t&&(n=o$1("→ "));let i="";return r$1(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h$1(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a$1=function(e){let t=r$1(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p$2={text:l$1,txt:l$1,array:a$1,flat:a$1},d$1=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l$1(e,!0)),null):p$2.hasOwnProperty(t)?p$2[t](e):e},u$1=e=>{r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f$2=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i$1(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j$1=/\//;class g$2{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c$1(t),!j$1.test(t)){let e=this.json.children.find((e=>e.id===t));return new g$2(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e$1({});return new g$2(n)}add(t,n={}){if(i$1(t))return t.forEach((e=>this.add(c$1(e),n))),this;t=c$1(t);let r=e$1({id:t,props:n});return this.json.children.push(r),new g$2(r)}remove(e){return e=c$1(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r$1(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r$1(this.json)}fillDown(){var e;return e=this.json,r$1(e,((e,t)=>{t.props=f$2(t.props,e.props);})),this}depth(){u$1(this.json);let e=r$1(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u$1(this.json),d$1(this.json,e)}debug(){return u$1(this.json),d$1(this.json,"debug"),this}}const _=function(e){let t=s$1(e);return new g$2(t)};_.prototype.plugin=function(e){e(this);};
+    const e$1=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t$1=/^ *(#|\/\/)/,n$2=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e$1({id:t}))),n}return [e$1({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r$1=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i$1=e=>"[object Array]"===Object.prototype.toString.call(e),c$1=e=>(e=e||"").trim(),s$1=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t$1.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n$2(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e$1(s),s}(c):i$1(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e$1({});return t.forEach((t=>{if((t=e$1(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r$1(s=c).forEach(e$1),s);var s;},h$1=e=>"[31m"+e+"[0m",o$1=e=>"[2m"+e+"[0m",l$1=function(e,t){let n="-> ";t&&(n=o$1("→ "));let i="";return r$1(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h$1(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a$1=function(e){let t=r$1(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p$2={text:l$1,txt:l$1,array:a$1,flat:a$1},d$1=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l$1(e,!0)),null):p$2.hasOwnProperty(t)?p$2[t](e):e},u$1=e=>{r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f$1=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i$1(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j$1=/\//;class g$2{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c$1(t),!j$1.test(t)){let e=this.json.children.find((e=>e.id===t));return new g$2(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e$1({});return new g$2(n)}add(t,n={}){if(i$1(t))return t.forEach((e=>this.add(c$1(e),n))),this;t=c$1(t);let r=e$1({id:t,props:n});return this.json.children.push(r),new g$2(r)}remove(e){return e=c$1(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r$1(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r$1(this.json)}fillDown(){var e;return e=this.json,r$1(e,((e,t)=>{t.props=f$1(t.props,e.props);})),this}depth(){u$1(this.json);let e=r$1(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u$1(this.json),d$1(this.json,e)}debug(){return u$1(this.json),d$1(this.json,"debug"),this}}const _=function(e){let t=s$1(e);return new g$2(t)};_.prototype.plugin=function(e){e(this);};
 
     // i just made these up
     const colors = {
@@ -19136,7 +19174,7 @@ var app = (function () {
     // import grad from '/Users/spencer/mountain/grad-school/src/index.js'
 
     // 'fill-down' parent logic inference
-    const compute$9 = function (allTags) {
+    const compute$8 = function (allTags) {
       // setup graph-lib format
       const flatList = Object.keys(allTags).map(k => {
         let o = allTags[k];
@@ -19153,7 +19191,7 @@ var app = (function () {
       let allTags = Object.assign({}, already, tags);
       // do some basic setting-up
       // 'fill-down' parent logic
-      const nodes = compute$9(allTags);
+      const nodes = compute$8(allTags);
       // convert it to our final format
       const res = fmt$1(nodes);
       return res
@@ -19172,7 +19210,7 @@ var app = (function () {
     const isArray$1 = function (arr) {
       return Object.prototype.toString.call(arr) === '[object Array]'
     };
-    const fns$1 = {
+    const fns = {
       /** add a given tag, to all these terms */
       tag: function (input, reason = '', isSafe) {
         if (!this.found || !input) {
@@ -19248,12 +19286,12 @@ var app = (function () {
         return this.difference(noDoc)
       },
     };
-    var tag$1 = fns$1;
+    var tag$1 = fns;
 
     const tagAPI = function (View) {
       Object.assign(View.prototype, tag$1);
     };
-    var api$i = tagAPI;
+    var api$7 = tagAPI;
 
     // wire-up more pos-tags to our model
     const addTags = function (tags) {
@@ -19272,7 +19310,7 @@ var app = (function () {
         one: { tagSet: {} }
       },
       methods: methods$7,
-      api: api$i,
+      api: api$7,
       lib: lib$2
     };
 
@@ -19792,12 +19830,12 @@ var app = (function () {
       },
     };
 
-    const aliases$1 = {
+    const aliases = {
       '&': 'and',
       '@': 'at',
       '%': 'percent',
     };
-    var aliases$2 = aliases$1;
+    var aliases$1 = aliases;
 
     var misc$7 = [
       'approx',
@@ -19853,7 +19891,7 @@ var app = (function () {
       'wr', //world record
     ];
 
-    var honorifics$1 = [
+    var honorifics = [
       'adj',
       'adm',
       'adv',
@@ -19904,7 +19942,7 @@ var app = (function () {
 
     var months = ['jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'oct', 'nov', 'dec'];
 
-    var nouns$2 = [
+    var nouns$1 = [
       'ad',
       'al',
       'arc',
@@ -19926,7 +19964,7 @@ var app = (function () {
 
     var organizations = ['dept', 'univ', 'assn', 'bros', 'inc', 'ltd', 'co'];
 
-    var places$2 = [
+    var places$1 = [
       'rd',
       'st',
       'dist',
@@ -20020,21 +20058,21 @@ var app = (function () {
     ];
 
     // add our abbreviation list to our lexicon
-    let list$2 = [
+    let list = [
       [misc$7],
       [units, 'Unit'],
-      [nouns$2, 'Noun'],
-      [honorifics$1, 'Honorific'],
+      [nouns$1, 'Noun'],
+      [honorifics, 'Honorific'],
       [months, 'Month'],
       [organizations, 'Organization'],
-      [places$2, 'Place'],
+      [places$1, 'Place'],
     ];
     // create key-val for sentence-tokenizer
     let abbreviations = {};
     // add them to a future lexicon
     let lexicon$2 = {};
 
-    list$2.forEach(a => {
+    list.forEach(a => {
       a[0].forEach(w => {
         // sentence abbrevs
         abbreviations[w] = true;
@@ -20105,7 +20143,7 @@ var app = (function () {
 
     var model$6 = {
       one: {
-        aliases: aliases$2,
+        aliases: aliases$1,
         abbreviations,
         prefixes: prefixes$1,
         suffixes: suffixes$2,
@@ -20275,10 +20313,10 @@ var app = (function () {
       index: index$1,
       wordCount: wordCount$1,
     };
-    var compute$8 = methods$5;
+    var compute$7 = methods$5;
 
     var tokenize$1 = {
-      compute: compute$8,
+      compute: compute$7,
       methods: methods$6,
       model: model$6,
       hooks: ['alias', 'machine', 'index'],
@@ -20461,7 +20499,7 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const api$h = function (View) {
+    const api$6 = function (View) {
       /** turn an array or object into a compressed trie*/
       View.prototype.compile = function (obj) {
         const trie = build(obj, this.world);
@@ -20484,7 +20522,7 @@ var app = (function () {
     };
 
     var lookup = {
-      api: api$h,
+      api: api$6,
     };
 
     const createCache = function (document) {
@@ -20551,25 +20589,25 @@ var app = (function () {
     const addAPI = function (View) {
       Object.assign(View.prototype, methods$3);
     };
-    var api$g = addAPI;
+    var api$5 = addAPI;
 
     const cache$3 = function (view) {
       view._cache = view.methods.one.cacheDoc(view.document);
     };
 
-    var compute$7 = {
+    var compute$6 = {
       cache: cache$3
     };
 
     var cache$2 = {
-      api: api$g,
-      compute: compute$7,
+      api: api$5,
+      compute: compute$6,
       methods: methods$4,
       // hooks: ['cache']
     };
 
     // lookup last word in the type-ahead prefixes
-    const compute$5 = function (view) {
+    const compute$4 = function (view) {
       const prefixes = view.model.one.typeahead;
       const docs = view.docs;
       if (docs.length === 0 || Object.keys(prefixes).length === 0) {
@@ -20594,7 +20632,7 @@ var app = (function () {
       }
     };
 
-    var compute$6 = { typeahead: compute$5 };
+    var compute$5 = { typeahead: compute$4 };
 
     // assume any discovered prefixes
     const autoFill = function () {
@@ -20611,10 +20649,10 @@ var app = (function () {
       return this
     };
 
-    const api$e = function (View) {
+    const api$3 = function (View) {
       View.prototype.autoFill = autoFill;
     };
-    var api$f = api$e;
+    var api$4 = api$3;
 
     // generate all the possible prefixes up-front
     const getPrefixes = function (arr, opts, world) {
@@ -20660,14 +20698,14 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const defaults$1 = {
+    const defaults = {
       safe: true,
       min: 3,
     };
 
     const prepare = function (words = [], opts = {}) {
       let model = this.model();
-      opts = Object.assign({}, defaults$1, opts);
+      opts = Object.assign({}, defaults, opts);
       if (isObject(words)) {
         Object.assign(model.one.lexicon, words);
         words = Object.keys(words);
@@ -20697,9 +20735,9 @@ var app = (function () {
     };
     var typeahead = {
       model: model$5,
-      api: api$f,
+      api: api$4,
       lib: lib$1,
-      compute: compute$6,
+      compute: compute$5,
       hooks: ['typeahead']
     };
 
@@ -20790,7 +20828,7 @@ var app = (function () {
       });
     };
 
-    var compute$4 = {
+    var compute$3 = {
       lexicon: firstPass
     };
 
@@ -20904,7 +20942,7 @@ var app = (function () {
     var lexicon$1 = {
       model: model$4,
       methods: methods$2,
-      compute: compute$4,
+      compute: compute$3,
       lib,
       hooks: ['lexicon']
     };
@@ -21004,7 +21042,7 @@ var app = (function () {
     // used in verbs().conjugate()
     // but also added to our lexicon
     //use shorter key-names
-    const mapping$2 = {
+    const mapping$1 = {
       g: 'Gerund',
       prt: 'Participle',
       perf: 'PerfectTense',
@@ -21815,7 +21853,7 @@ var app = (function () {
         let str = conjugations[inf][key];
         //swap-in infinitives for '_'
         str = str.replace('_', inf);
-        let full = mapping$2[key];
+        let full = mapping$1[key];
         final[full] = str;
       });
       //over-write original
@@ -21884,7 +21922,7 @@ var app = (function () {
       "Person|Verb": "true¦b1chu2drew,ja2ma0ollie,pat,rob,sue,wade;ck,rk;ob,u0;ck"
     };
 
-    var t=function(t,n){let e=Math.min(t.length,n.length);for(;e>0;){const o=t.slice(0,e);if(o===n.slice(0,e))return o;e-=1;}return ""},n$1=function(t){t.sort();for(let n=1;n<t.length;n++)t[n-1]===t[n]&&t.splice(n,1);};const e=function(){this.counts={};},o={init:function(t){void 0===this.counts[t]&&(this.counts[t]=0);},add:function(t,n){void 0===n&&(n=1),this.init(t),this.counts[t]+=n;},countOf:function(t){return this.init(t),this.counts[t]},highest:function(t){let n=[];const e=Object.keys(this.counts);for(let t=0;t<e.length;t++){const o=e[t];n.push([o,this.counts[o]]);}return n.sort((function(t,n){return n[1]-t[1]})),t&&(n=n.slice(0,t)),n}};Object.keys(o).forEach((function(t){e.prototype[t]=o[t];}));const s="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",i=s.split("").reduce((function(t,n,e){return t[n]=e,t}),{});var r=function(t){if(void 0!==s[t])return s[t];let n=1,e=36,o="";for(;t>=e;t-=e,n++,e*=36);for(;n--;){const n=t%36;o=String.fromCharCode((n<10?48:55)+n)+o,t=(t-n)/36;}return o},u=function(t){if(void 0!==i[t])return i[t];let n=0,e=1,o=36,s=1;for(;e<t.length;n+=o,e++,o*=36);for(let e=t.length-1;e>=0;e--,s*=36){let o=t.charCodeAt(e)-48;o>10&&(o-=7),n+=o*s;}return n};const c=";",h=":",f$1=",",l="!",d=36,p$1=function(t,n){let e="",o="";t.isTerminal(n)&&(e+=l);const s=t.nodeProps(n);for(let i=0;i<s.length;i++){const u=s[i];if("number"==typeof n[u]){e+=o+u,o=f$1;continue}if(t.syms[n[u]._n]){e+=o+u+t.syms[n[u]._n],o="";continue}let c=r(n._n-n[u]._n-1+t.symCount);n[u]._g&&c.length>=n[u]._g.length&&1===n[n[u]._g]?(c=n[u]._g,e+=o+u+c,o=f$1):(e+=o+u+c,o="");}return e},g$1=function(t,n){if(t.visited(n))return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++){const s=e[o],i=n._n-n[s]._n-1;i<d&&t.histRel.add(i),t.histAbs.add(n[s]._n,r(i).length-1),g$1(t,n[s]);}},a=function(t,n){if(void 0!==n._n)return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++)a(t,n[e[o]]);n._n=t.pos++,t.nodes.unshift(n);},y=function(t){t.nodes=[],t.nodeCount=0,t.syms={},t.symCount=0,t.pos=0,t.optimize(),t.histAbs=new e,t.histRel=new e,a(t,t.root),t.nodeCount=t.nodes.length,t.prepDFS(),g$1(t,t.root),t.symCount=function(t){t.histAbs=t.histAbs.highest(d);const n=[];n[-1]=0;let e=0,o=0;const s=3+r(t.nodeCount).length;for(let i=0;i<d&&void 0!==t.histAbs[i];i++)n[i]=t.histAbs[i][1]-s-t.histRel.countOf(d-i-1)+n[i-1],n[i]>=e&&(e=n[i],o=i+1);return o}(t);for(let n=0;n<t.symCount;n++)t.syms[t.histAbs[n][0]]=r(n);for(let n=0;n<t.nodeCount;n++)t.nodes[n]=p$1(t,t.nodes[n]);for(let n=t.symCount-1;n>=0;n--)t.nodes.unshift(r(n)+h+r(t.nodeCount-t.histAbs[n][0]-1));return t.nodes.join(c)},m$2=new RegExp("[0-9A-Z,;!:|¦]"),b={insertWords:function(t){if(void 0!==t){"string"==typeof t&&(t=t.split(/[^a-zA-Z]+/));for(let n=0;n<t.length;n++)t[n]=t[n].toLowerCase();n$1(t);for(let n=0;n<t.length;n++)null===t[n].match(m$2)&&this.insert(t[n]);}},insert:function(n){this._insert(n,this.root);const e=this.lastWord;this.lastWord=n;if(t(n,e)===e)return;const o=this.uniqueNode(e,n,this.root);o&&this.combineSuffixNode(o);},_insert:function(n,e){let o,s;if(0===n.length)return;const i=Object.keys(e);for(let r=0;r<i.length;r++){const u=i[r];if(o=t(n,u),0!==o.length){if(u===o&&"object"==typeof e[u])return void this._insert(n.slice(o.length),e[u]);if(u===n&&"number"==typeof e[u])return;return s={},s[u.slice(o.length)]=e[u],this.addTerminal(s,n=n.slice(o.length)),delete e[u],e[o]=s,void this.wordCount++}}this.addTerminal(e,n),this.wordCount++;},addTerminal:function(t,n){if(n.length<=1)return void(t[n]=1);const e={};t[n[0]]=e,this.addTerminal(e,n.slice(1));},nodeProps:function(t,n){const e=[];for(const o in t)""!==o&&"_"!==o[0]&&(n&&"object"!=typeof t[o]||e.push(o));return e.sort(),e},optimize:function(){this.combineSuffixNode(this.root),this.prepDFS(),this.countDegree(this.root),this.prepDFS(),this.collapseChains(this.root);},combineSuffixNode:function(t){if(t._c)return t;let n=[];this.isTerminal(t)&&n.push("!");const e=this.nodeProps(t);for(let o=0;o<e.length;o++){const s=e[o];"object"==typeof t[s]?(t[s]=this.combineSuffixNode(t[s]),n.push(s),n.push(t[s]._c)):n.push(s);}n=n.join("-");const o=this.suffixes[n];return o||(this.suffixes[n]=t,t._c=this.cNext++,t)},prepDFS:function(){this.vCur++;},visited:function(t){return t._v===this.vCur||(t._v=this.vCur,!1)},countDegree:function(t){if(void 0===t._d&&(t._d=0),t._d++,this.visited(t))return;const n=this.nodeProps(t,!0);for(let e=0;e<n.length;e++)this.countDegree(t[n[e]]);},collapseChains:function(t){let n,e,o,s;if(!this.visited(t)){for(e=this.nodeProps(t),s=0;s<e.length;s++)n=e[s],o=t[n],"object"==typeof o&&(this.collapseChains(o),void 0===o._g||1!==o._d&&1!==o._g.length||(delete t[n],n+=o._g,t[n]=o[o._g]));1!==e.length||this.isTerminal(t)||(t._g=n);}},isTerminal:function(t){return !!t[""]},uniqueNode:function(t,n,e){const o=this.nodeProps(e,!0);for(let s=0;s<o.length;s++){const i=o[s];if(i===t.slice(0,i.length))return i!==n.slice(0,i.length)?e[i]:this.uniqueNode(t.slice(i.length),n.slice(i.length),e[i])}},pack:function(){return y(this)}};Object.keys(b).forEach((function(t){}));const j=function(t,n,e){const o=u(n);return o<t.symCount?t.syms[o]:e+o+1-t.symCount},A=function(t){const n={nodes:t.split(";"),syms:[],symCount:0};return t.match(":")&&function(t){const n=new RegExp("([0-9A-Z]+):([0-9A-Z]+)");for(let e=0;e<t.nodes.length;e++){const o=n.exec(t.nodes[e]);if(!o){t.symCount=e;break}t.syms[u(o[1])]=u(o[2]);}t.nodes=t.nodes.slice(t.symCount,t.nodes.length);}(n),function(t){const n=[],e=(o,s)=>{let i=t.nodes[o];"!"===i[0]&&(n.push(s),i=i.slice(1));const r=i.split(/([A-Z0-9,]+)/g);for(let i=0;i<r.length;i+=2){const u=r[i],c=r[i+1];if(!u)continue;const h=s+u;if(","===c||void 0===c){n.push(h);continue}const f=j(t,c,o);e(f,h);}};return e(0,""),n}(n)},O=function(t){const n=t.split("|").reduce(((t,n)=>{const e=n.split("¦");return t[e[0]]=e[1],t}),{}),e={};return Object.keys(n).forEach((function(t){const o=A(n[t]);"true"===t&&(t=!0);for(let n=0;n<o.length;n++){const s=o[n];!0===e.hasOwnProperty(s)?!1===Array.isArray(e[s])?e[s]=[e[s],t]:e[s].push(t):e[s]=t;}})),e};
+    var t=function(t,n){let e=Math.min(t.length,n.length);for(;e>0;){const o=t.slice(0,e);if(o===n.slice(0,e))return o;e-=1;}return ""},n$1=function(t){t.sort();for(let n=1;n<t.length;n++)t[n-1]===t[n]&&t.splice(n,1);};const e=function(){this.counts={};},o={init:function(t){void 0===this.counts[t]&&(this.counts[t]=0);},add:function(t,n){void 0===n&&(n=1),this.init(t),this.counts[t]+=n;},countOf:function(t){return this.init(t),this.counts[t]},highest:function(t){let n=[];const e=Object.keys(this.counts);for(let t=0;t<e.length;t++){const o=e[t];n.push([o,this.counts[o]]);}return n.sort((function(t,n){return n[1]-t[1]})),t&&(n=n.slice(0,t)),n}};Object.keys(o).forEach((function(t){e.prototype[t]=o[t];}));const s="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",i=s.split("").reduce((function(t,n,e){return t[n]=e,t}),{});var r=function(t){if(void 0!==s[t])return s[t];let n=1,e=36,o="";for(;t>=e;t-=e,n++,e*=36);for(;n--;){const n=t%36;o=String.fromCharCode((n<10?48:55)+n)+o,t=(t-n)/36;}return o},u=function(t){if(void 0!==i[t])return i[t];let n=0,e=1,o=36,s=1;for(;e<t.length;n+=o,e++,o*=36);for(let e=t.length-1;e>=0;e--,s*=36){let o=t.charCodeAt(e)-48;o>10&&(o-=7),n+=o*s;}return n};const c=";",h=":",f=",",l="!",d=36,p$1=function(t,n){let e="",o="";t.isTerminal(n)&&(e+=l);const s=t.nodeProps(n);for(let i=0;i<s.length;i++){const u=s[i];if("number"==typeof n[u]){e+=o+u,o=f;continue}if(t.syms[n[u]._n]){e+=o+u+t.syms[n[u]._n],o="";continue}let c=r(n._n-n[u]._n-1+t.symCount);n[u]._g&&c.length>=n[u]._g.length&&1===n[n[u]._g]?(c=n[u]._g,e+=o+u+c,o=f):(e+=o+u+c,o="");}return e},g$1=function(t,n){if(t.visited(n))return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++){const s=e[o],i=n._n-n[s]._n-1;i<d&&t.histRel.add(i),t.histAbs.add(n[s]._n,r(i).length-1),g$1(t,n[s]);}},a=function(t,n){if(void 0!==n._n)return;const e=t.nodeProps(n,!0);for(let o=0;o<e.length;o++)a(t,n[e[o]]);n._n=t.pos++,t.nodes.unshift(n);},y=function(t){t.nodes=[],t.nodeCount=0,t.syms={},t.symCount=0,t.pos=0,t.optimize(),t.histAbs=new e,t.histRel=new e,a(t,t.root),t.nodeCount=t.nodes.length,t.prepDFS(),g$1(t,t.root),t.symCount=function(t){t.histAbs=t.histAbs.highest(d);const n=[];n[-1]=0;let e=0,o=0;const s=3+r(t.nodeCount).length;for(let i=0;i<d&&void 0!==t.histAbs[i];i++)n[i]=t.histAbs[i][1]-s-t.histRel.countOf(d-i-1)+n[i-1],n[i]>=e&&(e=n[i],o=i+1);return o}(t);for(let n=0;n<t.symCount;n++)t.syms[t.histAbs[n][0]]=r(n);for(let n=0;n<t.nodeCount;n++)t.nodes[n]=p$1(t,t.nodes[n]);for(let n=t.symCount-1;n>=0;n--)t.nodes.unshift(r(n)+h+r(t.nodeCount-t.histAbs[n][0]-1));return t.nodes.join(c)},m$1=new RegExp("[0-9A-Z,;!:|¦]"),b={insertWords:function(t){if(void 0!==t){"string"==typeof t&&(t=t.split(/[^a-zA-Z]+/));for(let n=0;n<t.length;n++)t[n]=t[n].toLowerCase();n$1(t);for(let n=0;n<t.length;n++)null===t[n].match(m$1)&&this.insert(t[n]);}},insert:function(n){this._insert(n,this.root);const e=this.lastWord;this.lastWord=n;if(t(n,e)===e)return;const o=this.uniqueNode(e,n,this.root);o&&this.combineSuffixNode(o);},_insert:function(n,e){let o,s;if(0===n.length)return;const i=Object.keys(e);for(let r=0;r<i.length;r++){const u=i[r];if(o=t(n,u),0!==o.length){if(u===o&&"object"==typeof e[u])return void this._insert(n.slice(o.length),e[u]);if(u===n&&"number"==typeof e[u])return;return s={},s[u.slice(o.length)]=e[u],this.addTerminal(s,n=n.slice(o.length)),delete e[u],e[o]=s,void this.wordCount++}}this.addTerminal(e,n),this.wordCount++;},addTerminal:function(t,n){if(n.length<=1)return void(t[n]=1);const e={};t[n[0]]=e,this.addTerminal(e,n.slice(1));},nodeProps:function(t,n){const e=[];for(const o in t)""!==o&&"_"!==o[0]&&(n&&"object"!=typeof t[o]||e.push(o));return e.sort(),e},optimize:function(){this.combineSuffixNode(this.root),this.prepDFS(),this.countDegree(this.root),this.prepDFS(),this.collapseChains(this.root);},combineSuffixNode:function(t){if(t._c)return t;let n=[];this.isTerminal(t)&&n.push("!");const e=this.nodeProps(t);for(let o=0;o<e.length;o++){const s=e[o];"object"==typeof t[s]?(t[s]=this.combineSuffixNode(t[s]),n.push(s),n.push(t[s]._c)):n.push(s);}n=n.join("-");const o=this.suffixes[n];return o||(this.suffixes[n]=t,t._c=this.cNext++,t)},prepDFS:function(){this.vCur++;},visited:function(t){return t._v===this.vCur||(t._v=this.vCur,!1)},countDegree:function(t){if(void 0===t._d&&(t._d=0),t._d++,this.visited(t))return;const n=this.nodeProps(t,!0);for(let e=0;e<n.length;e++)this.countDegree(t[n[e]]);},collapseChains:function(t){let n,e,o,s;if(!this.visited(t)){for(e=this.nodeProps(t),s=0;s<e.length;s++)n=e[s],o=t[n],"object"==typeof o&&(this.collapseChains(o),void 0===o._g||1!==o._d&&1!==o._g.length||(delete t[n],n+=o._g,t[n]=o[o._g]));1!==e.length||this.isTerminal(t)||(t._g=n);}},isTerminal:function(t){return !!t[""]},uniqueNode:function(t,n,e){const o=this.nodeProps(e,!0);for(let s=0;s<o.length;s++){const i=o[s];if(i===t.slice(0,i.length))return i!==n.slice(0,i.length)?e[i]:this.uniqueNode(t.slice(i.length),n.slice(i.length),e[i])}},pack:function(){return y(this)}};Object.keys(b).forEach((function(t){}));const j=function(t,n,e){const o=u(n);return o<t.symCount?t.syms[o]:e+o+1-t.symCount},A=function(t){const n={nodes:t.split(";"),syms:[],symCount:0};return t.match(":")&&function(t){const n=new RegExp("([0-9A-Z]+):([0-9A-Z]+)");for(let e=0;e<t.nodes.length;e++){const o=n.exec(t.nodes[e]);if(!o){t.symCount=e;break}t.syms[u(o[1])]=u(o[2]);}t.nodes=t.nodes.slice(t.symCount,t.nodes.length);}(n),function(t){const n=[],e=(o,s)=>{let i=t.nodes[o];"!"===i[0]&&(n.push(s),i=i.slice(1));const r=i.split(/([A-Z0-9,]+)/g);for(let i=0;i<r.length;i+=2){const u=r[i],c=r[i+1];if(!u)continue;const h=s+u;if(","===c||void 0===c){n.push(h);continue}const f=j(t,c,o);e(f,h);}};return e(0,""),n}(n)},O=function(t){const n=t.split("|").reduce(((t,n)=>{const e=n.split("¦");return t[e[0]]=e[1],t}),{}),e={};return Object.keys(n).forEach((function(t){const o=A(n[t]);"true"===t&&(t=!0);for(let n=0;n<o.length;n++){const s=o[n];!0===e.hasOwnProperty(s)?!1===Array.isArray(e[s])?e[s]=[e[s],t]:e[s].push(t):e[s]=t;}})),e};
 
     //words that can't be compressed, for whatever reason
     let misc$5 = {
@@ -21972,17 +22010,17 @@ var app = (function () {
       y: [[/([^aeiouy]|qu)y$/i, '$1ies']],
       z: [[/(quiz)$/i, '$1zes']],
     };
-    var rules$4 = suffixes$1;
+    var rules$3 = suffixes$1;
 
     const addE = /([xsz]|ch|sh)$/;
 
     const trySuffix = function (str) {
       let c = str[str.length - 1];
-      if (rules$4.hasOwnProperty(c) === true) {
-        for (let i = 0; i < rules$4[c].length; i += 1) {
-          let reg = rules$4[c][i][0];
+      if (rules$3.hasOwnProperty(c) === true) {
+        for (let i = 0; i < rules$3[c].length; i += 1) {
+          let reg = rules$3[c][i][0];
           if (reg.test(str) === true) {
-            return str.replace(reg, rules$4[c][i][1])
+            return str.replace(reg, rules$3[c][i][1])
           }
         }
       }
@@ -22280,7 +22318,7 @@ var app = (function () {
     // the boiled egg
     // boiled the water
 
-    const past$1 = {
+    const past = {
       beforeTags: {
         Adverb: 'PastTense', //quickly detailed
         Pronoun: 'PastTense', //he detailed
@@ -22322,10 +22360,10 @@ var app = (function () {
     };
 
     var adjPast = {
-      beforeTags: Object.assign({}, adj$1.beforeTags, past$1.beforeTags),
-      afterTags: Object.assign({}, adj$1.afterTags, past$1.afterTags),
-      beforeWords: Object.assign({}, adj$1.beforeWords, past$1.beforeWords),
-      afterWords: Object.assign({}, adj$1.afterWords, past$1.afterWords),
+      beforeTags: Object.assign({}, adj$1.beforeTags, past.beforeTags),
+      afterTags: Object.assign({}, adj$1.afterTags, past.afterTags),
+      beforeWords: Object.assign({}, adj$1.beforeWords, past.beforeWords),
+      afterWords: Object.assign({}, adj$1.afterWords, past.afterWords),
     };
 
     const v = 'Infinitive';
@@ -22534,34 +22572,34 @@ var app = (function () {
 
     // 'april o'neil'  -  'april 1st'
 
-    const m$1 = 'Month';
+    const m = 'Month';
     const month = {
       beforeTags: {
-        Date: m$1,
-        Value: m$1,
+        Date: m,
+        Value: m,
       },
       afterTags: {
-        Date: m$1,
-        Value: m$1,
+        Date: m,
+        Value: m,
       },
       beforeWords: {
-        by: m$1,
-        in: m$1,
-        during: m$1,
-        after: m$1,
-        until: m$1,
-        til: m$1,
-        sometime: m$1,
-        of: m$1, //5th of april
-        this: m$1, //this april
-        next: m$1,
-        last: m$1,
+        by: m,
+        in: m,
+        during: m,
+        after: m,
+        until: m,
+        til: m,
+        sometime: m,
+        of: m, //5th of april
+        this: m, //this april
+        next: m,
+        last: m,
       },
       afterWords: {
-        sometime: m$1,
-        in: m$1,
-        until: m$1,
-        the: m$1, //june the 4th
+        sometime: m,
+        in: m,
+        until: m,
+        the: m, //june the 4th
       },
     };
     var personDate = {
@@ -23277,7 +23315,7 @@ var app = (function () {
       return h
     }, {});
 
-    var rules$3 = [
+    var rules$2 = [
       [/([^v])ies$/i, '$1y'],
       [/ises$/i, 'isis'],
       [/(kn|[^o]l|w)ives$/i, '$1ife'],
@@ -23313,7 +23351,7 @@ var app = (function () {
       }, {})
     };
 
-    const toSingular$2 = function (str, model) {
+    const toSingular = function (str, model) {
       const { irregularPlurals } = model.two;
       let invert = invertObj(irregularPlurals); //(not very efficient)
       // check irregulars list
@@ -23321,18 +23359,18 @@ var app = (function () {
         return invert[str]
       }
       // go through our regexes
-      for (let i = 0; i < rules$3.length; i++) {
-        if (rules$3[i][0].test(str) === true) {
-          str = str.replace(rules$3[i][0], rules$3[i][1]);
+      for (let i = 0; i < rules$2.length; i++) {
+        if (rules$2[i][0].test(str) === true) {
+          str = str.replace(rules$2[i][0], rules$2[i][1]);
           return str
         }
       }
       return str
     };
-    var nounToSingular = toSingular$2;
+    var nounToSingular = toSingular;
 
     //rules for turning a verb into infinitive form
-    let rules$1 = {
+    let rules = {
       Participle: [
         {
           reg: /own$/i,
@@ -23813,7 +23851,7 @@ var app = (function () {
 
       ],
     };
-    var rules$2 = rules$1;
+    var rules$1 = rules;
 
     let guessVerb = {
       Gerund: ['ing'],
@@ -23908,7 +23946,7 @@ var app = (function () {
     var guess = guessVerb;
 
     /** it helps to know what we're conjugating from */
-    const getTense$1 = function (str) {
+    const getTense = function (str) {
       let three = str.substr(str.length - 3);
       if (guess.hasOwnProperty(three) === true) {
         return guess[three]
@@ -23923,7 +23961,7 @@ var app = (function () {
       }
       return null
     };
-    var getTense$2 = getTense$1;
+    var getTense$1 = getTense;
 
     // lookup known irregular verb forms
     const fromIrreg = function (str, model) {
@@ -23942,10 +23980,10 @@ var app = (function () {
     // transform verb from regular expressions
     const fromReg = function (str, tense) {
       // console.log(tense)
-      tense = tense || getTense$2(str);
-      if (tense && rules$2[tense]) {
-        for (let i = 0; i < rules$2[tense].length; i++) {
-          const rule = rules$2[tense][i];
+      tense = tense || getTense$1(str);
+      if (tense && rules$1[tense]) {
+        for (let i = 0; i < rules$1[tense].length; i++) {
+          const rule = rules$1[tense][i];
           if (rule.reg.test(str) === true) {
             // console.log(rule)
             return str.replace(rule.reg, rule.to)
@@ -23955,7 +23993,7 @@ var app = (function () {
       return null
     };
 
-    const toInfinitive$6 = function (str, model, tense) {
+    const toInfinitive = function (str, model, tense) {
       if (!str) {
         return ''
       }
@@ -23984,7 +24022,7 @@ var app = (function () {
       }
       return inf
     };
-    var verbToInfinitive = toInfinitive$6;
+    var verbToInfinitive = toInfinitive;
 
     var suffixes = {
       b: [
@@ -24419,7 +24457,7 @@ var app = (function () {
     //turn 'quick' into 'quickest'
     const do_rules$1 = [/ght$/, /nge$/, /ough$/, /ain$/, /uel$/, /[au]ll$/, /ow$/, /oud$/, /...p$/];
     const dont_rules$1 = [/ary$/];
-    const irregulars$2 = {
+    const irregulars$1 = {
       nice: 'nicest',
       late: 'latest',
       hard: 'hardest',
@@ -24462,8 +24500,8 @@ var app = (function () {
 
     const toSuperlative = function (str) {
       //irregulars
-      if (irregulars$2.hasOwnProperty(str)) {
-        return irregulars$2[str]
+      if (irregulars$1.hasOwnProperty(str)) {
+        return irregulars$1[str]
       }
       //known transforms
       for (let i = 0; i < transforms$1.length; i++) {
@@ -24495,7 +24533,7 @@ var app = (function () {
     //turn 'quick' into 'quickly'
     const do_rules = [/ght$/, /nge$/, /ough$/, /ain$/, /uel$/, /[au]ll$/, /ow$/, /old$/, /oud$/, /e[ae]p$/];
     const dont_rules = [/ary$/, /ous$/];
-    const irregulars$1 = {
+    const irregulars = {
       grey: 'greyer',
       gray: 'grayer',
       green: 'greener',
@@ -24528,8 +24566,8 @@ var app = (function () {
 
     const toComparative = function (str) {
       //known-irregulars
-      if (irregulars$1.hasOwnProperty(str)) {
-        return irregulars$1[str]
+      if (irregulars.hasOwnProperty(str)) {
+        return irregulars[str]
       }
       //known-transforms
       for (let i = 0; i < transforms.length; i++) {
@@ -24561,7 +24599,7 @@ var app = (function () {
 
     var transform = {
       nounToPlural, nounToSingular,
-      verbToInfinitive, getTense: getTense$2,
+      verbToInfinitive, getTense: getTense$1,
       verbConjugate, adjToSuperlative, adjToComparative
     };
 
@@ -24914,7 +24952,7 @@ var app = (function () {
     var fastTag = setTag$1;
 
     //similar to plural/singularize rules, but not the same
-    const isPlural$4 = {
+    const isPlural = {
       e: [
         'mice',
         'louse',
@@ -24939,7 +24977,7 @@ var app = (function () {
       ]
     };
 
-    const notPlural$1 = [
+    const notPlural = [
       'bus',
       'mas',//christmas
       'was',
@@ -24981,14 +25019,14 @@ var app = (function () {
       }
       let end = str[str.length - 1];
       // look at 'firemen'
-      if (isPlural$4.hasOwnProperty(end)) {
-        return isPlural$4[end].find(suff => str.endsWith(suff))
+      if (isPlural.hasOwnProperty(end)) {
+        return isPlural[end].find(suff => str.endsWith(suff))
       }
       if (end !== 's') {
         return false
       }
       // look for 'virus'
-      if (notPlural$1.find(end => str.endsWith(end))) {
+      if (notPlural.find(end => str.endsWith(end))) {
         return false
       }
       // ends with an s, seems plural i guess.
@@ -25026,7 +25064,7 @@ var app = (function () {
     const setTense = function (term) {
       let tags = term.tags;
       if (tags.has('Verb') && tags.size === 1) {
-        let guess = getTense$2(term.normal);
+        let guess = getTense$1(term.normal);
         if (guess) {
           fastTag(term, guess, '3-verb-tense-guess');
         }
@@ -25688,7 +25726,7 @@ var app = (function () {
       },
     };
 
-    const getRoot$2 = function (view) {
+    const getRoot = function (view) {
       const world = view.world;
       const keys = Object.keys(toRoot);
       // console.log(world.methods.two.transform.nounToSingular)
@@ -25704,12 +25742,12 @@ var app = (function () {
         }
       });
     };
-    var root = getRoot$2;
+    var root = getRoot;
 
     // rough connection between compromise tagset and Penn Treebank
     // https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
 
-    const mapping$1 = {
+    const mapping = {
       // adverbs
       // 'Comparative': 'RBR',
       // 'Superlative': 'RBS',
@@ -25784,8 +25822,8 @@ var app = (function () {
       // run through an ordered list of tags
       let arr = term.tagRank || [];
       for (let i = 0; i < arr.length; i += 1) {
-        if (mapping$1.hasOwnProperty(arr[i])) {
-          return mapping$1[arr[i]]
+        if (mapping.hasOwnProperty(arr[i])) {
+          return mapping[arr[i]]
         }
       }
       return null
@@ -25801,11 +25839,11 @@ var app = (function () {
     };
     var penn = pennTag;
 
-    var compute$3 = { preTagger: preTagger$1, tagRank: tagRank$1, root, penn };
+    var compute$2 = { preTagger: preTagger$1, tagRank: tagRank$1, root, penn };
 
     const entity = ['Person', 'Place', 'Organization'];
 
-    var nouns$1 = {
+    var nouns = {
       Noun: {
         not: ['Verb', 'Adjective', 'Adverb', 'Value', 'Determiner'],
       },
@@ -25908,7 +25946,7 @@ var app = (function () {
       },
     };
 
-    var verbs$2 = {
+    var verbs$1 = {
       Verb: {
         not: ['Noun', 'Adjective', 'Adverb', 'Value', 'Expression'],
       },
@@ -26117,18 +26155,18 @@ var app = (function () {
       },
     };
 
-    let allTags = Object.assign({}, nouns$1, verbs$2, values, dates$1, misc$1);
+    let allTags = Object.assign({}, nouns, verbs$1, values, dates$1, misc$1);
     // const tagSet = compute(allTags)
     var tags = allTags;
 
-    const plugin$5 = {
-      compute: compute$3,
+    const plugin$2 = {
+      compute: compute$2,
       methods: methods$1,
       model: model$3,
       tags,
       hooks: ['preTagger'],//'root'
     };
-    var preTag = plugin$5;
+    var preTag = plugin$2;
 
     const postPunct = /[,)"';:\-–—.…]/;
 
@@ -26203,7 +26241,7 @@ var app = (function () {
       return str
     };
 
-    const api$c = function (View) {
+    const api$1 = function (View) {
       /** */
       class Contractions extends View {
         constructor(document, pointer, groups) {
@@ -26241,7 +26279,7 @@ var app = (function () {
       View.prototype.contract = contract$1;
     };
 
-    var api$d = api$c;
+    var api$2 = api$1;
 
     var contractions$3 = [
       // simple mappings
@@ -26388,7 +26426,7 @@ var app = (function () {
     };
     var apostropheS$1 = apostropheS;
 
-    const lastNoun$1 = function (terms, i) {
+    const lastNoun = function (terms, i) {
       for (let n = i - 1; n >= 0; n -= 1) {
         if (
           terms[n].tags.has('Noun') ||
@@ -26411,7 +26449,7 @@ var app = (function () {
     const apostropheT = function (terms, i) {
       if (terms[i].normal === "ain't" || terms[i].normal === 'aint') {
         // we aint -> are not,   she aint -> is not
-        let noun = lastNoun$1(terms, i);
+        let noun = lastNoun(terms, i);
         if (noun) {
           // plural/singular pronouns
           if (noun.normal === 'we' || noun.normal === 'they') {
@@ -26657,15 +26695,15 @@ var app = (function () {
     };
     var contractions$2 = contractions$1;
 
-    var compute$2 = { contractions: contractions$2 };
+    var compute$1 = { contractions: contractions$2 };
 
-    const plugin$4 = {
+    const plugin$1 = {
       model: model$1,
-      compute: compute$2,
-      api: api$d,
+      compute: compute$1,
+      api: api$2,
       hooks: ['contractions'],
     };
-    var contractions = plugin$4;
+    var contractions = plugin$1;
 
     var adj = [
       // all fell apart
@@ -27264,7 +27302,7 @@ var app = (function () {
     //   {match:'', tag:'',reason:''},
     //   {match:'', tag:'',reason:''},
 
-    var fractions$1 = [
+    var fractions = [
       // half a penny
       { match: '[(half|quarter)] of? (a|an)', group: 0, tag: 'Fraction', reason: 'millionth' },
       // nearly half
@@ -27295,7 +27333,7 @@ var app = (function () {
 
     // {match:'', tag:'',reason:''},
 
-    var numbers$2 = [
+    var numbers = [
       // ==== Ambiguous numbers ====
       // 'second'
       { match: `#Cardinal [second]`, tag: 'Unit', reason: 'one-second' },
@@ -27515,7 +27553,7 @@ var app = (function () {
       { match: '[will] #Verb', group: 0, tag: 'Modal', reason: 'will-verb' },
     ];
 
-    var verbs$1 = [
+    var verbs = [
       //sometimes adverbs - 'pretty good','well above'
       {
         match: '#Copula (pretty|dead|full|well|sure) (#Adjective|#Noun)',
@@ -27770,7 +27808,7 @@ var app = (function () {
     ]
     */
 
-    var orgs$1 = [
+    var orgs = [
       // Foo University
       // { match: `#Noun ${orgMap}`, tag: 'Organization', safe: true, reason: 'foo-university' },
       // // University of Toronto
@@ -27805,7 +27843,7 @@ var app = (function () {
       { match: '#Noun+ (public|private) school', tag: 'School', reason: 'noun-public-school' },
     ];
 
-    var places$1 = [
+    var places = [
       // ==== Region ====
       //West Norforlk
       {
@@ -27920,18 +27958,18 @@ var app = (function () {
       gerundNouns,
       presNouns,
       money,
-      fractions$1,
-      numbers$2,
+      fractions,
+      numbers,
       person,
       personName,
-      verbs$1,
+      verbs,
       adjVerb,
       auxiliary,
       phrasal,
       imperative,
       misc,
-      orgs$1,
-      places$1,
+      orgs,
+      places,
       conjunctions
     );
     var model = {
@@ -27961,9 +27999,9 @@ var app = (function () {
       return document
     };
 
-    var compute$1 = { postTagger };
+    var compute = { postTagger };
 
-    const parse$6 = function (matches, methods) {
+    const parse = function (matches, methods) {
       const parseMatch = methods.one.parseMatch;
       matches.forEach(obj => {
         obj.regs = parseMatch(obj.match);
@@ -27975,7 +28013,7 @@ var app = (function () {
       return matches
     };
 
-    var parse$7 = parse$6;
+    var parse$1 = parse;
 
     const growFastOr = function (obj, index) {
       let or = obj.regs[index];
@@ -28060,7 +28098,7 @@ var app = (function () {
     // do some indexing on the list of matches
     const compile = function (matches, methods) {
       // turn match-syntax into json
-      matches = parse$7(matches, methods);
+      matches = parse$1(matches, methods);
       // convert (a|b) to ['a', 'b']
       matches = expand$1(matches);
       matches = expand$1(matches); // run this twice
@@ -28140,7 +28178,7 @@ var app = (function () {
     };
     var runMatch$1 = runMatch;
 
-    const matcher$2 = function (document, byGroup, methods) {
+    const matcher = function (document, byGroup, methods) {
       const one = methods.one;
       // find suitable matches to attempt, on each sentence
       let docCache = one.cacheDoc(document);
@@ -28153,7 +28191,7 @@ var app = (function () {
       // console.dir(results, { depth: 5 })
       return results
     };
-    var bulkMatch = matcher$2;
+    var bulkMatch = matcher;
 
     const logger = function (todo, document) {
       let [n, start, end] = todo.pointer;
@@ -28248,9 +28286,9 @@ var app = (function () {
       },
     };
 
-    const round$1 = n => Math.round(n * 100) / 100;
+    const round = n => Math.round(n * 100) / 100;
 
-    function api$b (View) {
+    function api (View) {
       View.prototype.confidence = function () {
         let sum = 0;
         let count = 0;
@@ -28263,3882 +28301,251 @@ var app = (function () {
         if (count === 0) {
           return 1
         }
-        return round$1(sum / count)
+        return round(sum / count)
       };
     }
 
-    const plugin$3 = {
-      api: api$b,
-      compute: compute$1,
+    const plugin = {
+      api,
+      compute,
       methods,
       model,
       hooks: ['postTagger'],
     };
-    var postTag = plugin$3;
+    var postTag = plugin;
 
     nlp$1.plugin(preTag); //~85kb
     nlp$1.plugin(contractions); //~6kb
     nlp$1.plugin(postTag); //~33kb
 
-    // return the nth elem of a doc
-    const getNth$a = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    /** return anything tagged as a phone number */
-    const phoneNumbers = function (n) {
-      let m = this.splitAfter('@hasComma');
-      m = m.match('#PhoneNumber+');
-      m = getNth$a(m, n);
-      return m
-    };
-
-    // setup easy helper methods
-    const selections = [
-      ['hyphenated', '@hasHyphen .'],
-      ['adjectives', '#Adjective'],
-      ['hashTags', '#HashTag'],
-      ['emails', '#Email'],
-      ['emoji', '#Emoji'],
-      ['emoticons', '#Emoticon'],
-      ['atMentions', '#AtMention'],
-      ['urls', '#Url'],
-      ['adverbs', '#Adverb'],
-      ['pronouns', '#Pronoun'],
-      ['conjunctions', '#Conjunction'],
-      ['prepositions', '#Preposition'],
-      ['abbreviations', '#Abbreviation'],
-      ['acronyms', '#Acronym'],
-      ['possessives', '#Possessive'],
-    ];
-
-    // aliases
-    let aliases = [
-      ['emojis', 'emoji'],
-      ['atmentions', 'atMentions'],
-      ['words', 'terms'],
-      ['things', 'entities'],
-      ['topics', 'entities'],
-    ];
-
-    const addMethods = function (View) {
-      // add a list of new helper methods
-      selections.forEach(a => {
-        View.prototype[a[0]] = function (n) {
-          let m = this.match(a[1]);
-          return typeof n === 'number' ? m.get(n) : m
-        };
-      });
-      View.prototype.phoneNumbers = phoneNumbers;
-      // add aliases
-      aliases.forEach(a => {
-        View.prototype[a[0]] = View.prototype[a[1]];
-      });
-    };
-
-    var selections$1 = addMethods;
-
-    const clauses = function (n) {
-      // an awkward way to disambiguate a comma use
-      let commas = this.if('@hasComma')
-        .ifNo('@hasComma @hasComma') //fun, cool...
-        .ifNo('@hasComma . .? (and|or) .') //cool, and fun
-        .ifNo('(#City && @hasComma) #Country') //'toronto, canada'
-        .ifNo('(#WeekDay && @hasComma) #Date') //'tuesday, march 2nd'
-        .ifNo('(#Date && @hasComma) #Year') //'july 6, 1992'
-        .ifNo('@hasComma (too|also)$') //at end of sentence
-        .match('@hasComma');
-      let found = this.splitAfter(commas);
-
-      // let quotes = found.quotations()
-      // found = found.splitOn(quotes)
-
-      // let parentheses = found.parentheses()
-      // found = found.splitOn(parentheses)
-
-      // it is cool and it is ..
-      let conjunctions = found.if('#Copula #Adjective #Conjunction (#Pronoun|#Determiner) #Verb').match('#Conjunction');
-      found = found.splitBefore(conjunctions);
-
-      // if it is this then that
-      let condition = found.if('if .{2,9} then .').match('then');
-      found = found.splitBefore(condition);
-
-      // misc clause partitions
-      found = found.splitBefore('as well as .');
-      found = found.splitBefore('such as .');
-      found = found.splitBefore('in addition to .');
-
-      // semicolons, dashes
-      found = found.splitAfter('@hasSemicolon');
-      found = found.splitAfter('@hasDash');
-
-      // passive voice verb - '.. which was robbed is empty'
-      // let passive = found.match('#Noun (which|that) (was|is) #Adverb? #PastTense #Adverb?')
-      // if (passive.found) {
-      //   found = found.splitAfter(passive)
-      // }
-      // //which the boy robbed
-      // passive = found.match('#Noun (which|that) the? #Noun+ #Adverb? #PastTense #Adverb?')
-      // if (passive.found) {
-      //   found = found.splitAfter(passive)
-      // }
-      // does there appear to have relative/subordinate clause still?
-      let tooLong = found.filter(d => d.wordCount() > 5 && d.match('#Verb+').length >= 2);
-      if (tooLong.found) {
-        let m = tooLong.splitAfter('#Noun .* #Verb .* #Noun+');
-        found = found.splitOn(m.eq(0));
-      }
-
-      if (typeof n === 'number') {
-        found = found.get(n);
-      }
-      return found
-    };
-
-    var clauses$1 = clauses;
-
-    const pairs = {
-      '\u0022': '\u0022', // 'StraightDoubleQuotes'
-      '\uFF02': '\uFF02', // 'StraightDoubleQuotesWide'
-      '\u0027': '\u0027', // 'StraightSingleQuotes'
-      '\u201C': '\u201D', // 'CommaDoubleQuotes'
-      '\u2018': '\u2019', // 'CommaSingleQuotes'
-      '\u201F': '\u201D', // 'CurlyDoubleQuotesReversed'
-      '\u201B': '\u2019', // 'CurlySingleQuotesReversed'
-      '\u201E': '\u201D', // 'LowCurlyDoubleQuotes'
-      '\u2E42': '\u201D', // 'LowCurlyDoubleQuotesReversed'
-      '\u201A': '\u2019', // 'LowCurlySingleQuotes'
-      '\u00AB': '\u00BB', // 'AngleDoubleQuotes'
-      '\u2039': '\u203A', // 'AngleSingleQuotes'
-      // Prime 'non quotation'
-      '\u2035': '\u2032', // 'PrimeSingleQuotes'
-      '\u2036': '\u2033', // 'PrimeDoubleQuotes'
-      '\u2037': '\u2034', // 'PrimeTripleQuotes'
-      // Prime 'quotation' variation
-      '\u301D': '\u301E', // 'PrimeDoubleQuotes'
-      '\u0060': '\u00B4', // 'PrimeSingleQuotes'
-      '\u301F': '\u301E', // 'LowPrimeDoubleQuotesReversed'
-    };
-
-    const hasOpen$1 = RegExp('(' + Object.keys(pairs).join('|') + ')');
-
-    const findEnd$1 = function (terms, i) {
-      const have = terms[i].pre.match(hasOpen$1)[0] || '';
-      if (!have || !pairs[have]) {
-        return null
-      }
-      const want = pairs[have];
-      for (; i < terms.length; i += 1) {
-        if (terms[i].post && terms[i].post.match(want)) {
-          return i
-        }
-      }
-      return null
-    };
-
-    const find$b = function () {
-      let ptrs = [];
-      this.docs.forEach(terms => {
-        for (let i = 0; i < terms.length; i += 1) {
-          let term = terms[i];
-          if (term.pre && hasOpen$1.test(term.pre)) {
-            let end = findEnd$1(terms, i);
-            if (end !== null) {
-              let [n, start] = terms[i].index;
-              ptrs.push([n, start, end + 1]);
-              i = end;
-            }
-          }
-        }
-      });
-      return this.update(ptrs)
-    };
-
-    var quotations = find$b;
-
-    const hasOpen = /\(/;
-    const hasClosed = /\)/;
-
-    const findEnd = function (terms, i) {
-      for (; i < terms.length; i += 1) {
-        if (terms[i].post && hasClosed.test(terms[i].post)) {
-          return i
-        }
-      }
-      return null
-    };
-
-    const find$a = function () {
-      let ptrs = [];
-      this.docs.forEach(terms => {
-        for (let i = 0; i < terms.length; i += 1) {
-          let term = terms[i];
-          if (term.pre && hasOpen.test(term.pre)) {
-            let end = findEnd(terms, i);
-            if (end !== null) {
-              let [n, start] = terms[i].index;
-              ptrs.push([n, start, end + 1]);
-              i = end;
-            }
-          }
-        }
-      });
-      return this.update(ptrs)
-    };
-
-    var parentheses = find$a;
-
-    const chunks = function (view) {
-      let carry = [];
-      let roll = null;
-      let same = null;
-      view.docs.forEach(terms => {
-        terms.forEach(term => {
-          // start a new chunk
-          if (term.chunk !== same) {
-            if (roll) {
-              roll[2] = term.index[1];
-              carry.push(roll);
-            }
-            same = term.chunk;
-            roll = [term.index[0], term.index[1]];
-          }
-        });
-      });
-      if (roll) {
-        carry.push(roll);
-      }
-      return view.update(carry)
-    };
-    var getChunks = chunks;
-
-    const chunker$1 = function (View) {
-      View.prototype.chunks = function () {
-        return getChunks(this)
-      };
-
-      selections$1(View);
-      View.prototype.clauses = clauses$1;
-      View.prototype.quotations = quotations;
-      View.prototype.parentheses = parentheses;
-    };
-    var api$a = chunker$1;
-
-    // const byWord = {
-    //   that: 'Conjunction',
-    // }
-
-    // simply chunk Nouns as <Noun>
-    const easyMode = function (document) {
-      for (let n = 0; n < document.length; n += 1) {
-        for (let t = 0; t < document[n].length; t += 1) {
-          let term = document[n][t];
-          if (term.tags.has('Verb')) {
-            term.chunk = 'Verb';
-            continue
-          }
-          if (term.tags.has('Noun')) {
-            term.chunk = 'Noun';
-            continue
-          }
-          // 100 cats
-          if (term.tags.has('Value')) {
-            term.chunk = 'Noun';
-            continue
-          }
-          //
-          if (term.tags.has('QuestionWord')) {
-            term.chunk = 'Conjunction';
-            continue
-          }
-          // if (byWord.hasOwnProperty(term.normal)) {
-          //   term.chunk = byWord[term.normal]
-          // }
-        }
-      }
-    };
-    var easyMode$1 = easyMode;
-
-    const rules = [
-      // === Conjunction ===
-      // that the houses
-      { match: '[that] #Determiner #Noun', group: 0, chunk: 'Pivot' },
-      // estimated that
-      { match: '#PastTense [that]', group: 0, chunk: 'Pivot' },
-
-      // === Adjective ===
-      // was really nice
-      { match: '#Copula [#Adverb+? #Adjective]', group: 0, chunk: 'Adjective' },
-      // was nice
-      { match: '#Copula [#Adjective]', group: 0, chunk: 'Adjective' },
-      // nice and cool
-      { match: '#Adjective and #Adjective', chunk: 'Adjective' },
-      // really nice
-      { match: '#Adverb+ #Adjective', chunk: 'Adjective' },
-
-      // === Verb ===
-      // quickly run
-      { match: '#Adverb+ {Verb}', chunk: 'Verb' },
-      // run quickly
-      { match: '{Verb} #Adverb+', chunk: 'Verb' },
-      // sitting near
-      { match: '#Gerund #Adjective', chunk: 'Verb' },
-      // going to walk
-      { match: '#Gerund to #Verb', chunk: 'Verb' },
-      // is no
-      { match: '#Copula no', chunk: 'Verb' },
-      // had not
-      { match: '#Verb #Negative', chunk: 'Verb' },
-      // not seen
-      { match: '#Negative #Verb', chunk: 'Verb' },
-      // not really
-      { match: '#Negative #Adverb ', chunk: 'Verb' },
-      // really not
-      { match: '#Adverb #Negative', chunk: 'Verb' },
-      // want to see
-      { match: '(want|wants|wanted) to #Infinitive', chunk: 'Verb' },
-
-      // === Noun ===
-      // the brown fox
-      { match: '#Determiner #Adjective+ #Noun', chunk: 'Noun' },
-      // the fox
-      { match: '#Determiner <Noun>', chunk: 'Noun' },
-      // brown fox
-      { match: '#Adjective+ <Noun>', chunk: 'Noun' },
-      // --- of ---
-      // son of a gun
-      { match: '<Noun> of #Determiner? #Noun', chunk: 'Noun' },
-      // --- in ---
-      { match: '#Noun in #Determiner? #Noun', chunk: 'Noun' },
-      // indoor and outdoor seating
-      { match: '#Noun and #Determiner? #Noun', chunk: 'Noun' },
-    ];
-
-    const setChunks = function (todo, document, methods) {
-      const { getDoc } = methods.one;
-      let terms = getDoc([todo.pointer], document)[0];
-      const env = typeof process === 'undefined' ? self.env || {} : process.env;
-      terms.forEach(term => {
-        if (term.chunk) {
-          return //don't overwrite
-        }
-        if (env.DEBUG_CHUNKS) {
-          let str = (term.normal + "'").padEnd(8);
-          console.log(`  | '${str}  →  \x1b[34m${todo.chunk.padEnd(6)}\x1b[0m - \x1b[2m ${todo.match} \x1b[0m`); // eslint-disable-line
-        }
-        term.chunk = todo.chunk;
-      });
-    };
-
-    const matcher = function (document, world) {
-      const { methods } = world;
-      let byGroup = methods.two.compile(rules, methods);
-      let found = methods.two.bulkMatch(document, byGroup, methods);
-      found.forEach(todo => {
-        setChunks(todo, document, methods);
-      });
-    };
-    var matcher$1 = matcher;
-
-    const setChunk = function (term, chunk) {
-      const env = typeof process === 'undefined' ? self.env || {} : process.env;
-      if (env.DEBUG_CHUNKS) {
-        let str = (term.normal + "'").padEnd(8);
-        console.log(`  | '${str}  →  \x1b[34m${chunk.padEnd(12)}\x1b[0m \x1b[2m -fallback- \x1b[0m`); // eslint-disable-line
-      }
-      term.chunk = chunk;
-    };
-
-    // ensure everything has a chunk
-    const fallback = function (document) {
-      for (let n = 0; n < document.length; n += 1) {
-        for (let t = 0; t < document[n].length; t += 1) {
-          let term = document[n][t];
-          if (term.chunk === undefined) {
-            // conjunctions stand alone
-            if (term.tags.has('Conjunction')) {
-              setChunk(term, 'Pivot');
-            } else if (term.tags.has('Preposition')) {
-              setChunk(term, 'Pivot');
-            } else if (term.tags.has('Adverb')) {
-              setChunk(term, 'Verb');
-            }
-            // just take the chunk on the right?
-            // else if (document[n][t + 1] && document[n][t + 1].chunk) {
-            //   setChunk(term, document[n][t + 1].chunk)
-            // }
-            // // or take the chunk on the left
-            // else if (document[n][t - 1] && document[n][t - 1].chunk) {
-            //   setChunk(term, document[n][t - 1].chunk)
-            else {
-              //  ¯\_(ツ)_/¯
-              term.chunk = 'Noun';
-            }
-          }
-        }
-      }
-    };
-    var fallback$1 = fallback;
-
-    const fixUp = function (docs) {
-      docs.forEach(terms => {
-        // ensure an adjective chunk is preceded by a copula
-        for (let i = 0; i < terms.length; i += 1) {
-          let term = terms[i];
-          if (term.tags.has('#Copula')) {
-            return
-          }
-          if (term.chunk === 'Adjective') {
-            term.chunk = 'Noun';
-            // console.log(`✗ ${term.normal}`)
-          }
-        }
-      });
-    };
-    var fixUp$1 = fixUp;
-
-    /* Chunks:
-        Noun
-        .Verb
-        Adjective
-        Preposition
-    */
-
-    const findChunks = function (view) {
-      const { document, world } = view;
-      easyMode$1(document);
-      matcher$1(document, world);
-      matcher$1(document, world); //run it 2nd time
-      fallback$1(document, world);
-      fixUp$1(document, world);
-    };
-    var compute = { chunks: findChunks };
-
-    var chunker = {
-      compute: compute,
-      api: api$a,
-      hooks: ['chunks'],
-    };
-
-    const findNouns = function (doc) {
-      let m = doc.match('<Noun>');
-      let commas = m.match('@hasComma');
-      // allow toronto, ontario
-      commas = commas.not('#Place');
-      if (commas.found) {
-        m = m.splitAfter(commas);
-      }
-      // yo there
-      m = m.splitOn('#Expression');
-      // these are individual nouns
-      m = m.splitOn('(he|she|we|you|they)');
-      // a client i saw
-      m = m.splitOn('(#Noun|#Adjective) [#Pronoun]', 0);
-      // give him the best
-      m = m.splitOn('[#Pronoun] (#Determiner|#Value)', 0);
-      // the noise the slide makes
-      m = m.splitBefore('#Noun [(the|a|an)] #Adjective? #Noun', 0);
-      // here spencer slept
-      m = m.splitOn('[(here|there)] #Noun', 0);
-      // put it there
-      m = m.splitOn('[#Noun] (here|there)', 0);
-      //ensure there's actually a noun
-      m = m.if('#Noun');
-      return m
-    };
-    var find$9 = findNouns;
-
-    // https://www.trentu.ca/history/subordinate-clause-and-complex-sentence
-    const list$1 = [
-      'after',
-      'although',
-      'as if',
-      'as long as',
-      'as',
-      'because',
-      'before',
-      'even if',
-      'even though',
-      'ever since',
-      'if',
-      'in order that',
-      'provided that',
-      'since',
-      'so that',
-      'than',
-      'that',
-      'though',
-      'unless',
-      'until',
-      'what',
-      'whatever',
-      'when',
-      'whenever',
-      'where',
-      'whereas',
-      'wherever',
-      'whether',
-      'which',
-      'whichever',
-      'who',
-      'whoever',
-      'whom',
-      'whomever',
-      'whose',
-    ];
-
-    const isSubordinate = function (m) {
-      // athletes from toronto, days since december
-      if (m.before('#Preposition$').found) {
-        return true
-      }
-      let leadIn = m.before();
-      if (!leadIn.found) {
-        return false
-      }
-      for (let i = 0; i < list$1.length; i += 1) {
-        if (m.has(list$1[i])) {
-          return true
-        }
-      }
-      return false
-    };
-    var isSubordinate$1 = isSubordinate;
-
-    const notPlural = '(#Pronoun|#Place|#Value|#Person|#Uncountable|#Month|#WeekDay|#Holiday|#Possessive)';
-
-    const isPlural$2 = function (m, root) {
-      // const { looksPlural } = m.world.methods.two
-      // these can't be plural
-      if (root.has(notPlural) === true) {
-        return false
-      }
-      // two singular nouns are plural noun phrase
-      if (m.has('#Noun and #Noun')) {
-        return true
-      }
-      if (m.has('#Plural')) {
-        return true
-      }
-      if (m.has('#Singular')) {
-        return false
-      }
-      // word-reg fallback
-      let str = root.text('normal');
-      // ends with a brutal s fallback
-      return str.length > 3 && str.endsWith('s') && !str.endsWith('ss')
-    };
-    var isPlural$3 = isPlural$2;
-
-    const getRoot$1 = function (m) {
-      let tmp = m.clone();
-      tmp = tmp.match('#Noun+');
-      tmp = tmp.remove('(#Adjective|#Preposition|#Determiner|#Value)');
-      // team's captain
-      if (tmp.has('#Possessive .? #Noun')) {
-        tmp = tmp.remove('#Possessive');
-      }
-      return tmp.first()
-    };
-
-    const parseNoun = function (m) {
-      let root = getRoot$1(m);
-      return {
-        determiner: m.match('#Determiner').eq(0),
-        adjectives: m.match('#Adjective'),
-        number: m.values(),
-        isPlural: isPlural$3(m, root),
-        isSubordinate: isSubordinate$1(m),
-        root: root,
-      }
-    };
-    var parseNoun$1 = parseNoun;
-
-    const toText$2 = m => m.text();
-    const toArray$1 = m => m.json({ terms: false, normal: true }).map(s => s.normal);
-
-    const getNum = function (m) {
-      let num = null;
-      if (!m.found) {
-        return num
-      }
-      let val = m.values(0);
-      if (val.found) {
-        let obj = val.parse()[0] || {};
-        return obj.num
-      }
-      return num
-    };
-
-    const toJSON$2 = function (m) {
-      let res = parseNoun$1(m);
-      return {
-        root: toText$2(res.root),
-        number: getNum(res.number),
-        determiner: toText$2(res.determiner),
-        adjectives: toArray$1(res.adjectives),
-        isPlural: res.isPlural,
-        isSubordinate: res.isSubordinate,
-      }
-    };
-    var toJSON$3 = toJSON$2;
-
-    const toPlural = function (m, parsed) {
-      // already plural?
-      if (parsed.isPlural === true) {
-        return m
-      }
-      const { methods, model } = m.world;
-      const { nounToPlural } = methods.two.transform;
-      // inflect the root noun
-      let str = parsed.root.text('normal');
-      let plural = nounToPlural(str, model);
-      m.replace(parsed.root, plural).tag('Plural', 'toPlural');
-
-      // should we change the determiner/article?
-      if (parsed.determiner.has('(a|an)')) {
-        // 'a captain' -> 'the captains'
-        m.replace(parsed.determiner, 'the');
-      }
-      return m
-    };
-    var toPlural$1 = toPlural;
-
-    const toSingular = function (m, parsed) {
-      // already singular?
-      if (parsed.isPlural === false) {
-        return m
-      }
-      const { methods, model } = m.world;
-      const { nounToSingular } = methods.two.transform;
-      // inflect the root noun
-      let str = parsed.root.text('normal');
-      let single = nounToSingular(str, model);
-      m.replace(parsed.root, single).tag('Singular', 'toPlural');
-
-      // should we change the determiner/article?
-
-      return m
-    };
-    var toSingular$1 = toSingular;
-
-    // return the nth elem of a doc
-    const getNth$9 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const api$8 = function (View) {
-      class Nouns extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Nouns';
-        }
-
-        parse(n) {
-          return getNth$9(this, n).map(parseNoun$1)
-        }
-
-        json(opts = {}) {
-          return this.map(m => {
-            let json = m.toView().json(opts)[0] || {};
-            if (opts && opts.noun !== true) {
-              json.noun = toJSON$3(m);
-            }
-            return json
-          }, [])
-        }
-
-        isPlural(n) {
-          let arr = this.filter(m => parseNoun$1(m).isPlural);
-          return getNth$9(arr, n)
-        }
-
-        adjectives(n) {
-          let list = this.update([]);
-          this.forEach(m => {
-            let adj = parseNoun$1(m).adjectives;
-            if (adj.found) {
-              list = list.concat(adj);
-            }
-          });
-          return getNth$9(list, n)
-        }
-
-        toPlural(n) {
-          return getNth$9(this, n).map(m => {
-            return toPlural$1(m, parseNoun$1(m))
-          })
-          // return new Nouns(all.document, all.pointer)
-        }
-
-        toSingular(n) {
-          return getNth$9(this, n).map(m => {
-            let res = parseNoun$1(m);
-            return toSingular$1(m, res)
-          })
-        }
-        // create a new View, from this one
-        update(pointer) {
-          let m = new Nouns(this.document, pointer);
-          m._cache = this._cache; // share this full thing
-          return m
-        }
-      }
-      View.prototype.nouns = function (n) {
-        let m = find$9(this);
-        m = getNth$9(m, n);
-        return new Nouns(this.document, m.pointer)
-      };
-    };
-    var api$9 = api$8;
-
-    var nouns = {
-      api: api$9,
-    };
-
-    const findFractions = function (doc, n) {
-      // five eighths
-      let m = doc.match('#Fraction+');
-      // remove 'two and five eights'
-      m = m.filter(r => {
-        return !r.lookBehind('#Value and$').found
-      });
-      if (typeof n === 'number') {
-        m = m.eq(n);
-      }
-      return m
-    };
-    var find$8 = findFractions;
-
-    //support global multipliers, like 'half-million' by doing 'million' then multiplying by 0.5
-    const findModifiers = str => {
-      const mults = [
-        {
-          reg: /^(minus|negative)[\s-]/i,
-          mult: -1,
-        },
-        {
-          reg: /^(a\s)?half[\s-](of\s)?/i,
-          mult: 0.5,
-        },
-        //  {
-        //   reg: /^(a\s)?quarter[\s\-]/i,
-        //   mult: 0.25
-        // }
-      ];
-      for (let i = 0; i < mults.length; i++) {
-        if (mults[i].reg.test(str) === true) {
-          return {
-            amount: mults[i].mult,
-            str: str.replace(mults[i].reg, ''),
-          }
-        }
-      }
-      return {
-        amount: 1,
-        str: str,
-      }
-    };
-
-    var findModifiers$1 = findModifiers;
-
-    var words = {
-      ones: {
-        zeroth: 0,
-        first: 1,
-        second: 2,
-        third: 3,
-        fourth: 4,
-        fifth: 5,
-        sixth: 6,
-        seventh: 7,
-        eighth: 8,
-        ninth: 9,
-        zero: 0,
-        one: 1,
-        two: 2,
-        three: 3,
-        four: 4,
-        five: 5,
-        six: 6,
-        seven: 7,
-        eight: 8,
-        nine: 9,
-      },
-      teens: {
-        tenth: 10,
-        eleventh: 11,
-        twelfth: 12,
-        thirteenth: 13,
-        fourteenth: 14,
-        fifteenth: 15,
-        sixteenth: 16,
-        seventeenth: 17,
-        eighteenth: 18,
-        nineteenth: 19,
-        ten: 10,
-        eleven: 11,
-        twelve: 12,
-        thirteen: 13,
-        fourteen: 14,
-        fifteen: 15,
-        sixteen: 16,
-        seventeen: 17,
-        eighteen: 18,
-        nineteen: 19,
-      },
-      tens: {
-        twentieth: 20,
-        thirtieth: 30,
-        fortieth: 40,
-        fourtieth: 40,
-        fiftieth: 50,
-        sixtieth: 60,
-        seventieth: 70,
-        eightieth: 80,
-        ninetieth: 90,
-        twenty: 20,
-        thirty: 30,
-        forty: 40,
-        fourty: 40,
-        fifty: 50,
-        sixty: 60,
-        seventy: 70,
-        eighty: 80,
-        ninety: 90,
-      },
-      multiples: {
-        hundredth: 100,
-        thousandth: 1000,
-        millionth: 1e6,
-        billionth: 1e9,
-        trillionth: 1e12,
-        quadrillionth: 1e15,
-        quintillionth: 1e18,
-        sextillionth: 1e21,
-        septillionth: 1e24,
-        hundred: 100,
-        thousand: 1000,
-        million: 1e6,
-        billion: 1e9,
-        trillion: 1e12,
-        quadrillion: 1e15,
-        quintillion: 1e18,
-        sextillion: 1e21,
-        septillion: 1e24,
-        grand: 1000,
-      },
-    };
-
-    //prevent things like 'fifteen ten', and 'five sixty'
-    const isValid = (w, has) => {
-      if (words.ones.hasOwnProperty(w)) {
-        if (has.ones || has.teens) {
-          return false
-        }
-      } else if (words.teens.hasOwnProperty(w)) {
-        if (has.ones || has.teens || has.tens) {
-          return false
-        }
-      } else if (words.tens.hasOwnProperty(w)) {
-        if (has.ones || has.teens || has.tens) {
-          return false
-        }
-      }
-      return true
-    };
-    var isValid$1 = isValid;
-
-    //concatenate into a string with leading '0.'
-    const parseDecimals = function (arr) {
-      let str = '0.';
-      for (let i = 0; i < arr.length; i++) {
-        let w = arr[i];
-        if (words.ones.hasOwnProperty(w) === true) {
-          str += words.ones[w];
-        } else if (words.teens.hasOwnProperty(w) === true) {
-          str += words.teens[w];
-        } else if (words.tens.hasOwnProperty(w) === true) {
-          str += words.tens[w];
-        } else if (/^[0-9]$/.test(w) === true) {
-          str += w;
-        } else {
-          return 0
-        }
-      }
-      return parseFloat(str)
-    };
-
-    var parseDecimals$1 = parseDecimals;
-
-    //parse a string like "4,200.1" into Number 4200.1
-    const parseNumeric$1 = str => {
-      //remove ordinal - 'th/rd'
-      str = str.replace(/1st$/, '1');
-      str = str.replace(/2nd$/, '2');
-      str = str.replace(/3rd$/, '3');
-      str = str.replace(/([4567890])r?th$/, '$1');
-      //remove prefixes
-      str = str.replace(/^[$€¥£¢]/, '');
-      //remove suffixes
-      str = str.replace(/[%$€¥£¢]$/, '');
-      //remove commas
-      str = str.replace(/,/g, '');
-      //split '5kg' from '5'
-      str = str.replace(/([0-9])([a-z\u00C0-\u00FF]{1,2})$/, '$1');
-      return str
-    };
-
-    var parseNumeric$2 = parseNumeric$1;
-
-    const improperFraction = /^([0-9,. ]+)\/([0-9,. ]+)$/;
-
-    //some numbers we know
-    const casualForms = {
-      'a few': 3,
-      'a couple': 2,
-      'a dozen': 12,
-      'two dozen': 24,
-      zero: 0,
-    };
-
-    // a 'section' is something like 'fifty-nine thousand'
-    // turn a section into something we can add to - like 59000
-    const section_sum = obj => {
-      return Object.keys(obj).reduce((sum, k) => {
-        sum += obj[k];
-        return sum
-      }, 0)
-    };
-
-    //turn a string into a number
-    const parse$5 = function (str) {
-      //convert some known-numbers
-      if (casualForms.hasOwnProperty(str) === true) {
-        return casualForms[str]
-      }
-      //'a/an' is 1
-      if (str === 'a' || str === 'an') {
-        return 1
-      }
-      const modifier = findModifiers$1(str);
-      str = modifier.str;
-      let last_mult = null;
-      let has = {};
-      let sum = 0;
-      let isNegative = false;
-      const terms = str.split(/[ -]/);
-      // const isFraction = findFraction(terms)
-      for (let i = 0; i < terms.length; i++) {
-        let w = terms[i];
-        w = parseNumeric$2(w);
-
-        if (!w || w === 'and') {
-          continue
-        }
-        if (w === '-' || w === 'negative') {
-          isNegative = true;
-          continue
-        }
-        if (w.charAt(0) === '-') {
-          isNegative = true;
-          w = w.substr(1);
-        }
-
-        //decimal mode
-        if (w === 'point') {
-          sum += section_sum(has);
-          sum += parseDecimals$1(terms.slice(i + 1, terms.length));
-          sum *= modifier.amount;
-          return sum
-        }
-
-        //improper fraction
-        const fm = w.match(improperFraction);
-        if (fm) {
-          const num = parseFloat(fm[1].replace(/[, ]/g, ''));
-          const denom = parseFloat(fm[2].replace(/[, ]/g, ''));
-          if (denom) {
-            sum += num / denom || 0;
-          }
-          continue
-        }
-        // try to support 'two fifty'
-        if (words.tens.hasOwnProperty(w)) {
-          if (has.ones && Object.keys(has).length === 1) {
-            sum = has.ones * 100;
-            has = {};
-          }
-        }
-
-        //prevent mismatched units, like 'seven eleven' if not a fraction
-        if (isValid$1(w, has) === false) {
-          return null
-        }
-
-        //buildOut section, collect 'has' values
-        if (/^[0-9.]+$/.test(w)) {
-          has.ones = parseFloat(w); //not technically right
-        } else if (words.ones.hasOwnProperty(w) === true) {
-          has.ones = words.ones[w];
-        } else if (words.teens.hasOwnProperty(w) === true) {
-          has.teens = words.teens[w];
-        } else if (words.tens.hasOwnProperty(w) === true) {
-          has.tens = words.tens[w];
-        } else if (words.multiples.hasOwnProperty(w) === true) {
-          let mult = words.multiples[w];
-
-          //something has gone wrong : 'two hundred five hundred'
-          //possibly because it's a fraction
-          if (mult === last_mult) {
-            return null
-          }
-          //support 'hundred thousand'
-          //this one is tricky..
-          if (mult === 100 && terms[i + 1] !== undefined) {
-            const w2 = terms[i + 1];
-            if (words.multiples[w2]) {
-              mult *= words.multiples[w2]; //hundredThousand/hundredMillion
-              i += 1;
-            }
-          }
-          //natural order of things
-          //five thousand, one hundred..
-          if (last_mult === null || mult < last_mult) {
-            sum += (section_sum(has) || 1) * mult;
-            last_mult = mult;
-            has = {};
-          } else {
-            //maybe hundred .. thousand
-            sum += section_sum(has);
-            last_mult = mult;
-            sum = (sum || 1) * mult;
-            has = {};
-          }
-        }
-      }
-      //dump the remaining has values
-      sum += section_sum(has);
-      //post-process add modifier
-      sum *= modifier.amount;
-      sum *= isNegative ? -1 : 1;
-      //dont return 0, if it went straight-through
-      if (sum === 0 && Object.keys(has).length === 0) {
-        return null
-      }
-      return sum
-    };
-
-    var parseText = parse$5;
-
-    const endS = /s$/;
-
-    // just using .toNumber() again may risk an infinite-loop
-    const parseNumber$2 = function (m) {
-      let str = m.text('reduced');
-      return parseText(str)
-    };
-
-    let mapping = {
-      half: 2,
-      halve: 2,
-      quarter: 4,
-    };
-
-    const slashForm = function (m) {
-      let str = m.text('reduced');
-      let found = str.match(/^([-+]?[0-9]+)\/([-+]?[0-9]+)(st|nd|rd|th)?s?$/);
-      if (found && found[1] && found[0]) {
-        return {
-          numerator: Number(found[1]),
-          denominator: Number(found[2]),
-        }
-      }
-      return null
-    };
-
-    // parse '4 out of 4'
-    const nOutOfN = function (m) {
-      let found = m.match('[<num>#Value+] out of every? [<den>#Value+]');
-      if (found.found !== true) {
-        return null
-      }
-      let { num, den } = found.groups();
-      if (!num || !den) {
-        return null
-      }
-      num = parseNumber$2(num);
-      den = parseNumber$2(den);
-      if (!num || !den) {
-        return null
-      }
-      if (typeof num === 'number' && typeof den === 'number') {
-        return {
-          numerator: num,
-          denominator: den,
-        }
-      }
-      return null
-    };
-
-    // parse 'five thirds'
-    const nOrinalth = function (m) {
-      let found = m.match('[<num>(#Cardinal|a)+] [<den>#Fraction+]');
-      if (found.found !== true) {
-        return null
-      }
-      let { num, den } = found.groups();
-      // -- parse numerator---
-      // quick-support for 'a third'
-      if (num.has('a')) {
-        num = 1;
-      } else {
-        // abuse the number-parser for 'thirty three'
-        // let tmp = num.clone().unTag('Fraction')
-        // num = tmp.numbers().get(0)
-        num = parseNumber$2(num);
-      }
-      // -- parse denominator --
-      // turn 'thirds' into third
-      let str = den.text('reduced');
-      if (endS.test(str)) {
-        str = str.replace(endS, '');
-        den = den.replaceWith(str);
-      }
-      // support 'one half' as '1/2'
-      if (mapping.hasOwnProperty(str)) {
-        den = mapping[str];
-      } else {
-        // dem = dem.numbers().get(0)
-        den = parseNumber$2(den);
-      }
-      if (typeof num === 'number' && typeof den === 'number') {
-        return {
-          numerator: num,
-          denominator: den,
-        }
-      }
-      return null
-    };
-
-    // implied 1 in '100th of a', 'fifth of a'
-    const oneNth = function (m) {
-      let found = m.match('^#Ordinal$');
-      if (found.found !== true) {
-        return null
-      }
-      // ensure it's '100th of a '
-      if (m.lookAhead('^of .')) {
-        // let num = found.numbers().get(0)
-        let num = parseNumber$2(found);
-        return {
-          numerator: 1,
-          denominator: num,
-        }
-      }
-      return null
-    };
-
-    // 'half'
-    const named = function (m) {
-      let str = m.text('reduced');
-      if (mapping.hasOwnProperty(str)) {
-        return { numerator: 1, denominator: mapping[str] }
-      }
-      return null
-    };
-
-    const round = n => {
-      let rounded = Math.round(n * 1000) / 1000;
-      // don't round 1 millionth down into 0
-      if (rounded === 0 && n !== 0) {
-        return n
-      }
-      return rounded
-    };
-
-    const parseFraction = function (m) {
-      m = m.clone();
-      let res = named(m) || slashForm(m) || nOutOfN(m) || nOrinalth(m) || oneNth(m) || null;
-      if (res !== null) {
-        // do the math
-        if (res.numerator && res.denominator) {
-          res.decimal = res.numerator / res.denominator;
-          res.decimal = round(res.decimal);
-        }
-      }
-      return res
-    };
-    var parseFraction$1 = parseFraction;
-
-    /**
-     * turn big numbers, like 2.3e+22, into a string with a ton of trailing 0's
-     * */
-    const numToString = function (n) {
-      if (n < 1000000) {
-        return String(n)
-      }
-      let str;
-      if (typeof n === 'number') {
-        str = n.toFixed(0);
-      } else {
-        str = n;
-      }
-      if (str.indexOf('e+') === -1) {
-        return str
-      }
-      return str
-        .replace('.', '')
-        .split('e+')
-        .reduce(function (p, b) {
-          return p + Array(b - p.length + 2).join(0)
-        })
-    };
-    var toString = numToString;
-    // console.log(numToString(2.5e+22));
-
-    const tens_mapping = [
-      ['ninety', 90],
-      ['eighty', 80],
-      ['seventy', 70],
-      ['sixty', 60],
-      ['fifty', 50],
-      ['forty', 40],
-      ['thirty', 30],
-      ['twenty', 20],
-    ];
-    const ones_mapping = [
-      '',
-      'one',
-      'two',
-      'three',
-      'four',
-      'five',
-      'six',
-      'seven',
-      'eight',
-      'nine',
-      'ten',
-      'eleven',
-      'twelve',
-      'thirteen',
-      'fourteen',
-      'fifteen',
-      'sixteen',
-      'seventeen',
-      'eighteen',
-      'nineteen',
-    ];
-
-    const sequence = [
-      [1e24, 'septillion'],
-      [1e20, 'hundred sextillion'],
-      [1e21, 'sextillion'],
-      [1e20, 'hundred quintillion'],
-      [1e18, 'quintillion'],
-      [1e17, 'hundred quadrillion'],
-      [1e15, 'quadrillion'],
-      [1e14, 'hundred trillion'],
-      [1e12, 'trillion'],
-      [1e11, 'hundred billion'],
-      [1e9, 'billion'],
-      [1e8, 'hundred million'],
-      [1e6, 'million'],
-      [100000, 'hundred thousand'],
-      [1000, 'thousand'],
-      [100, 'hundred'],
-      [1, 'one'],
-    ];
-
-    /**
-     * turns an integer/float into.ber, like 'fifty-five'
-     */
-
-    //turn number into an array of magnitudes, like [[5, million], [2, hundred]]
-    const breakdown_magnitudes = function (num) {
-      let working = num;
-      let have = [];
-      sequence.forEach(a => {
-        if (num >= a[0]) {
-          let howmany = Math.floor(working / a[0]);
-          working -= howmany * a[0];
-          if (howmany) {
-            have.push({
-              unit: a[1],
-              count: howmany,
-            });
-          }
-        }
-      });
-      return have
-    };
-
-    //turn numbers from 100-0 into their text
-    const breakdown_hundred = function (num) {
-      let arr = [];
-      if (num > 100) {
-        return arr //something bad happened..
-      }
-      for (let i = 0; i < tens_mapping.length; i++) {
-        if (num >= tens_mapping[i][1]) {
-          num -= tens_mapping[i][1];
-          arr.push(tens_mapping[i][0]);
-        }
-      }
-      //(hopefully) we should only have 20-0 now
-      if (ones_mapping[num]) {
-        arr.push(ones_mapping[num]);
-      }
-      return arr
-    };
-
-    /** print-out 'point eight nine'*/
-    const handle_decimal = num => {
-      const names = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
-      let arr = [];
-      //parse it out like a string, because js math is such shit
-      let str = toString(num);
-      let decimal = str.match(/\.([0-9]+)/);
-      if (!decimal || !decimal[0]) {
-        return arr
-      }
-      arr.push('point');
-      let decimals = decimal[0].split('');
-      for (let i = 0; i < decimals.length; i++) {
-        arr.push(names[decimals[i]]);
-      }
-      return arr
-    };
-
-    /** turns an integer into a textual number */
-    const toText$1 = function (obj) {
-      let num = obj.num;
-      // handle zero, quickly
-      if (num === 0 || num === '0') {
-        return 'zero' // no?
-      }
-      //big numbers, north of sextillion, aren't gonna work well..
-      //keep them small..
-      if (num > 1e21) {
-        num = toString(num);
-      }
-      let arr = [];
-      //handle negative numbers
-      if (num < 0) {
-        arr.push('minus');
-        num = Math.abs(num);
-      }
-      //break-down into units, counts
-      let units = breakdown_magnitudes(num);
-      //build-up the string from its components
-      for (let i = 0; i < units.length; i++) {
-        let unit_name = units[i].unit;
-        if (unit_name === 'one') {
-          unit_name = '';
-          //put an 'and' in here
-          if (arr.length > 1) {
-            arr.push('and');
-          }
-        }
-        arr = arr.concat(breakdown_hundred(units[i].count));
-        arr.push(unit_name);
-      }
-      //also support decimals - 'point eight'
-      arr = arr.concat(handle_decimal(num));
-      //remove empties
-      arr = arr.filter(s => s);
-      if (arr.length === 0) {
-        arr[0] = '';
-      }
-      return arr.join(' ')
-    };
-
-    var textCardinal = toText$1;
-
-    // console.log(to_text(-1000.8));
-
-    const toCardinal = function (obj) {
-      if (!obj.numerator || !obj.denominator) {
-        return ''
-      }
-      let a = textCardinal(obj.numerator);
-      let b = textCardinal(obj.denominator);
-      return `${a} out of ${b}`
-    };
-    var toCardinal$1 = toCardinal;
-
-    const irregulars = {
-      one: 'first',
-      two: 'second',
-      three: 'third',
-      five: 'fifth',
-      eight: 'eighth',
-      nine: 'ninth',
-      twelve: 'twelfth',
-      twenty: 'twentieth',
-      thirty: 'thirtieth',
-      forty: 'fortieth',
-      fourty: 'fourtieth',
-      fifty: 'fiftieth',
-      sixty: 'sixtieth',
-      seventy: 'seventieth',
-      eighty: 'eightieth',
-      ninety: 'ninetieth',
-    };
-
-    /**
-     * convert a javascript number to 'twentieth' format
-     * */
-    const textOrdinal = obj => {
-      let words = textCardinal(obj).split(' ');
-      //convert the last number to an ordinal
-      let last = words[words.length - 1];
-      if (irregulars.hasOwnProperty(last)) {
-        words[words.length - 1] = irregulars[last];
-      } else {
-        words[words.length - 1] = last.replace(/y$/, 'i') + 'th';
-      }
-      return words.join(' ')
-    };
-
-    var textOrdinal$1 = textOrdinal;
-
-    const toOrdinal = function (obj) {
-      // don't divide by zero!
-      if (!obj.numerator || !obj.denominator) {
-        return ''
-      }
-      // create [two] [fifths]
-      let start = textCardinal(obj.numerator);
-      let end = textOrdinal$1(obj.denominator);
-      // 'one secondth' -> 'one half'
-      if (obj.denominator === 2) {
-        end = 'half';
-      }
-      if (start && end) {
-        if (obj.numerator !== 1) {
-          end += 's';
-        }
-        return `${start} ${end}`
-      }
-      return ''
-    };
-    var toOrdinal$1 = toOrdinal;
-
-    // return the nth elem of a doc
-    const getNth$8 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const plugin$2 = function (View) {
-      /**
-       */
-      class Fractions extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Fractions';
-        }
-        parse(n) {
-          return getNth$8(this, n).map(parseFraction$1)
-        }
-        get(n) {
-          return getNth$8(this, n).map(parseFraction$1)
-        }
-        json(n) {
-          return getNth$8(this, n).map(p => {
-            let json = p.toView().json()[0];
-            let parsed = parseFraction$1(p);
-            json.fraction = parsed;
-            return json
-          }, [])
-        }
-        // become 0.5
-        toDecimal(n) {
-          getNth$8(this, n).forEach(m => {
-            let { decimal } = parseFraction$1(m);
-            m = m.replaceWith(String(decimal), true);
-            m.tag('NumericValue');
-            m.unTag('Fraction');
-          });
-          return this
-        }
-        toFraction(n) {
-          getNth$8(this, n).forEach(m => {
-            let obj = parseFraction$1(m);
-            if (obj && typeof obj.numerator === 'number' && typeof obj.denominator === 'number') {
-              let str = `${obj.numerator}/${obj.denominator}`;
-              this.replace(m, str);
-            }
-          });
-          return this
-        }
-        toOrdinal(n) {
-          getNth$8(this, n).forEach(m => {
-            let obj = parseFraction$1(m);
-            let str = toOrdinal$1(obj);
-            m.replaceWith(str);
-          });
-          return this
-        }
-        toCardinal(n) {
-          getNth$8(this, n).forEach(m => {
-            let obj = parseFraction$1(m);
-            let str = toCardinal$1(obj);
-            m.replaceWith(str);
-          });
-          return this
-        }
-        toPercentage(n) {
-          getNth$8(this, n).forEach(m => {
-            let { decimal } = parseFraction$1(m);
-            let percent = decimal * 100;
-            percent = Math.round(percent * 100) / 100; // round it
-            m.replaceWith(`${percent}%`);
-          });
-          return this
-        }
-      }
-
-      View.prototype.fractions = function (n) {
-        let m = find$8(this);
-        m = getNth$8(m, n);
-        return new Fractions(this.document, m.pointer)
-      };
-    };
-
-    var fractions = plugin$2;
-
-    const ones = 'one|two|three|four|five|six|seven|eight|nine';
-    const tens = 'twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|fourty';
-    const teens = 'eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen';
-
-    // this is a bit of a mess
-    // segment consecutive number-words into sensible chunks
-    const findNumbers = function (doc) {
-      let m = doc.match('#Value+');
-
-      //"50 83"
-      if (m.has('#NumericValue #NumericValue')) {
-        //a comma may mean two numbers
-        if (m.has('#Value @hasComma #Value')) {
-          m.splitAfter('@hasComma');
-        } else if (m.has('#NumericValue #Fraction')) {
-          m.splitAfter('#NumericValue #Fraction');
-        } else {
-          m = m.splitAfter('#NumericValue');
-        }
-      }
-
-      //three-length
-      if (m.has('#Value #Value #Value') && !m.has('#Multiple')) {
-        //twenty-five-twenty
-        if (m.has('(' + tens + ') #Cardinal #Cardinal')) {
-          m = m.splitAfter('(' + tens + ') #Cardinal');
-        }
-      }
-
-      //two-length ones
-      if (m.has('#Value #Value')) {
-        //june 21st 1992 is two seperate values
-        if (m.has('#NumericValue #NumericValue')) {
-          m = m.splitOn('#Year');
-        }
-        //sixty fifteen
-        if (m.has('(' + tens + ') (' + teens + ')')) {
-          m = m.splitAfter('(' + tens + ')');
-        }
-
-        //"72 82"
-        let double = m.match('#Cardinal #Cardinal');
-        if (double.found && !m.has('(point|decimal|#Fraction)')) {
-          //not 'two hundred'
-          if (!double.has('#Cardinal (#Multiple|point|decimal)')) {
-            // two fifty five
-            let noMultiple = m.has(`(${ones}) (${tens})`);
-            // twenty one
-            let tensVal = double.has('(' + tens + ') #Cardinal');
-            // hundredOne
-            let multVal = double.has('#Multiple #Value');
-            //one proper way, 'twenty one', or 'hundred one'
-            if (!noMultiple && !tensVal && !multVal) {
-              // double = double.firstTerm()
-              double.terms().forEach(d => {
-                m = m.splitOn(d);
-              });
-            }
-          }
-        }
-
-        //seventh fifth
-        if (m.match('#Ordinal #Ordinal').match('#TextValue').found && !m.has('#Multiple')) {
-          //the one proper way, 'twenty first'
-          if (!m.has('(' + tens + ') #Ordinal')) {
-            m = m.splitAfter('#Ordinal');
-          }
-        }
-        //fifth five
-        if (m.has('#Ordinal #Cardinal')) {
-          m = m.splitBefore('#Cardinal+');
-        }
-        //five 2017 (support '5 hundred', and 'twenty 5'
-        if (m.has('#TextValue #NumericValue') && !m.has('(' + tens + '|#Multiple)')) {
-          m = m.splitBefore('#NumericValue+');
-        }
-      }
-
-      //5-8
-      if (m.has('#NumberRange')) {
-        m = m.splitAfter('#NumberRange');
-      }
-
-      return m
-    };
-
-    var find$7 = findNumbers;
-
-    const parseNumeric = function (str, p, isFraction) {
-      str = str.replace(/,/g, '');
-      //parse a numeric-number (easy)
-      let arr = str.split(/^([^0-9]*)([0-9.,]*)([^0-9]*)$/);
-      if (arr && arr[2] && p.terms().length < 2) {
-        let num = parseFloat(arr[2] || str);
-        //ensure that num is an actual number
-        if (typeof num !== 'number') {
-          num = null;
-        }
-        // strip an ordinal off the suffix
-        let suffix = arr[3] || '';
-        if (suffix === 'st' || suffix === 'nd' || suffix === 'rd' || suffix === 'th') {
-          suffix = '';
-        }
-        // support M for million, k for thousand
-        if (suffix === 'm' || suffix === 'M') {
-          num *= 1000000;
-          suffix = '';
-        }
-        if (suffix === 'k' || suffix === 'k') {
-          num *= 1000;
-          suffix = '';
-        }
-        num = isFraction ? 1 / num : num;
-        return {
-          prefix: arr[1] || '',
-          num: num,
-          suffix: suffix,
-        }
-      }
-      return null
-    };
-
-    // get a numeric value from this phrase
-    const parseNumber = function (m) {
-      let str = m.text('reduced');
-      // is it in '3,123' format?
-      let hasComma = /[0-9],[0-9]/.test(m.text('text'));
-      // parse a numeric-number like '$4.00'
-      let res = parseNumeric(str, m);
-      if (res !== null) {
-        res.hasComma = hasComma;
-        return res
-      }
-      // -- parse text-formats --
-      // Fractions: remove 'and a half' etc. from the end
-      let frPart = m.match('#Fraction{2,}$');
-      frPart = frPart.found === false ? m.match('^#Fraction$') : frPart;
-      let fraction = null;
-      if (frPart.found) {
-        if (frPart.has('#Value and #Value #Fraction')) {
-          frPart = frPart.match('and #Value #Fraction');
-        }
-        fraction = parseFraction$1(frPart);
-        // remove it from our string
-        m = m.not(frPart);
-        m = m.not('and$');
-        str = m.text('reduced');
-      }
-      let num = 0;
-      if (str) {
-        num = parseText(str) || 0;
-      }
-      // apply numeric fraction
-      if (fraction && fraction.decimal) {
-        num += fraction.decimal;
-      }
-      return {
-        hasComma: hasComma,
-        prefix: '',
-        num: num,
-        suffix: '',
-        isOrdinal: m.has('#Ordinal'),
-        isText: m.has('#TextValue'),
-        isFraction: m.has('#Fraction'),
-        isMoney: m.has('#Money'),
-      }
-    };
-    var parseNumber$1 = parseNumber;
-
-    /**
-     * turn a number like 5 into an ordinal like 5th
-     */
-    const numOrdinal = function (obj) {
-      let num = obj.num;
-      if (!num && num !== 0) {
-        return null
-      }
-      //the teens are all 'th'
-      let tens = num % 100;
-      if (tens > 10 && tens < 20) {
-        return String(num) + 'th'
-      }
-      //the rest of 'em
-      const mapping = {
-        0: 'th',
-        1: 'st',
-        2: 'nd',
-        3: 'rd',
-      };
-      let str = toString(num);
-      let last = str.slice(str.length - 1, str.length);
-      if (mapping[last]) {
-        str += mapping[last];
-      } else {
-        str += 'th';
-      }
-      return str
-    };
-
-    var numOrdinal$1 = numOrdinal;
-
-    const format = function (obj, fmt) {
-      if (fmt === 'TextOrdinal') {
-        return textOrdinal$1(obj)
-      }
-      if (fmt === 'Ordinal') {
-        return numOrdinal$1(obj)
-      }
-      if (fmt === 'TextCardinal') {
-        return textCardinal(obj)
-      }
-      // assume Cardinal
-      return String(obj.num)
-    };
-    var format$1 = format;
-
-    // return the nth elem of a doc
-    const getNth$7 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const addMethod$2 = function (View) {
-      /**   */
-      class Numbers extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Numbers';
-        }
-        parse(n) {
-          return getNth$7(this, n).map(parseNumber$1)
-        }
-        get(n) {
-          return getNth$7(this, n)
-            .map(parseNumber$1)
-            .map(o => o.num)
-        }
-        json(n) {
-          let doc = getNth$7(this, n);
-          return doc.map(p => {
-            let json = p.toView().json()[0];
-            let parsed = parseNumber$1(p);
-            json.number = {
-              prefix: parsed.prefix,
-              num: parsed.num,
-              suffix: parsed.suffix,
-              hasComma: parsed.hasComma,
-            };
-            return json
-          }, [])
-        }
-        /** return only ordinal numbers */
-        isOrdinal() {
-          return this.if('#Ordinal')
-        }
-        /** return only cardinal numbers*/
-        isCardina() {
-          return this.if('#Cardinal')
-        }
-
-        /** convert to numeric form like '8' or '8th' */
-        toNumber() {
-          this.if('#TextValue').forEach(val => {
-            let obj = parseNumber$1(val);
-            if (obj.num === null) {
-              return
-            }
-            let fmt = obj.isOrdinal ? 'Ordinal' : 'Cardinal';
-            let str = format$1(obj, fmt);
-            val.replaceWith(str, true);
-            val.tag('NumericValue');
-          });
-          return this
-        }
-        /** convert to numeric form like 'eight' or 'eighth' */
-        toText() {
-          this.if('#NumericValue').forEach(val => {
-            let obj = parseNumber$1(val);
-            if (obj.num === null) {
-              return
-            }
-            let fmt = obj.isOrdinal ? 'TextOrdinal' : 'TextCardinal';
-            let str = format$1(obj, fmt);
-            val.replaceWith(str, true);
-            val.tag('TextValue');
-          });
-          return this
-        }
-        /** convert ordinal to cardinal form, like 'eight', or '8' */
-        toCardinal() {
-          this.if('#Ordinal').forEach(val => {
-            let obj = parseNumber$1(val);
-            if (obj.num === null) {
-              return
-            }
-            let fmt = obj.isText ? 'TextCardinal' : 'Cardinal';
-            let str = format$1(obj, fmt);
-            val.replaceWith(str, true);
-            val.tag('Cardinal');
-          });
-          return this
-        }
-        /** convert cardinal to ordinal form, like 'eighth', or '8th' */
-        toOrdinal() {
-          this.if('#Cardinal').forEach(val => {
-            let obj = parseNumber$1(val);
-            if (obj.num === null) {
-              return
-            }
-            let fmt = obj.isText ? 'TextOrdinal' : 'Ordinal';
-            let str = format$1(obj, fmt);
-            val.replaceWith(str, true);
-            val.tag('Ordinal');
-          });
-          return this
-        }
-        // overloaded - keep Numbers class
-        update(pointer) {
-          let m = new Numbers(this.document, pointer);
-          m._cache = this._cache; // share this full thing
-          return m
-        }
-      }
-
-      View.prototype.numbers = function (n) {
-        let m = find$7(this);
-        m = getNth$7(m, n);
-        return new Numbers(this.document, m.pointer)
-      };
-      // alias
-      View.prototype.values = View.prototype.numbers;
-    };
-    var numbers$1 = addMethod$2;
-
-    const findPercentages = function (doc, n) {
-      // 5%
-      let m = doc.match('#Percent+');
-      // five percent
-      m = m.concat(doc.match('[#Cardinal] percent', 0));
-      if (typeof n === 'number') {
-        m = m.eq(n);
-      }
-      return m
-    };
-    var find$6 = findPercentages;
-
-    // return the nth elem of a doc
-    const getNth$6 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const parse$4 = function (m) {
-      let num = parseNumber$1(m).num;
-      if (typeof num === 'number') {
-        return num / 100
-      }
-      return null
-    };
-
-    const plugin$1 = function (View) {
-      /**
-       */
-      class Percentages extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Percentages';
-        }
-        parse(n) {
-          return getNth$6(this, n).map(parse$4)
-        }
-        get(n) {
-          return getNth$6(this, n).map(parse$4)
-        }
-        json(n) {
-          return getNth$6(this, n).map(p => {
-            let json = p.toView().json()[0];
-            let decimal = parse$4(p);
-            let full = decimal * 100;
-            json.fraction = {
-              decimal,
-              textNumber: `${full} percent`,
-              cardinal: `${full}%`,
-            };
-            return json
-          }, [])
-        }
-      }
-
-      View.prototype.percentages = function (n) {
-        let m = find$6(this);
-        m = getNth$6(m, n);
-        return new Percentages(this.document, m.pointer)
-      };
-    };
-
-    var percentages = plugin$1;
-
-    const api$7 = function (View) {
-      fractions(View);
-      numbers$1(View);
-      percentages(View);
-    };
-
-    var numbers = {
-      api: api$7,
-    };
-
-    //is this sentence asking a question?
-    const isQuestion = function (doc) {
-      let clauses = doc.clauses();
-
-      // Has ellipsis at the end means it's probably not a question
-      // e.g., Is this just fantasy...
-      if (/\.\.$/.test(doc.out('text'))) {
-        return false
-      }
-
-      // Starts with question word, but has a comma, so probably not a question
-      // e.g., Why are we caught in a land slide, no escape from reality
-      if (doc.has('^#QuestionWord') && doc.has('@hasComma')) {
-        return false
-      }
-
-      // do you see it or not
-      if (doc.has('or not$')) {
-        return true
-      }
-
-      // Starts with a #QuestionWord
-      // e.g., What open your eyes look up to the skies and see
-      if (doc.has('^#QuestionWord')) {
-        return true
-      }
-
-      // Second word is a #QuestionWord
-      // e.g., I'm what a poor boy
-      // case ts.has('^\w+\s#QuestionWord'):
-      // return true;
-
-      // is it, do you - start of sentence
-      // e.g., Do I need no sympathy
-      if (doc.has('^(do|does|did|is|was|can|could|will|would|may) #Noun')) {
-        return true
-      }
-
-      // these are a little more loose..
-      // e.g., Must I be come easy come easy go
-      if (doc.has('^(have|must) you')) {
-        return true
-      }
-
-      // Clause starts with a question word
-      // e.g., Anyway the wind blows, what doesn't really matter to me
-      if (clauses.has('^#QuestionWord')) {
-        return true
-      }
-
-      //is wayne gretskzy alive
-      if (clauses.has('(do|does|is|was) #Noun+ #Adverb? (#Adjective|#Infinitive)$')) {
-        return true
-      }
-
-      // Probably not a question
-      return false
-    };
-
-    const findQuestions = function (view) {
-      const hasQ = /\?/;
-      const { document } = view;
-      return view.filter(m => {
-        let terms = m.docs[0];
-        let lastTerm = terms[terms.length - 1];
-        // is it not a full sentence?
-        if (document[lastTerm.index[0]].length !== terms.length) {
-          return false
-        }
-        // does it end with a question mark?
-        if (hasQ.test(lastTerm.post)) {
-          return true
-        }
-        // try to guess a sentence without a question-mark
-        return isQuestion(m)
-      })
-    };
-    var questions = findQuestions;
-
-    const parse$2 = function (s) {
-      // let chunks = s.chunks().debug()
-
-      return {
-        // mainVerb:
-      }
-    };
-    var parse$3 = parse$2;
-
-    const toPast$2 = function (s) {
-      let verbs = s.verbs();
-
-      // already past
-      if (verbs.has('#PastTense')) {
-        return s
-      }
-
-      // translate the first verb, no-stress
-      let first = verbs.eq(0);
-      first.toPastTense();
-
-      // force agreement with any 2nd/3rd verbs:
-      if (verbs.length > 1) {
-        verbs = verbs.slice(1);
-        // remove any sorta infinitive - 'to engage'
-        verbs = verbs.filter((v) => !v.lookBehind('to$').found);
-        // keep -ing verbs
-        verbs = verbs.if('#PresentTense');
-        verbs = verbs.if('!#Gerund');
-
-        //run-on infinitive-list - 'to walk, sit and eat'
-        let list = s.match('to #Verb+ #Conjunction #Verb').terms();
-        verbs = verbs.not(list);
-
-        // otherwise, I guess so?
-        if (verbs.found) {
-          verbs.verbs().toPastTense();
-        }
-      }
-
-      // s.compute('chunks')
-      return s
-    };
-    var toPast$3 = toPast$2;
-
-    const toPresent$2 = function (s) {
-      s.verbs().toPresentTense();
-      // s.compute('chunks')
-      return s
-    };
-    var toPresent$3 = toPresent$2;
-
-    const toFuture$2 = function (s) {
-      let verbs = s.verbs();
-
-      // translate the first verb, no-stress
-      let first = verbs.eq(0);
-      first.toFutureTense();
-
-      s = s.fullSentence();
-      verbs = s.verbs();//re-do it
-      // verbs.debug()
-      // force agreement with any 2nd/3rd verbs:
-      if (verbs.length > 1) {
-        verbs = verbs.slice(1);
-        // remove any sorta infinitive - 'to engage'
-        verbs = verbs.filter((v) => !v.lookBehind('to$').found);
-
-        // verbs.debug()
-        // otherwise, I guess so?
-        if (verbs.found) {
-          verbs.verbs().toFutureTense();
-        }
-      }
-
-      // s = s.fullSentence()
-      // s.compute('chunks')
-      return s
-    };
-    var toFuture$3 = toFuture$2;
-
-    const toInfinitive$4 = function (s) {
-      s.verbs().toInfinitive();
-      // s.compute('chunks')
-      return s
-    };
-    var toInfinitive$5 = toInfinitive$4;
-
-    // return the nth elem of a doc
-    const getNth$5 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const api$5 = function (View) {
-      class Sentences extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Sentences';
-        }
-        toPastTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toPast$3(vb, parsed)
-          })
-        }
-        toPresentTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toPresent$3(vb, parsed)
-          })
-        }
-        toFutureTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toFuture$3(vb, parsed)
-          })
-        }
-        toInfinitive(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toInfinitive$5(vb, parsed)
-          })
-        }
-        toNegative(n) {
-          // return getNth(this, n).map(vb => {
-          //   let parsed = parse(vb)
-          //   return toInfinitive(vb, parsed)
-          // })
-          return this
-        }
-        // overloaded - keep Sentences class
-        update(pointer) {
-          let m = new Sentences(this.document, pointer);
-          m._cache = this._cache; // share this full thing
-          return m
-        }
-      }
-      // aliases
-      Sentences.prototype.toPresent = Sentences.prototype.toPresentTense;
-      Sentences.prototype.toPast = Sentences.prototype.toPastTense;
-      Sentences.prototype.toFuture = Sentences.prototype.toFutureTense;
-
-      const methods = {
-        sentences: function (n) {
-          let m = this.map(s => s.fullSentence());
-          m = getNth$5(m, n);
-          return new Sentences(this.document, m.pointer)
-        },
-        questions: function (n) {
-          let m = questions(this);
-          return getNth$5(m, n)
-        },
-      };
-
-      Object.assign(View.prototype, methods);
-    };
-    var api$6 = api$5;
-
-    var sentences = { api: api$6 };
-
-    const find$4 = function (doc) {
-      let m = doc.match('#Honorific+? #Person+');
-      return m
-    };
-    var find$5 = find$4;
-
-    const parse = function (m) {
-      let res = {};
-      res.firstName = m.match('#FirstName+');
-      res.lastName = m.match('#LastName+');
-      res.honorific = m.match('#Honorific+');
-
-      let last = res.lastName;
-      let first = res.firstName;
-      if (!first.found || !last.found) {
-        // let p = m.clone()
-        // assume 'Mr Springer' is a last-name
-        if (!first.found && !last.found && m.has('^#Honorific .$')) {
-          res.lastName = m.match('.$');
-          return res
-        }
-      }
-      return res
-    };
-    var parse$1 = parse;
-
-    /*
-      Important notice - 
-      this method makes many assumptions about gender-identity, in-order to assign grammatical gender.
-      it should not be used for any other purposes, other than resolving pronouns in english
-    */
-    const m = 'male';
-    const f = 'female';
-
-    // known gendered honorifics
-    const honorifics = {
-      mr: m,
-      mrs: f,
-      miss: f,
-      madam: f,
-
-      // british stuff
-      king: m,
-      queen: f,
-      duke: m,
-      duchess: f,
-      baron: m,
-      baroness: f,
-      count: m,
-      countess: f,
-      prince: m,
-      princess: f,
-      sire: m,
-      dame: f,
-      lady: f,
-
-      ayatullah: m, //i think?
-
-      congressman: m,
-      congresswoman: f,
-      'first lady': f,
-
-      // marked as non-binary
-      mx: null,
-    };
-
-    const predictGender = function (parsed, person) {
-      let { firstName, honorific } = parsed;
-      // use first-name as signal-signal
-      if (firstName.has('#FemaleName')) {
-        return f
-      }
-      if (firstName.has('#MaleName')) {
-        return m
-      }
-      // use honorics as gender-signal
-      if (honorific.found) {
-        let hon = honorific.text('normal');
-        hon = hon.replace(/\./g, ''); //clean it up a bit
-        if (honorifics.hasOwnProperty(hon)) {
-          return honorifics[hon]
-        }
-        // her excelency
-        if (/^her /.test(hon)) {
-          return f
-        }
-        if (/^his /.test(hon)) {
-          return m
-        }
-      }
-      // offer used-pronouns as a signal
-      let after = person.after();
-      if (!after.has('#Person') && after.has('#Pronoun')) {
-        let pro = after.match('#Pronoun');
-        // manual use of gender-neutral
-        if (pro.has('(they|their)')) {
-          return null
-        }
-        let hasMasc = pro.has('(he|his)');
-        let hasFem = pro.has('(she|her|hers)');
-        if (hasMasc && !hasFem) {
-          return m
-        }
-        if (hasFem && !hasMasc) {
-          return f
-        }
-      }
-      return null
-    };
-    var gender = predictGender;
-
-    // return the nth elem of a doc
-    const getNth$4 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const addMethod$1 = function (View) {
-      /**
-       *
-       */
-      class People extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'People';
-        }
-        parse(n) {
-          return getNth$4(this, n).map(parse$1)
-        }
-        json(n) {
-          let doc = getNth$4(this, n);
-          return doc.map(p => {
-            let json = p.toView().json()[0];
-            let parsed = parse$1(p);
-            json.person = {
-              firstName: parsed.firstName.text('normal'),
-              lastName: parsed.lastName.text('normal'),
-              honorific: parsed.honorific.text('normal'),
-              presumed_gender: gender(parsed, p),
-            };
-            return json
-          }, [])
-        }
-        // overloaded - keep People class
-        update(pointer) {
-          let m = new People(this.document, pointer);
-          m._cache = this._cache; // share this full thing
-          return m
-        }
-      }
-
-      View.prototype.people = function (n) {
-        let m = find$5(this);
-        m = getNth$4(m, n);
-        return new People(this.document, m.pointer)
-      };
-    };
-    var people = addMethod$1;
-
-    const find$2 = function (doc) {
-      let m = doc.match('#Place+');
-
-      // split all commas except for 'paris, france'
-      let splits = m.match('@hasComma');
-      splits = splits.filter(c => {
-        // split 'europe, china'
-        if (c.has('(asia|africa|europe|america)$')) {
-          return true
-        }
-        // don't split 'paris, france'
-        if (c.has('(#City|#Region)$') && c.after('^#Country').found) {
-          return false
-        }
-        return true
-      });
-      m = m.splitAfter(splits);
-      return m
-    };
-    var find$3 = find$2;
-
-    // return the nth elem of a doc
-    const getNth$3 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const addMethod = function (View) {
-
-      View.prototype.places = function (n) {
-        let m = find$3(this);
-        m = getNth$3(m, n);
-        return new View(this.document, m.pointer)
-      };
-    };
-    var places = addMethod;
-
-    // return the nth elem of a doc
-    const getNth$2 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const api$4 = function (View) {
-      View.prototype.organizations = function (n) {
-        let m = this.match('#Organization+');
-        return getNth$2(m, n)
-      };
-    };
-    var orgs = api$4;
-
-    // return the nth elem of a doc
-    const getNth$1 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    //combine them with .topics() method
-    const find$1 = function (n) {
-      let r = this.clauses();
-      // Find people, places, and organizations
-      let m = r.people();
-      m = m.concat(r.places());
-      m = m.concat(r.organizations());
-      m = m.not('(someone|man|woman|mother|brother|sister|father)');
-      //return them to normal ordering
-      m.sort('sequence');
-      // yup.unique() //? not sure
-      m = getNth$1(m, n);
-      return m
-    };
-
-    const api$3 = function (View) {
-      View.prototype.topics = find$1;
-      // aliases
-      View.prototype.entities = find$1;
-    };
-    var topics = api$3;
-
-    const api$2 = function (View) {
-      people(View);
-      places(View);
-      orgs(View);
-      topics(View);
-    };
-    var subjects = { api: api$2 };
-
-    const findVerbs = function (doc) {
-      let m = doc.match('<Verb>');
-
-      m = m.splitAfter('@hasComma');
-
-      // the reason he will is ...
-      // all i do is talk
-      m = m.splitAfter('[(do|did|am|was|is|will)] (is|was)', 0);
-      // m = m.splitAfter('[(do|did|am|was|is|will)] #PresentTense', 0)
-
-      // cool
-
-      // like being pampered
-      m = m.splitBefore('(#Verb && !#Copula) [being] #Verb', 0);
-      // like to be pampered
-      m = m.splitBefore('#Verb [to be] #Verb', 0);
-
-      // implicit conjugation - 'help fix'
-
-      m = m.splitAfter('[help] #PresentTense', 0);
-      // what i can sell is..
-      m = m.splitBefore('(#PresentTense|#PastTense) [#Copula]$', 0);
-      // what i can sell will be
-      m = m.splitBefore('(#PresentTense|#PastTense) [will be]$', 0);
-
-      // professes love
-      let toVerbs = m.match('(#PresentTense|#PastTense) #Infinitive');
-      if (toVerbs.found && !toVerbs.has('^go')) {
-        m = m.splitBefore('(#PresentTense|#PastTense) [#Infinitive]', 0);
-      }
-      //ensure there's actually a verb
-      m = m.if('#Verb');
-      // the reason he will is ...
-      // ensure it's not two verbs
-      return m
-    };
-    var find = findVerbs;
-
-    // find the main verb, from a verb phrase
-    const getMain = function (vb) {
-      let root = vb;
-      if (vb.wordCount() > 1) {
-        root = vb.not('(#Negative|#Auxiliary|#Modal|#Adverb|#Prefix)');
-        // main = main.match('!#Particle')
-      }
-      // fallback to just the last word, sometimes
-      if (root.length > 1 && !root.has('#Phrasal #Particle')) {
-        root = root.last();
-      }
-      // look for more modals
-      root = root.not('(want|wants|wanted) to');
-      // look for more auxiliaries
-      // if (root.has('was #Verb')) {
-      //   root = root.not('was')
-      // }
-
-      // root = root.not('[(want|wants|wanted) to] #PresentTense', 0)
-      // fallback
-      if (!root.found) {
-        root = vb.not('#Negative');
-        return root
-      }
-      return root
-    };
-    var getRoot = getMain;
-
-    // split adverbs as before/after the root
-    const getAdverbs = function (vb, root) {
-      let res = {
-        pre: vb.none(),
-        post: vb.none(),
-      };
-      if (!vb.has('#Adverb')) {
-        return res
-      }
-      // pivot on the main verb
-      let parts = vb.splitOn(root);
-      if (parts.length === 3) {
-        return {
-          pre: parts.eq(0).adverbs(),
-          post: parts.eq(2).adverbs(),
-        }
-      }
-      // it must be the second one
-      if (parts.eq(0).is(root)) {
-        res.post = parts.eq(1).adverbs();
-        return res
-      }
-      res.pre = parts.eq(0).adverbs();
-      return res
-    };
-    var getAdverbs$1 = getAdverbs;
-
-    const getAuxiliary = function (vb, root) {
-      let parts = vb.splitBefore(root);
-      if (parts.length <= 1) {
-        return vb.none()
-      }
-      let aux = parts.eq(0).clone();
-      aux.remove('(#Adverb|#Negative|#Prefix)');
-      return aux
-    };
-
-    const getNegative = function (vb) {
-      return vb.match('#Negative')
-    };
-
-    // pull-apart phrasal-verb into verb-particle
-    const getPhrasal = function (root) {
-      let particle = root.match('#Particle$');
-      return {
-        verb: root.not(particle),
-        particle: particle,
-      }
-    };
-
-    const parseVerb = function (view) {
-      let vb = view.clone();
-      vb.contractions().expand();
-      const root = getRoot(vb);
-      let res = {
-        root: root,
-        prefix: vb.match('#Prefix'),
-        adverbs: getAdverbs$1(vb, root),
-        auxiliary: getAuxiliary(vb, root),
-        negative: getNegative(vb),
-        phrasal: getPhrasal(root),
-      };
-      return res
-    };
-    var parseVerb$1 = parseVerb;
-
-    const present = { tense: 'PresentTense' };
-    const conditional = { conditional: true };
-    const future = { tense: 'FutureTense' };
-    const prog = { progressive: true };
-    const past = { tense: 'PastTense' };
-    const complete = { complete: true, progressive: false };
-    const passive = { passive: true };
-    const plural = { plural: true };
-    const singular = { plural: false };
-
-    const getData = function (tags) {
-      let data = {};
-      tags.forEach(o => {
-        Object.assign(data, o);
-      });
-      return data
-    };
-
-    const verbForms = {
-      // === Simple ===
-      'imperative': [
-        // walk!
-        ['#Imperative', []],
-      ],
-      'infinitive': [
-        // walk
-        ['^#Infinitive$', []],
-      ],
-      'simple-present': [
-        // he walks',
-        ['^#PresentTense$', [present]],
-      ],
-      'simple-past': [
-        // he walked',
-        ['^#PastTense$', [past]],
-      ],
-      'simple-future': [
-        // he will walk
-        ['^will #Infinitive$', [future]],
-      ],
-
-      // === Progressive ===
-      'present-progressive': [
-        // he is walking
-        ['^(is|are|am) #Gerund$', [present, prog]],
-      ],
-      'past-progressive': [
-        // he was walking
-        ['^(was|were) #Gerund$', [past, prog]],
-      ],
-      'future-progressive': [
-        // he will be
-        ['^will be #Gerund$', [future, prog]],
-      ],
-
-      // === Perfect ===
-      'present-perfect': [
-        // he has walked
-        ['^(has|have) #PastTense$', [past, complete]], //past?
-      ],
-      'past-perfect': [
-        // he had walked
-        ['^had #PastTense$', [past, complete]],
-      ],
-      'future-perfect': [
-        // he will have
-        ['^will have #PastTense$', [future, complete]],
-      ],
-
-      // === Progressive-perfect ===
-      'present-perfect-progressive': [
-        // he has been walking
-        ['^(has|have) been #Gerund$', [past, prog]], //present?
-      ],
-      'past-perfect-progressive': [
-        // he had been
-        ['^had been #Gerund$', [past, prog]],
-      ],
-      'future-perfect-progressive': [
-        // will have been
-        ['^will have been #Gerund$', [future, prog]],
-      ],
-
-      // ==== Passive ===
-      'passive-past': [
-        // got walked, was walked, were walked
-        ['(got|were|was) (#PastTense|#Participle)', [past, passive]],
-        // was being walked
-        ['^(was|were) being (#PastTense|#Participle)', [past, passive]],
-        // had been walked, have been eaten
-        ['^(had|have) been (#PastTense|#Participle)', [past, passive]],
-      ],
-      'passive-present': [
-        // is walked, are stolen
-        ['^(is|are|am) (#PastTense|#Participle)', [present, passive]],
-        // is being walked
-        ['^(is|are|am) being (#PastTense|#Participle)', [present, passive]],
-        // has been cleaned
-        ['^has been (#PastTense|#Participle)', [present, passive]],
-      ],
-      'passive-future': [
-        // will have been walked
-        ['will have been (#PastTense|#Participle)', [future, passive, conditional]],
-        // will be cleaned
-        ['will be being? (#PastTense|#Participle)', [future, passive, conditional]],
-      ],
-
-      // === Conditional ===
-      'present-conditional': [
-        // would be walked
-        ['would be #PastTense', [present, conditional]],
-      ],
-      'past-conditional': [
-        // would have been walked
-        ['would have been #PastTense', [past, conditional]],
-      ],
-
-      // ==== Auxiliary ===
-      'auxiliary-future': [
-        // going to drink
-        ['(is|are|am|was) going to (#Infinitive|#PresentTense)', [future]],
-      ],
-      'auxiliary-past': [
-        // he did walk
-        ['^did #Infinitive$', [past, singular]],
-        // used to walk
-        ['^used to #Infinitive$', [past, complete]],
-      ],
-      'auxiliary-present': [
-        // we do walk
-        ['^(does|do) #Infinitive$', [present, complete, plural]],
-      ],
-
-      // === modals ===
-      'modal-past': [
-        // he could have walked
-        ['^(could|must|should|shall) have #PastTense$', [past]],
-      ],
-      'want-infinitive': [
-        ['^(want|wants|wanted) to #Infinitive$', [present]],
-        ['^wanted to #Infinitive$', [past]],
-        ['^will want to #Infinitive$', [future]],
-      ],
-      'modal-infinitive': [
-        // he can walk
-        ['^#Modal #Infinitive$', []],
-      ],
-    };
-
-    let list = [];
-    Object.keys(verbForms).map(k => {
-      verbForms[k].forEach(a => {
-        list.push({
-          name: k,
-          match: a[0],
-          data: getData(a[1]),
-        });
-      });
-    });
-
-    var forms$4 = list;
-
-    const cleanUp = function (vb, res) {
-      vb = vb.clone();
-      // remove adverbs
-      if (res.adverbs.post && res.adverbs.post.found) {
-        vb.remove(res.adverbs.post);
-      }
-      if (res.adverbs.pre && res.adverbs.pre.found) {
-        vb.remove(res.adverbs.pre);
-      }
-      // remove negatives
-      if (vb.has('not')) {
-        vb = vb.remove('not');
-      }
-      // remove prefixes like 'anti'
-      if (vb.has('#Prefix')) {
-        vb = vb.remove('#Prefix');
-      }
-      // cut-off phrasal-verb
-      if (res.root.has('#PhrasalVerb #Particle')) {
-        vb.remove('#Particle$');
-      }
-      // did we miss any of these?
-      // vb = vb.remove('#Adverb')
-      return vb
-    };
-
-    const getGrammar = function (vb, res) {
-      let grammar = {};
-      // make it easy to classify, first
-      vb = cleanUp(vb, res);
-      for (let i = 0; i < forms$4.length; i += 1) {
-        let todo = forms$4[i];
-        if (vb.has(todo.match) === true) {
-          grammar.form = todo.name;
-          Object.assign(grammar, todo.data);
-          break //only match one
-        }
-      }
-      // did we find nothing?
-      if (!grammar.form) {
-        if (vb.has('^#Verb$')) {
-          grammar.form = 'infinitive';
-        }
-      }
-      // fallback to 'naiive' tense detection
-      if (!grammar.tense) {
-        grammar.tense = res.root.has('#PastTense') ? 'PastTense' : 'PresentTense';
-      }
-      grammar.copula = res.root.has('#Copula');
-      return grammar
-    };
-
-    var getGrammar$1 = getGrammar;
-
-    const toArray = function (m) {
-      if (!m || !m.isView) {
-        return []
-      }
-      const opts = { normal: true, terms: false, text: false };
-      return m.json(opts).map(s => s.normal)
-    };
-
-    const toText = function (m) {
-      if (!m || !m.isView) {
-        return ''
-      }
-      return m.text('normal')
-    };
-
-    const toInfinitive$3 = function (root) {
-      const { verbToInfinitive } = root.methods.two.transform;
-      let str = root.text('normal');
-      return verbToInfinitive(str, root.model)
-    };
-
-    const toJSON = function (vb) {
-      vb = vb.clone().toView();
-      let parsed = parseVerb$1(vb);
-      const info = getGrammar$1(vb, parsed);
-      return {
-        root: parsed.root.text(),
-        preAdverbs: toArray(parsed.adverbs.pre),
-        postAdverbs: toArray(parsed.adverbs.post),
-        auxiliary: toText(parsed.auxiliary),
-        negative: parsed.negative.found,
-        prefix: toText(parsed.prefix),
-        infinitive: toInfinitive$3(parsed.root),
-        grammar: info,
-      }
-    };
-    var toJSON$1 = toJSON;
-
-    const shouldSkip = function (last) {
-      // is it our only choice?
-      if (last.length <= 1) {
-        return false
-      }
-      let obj = last.parse()[0] || {};
-      return obj.isSubordinate
-    };
-
-    // try to chop-out any obvious conditional phrases
-    // he wore, [if it was raining], a raincoat.
-    const noSubClause = function (before) {
-      let parts = before.clauses();
-      parts = parts.filter((m, i) => {
-        // if it was raining..
-        if (m.has('^(if|unless|while|but|for|per)')) {
-          return false
-        }
-        // bowed to her,
-        if (i > 0 && m.has('^#Verb . #Noun+$')) {
-          return false
-        }
-        // the fog, suddenly increasing in..
-        if (i > 0 && m.has('^#Adverb')) {
-          return false
-        }
-        return true
-      });
-      // don't drop the whole thing.
-      if (parts.length === 0) {
-        return before
-      }
-      return parts
-    };
-
-    //
-    const lastNoun = function (vb) {
-      let before = vb.before();
-      // try to drop any mid-sentence clauses
-      before = noSubClause(before);
-      // parse-out our preceding nouns
-      let nouns = before.nouns();
-
-      // look for any dead-ringers
-      let last = nouns.last();
-      // i/she/he/they are very strong
-      let pronoun = last.match('(i|he|she|we|you|they)');
-      if (pronoun.found) {
-        return pronoun
-      }
-      // these are also good hints
-      let det = last.match('^#Determiner .+');
-      if (det.found) {
-        return det
-      }
-      // should we skip a subbordinate clause or two?
-      last = nouns.last();
-      if (shouldSkip(last)) {
-        nouns.remove(last);
-        last = nouns.last();
-      }
-      // i suppose we can skip two?
-      if (shouldSkip(last)) {
-        nouns.remove(last);
-        last = nouns.last();
-      }
-      return last
-    };
-
-    const isPlural$1 = function (subj, vb) {
-      // jack and jill
-      if (subj.has('(and|or)')) {
-        return true
-      }
-      // quarterbacks
-      if (subj.has('#Plural')) {
-        return true
-      }
-      if (subj.has('(we|they)')) {
-        return true
-      }
-      // 'we are' vs 'he is'
-      if (vb.has('(are)')) {
-        return true
-      }
-      return false
-    };
-
-    const getSubject = function (vb) {
-      let subj = lastNoun(vb);
-      return {
-        subject: subj,
-        plural: isPlural$1(subj, vb),
-      }
-    };
-    var getSubject$1 = getSubject;
-
-    const noop = vb => vb;
-
-    const isPlural = (vb, parsed) => {
-      let subj = getSubject$1(vb, parsed);
-      let m = subj.subject;
-      if (m.has('i') || m.has('we')) {
-        return true
-      }
-      return subj.plural
-    };
-
-    // present-tense copula
-    const isAreAm = function (vb, parsed) {
-      // 'people were' -> 'people are'
-      if (vb.has('were')) {
-        return 'are'
-      }
-      // 'i was' -> i am
-      let { subject, plural } = getSubject$1(vb, parsed);
-      if (subject.has('i')) {
-        return 'am'
-      }
-      if (subject.has('we') || plural) {
-        return 'are'
-      }
-      // 'he was' -> he is
-      return 'is'
-    };
-
-
-    const doDoes = function (vb, parsed) {
-      let subj = getSubject$1(vb, parsed);
-      let m = subj.subject;
-      if (m.has('i') || m.has('we')) {
-        return 'do'
-      }
-      if (subj.plural) {
-        return 'do'
-      }
-      return 'does'
-    };
-
-    const toInf = function (vb, parsed) {
-      const { verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text({ keepPunct: false });
-      str = verbToInfinitive(str, vb.model);
-      if (str) {
-        vb.replace(parsed.root, str);
-      }
-      return vb
-    };
-
-    const getTense = (root) => {
-      let tense = null;
-      if (root.has('#Participle')) {
-        return 'Participle'
-      }
-      if (root.has('#PastTense')) {
-        return 'PastTense'
-      }
-      return tense
-    };
-
-    // all verb forms are the same
-    const toInfinitive$1 = function (vb, parsed) {
-      const { verbToInfinitive } = vb.methods.two.transform;
-      const { root, auxiliary } = parsed;
-      root.freeze();
-      let str = root.text('normal');
-      str = verbToInfinitive(str, vb.model, getTense(root));
-      if (str) {
-        vb.replace(root, str);
-      }
-      // remove any auxiliary terms
-      if (auxiliary.found) {
-        auxiliary.terms().reverse().forEach(m => {
-          vb.remove(m.text());//gross
-        });
-      }
-      // there is no real way to do this
-      // 'i not walk'?  'i walk not'?
-      if (parsed.negative.found) {
-        if (!vb.has('not')) {
-          vb.prepend('not');
-        }
-        let does = doDoes(vb, parsed);
-        vb.prepend(does);
-      }
-      vb.fullSentence().compute(['lexicon', 'preTagger', 'postTagger', 'chunks']);
-      return vb
-    };
-    var toInfinitive$2 = toInfinitive$1;
-
-    const fns = {
-
-      noop: vb => vb,
-
-      noAux: (vb, parsed) => {
-        if (parsed.auxiliary.found) {
-          vb = vb.remove(parsed.auxiliary);
-        }
-        return vb
-      },
-
-      // walk->walked
-      simple: (vb, parsed) => {
-        const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
-        let str = parsed.root.text({ keepPunct: false });
-        str = verbToInfinitive(str, vb.model);
-        let all = verbConjugate(str, vb.model);
-        // 'driven' || 'drove'
-        str = all.PastTense;
-        // all.Participle || all.PastTense
-        // but skip the 'is' participle..
-        str = str === 'been' ? 'was' : str;
-        if (str) {
-          vb.replace(parsed.root, str);
-        }
-        return vb
-      },
-
-      both: function (vb, parsed) {
-        // 'he did not walk'
-        if (parsed.negative.found) {
-          let did = doDoes(vb, parsed);
-          if (did === 'do') {
-            did = 'did';
-          }
-          vb.replace('will', did);
-          return vb
-        }
-        // 'he walked'
-        vb = fns.simple(vb, parsed);
-        vb = fns.noAux(vb, parsed);
-        return vb
-      },
-
-      hasHad: vb => {
-        vb.replace('has', 'had');
-        return vb
-      },
-
-      // some verbs have this weird past-tense form
-      // drive -> driven, (!drove)
-      hasParticiple: (vb, parsed) => {
-        const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
-        let str = parsed.root.text('normal');
-        str = verbToInfinitive(str, vb.model);
-        return verbConjugate(str, vb.model).Participle
-      },
-
-    };
-
-
-    const forms$3 = {
-      // walk -> walked
-      'infinitive': fns.simple,
-      // he walks -> he walked
-      'simple-present': fns.simple,
-      // he walked
-      'simple-past': noop,
-      // he will walk -> he walked
-      'simple-future': fns.both,
-
-      // he is walking
-      'present-progressive': vb => {
-        vb.replace('are', 'were');
-        vb.replace('(is|are|am)', 'was');
-        return vb
-      },
-      // he was walking
-      'past-progressive': noop,
-      // he will be walking
-      'future-progressive': (vb, parsed) => {
-        vb.match(parsed.root).insertBefore('was');
-        vb.remove('(will|be)');
-        return vb
-      },
-
-      // has walked -> had walked (?)
-      'present-perfect': fns.hasHad,
-      // had walked
-      'past-perfect': noop,
-      // will have walked -> had walked
-      'future-perfect': (vb, parsed) => {
-        vb.match(parsed.root).insertBefore('had');
-        vb.remove('(will|have)');
-        return vb
-      },
-
-      // has been walking -> had been
-      'present-perfect-progressive': fns.hasHad,
-      // had been walking
-      'past-perfect-progressive': noop,
-      // will have been -> had
-      'future-perfect-progressive': vb => {
-        vb.remove('will');
-        vb.replace('have', 'had');
-        return vb
-      },
-
-      // got walked
-      'passive-past': vb => {
-        // 'have been walked' -> 'had been walked'
-        vb.replace('have', 'had');
-        return vb
-      },
-      // is being walked  -> 'was being walked'
-      'passive-present': vb => {
-        vb.replace('(is|are)', 'was');
-        return vb
-      },
-      // will be walked -> had been walked
-      'passive-future': (vb, parsed) => {
-        if (parsed.auxiliary.has('will be')) {
-          vb.match(parsed.root).insertBefore('had been');
-          vb.remove('(will|be)');
-        }
-        // will have been walked -> had been walked
-        if (parsed.auxiliary.has('will have been')) {
-          vb.replace('have', 'had');
-          vb.remove('will');
-        }
-        return vb
-      },
-
-      // would be walked -> 'would have been walked'
-      'present-conditional': vb => {
-        vb.replace('be', 'have been');
-        return vb
-      },
-      // would have been walked
-      'past-conditional': noop,
-
-      // is going to drink -> was going to drink
-      'auxiliary-future': vb => {
-        vb.replace('(is|are|am)', 'was');
-        return vb
-      },
-      // used to walk
-      'auxiliary-past': noop,
-      // we do walk -> we did walk
-      'auxiliary-present': vb => {
-        vb.replace('(do|does)', 'did');
-        return vb
-      },
-
-      // must walk -> 'must have walked'
-      'modal-infinitive': (vb, parsed) => {
-        // this modal has a clear tense
-        if (vb.has('can')) {
-          // can drive -> could drive
-          vb.replace('can', 'could');
-        } else {
-          // otherwise, 
-          //  walk -> have walked
-          //  drive -> have driven
-          fns.simple(vb, parsed);
-          vb.match('#Modal').insertAfter('have').tag('Auxiliary');
-        }
-        return vb
-      },
-      // must have walked
-      'modal-past': noop,
-      // wanted to walk
-      'want-infinitive': vb => {
-        vb.replace('(want|wants)', 'wanted');
-        vb.remove('will');
-        return vb
-      },
-    };
-
-    const toPast = function (vb, parsed, form) {
-      // console.log(form)
-      if (forms$3.hasOwnProperty(form)) {
-        vb = forms$3[form](vb, parsed);
-        vb.fullSentence().compute(['lexicon', 'preTagger', 'postTagger', 'chunks']);
-        return vb
-      }
-      // do nothing i guess?
-      return vb
-    };
-    var toPast$1 = toPast;
-
-    // walk->walked
-    const simple$1 = (vb, parsed) => {
-      const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text('normal');
-      str = verbToInfinitive(str, vb.model);
-      // 'i walk' vs 'he walks'
-      if (isPlural(vb, parsed) === false) {
-        str = verbConjugate(str, vb.model).PresentTense;
-      }
-      // handle copula
-      if (parsed.root.has('#Copula')) {
-        str = isAreAm(vb, parsed);
-      }
-      if (str) {
-        vb = vb.replace(parsed.root, str);
-        vb.not('#Particle').tag('PresentTense');
-      }
-      return vb
-    };
-
-    const toGerund$2 = (vb, parsed) => {
-      const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text('normal');
-      str = verbToInfinitive(str, vb.model);
-      // 'i walk' vs 'he walks'
-      if (isPlural(vb, parsed) === false) {
-        str = verbConjugate(str, vb.model).Gerund;
-      }
-      if (str) {
-        vb = vb.replace(parsed.root, str);
-        vb.not('#Particle').tag('Gerund');
-      }
-      return vb
-    };
-
-    const toInfinitive = (vb, parsed) => {
-      const { verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text('normal');
-      str = verbToInfinitive(str, vb.model);
-      if (str) {
-        vb = vb.replace(parsed.root, str);
-      }
-      return vb
-    };
-
-
-
-    const forms$2 = {
-      // walk
-      'infinitive': simple$1,
-      // he walks -> he walked
-      'simple-present': noop,
-      // he walked
-      'simple-past': simple$1,
-      // he will walk -> he walked
-      'simple-future': (vb, parsed) => {
-        const { root, auxiliary } = parsed;
-        // handle 'will be'
-        if (auxiliary.has('will') && root.has('be')) {
-          let str = isAreAm(vb, parsed);
-          vb.replace(root, str);
-          vb = vb.remove('will');
-        } else {
-          simple$1(vb, parsed);
-          vb = vb.remove('will');
-        }
-        return vb
-      },
-
-      // is walking ->
-      'present-progressive': noop,
-      // was walking -> is walking
-      'past-progressive': (vb, parsed) => {
-        let str = isAreAm(vb, parsed);
-        return vb.replace('(were|was)', str)
-      },
-      // will be walking -> is walking
-      'future-progressive': vb => {
-        vb.match('will').insertBefore('is');
-        vb.remove('be');
-        return vb.remove('will')
-      },
-
-      // has walked ->  (?)
-      'present-perfect': noop,
-
-      // had walked -> has walked
-      'past-perfect': (vb, parsed) => {
-        // not 'we has walked'
-        let subj = getSubject$1(vb, parsed);
-        let m = subj.subject;
-        if (m.has('i') || m.has('we')) {
-          vb = toInf(vb, parsed);// we walk
-          vb.remove('had');
-          return vb
-        }
-        vb.replace('had', 'has');
-        return vb
-      },
-      // will have walked -> has walked
-      'future-perfect': vb => {
-        vb.match('will').insertBefore('has');
-        return vb.remove('have').remove('will')
-      },
-
-      // has been walking
-      'present-perfect-progressive': noop,
-      // had been walking
-      'past-perfect-progressive': vb => vb.replace('had', 'has'),
-      // will have been -> has been
-      'future-perfect-progressive': vb => {
-        vb.match('will').insertBefore('has');
-        return vb.remove('have').remove('will')
-      },
-
-      // got walked -> is walked
-      // was walked -> is walked
-      // had been walked -> is walked
-      'passive-past': (vb, parsed) => {
-        let str = isAreAm(vb, parsed);
-        if (vb.has('(had|have|has)') && vb.has('been')) {
-          vb.replace('(had|have|has)', str);
-          vb.replace('been', 'being');
-          return vb
-        }
-        return vb.replace('(got|was|were)', str)
-      },
-      // is being walked  ->
-      'passive-present': noop,
-      // will be walked -> is being walked
-      'passive-future': vb => {
-        vb.replace('will', 'is');
-        return vb.replace('be', 'being')
-      },
-
-      // would be walked ->
-      'present-conditional': noop,
-      // would have been walked ->
-      'past-conditional': vb => {
-        vb.replace('been', 'be');
-        return vb.remove('have')
-      },
-
-      // is going to drink -> is drinking
-      'auxiliary-future': (vb, parsed) => {
-        toGerund$2(vb, parsed);
-        vb.remove('(going|to)');
-        return vb
-      },
-      // used to walk -> is walking
-      // did walk -> is walking
-      'auxiliary-past': (vb, parsed) => {
-        // 'did provide' -> 'does provide'
-        if (parsed.auxiliary.has('did')) {
-          let str = doDoes(vb, parsed);
-          vb.replace(parsed.auxiliary, str);
-          return vb
-        }
-        toGerund$2(vb, parsed);
-        vb.replace(parsed.auxiliary, 'is');
-        return vb
-      },
-      // we do walk ->
-      'auxiliary-present': noop,
-
-      // must walk -> 'must have walked'
-      'modal-infinitive': noop,
-      // must have walked
-      'modal-past': (vb, parsed) => {
-        toInfinitive(vb, parsed);
-        return vb.remove('have')
-      },
-      // wanted to walk
-      'want-infinitive': (vb, parsed) => {
-        let str = 'wants';
-        if (isPlural(vb, parsed)) {
-          str = 'want';//we want
-        }
-        vb.replace('(want|wanted|wants)', str);
-        vb.remove('will');
-        return vb
-      },
-    };
-
-    const toPresent = function (vb, parsed, form) {
-      // console.log(form)
-      if (forms$2.hasOwnProperty(form)) {
-        vb = forms$2[form](vb, parsed);
-        vb.fullSentence().compute(['lexicon', 'preTagger', 'postTagger', 'chunks']);
-        return vb
-      }
-      return vb
-    };
-    var toPresent$1 = toPresent;
-
-    const simple = (vb, parsed) => {
-      const { verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text('normal');
-      str = verbToInfinitive(str, vb.model);
-      if (str) {
-        vb = vb.replace(parsed.root, str);
-        // vb.not('#Particle').tag('Infinitive')
-      }
-      vb.prepend('will').match('will').tag('Auxiliary');
-      vb.remove(parsed.auxiliary);
-      return vb
-    };
-
-    // 'will be walking'
-    const progressive = (vb, parsed) => {
-      const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text('normal');
-      str = verbToInfinitive(str, vb.model);
-      if (str) {
-        str = verbConjugate(str, vb.model).Gerund;
-        vb = vb.replace(parsed.root, str);
-        vb.not('#Particle').tag('PresentTense');
-      }
-      vb.prepend('will be').match('will be').tag('Auxiliary');
-      vb.remove(parsed.auxiliary);
-      return vb
-    };
-
-    const forms$1 = {
-      // walk ->
-      'infinitive': simple,
-      // he walks ->
-      'simple-present': simple,
-      // he walked
-      'simple-past': simple,
-      // he will walk ->
-      'simple-future': noop,
-
-      // is walking ->
-      'present-progressive': progressive,
-      // was walking ->
-      'past-progressive': progressive,
-      // will be walking ->
-      'future-progressive': noop,
-
-      // has walked ->
-      'present-perfect': vb => vb.replace('(has|have)', 'will have'),
-      // had walked ->
-      'past-perfect': vb => vb.replace('(had|has)', 'will have'),
-      // will have walked ->
-      'future-perfect': noop,
-
-      // has been walking
-      'present-perfect-progressive': vb => vb.replace('has', 'will have'),
-      // had been walking
-      'past-perfect-progressive': vb => vb.replace('had', 'will have'),
-      // will have been ->
-      'future-perfect-progressive': noop,
-
-      // got walked ->
-      // was walked ->
-      // was being walked ->
-      // had been walked ->
-      'passive-past': vb => {
-        if (vb.has('got')) {
-          return vb.replace('got', 'will get')
-        }
-        if (vb.has('(was|were)')) {
-          vb.replace('(was|were)', 'will be');
-          return vb.remove('being')
-        }
-        if (vb.has('(have|has|had) been')) {
-          return vb.replace('(have|has|had) been', 'will be')
-        }
-        return vb
-      },
-      // is being walked  ->
-      'passive-present': vb => {
-        vb.replace('being', 'will be');
-        vb.remove('(is|are|am)');
-        return vb
-      },
-      // will be walked ->
-      'passive-future': noop,
-      // would be walked ->
-      'present-conditional': vb => vb.replace('would', 'will'),
-      // would have been walked ->
-      'past-conditional': vb => vb.replace('would', 'will'),
-
-      // is going to drink ->
-      'auxiliary-future': noop,
-      // used to walk -> is walking
-      // did walk -> is walking
-      'auxiliary-past': vb => {
-        if (vb.has('used') && vb.has('to')) {
-          vb.replace('used', 'will');
-          return vb.remove('to')
-        }
-        vb.replace('did', 'will');
-        return vb
-      },
-      // we do walk ->
-      // he does walk ->
-      'auxiliary-present': vb => {
-        return vb.replace('(do|does)', 'will')
-      },
-
-      // must walk ->
-      'modal-infinitive': noop,
-      // must have walked
-      'modal-past': noop,
-      // wanted to walk
-      'want-infinitive': vb => {
-        vb.replace('(want|wants|wanted)', 'will want');
-        return vb
-      },
-    };
-
-    const toFuture = function (vb, parsed, form) {
-      // console.log(form)
-      // is it already future-tense?
-      if (vb.has('will') || vb.has('going to')) {
-        return vb
-      }
-      if (forms$1.hasOwnProperty(form)) {
-        vb = forms$1[form](vb, parsed);
-        vb.fullSentence().compute(['lexicon', 'preTagger', 'postTagger', 'chunks']);
-        return vb
-      }
-      return vb
-    };
-    var toFuture$1 = toFuture;
-
-    // all verb forms are the same
-    const toGerund = function (vb, parsed) {
-      const { verbToInfinitive, verbConjugate } = vb.methods.two.transform;
-      const { root, auxiliary } = parsed;
-      if (vb.has('#Gerund')) {
-        return vb
-      }
-      root.freeze();
-      let str = root.text('normal');
-      str = verbToInfinitive(str, vb.model,);
-      let gerund = verbConjugate(str, vb.model).Gerund;
-      if (gerund) {
-        vb.replace(root, gerund);
-      }
-      // remove any auxiliary
-      if (auxiliary.found) {
-        auxiliary.terms().forEach(m => {
-          vb.remove(m); //super awkward
-        });
-      }
-      // remove any auxiliary
-      vb.fullSentence().compute(['preTagger', 'postTagger', 'chunks']);
-      return vb
-    };
-    var toGerund$1 = toGerund;
-
-    // do/does not walk 
-    const doesNot = function (vb, parsed) {
-      let does = doDoes(vb, parsed);
-      vb.prepend(does + ' not');
-      return vb
-    };
-
-    const isWas = function (vb) {
-      // not be
-      let m = vb.match('be');
-      if (m.found) {
-        m.prepend('not');
-        return vb
-      }
-      // will not
-      m = vb.match('(is|was|am|are|will|were)');
-      if (m.found) {
-        m.append('not');
-        return vb
-      }
-      return vb
-    };
-
-    const hasCopula = (vb) => vb.has('(is|was|am|are|will|were|be)');
-
-    //vaguely, turn 'he is cool' into 'he is not cool'
-    const forms = {
-
-
-      // he walks' -> 'he does not walk'
-      'simple-present': (vb, parsed) => {
-        // is/was
-        if (hasCopula(vb) === true) {
-          return isWas(vb)
-        }
-        // he walk
-        vb = toInf(vb, parsed);
-        // does not 
-        vb = doesNot(vb, parsed);
-        return vb
-      },
-      // 'he walked' -> 'he did not walk'
-      'simple-past': (vb, parsed) => {
-        // is/was
-        if (hasCopula(vb) === true) {
-          return isWas(vb)
-        }
-        // he walk
-        vb = toInf(vb, parsed);
-        // did not walk
-        vb.prepend('did not');
-        return vb
-      },
-
-      // walk! -> 'do not walk'
-      'imperative': (vb, parsed) => {
-        vb.prepend('do not');
-        return vb
-      },
-      // walk -> does not walk
-      'infinitive': (vb, parsed) => {
-        if (hasCopula(vb) === true) {
-          return isWas(vb)
-        }
-        return doesNot(vb, parsed)
-      },
-
-      'passive-past': (vb, parsed) => {
-        // got walked -> did not get walked
-        if (vb.has('got')) {
-          vb.replace('got', 'get');
-          vb.prepend('did not');
-          return vb
-        }
-        // was walked, were walked
-        // was being walked
-        // had been walked, have been eaten
-        let m = vb.match('(was|were|had|have)');
-        if (m.found) {
-          m.append('not');
-        }
-        return vb
-      },
-      'auxiliary-past': (vb, parsed) => {
-        // used to walk
-        if (vb.has('used')) {
-          vb.prepend('did not');
-          return vb
-        }
-        // he did walk
-        let m = vb.match('(did|does|do)');
-        if (m.found) {
-          m.append('not');
-        }
-        return vb
-      },
-
-      // wants to walk
-      'want-infinitive': (vb, parsed) => {
-        // does not 
-        vb = doesNot(vb, parsed);
-        // want
-        vb = vb.replace('wants', 'want');
-        return vb
-      },
-
-    };
-
-    const toNegative = function (vb, parsed, form) {
-      // console.log(form)
-      if (vb.has('#Negative')) {
-        return vb
-      }
-      if (forms.hasOwnProperty(form)) {
-        vb = forms[form](vb, parsed);
-        return vb
-      }
-
-      // 'not be'
-      let m = vb.matchOne('be');
-      if (m.found) {
-        m.prepend('not');
-        return vb
-      }
-      // is/was not
-      if (hasCopula(vb) === true) {
-        return isWas(vb)
-      }
-
-      // 'would not'
-      m = vb.matchOne('(will|had|have|has|did|does|do|#Modal)');
-      if (m.found) {
-        m.append('not');
-        return vb
-      }
-      // do nothing i guess?
-      return vb
-    };
-    var toNegative$1 = toNegative;
-
-    // return the nth elem of a doc
-    const getNth = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    const api = function (View) {
-      class Verbs extends View {
-        constructor(document, pointer, groups) {
-          super(document, pointer, groups);
-          this.viewType = 'Verbs';
-        }
-        parse(n) {
-          return getNth(this, n).map(parseVerb$1)
-        }
-        json(opts, n) {
-          let m = getNth(this, n).reverse();
-          let arr = m.map(vb => {
-            let json = vb.toView().json(opts)[0] || {};
-            json.verb = toJSON$1(vb);
-            return json
-          }, []);
-          return arr.reverse()
-        }
-        subjects(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            return getSubject$1(vb, parsed).subject
-          })
-        }
-        isSingular(n) {
-          return getNth(this, n).filter(vb => {
-            return getSubject$1(vb).plural !== true
-          })
-        }
-        isPlural(n) {
-          return getNth(this, n).filter(vb => {
-            return getSubject$1(vb).plural === true
-          })
-        }
-        isImperative(n) {
-          return getNth(this, n).filter(vb => vb.has('#Imperative'))
-        }
-        toInfinitive(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toInfinitive$2(vb, parsed, info.form)
-          })
-        }
-        toPresentTense(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toPresent$1(vb, parsed, info.form)
-          })
-        }
-        toPastTense(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toPast$1(vb, parsed, info.form)
-          })
-        }
-        toFutureTense(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toFuture$1(vb, parsed, info.form)
-          })
-        }
-        toGerund(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toGerund$1(vb, parsed, info.form)
-          })
-        }
-        conjugate(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return {
-              Infinitive: toInfinitive$2(vb.clone(), parsed, info.form).text('normal'),
-              PastTense: toPast$1(vb.clone(), parsed, info.form).text('normal'),
-              PresentTense: toPresent$1(vb.clone(), parsed, info.form).text('normal'),
-              FutureTense: toFuture$1(vb.clone(), parsed, info.form).text('normal'),
-            }
-          })
-        }
-        // overloaded - keep Verb class
-        update(pointer) {
-          let m = new Verbs(this.document, pointer);
-          m._cache = this._cache; // share this full thing
-          return m
-        }
-
-        /** return only verbs with 'not'*/
-        isNegative() {
-          return this.if('#Negative')
-        }
-        /**  return only verbs without 'not'*/
-        isPositive() {
-          return this.ifNo('#Negative')
-        }
-        /** remove 'not' from these verbs */
-        toPositive() {
-          let m = this.match('do not #Verb');
-          if (m.found) {
-            m.remove('do not');
-          }
-          return this.remove('#Negative')
-        }
-        toNegative(n) {
-          return getNth(this, n).map(vb => {
-            let parsed = parseVerb$1(vb);
-            let info = getGrammar$1(vb, parsed);
-            return toNegative$1(vb, parsed, info.form)
-          })
-        }
-      }
-      Verbs.prototype.toPast = Verbs.prototype.toPastTense;
-      Verbs.prototype.toPresent = Verbs.prototype.toPresentTense;
-      Verbs.prototype.toFuture = Verbs.prototype.toFutureTense;
-
-      View.prototype.verbs = function (n) {
-        let vb = find(this);
-        vb = getNth(vb, n);
-        return new Verbs(this.document, vb.pointer)
-      };
-    };
-    var api$1 = api;
-
-    var verbs = {
-      api: api$1,
-    };
-
-    const defaults = {
-      people: true,
-      emails: true,
-      phoneNumbers: true,
-      places: true,
-    };
-
-    const redact = function (opts = {}) {
-      opts = Object.assign({}, defaults, opts);
-      if (opts.people !== false) {
-        this.people().replaceWith('██████████');
-      }
-      if (opts.emails !== false) {
-        this.emails().replaceWith('██████████');
-      }
-      if (opts.places !== false) {
-        this.places().replaceWith('██████████');
-      }
-      if (opts.phoneNumbers !== false) {
-        this.phoneNumbers().replaceWith('███████');
-      }
-      return this
-    };
-
-    const plugin = {
-      api: function (View) {
-        View.prototype.redact = redact;
-      }
-    };
-    var redact$1 = plugin;
-
-    nlp$1.plugin(chunker); //
-    nlp$1.plugin(nouns); //
-    nlp$1.plugin(numbers); //
-    nlp$1.plugin(sentences); //
-    nlp$1.plugin(subjects); //
-    nlp$1.plugin(verbs); //
-    nlp$1.plugin(redact$1); //
-
-    var text = `Now this is a story all about how
-My life got flipped turned upside down
-And I'd like to take a minute, just sit right there
-I'll tell you how I became the prince of a town called Bel-Air
-
-In West Philadelphia born and raised
-On the playground is where I spent most of my days
-Chillin' out, maxin', relaxin' all cool
-And all shootin' some b-ball outside of the school
-When a couple of guys who were up to no good
-Started makin' trouble in my neighborhood
-I got in one little fight and my mom got scared
-And said "You're movin' with your auntie and uncle in Bel-Air"
-
-I pulled up to a house about seven or eight
-And I yelled to the cabbie "Yo', Holmes, smell ya later"
-I looked at my kingdom, I was finally there
-To sit on my throne as the Prince of Bel-Air`;
-
-    /* three/redact/App.svelte generated by Svelte v3.43.0 */
-    const file = "three/redact/App.svelte";
-
-    // (45:2) <One>
-    function create_default_slot_2(ctx) {
+    /* one/tokenize/App.svelte generated by Svelte v3.43.0 */
+
+    const { console: console_1 } = globals;
+    const file = "one/tokenize/App.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[7] = list[i];
+    	child_ctx[9] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[10] = list[i];
+    	child_ctx[12] = i;
+    	return child_ctx;
+    }
+
+    // (73:10) {#each o.terms as term, i}
+    function create_each_block_1(ctx) {
+    	let div0;
+    	let t0_value = /*showSpaces*/ ctx[2](/*term*/ ctx[10].pre) + "";
+    	let t0;
+    	let t1;
+    	let div1;
+    	let t2_value = /*showText*/ ctx[3](/*term*/ ctx[10]) + "";
+    	let t2;
+    	let t3;
+    	let div2;
+    	let t4_value = /*showSpaces*/ ctx[2](/*term*/ ctx[10].post) + "";
+    	let t4;
+
+    	const block = {
+    		c: function create() {
+    			div0 = element("div");
+    			t0 = text$1(t0_value);
+    			t1 = space();
+    			div1 = element("div");
+    			t2 = text$1(t2_value);
+    			t3 = space();
+    			div2 = element("div");
+    			t4 = text$1(t4_value);
+    			attr_dev(div0, "class", "space pre svelte-1v18ker");
+    			toggle_class(div0, "empty", !/*term*/ ctx[10].pre);
+    			add_location(div0, file, 73, 10, 1549);
+    			attr_dev(div1, "class", "term svelte-1v18ker");
+    			add_location(div1, file, 74, 10, 1637);
+    			attr_dev(div2, "class", "space post svelte-1v18ker");
+    			toggle_class(div2, "empty", !/*term*/ ctx[10].post);
+    			add_location(div2, file, 75, 10, 1688);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div0, anchor);
+    			append_dev(div0, t0);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, div1, anchor);
+    			append_dev(div1, t2);
+    			insert_dev(target, t3, anchor);
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, t4);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*res*/ 2 && t0_value !== (t0_value = /*showSpaces*/ ctx[2](/*term*/ ctx[10].pre) + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty & /*res*/ 2) {
+    				toggle_class(div0, "empty", !/*term*/ ctx[10].pre);
+    			}
+
+    			if (dirty & /*res*/ 2 && t2_value !== (t2_value = /*showText*/ ctx[3](/*term*/ ctx[10]) + "")) set_data_dev(t2, t2_value);
+    			if (dirty & /*res*/ 2 && t4_value !== (t4_value = /*showSpaces*/ ctx[2](/*term*/ ctx[10].post) + "")) set_data_dev(t4, t4_value);
+
+    			if (dirty & /*res*/ 2) {
+    				toggle_class(div2, "empty", !/*term*/ ctx[10].post);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(div1);
+    			if (detaching) detach_dev(t3);
+    			if (detaching) detach_dev(div2);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(73:10) {#each o.terms as term, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (79:8) {#if res[n+1]}
+    function create_if_block(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			attr_dev(div, "class", "div svelte-1v18ker");
+    			add_location(div, file, 79, 10, 1835);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(79:8) {#if res[n+1]}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (71:8) {#each res as o, n}
+    function create_each_block(ctx) {
+    	let div;
+    	let t;
+    	let if_block_anchor;
+    	let each_value_1 = /*o*/ ctx[7].terms;
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	let if_block = /*res*/ ctx[1][/*n*/ ctx[9] + 1] && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t = space();
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    			attr_dev(div, "class", "sentence row svelte-1v18ker");
+    			add_location(div, file, 71, 8, 1475);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			insert_dev(target, t, anchor);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*res, showSpaces, showText*/ 14) {
+    				each_value_1 = /*o*/ ctx[7].terms;
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
+    			}
+
+    			if (/*res*/ ctx[1][/*n*/ ctx[9] + 1]) {
+    				if (if_block) ; else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(71:8) {#each res as o, n}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (85:6) <Two>
+    function create_default_slot_3(ctx) {
     	let code;
     	let current;
 
     	code = new Code({
-    			props: { js: /*example*/ ctx[2], width: "500px" },
+    			props: { js: /*example*/ ctx[4], width: "500px" },
     			$$inline: true
     		});
 
@@ -32150,7 +28557,7 @@ To sit on my throne as the Prince of Bel-Air`;
     			mount_component(code, target, anchor);
     			current = true;
     		},
-    		p: noop$1,
+    		p: noop,
     		i: function intro(local) {
     			if (current) return;
     			transition_in(code.$$.fragment, local);
@@ -32167,40 +28574,98 @@ To sit on my throne as the Prince of Bel-Air`;
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_default_slot_2.name,
+    		id: create_default_slot_3.name,
     		type: "slot",
-    		source: "(45:2) <One>",
+    		source: "(85:6) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:0) <Page bottom='40px'>
+    // (89:6) <Three>
+    function create_default_slot_2(ctx) {
+    	let t0;
+    	let a;
+    	let t2;
+
+    	const block = {
+    		c: function create() {
+    			t0 = text$1("viz inspired by ");
+    			a = element("a");
+    			a.textContent = "Peritext";
+    			t2 = text$1(" by Geoffrey Litt.");
+    			attr_dev(a, "href", "https://www.inkandswitch.com/peritext/");
+    			add_location(a, file, 89, 24, 2022);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, a, anchor);
+    			insert_dev(target, t2, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(a);
+    			if (detaching) detach_dev(t2);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_2.name,
+    		type: "slot",
+    		source: "(89:6) <Three>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (64:2) <Page bottom="40px">
     function create_default_slot_1(ctx) {
     	let div0;
     	let t1;
     	let div1;
     	let t3;
-    	let textarea;
+    	let codemirror;
+    	let updating_text;
     	let t4;
-    	let pre;
+    	let div2;
     	let t5;
+    	let two;
     	let t6;
-    	let one;
+    	let three;
     	let current;
 
-    	textarea = new TextArea({
+    	function codemirror_text_binding(value) {
+    		/*codemirror_text_binding*/ ctx[5](value);
+    	}
+
+    	let codemirror_props = {};
+
+    	if (/*str*/ ctx[0] !== void 0) {
+    		codemirror_props.text = /*str*/ ctx[0];
+    	}
+
+    	codemirror = new CodeMirror_1({ props: codemirror_props, $$inline: true });
+    	binding_callbacks.push(() => bind(codemirror, 'text', codemirror_text_binding));
+    	let each_value = /*res*/ ctx[1];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	two = new Two({
     			props: {
-    				value: text,
-    				size: "18px",
-    				height: "400px",
-    				cb: /*onchange*/ ctx[1]
+    				$$slots: { default: [create_default_slot_3] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
 
-    	one = new One({
+    	three = new Three({
     			props: {
     				$$slots: { default: [create_default_slot_2] },
     				$$scope: { ctx }
@@ -32211,56 +28676,110 @@ To sit on my throne as the Prince of Bel-Air`;
     	const block = {
     		c: function create() {
     			div0 = element("div");
-    			div0.textContent = "compromise/three/redact";
+    			div0.textContent = "compromise/one/tokenize";
     			t1 = space();
     			div1 = element("div");
-    			div1.textContent = "hide identifiable information in a document -";
+    			div1.textContent = "text is more useful when it's json.";
     			t3 = space();
-    			create_component(textarea.$$.fragment);
+    			create_component(codemirror.$$.fragment);
     			t4 = space();
-    			pre = element("pre");
-    			t5 = text$2(/*res*/ ctx[0]);
+    			div2 = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t5 = space();
+    			create_component(two.$$.fragment);
     			t6 = space();
-    			create_component(one.$$.fragment);
+    			create_component(three.$$.fragment);
     			attr_dev(div0, "class", "lib");
-    			add_location(div0, file, 37, 4, 868);
+    			add_location(div0, file, 64, 6, 1193);
     			attr_dev(div1, "class", "down tab desc");
-    			add_location(div1, file, 38, 4, 919);
-    			attr_dev(pre, "class", "res down svelte-hqk0ir");
-    			add_location(pre, file, 41, 2, 1119);
+    			add_location(div1, file, 66, 6, 1300);
+    			attr_dev(div2, "class", "res col svelte-1v18ker");
+    			add_location(div2, file, 69, 6, 1417);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, div1, anchor);
     			insert_dev(target, t3, anchor);
-    			mount_component(textarea, target, anchor);
+    			mount_component(codemirror, target, anchor);
     			insert_dev(target, t4, anchor);
-    			insert_dev(target, pre, anchor);
-    			append_dev(pre, t5);
+    			insert_dev(target, div2, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div2, null);
+    			}
+
+    			insert_dev(target, t5, anchor);
+    			mount_component(two, target, anchor);
     			insert_dev(target, t6, anchor);
-    			mount_component(one, target, anchor);
+    			mount_component(three, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (!current || dirty & /*res*/ 1) set_data_dev(t5, /*res*/ ctx[0]);
-    			const one_changes = {};
+    			const codemirror_changes = {};
 
-    			if (dirty & /*$$scope*/ 8) {
-    				one_changes.$$scope = { dirty, ctx };
+    			if (!updating_text && dirty & /*str*/ 1) {
+    				updating_text = true;
+    				codemirror_changes.text = /*str*/ ctx[0];
+    				add_flush_callback(() => updating_text = false);
     			}
 
-    			one.$set(one_changes);
+    			codemirror.$set(codemirror_changes);
+
+    			if (dirty & /*res, showSpaces, showText*/ 14) {
+    				each_value = /*res*/ ctx[1];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div2, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			const two_changes = {};
+
+    			if (dirty & /*$$scope*/ 8192) {
+    				two_changes.$$scope = { dirty, ctx };
+    			}
+
+    			two.$set(two_changes);
+    			const three_changes = {};
+
+    			if (dirty & /*$$scope*/ 8192) {
+    				three_changes.$$scope = { dirty, ctx };
+    			}
+
+    			three.$set(three_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(textarea.$$.fragment, local);
-    			transition_in(one.$$.fragment, local);
+    			transition_in(codemirror.$$.fragment, local);
+    			transition_in(two.$$.fragment, local);
+    			transition_in(three.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(textarea.$$.fragment, local);
-    			transition_out(one.$$.fragment, local);
+    			transition_out(codemirror.$$.fragment, local);
+    			transition_out(two.$$.fragment, local);
+    			transition_out(three.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -32268,11 +28787,14 @@ To sit on my throne as the Prince of Bel-Air`;
     			if (detaching) detach_dev(t1);
     			if (detaching) detach_dev(div1);
     			if (detaching) detach_dev(t3);
-    			destroy_component(textarea, detaching);
+    			destroy_component(codemirror, detaching);
     			if (detaching) detach_dev(t4);
-    			if (detaching) detach_dev(pre);
+    			if (detaching) detach_dev(div2);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t5);
+    			destroy_component(two, detaching);
     			if (detaching) detach_dev(t6);
-    			destroy_component(one, detaching);
+    			destroy_component(three, detaching);
     		}
     	};
 
@@ -32280,14 +28802,14 @@ To sit on my throne as the Prince of Bel-Air`;
     		block,
     		id: create_default_slot_1.name,
     		type: "slot",
-    		source: "(37:0) <Page bottom='40px'>",
+    		source: "(64:2) <Page bottom=\\\"40px\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (49:0) <Below>
+    // (93:2) <Below>
     function create_default_slot(ctx) {
     	let a0;
     	let t1;
@@ -32300,12 +28822,12 @@ To sit on my throne as the Prince of Bel-Air`;
     			t1 = space();
     			a1 = element("a");
     			a1.textContent = "github";
-    			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/compromise-lookup");
+    			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/compromise-match-syntax");
     			attr_dev(a0, "class", "");
-    			add_location(a0, file, 49, 2, 1240);
-    			attr_dev(a1, "href", "https://github.com/spencermountain/compromise#one");
+    			add_location(a0, file, 93, 4, 2142);
+    			attr_dev(a1, "href", "https://github.com/spencermountain/compromise#two");
     			attr_dev(a1, "class", "");
-    			add_location(a1, file, 50, 2, 1330);
+    			add_location(a1, file, 94, 4, 2240);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a0, anchor);
@@ -32323,7 +28845,7 @@ To sit on my throne as the Prince of Bel-Air`;
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(49:0) <Below>",
+    		source: "(93:2) <Below>",
     		ctx
     	});
 
@@ -32331,6 +28853,7 @@ To sit on my throne as the Prince of Bel-Air`;
     }
 
     function create_fragment(ctx) {
+    	let div;
     	let back;
     	let t0;
     	let page;
@@ -32358,34 +28881,38 @@ To sit on my throne as the Prince of Bel-Air`;
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			create_component(back.$$.fragment);
     			t0 = space();
     			create_component(page.$$.fragment);
     			t1 = space();
     			create_component(below.$$.fragment);
+    			attr_dev(div, "class", "col svelte-1v18ker");
+    			add_location(div, file, 61, 0, 1135);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			mount_component(back, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			mount_component(page, target, anchor);
-    			insert_dev(target, t1, anchor);
-    			mount_component(below, target, anchor);
+    			insert_dev(target, div, anchor);
+    			mount_component(back, div, null);
+    			append_dev(div, t0);
+    			mount_component(page, div, null);
+    			append_dev(div, t1);
+    			mount_component(below, div, null);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
     			const page_changes = {};
 
-    			if (dirty & /*$$scope, res*/ 9) {
+    			if (dirty & /*$$scope, res, str*/ 8195) {
     				page_changes.$$scope = { dirty, ctx };
     			}
 
     			page.$set(page_changes);
     			const below_changes = {};
 
-    			if (dirty & /*$$scope*/ 8) {
+    			if (dirty & /*$$scope*/ 8192) {
     				below_changes.$$scope = { dirty, ctx };
     			}
 
@@ -32405,11 +28932,10 @@ To sit on my throne as the Prince of Bel-Air`;
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(back, detaching);
-    			if (detaching) detach_dev(t0);
-    			destroy_component(page, detaching);
-    			if (detaching) detach_dev(t1);
-    			destroy_component(below, detaching);
+    			if (detaching) detach_dev(div);
+    			destroy_component(back);
+    			destroy_component(page);
+    			destroy_component(below);
     		}
     	};
 
@@ -32425,52 +28951,114 @@ To sit on my throne as the Prince of Bel-Air`;
     }
 
     function instance($$self, $$props, $$invalidate) {
+    	let res;
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
-    	let res = nlp$1(text).redact().text();
+    	let str = `i have two questions. 'Why lie?' and 'Lies, why?'`;
 
-    	const onchange = function (txt) {
-    		$$invalidate(0, res = nlp$1(txt).redact().text());
+    	const doit = function () {
+    		console.log('=-=-=-= here -=-=-=-');
+    		$$invalidate(1, res = nlp$1(str).json());
     	};
 
-    	let example = `let doc = nlp('my number is 416-555-6732')
-doc.redact()
-doc.text()`;
+    	const showSpaces = function (str) {
+    		str = str.replace(/ /g, '_');
+    		str = str.replace(/\r?\n/g, '⏎');
+    		return str;
+    	};
+
+    	const showText = function (term) {
+    		if (term.machine) {
+    			return `[${term.machine}]`;
+    		}
+
+    		return term.text;
+    	};
+
+    	let example = `let doc = nlp('i was saying boo-urns')
+doc.json()
+/*[{
+    text: 'I was saying boo-urns.',
+    terms: [
+      {
+        text: 'I',
+        normal: 'i',
+        pre: '',
+        post: ' '
+      },
+      {
+        text: 'was',
+        pre: '',
+        post: ' '
+      },
+      {
+        text: 'saying',
+        pre: '',
+        post: ' '
+      },
+      {
+        text: 'boo',
+        pre: '',
+        post: '-'
+      },
+      {
+        text: 'urns',
+        pre: '',
+        post: '.'
+      }
+    ]
+  }]
+*/
+`;
 
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
+
+    	function codemirror_text_binding(value) {
+    		str = value;
+    		$$invalidate(0, str);
+    	}
 
     	$$self.$capture_state = () => ({
     		Page,
     		Back,
     		One,
-    		Two,
-    		Three,
     		Left,
+    		Two,
     		CodeMirror: CodeMirror_1,
-    		TextArea,
-    		Code,
     		Below,
+    		Code,
+    		TextArea,
+    		Three,
     		nlp: nlp$1,
-    		text,
-    		res,
-    		onchange,
-    		example
+    		str,
+    		doit,
+    		showSpaces,
+    		showText,
+    		example,
+    		res
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('res' in $$props) $$invalidate(0, res = $$props.res);
-    		if ('example' in $$props) $$invalidate(2, example = $$props.example);
+    		if ('str' in $$props) $$invalidate(0, str = $$props.str);
+    		if ('example' in $$props) $$invalidate(4, example = $$props.example);
+    		if ('res' in $$props) $$invalidate(1, res = $$props.res);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [res, onchange, example];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*str*/ 1) {
+    			$$invalidate(1, res = nlp$1(str).json());
+    		}
+    	};
+
+    	return [str, res, showSpaces, showText, example, codemirror_text_binding];
     }
 
     class App extends SvelteComponentDev {
