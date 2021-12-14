@@ -8,6 +8,7 @@
   import Block from '../lib/Block.svelte'
   import Tokenize from './demos/Tokenize.svelte'
   import Filesize from '../tmp/filesize/App.svelte'
+  import Perf from './graphs/Perf.svelte'
 </script>
 
 <Block color="#D68881" />
@@ -16,10 +17,10 @@
     <div class="lib">compromise/one</div>
     <div class="plugin">tokenization</div>
     <div style="margin-top:2rem;" />
-    <div class="tab" style="font-size:1rem; ">
+    <!-- <div class="tab" style="font-size:1rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
-    </div>
-    <div class="down tab">turn your novel into JSON -</div>
+    </div> -->
+    <div class="desc">turn your novel into JSON</div>
     <div class="" style="margin-top:4.5rem;">
       <Tokenize />
     </div>
@@ -84,18 +85,21 @@
   <Left>
     <div class="down col">
       <div>
-        <span class="lib">compromise/one</span> is 32kb
+        <span class="lib">compromise/one</span> is <span class="sea">42kb</span>
       </div>
 
       <!-- <Filesize /> -->
-      <img class="clean" style="width:300px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
-      <div>
-        it can do ~1.2mbs of text per second,
-        <div>or a novel every 3 seconds</div>
-      </div>
+      <img class="clean" style="width:450px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+    </div>
+    <div style="max-width:600px; margin-top:6rem;">
+      <Perf />
+    </div>
+    <div class="f09 right down">
+      it does ~800kb of text per second,
+      <div>or a bookshelf in 12s.</div>
     </div>
   </Left>
-  <div>
+  <div style="margin-top:6rem; margin-left:2rem;">
     <div>sometimes just splitting things up is enough.</div>
     <div class="m1">it feels like data now, a little.</div>
     <div class="m2 sea down f09">or swing harder ↓</div>
@@ -103,9 +107,26 @@
 </Page>
 
 <style>
-  .demo {
-    margin-top: 2rem;
-    text-decoration: underline;
+  .lib {
+    font-family: monospace, monospace;
+    border-bottom: 1px solid grey;
+    display: inline;
+    margin-left: 1rem;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+  }
+  .plugin {
+    font-family: monospace, monospace;
+    color: #cc8a66;
+    margin-top: 1rem;
+    margin-left: 5rem;
+  }
+  .desc {
+    margin-bottom: 6rem;
+    opacity: 0.9;
+  }
+  .right {
+    text-align: right;
   }
   .clean {
     box-shadow: none;

@@ -13335,50 +13335,60 @@ var app = (function () {
     	return block;
     }
 
-    // (19:2) {:then p}
+    // (23:2) {:then p}
     function create_then_block(ctx) {
     	let div4;
     	let div0;
     	let t0;
-    	let div2;
-    	let div1;
-    	let t1;
-    	let t2;
     	let div3;
+    	let div1;
+    	let t4;
+    	let div2;
+    	let t5;
 
     	const block = {
     		c: function create() {
     			div4 = element("div");
     			div0 = element("div");
     			t0 = space();
-    			div2 = element("div");
-    			div1 = element("div");
-    			t1 = text(/*txt*/ ctx[0]);
-    			t2 = space();
     			div3 = element("div");
-    			div3.textContent = "- 32 kb";
-    			attr_dev(div0, "class", "bar svelte-1s5w4p6");
-    			add_location(div0, file, 21, 6, 507);
-    			add_location(div1, file, 23, 8, 564);
-    			attr_dev(div2, "class", "size col svelte-1s5w4p6");
-    			add_location(div2, file, 22, 6, 533);
-    			attr_dev(div3, "class", "label svelte-1s5w4p6");
-    			add_location(div3, file, 27, 6, 620);
-    			attr_dev(div4, "class", "row svelte-1s5w4p6");
-    			add_location(div4, file, 20, 4, 483);
+    			div1 = element("div");
+    			div1.textContent = `- ${/*size*/ ctx[3]} kb`;
+    			t4 = space();
+    			div2 = element("div");
+    			t5 = text(/*txt*/ ctx[1]);
+    			attr_dev(div0, "class", "bar svelte-oygpfd");
+    			set_style(div0, "height", /*len*/ ctx[2] / 600 + "px");
+    			add_location(div0, file, 25, 6, 621);
+    			attr_dev(div1, "class", "label svelte-oygpfd");
+    			add_location(div1, file, 27, 8, 736);
+    			add_location(div2, file, 28, 8, 781);
+    			attr_dev(div3, "class", "size col svelte-oygpfd");
+    			set_style(div3, "min-height", /*max*/ ctx[0]);
+    			add_location(div3, file, 26, 6, 678);
+    			attr_dev(div4, "class", "row svelte-oygpfd");
+    			add_location(div4, file, 24, 4, 597);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div4, anchor);
     			append_dev(div4, div0);
     			append_dev(div4, t0);
-    			append_dev(div4, div2);
-    			append_dev(div2, div1);
-    			append_dev(div1, t1);
-    			append_dev(div4, t2);
     			append_dev(div4, div3);
+    			append_dev(div3, div1);
+    			append_dev(div3, t4);
+    			append_dev(div3, div2);
+    			append_dev(div2, t5);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*txt*/ 1) set_data_dev(t1, /*txt*/ ctx[0]);
+    			if (dirty & /*len*/ 4) {
+    				set_style(div0, "height", /*len*/ ctx[2] / 600 + "px");
+    			}
+
+    			if (dirty & /*txt*/ 2) set_data_dev(t5, /*txt*/ ctx[1]);
+
+    			if (dirty & /*max*/ 1) {
+    				set_style(div3, "min-height", /*max*/ ctx[0]);
+    			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div4);
@@ -13389,14 +13399,14 @@ var app = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(19:2) {:then p}",
+    		source: "(23:2) {:then p}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (17:12)      <p>...waiting</p>   {:then p}
+    // (21:12)      <p>...waiting</p>   {:then p}
     function create_pending_block(ctx) {
     	let p_1;
 
@@ -13404,7 +13414,7 @@ var app = (function () {
     		c: function create() {
     			p_1 = element("p");
     			p_1.textContent = "...waiting";
-    			add_location(p_1, file, 17, 4, 418);
+    			add_location(p_1, file, 21, 4, 532);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p_1, anchor);
@@ -13419,7 +13429,7 @@ var app = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(17:12)      <p>...waiting</p>   {:then p}",
+    		source: "(21:12)      <p>...waiting</p>   {:then p}",
     		ctx
     	});
 
@@ -13437,17 +13447,17 @@ var app = (function () {
     		pending: create_pending_block,
     		then: create_then_block,
     		catch: create_catch_block,
-    		value: 1
+    		value: 4
     	};
 
-    	handle_promise(/*p*/ ctx[1], info);
+    	handle_promise(/*p*/ ctx[4], info);
 
     	const block = {
     		c: function create() {
     			div = element("div");
     			info.block.c();
-    			attr_dev(div, "class", "m3 svelte-1s5w4p6");
-    			add_location(div, file, 15, 0, 384);
+    			attr_dev(div, "class", "m3 svelte-oygpfd");
+    			add_location(div, file, 19, 0, 498);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -13487,38 +13497,50 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
     	let txt = '';
+    	let size = '248';
+    	let len = 0;
+    	let { max = '400px' } = $$props;
 
     	// let p = fetch('./one.txt')
+    	// let p = fetch('./two.txt')
     	let p = fetch('./three.txt').// let p = fetch('https://unpkg.com/compromise@13.11.4-rc4/builds/compromise.js')
     	then(response => response.text()).then(data => {
     		console.log(data);
-    		$$invalidate(0, txt = data);
+    		$$invalidate(1, txt = data);
+    		$$invalidate(2, len = txt.length);
     	});
 
-    	const writable_props = [];
+    	const writable_props = ['max'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Page, TextArea, txt, p });
+    	$$self.$$set = $$props => {
+    		if ('max' in $$props) $$invalidate(0, max = $$props.max);
+    	};
+
+    	$$self.$capture_state = () => ({ Page, TextArea, txt, size, len, max, p });
 
     	$$self.$inject_state = $$props => {
-    		if ('txt' in $$props) $$invalidate(0, txt = $$props.txt);
-    		if ('p' in $$props) $$invalidate(1, p = $$props.p);
+    		if ('txt' in $$props) $$invalidate(1, txt = $$props.txt);
+    		if ('size' in $$props) $$invalidate(3, size = $$props.size);
+    		if ('len' in $$props) $$invalidate(2, len = $$props.len);
+    		if ('max' in $$props) $$invalidate(0, max = $$props.max);
+    		if ('p' in $$props) $$invalidate(4, p = $$props.p);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [txt, p];
+    	return [max, txt, len, size, p];
     }
 
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, {});
+    		init(this, options, instance, create_fragment, safe_not_equal, { max: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -13526,6 +13548,14 @@ var app = (function () {
     			options,
     			id: create_fragment.name
     		});
+    	}
+
+    	get max() {
+    		throw new Error("<App>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set max(value) {
+    		throw new Error("<App>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
