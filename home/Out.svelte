@@ -11,7 +11,34 @@
 <!-- <Page /> -->
 
 <Page>
-  <Block color="#bfb0b3" />
+  <!-- <Block color="#bfb0b3" /> -->
+
+  <Left accent="steelblue">
+    <div class="down" />
+    <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem; margin-top:4rem;" />
+    we think that &nbsp;<i>open-source, web-focused</i>&nbsp; tools
+    <div class="tab f09 down">
+      and a <a class="sea b i" href="https://github.com/spencermountain/compromise/graphs/contributors">stupidly-good</a
+      >&nbsp; group of contributers -
+    </div>
+    <div class="down f2 fuscia tab">focusing on configurability</div>
+    <div class="down f2 tulip" style="margin-top:100px; margin-left:25%;">
+      <div class="tab">avoiding fancy engineering</div>
+    </div>
+    <div class="down " style="margin-top:100px; margin-left:100px;">
+      and,
+      <div class="tab f2 blue">keeping filesize tiny.</div>
+    </div>
+    <!-- <div class="down f2 sky" style="margin-top:100px; margin-left:100px;">
+      <div class="tab">minimizing jargon</div>
+    </div> -->
+    <div style="margin-top:100px;" />
+    <div class="down tab">
+      that's the best way to build this.
+      <!-- <div class="tab">a crazy set of things.</div> -->
+    </div>
+  </Left>
+
   <One>
     <div>Compromise was created <b>in 2010</b></div>
     <!-- <div class="tab">we have published > 100 releases.</div> -->

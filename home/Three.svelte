@@ -12,16 +12,19 @@
 
 <Page>
   <Left>
-    <kbd style="font-size:2rem; line-height:2rem">compromise/three</kbd><span class="f2">:</span>
+    <b class="sky f2">compromise/three</b>
+    <div>includes transforming <span class="plugin">chunks</span>, or groups of words.</div>
+
+    <!-- <kbd style="font-size:2rem; line-height:2rem">compromise/three</kbd><span class="f2">:</span> -->
     <div style="margin-top:2rem;" />
     <div class="tab" style="font-size:1.8rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; chunks / phrases / clauses</span> -
     </div>
     <!-- <div class="down tab">turn your novel into JSON.</div> -->
   </Left>
-  <One>
+  <!-- <One>
     <Chunker />
-  </One>
+  </One> -->
 
   <One>
     <div>
@@ -76,7 +79,13 @@
     </ul>
   </Two>
 
-  <One />
+  <One>
+    <div class="row">
+      <img class="clean" style="width:250px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+      <img class="clean" style="width:250px;" src="./home/img/two.jpg" alt="compromise/two filesize" />
+      <img class="clean" style="width:250px;" src="./home/img/three.jpg" alt="compromise/three filesize" />
+    </div>
+  </One>
   <One>
     If you’re cautious, and worried this won’t work,
     <div class="tab sea">you are very clever.</div>

@@ -11,26 +11,26 @@
   import Perf from './graphs/Perf.svelte'
 </script>
 
-<Block color="#D68881" />
+<!-- <Block color="#D68881" /> -->
 <Page>
   <Left>
-    <div class="lib">compromise/one</div>
-    <div class="plugin">tokenization</div>
+    <b class="sky f2">compromise/one</b>
+    <div>just is <span class="plugin" style="margin-left:5px;">tokenization</span>.</div>
     <div style="margin-top:2rem;" />
     <!-- <div class="tab" style="font-size:1rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div> -->
     <div class="desc">turn your novel into JSON</div>
-    <div class="" style="margin-top:4.5rem;">
+    <!-- <div class="" style="margin-top:4.5rem;">
       <Tokenize />
-    </div>
+    </div> -->
   </Left>
   <One>
     <!-- <div class="f09">promise -</div> -->
     <!-- <div><kbd>compromise/one</kbd> is a completely uncontroversial way</div> -->
     <!-- <div class="f09">you can</div> -->
     <div class="tab">
-      with a one-liner-
+      <!-- with a one-liner- -->
 
       <div class="tab">in a couple milliseconds</div>
     </div>
@@ -41,7 +41,7 @@
   </One>
 
   <One>
-    <div class="down">the tokenizer's been refined over 10 ruthless github-years</div>
+    <!-- <div class="down">the tokenizer's been refined over 10 ruthless github-years</div> -->
     <!-- <div class="tab f09">and is running at the UN, government orgs, banks, and many software companies.</div> -->
     <!-- <div>this basic thing has been refined for 8 ruthless github-years</div> -->
 

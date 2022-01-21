@@ -3,7 +3,7 @@
   import One from './home/One.svelte'
   import Two from './home/Two.svelte'
   import Three from './home/Three.svelte'
-  import Four from './home/Four.svelte'
+  // import Four from './home/Four.svelte'
   import Out from './home/Out.svelte'
 </script>
 
@@ -14,7 +14,7 @@
 
 <Three />
 
-<Four />
+<!-- <Four /> -->
 <Out />
 
 <style>
