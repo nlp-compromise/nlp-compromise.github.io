@@ -39,7 +39,7 @@ doc.contractions().length
   onChange()
 </script>
 
-<Back />
+<Back href="https://compromise.cool" />
 <Page bottom="40px">
   <div class="lib">compromise/two</div>
   <div class="plugin">contractions</div>
@@ -77,10 +77,5 @@ doc.contractions().length
   .res {
     margin-top: 4rem;
     margin-left: 4rem;
-  }
-  .right {
-    margin-top: -100px;
-    margin-left: 50%;
-    text-align: center;
   }
 </style>

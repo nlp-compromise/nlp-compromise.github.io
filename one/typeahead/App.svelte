@@ -1,27 +1,25 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
   import nlp from '/Users/spencer/mountain/compromise/src/one.js'
-  
-  let words=[
-`bedfordshire`,
-`aberdeenshire`,
-`buckinghamshire`,
-`argyllshire`,
-`bambridgeshire`,
-`cheshire`,
-`ayrshire`,
+
+  let words = [
+    `bedfordshire`,
+    `aberdeenshire`,
+    `buckinghamshire`,
+    `argyllshire`,
+    `bambridgeshire`,
+    `cheshire`,
+    `ayrshire`,
   ]
   nlp.typeAhead(words)
 
-
-
-  let text=`argyl`
-  $: more=()=>{
-    let doc=nlp(text).compute('typeahead')
+  let text = `argyl`
+  $: more = () => {
+    let doc = nlp(text).compute('typeahead')
     doc.autoFill()
     return doc.text()
   }
-let example=`nlp.typeAhead(['argyllshire','bambridgeshire'])
+  let example = `nlp.typeAhead(['argyllshire','bambridgeshire'])
 
 let doc = nlp(text)
 doc.compute('typeahead') //kaboom
@@ -34,65 +32,29 @@ doc.text() // 'argyllshire'
 `
 </script>
 
-
-<style >
-  .res {
-    font-size:4rem;
-    line-height:4.5rem;
-    margin-top:3rem;
-    margin-left:2rem;
-    margin-bottom:2rem;
-    color:#2D85A8;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    text-align:center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
-.col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: flex-start;
-  text-align:center;
-  flex-wrap: wrap;
-  align-self: stretch;
-}
-.both {
-  display: flex;
-  flex-direction: row;
-  justify-content: stretch;
-  align-items: center;
-  text-align:center;
-  flex-wrap: wrap;
-  align-self: stretch;
-}
-</style >
-
 <div class="col">
-  <Back />
+  <Back href="https://compromise.cool" />
   <Page bottom="40px">
-      <div class="lib">compromise/one</div>
-      <div class="plugin">type-ahead</div>
-      <div class="down tab desc">assume a word, before it is fully-typed</div>
-      <div class="both">
-        <div style="flex-grow:1">          
-          <CodeMirror bind:text={text}/>
-          <div class="res">
-             {more()} 
-          </div>
+    <div class="lib">compromise/one</div>
+    <div class="plugin">type-ahead</div>
+    <div class="down tab desc">assume a word, before it is fully-typed</div>
+    <div class="both">
+      <div style="flex-grow:1">
+        <CodeMirror bind:text />
+        <div class="res">
+          {more()}
         </div>
-        <TextArea width="140px" height="250px" value={words.join('\n')} size="0.9rem" readonly={true}/>
       </div>
-      <Two>
-        <Code js={example} width="500px"/>
-      </Two>        
+      <TextArea width="140px" height="250px" value={words.join('\n')} size="0.9rem" readonly={true} />
+    </div>
+    <Two>
+      <Code js={example} width="500px" />
+    </Two>
   </Page>
-  <Below> 
+  <Below>
     <a href="https://observablehq.com/@spencermountain/compromise-typeahead" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#one" class="">github</a>
   </Below>
 </div>
 
+<style></style>

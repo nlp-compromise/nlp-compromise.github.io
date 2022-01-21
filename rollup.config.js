@@ -9,7 +9,7 @@ import css from 'rollup-plugin-css-only'
 let dir = process.env.PAGE || '.'
 let out = `${dir}/build/bundle.js`
 let input = dir + '/main.js'
-
+console.log(input)
 const production = !process.env.ROLLUP_WATCH
 
 function serve() {

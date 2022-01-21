@@ -77,7 +77,7 @@
     <div style="width:250px;" />
     <Grid seed="1a30de68df4ea7e7bef" />
   </Two>
-  <div>why does a sentence have to kill our information?</div>
+  <!-- <div>why does a sentence have to kill our information?</div> -->
 
   <One>
     <div class="space" />

@@ -7,7 +7,7 @@
   import Caret from '../lib/Caret.svelte'
   import Block from '../lib/Block.svelte'
   import Tokenize from './demos/Tokenize.svelte'
-  import Filesize from '../tmp/filesize/App.svelte'
+  import Filesize from './tmp/filesize/App.svelte'
   import Perf from './graphs/Perf.svelte'
 </script>
 
@@ -78,6 +78,12 @@
       </li>
       <li class="down">
         <a href="./one/syllables"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a>
+      </li>
+      <li class="down">
+        <a href="./one/tfidf"><span class="choose" style="color:white;">TFIDF</span> <Caret /></a>
+      </li>
+      <li class="down">
+        <a href="./one/wikipedia"><span class="choose" style="color:white;">Wikipedia Topics</span> <Caret /></a>
       </li>
     </ul>
   </Two>

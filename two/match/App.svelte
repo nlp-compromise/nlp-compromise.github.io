@@ -1,9 +1,9 @@
 <script>
   import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
   import nlp from '/Users/spencer/mountain/compromise/src/two.js'
-  let str='the #Noun is #Adjective'
-  let count=0
-  let example=`const doc = nlp('simon says clean the fridge')
+  let str = 'the #Noun is #Adjective'
+  let count = 0
+  let example = `const doc = nlp('simon says clean the fridge')
 
 // detect a match
 let found = doc.has('simon says') 
@@ -13,100 +13,69 @@ let found = doc.has('simon says')
 let m = doc.match('simon says [#Verb+]', 0)
 m.text() // 'clean'
 `
-  let doc=nlp('')
-  let res=doc.none()
-  let duration=0
+  let doc = nlp('')
+  let res = doc.none()
+  let duration = 0
 
-  const doit=function(){
+  const doit = function () {
     let begin = new Date()
-    res=doc.match(str)
+    res = doc.match(str)
     let end = new Date()
-    duration=end.getTime() - begin.getTime()
+    duration = end.getTime() - begin.getTime()
   }
 
   // load on init
-  let ps=[]
-  for (let i = 1; i < 20; i += 1){
-    const p=fetch(`https://unpkg.com/nlp-corpus@4.0.0/builds/${i}-doc.txt`)
-    .then(response => response.text()).then(txt=>nlp(txt))
+  let ps = []
+  for (let i = 1; i < 20; i += 1) {
+    const p = fetch(`https://unpkg.com/nlp-corpus@4.0.0/builds/${i}-doc.txt`)
+      .then(response => response.text())
+      .then(txt => nlp(txt))
     ps.push(p)
   }
-  let p = Promise.all(ps).then((res)=>{
+  let p = Promise.all(ps).then(res => {
     console.log('downloaded')
-    doc=res[0]
+    doc = res[0]
     // let txt=res.join('\n')
     // doc=nlp(txt)
     console.log('parsed')
-    count+=doc.length
+    count += doc.length
     doit()
   })
 </script>
 
 <div class="col">
-  <Back />
+  <Back href="https://compromise.cool" />
   <Page bottom="40px">
-      <div class="lib">compromise/two</div>
-      <div class="plugin">match-syntax</div>
-      <div class="down tab desc">grammar is finally useful.</div>
-      <CodeMirror bind:text={str} />
-    
-      {#await p}
-    <div class="col" style="align-items: center;">...loading documents</div>
-  {:then p}
+    <div class="lib">compromise/two</div>
+    <div class="plugin">match-syntax</div>
+    <div class="down tab desc">grammar is finally useful.</div>
+    <CodeMirror bind:text={str} />
 
-  <div class="col" style="align-items: center;">
-    <button on:click={doit}>run</button>
-    searching {count.toLocaleString()} sentences
-  </div>
+    {#await p}
+      <div class="col" style="align-items: center;">...loading documents</div>
+    {:then p}
+      <div class="col" style="align-items: center;">
+        <button on:click={doit}>run</button>
+        searching {count.toLocaleString()} sentences
+      </div>
 
-    <!-- sentence-list -->
-    <div class="list">
-      <div style="margin-bottom:2rem;">{res.length} matches in {duration}ms</div>
-      {#each res.json() as o}
-      <div class="sentence">•  {o.text}</div>
-      {/each}
-    </div>
-  {/await}
+      <!-- sentence-list -->
+      <div class="list">
+        <div style="margin-bottom:2rem;">{res.length} matches in {duration}ms</div>
+        {#each res.json() as o}
+          <div class="sentence">• {o.text}</div>
+        {/each}
+      </div>
+    {/await}
 
-      <Two>
-        <Code js={example} width="500px"/>
-      </Two>        
+    <Two>
+      <Code js={example} width="500px" />
+    </Two>
   </Page>
-  <Below> 
+  <Below>
     <a href="https://observablehq.com/@spencermountain/compromise-match-syntax" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#two" class="">github</a>
   </Below>
 </div>
 
-
-<style >
-.col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: flex-start;
-  text-align:center;
-  flex-wrap: wrap;
-  align-self: stretch;
-}
-.list{
-  font-size:0.9rem;
-  margin-right:4rem;
-  margin-top:4rem;
-  margin-left:4rem;
-  padding:1rem;
-  color:#606c74;
-  border-bottom: 2px solid transparent;
-  border-left: 4px solid lightgrey;
-  color: #577c97;
-  box-shadow: 2px 1px 5px 0 rgba(0, 0, 0, 0.2);
-  border-bottom: 2px solid lightsteelblue;
-  font-style: italic;
-  overflow-y:scroll;
-  max-height:500px;
-}
-.sentence{
-  margin-bottom:30px;
-
-}
-</style >
+<style></style>

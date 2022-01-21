@@ -1,5 +1,5 @@
 <script>
-  import { Page, TextArea } from '../../lib/index.js'
+  import { Page, TextArea } from '../../../lib/index.js'
   // import Code from './Code.svelte'
   let txt = ''
   let size = '248'
