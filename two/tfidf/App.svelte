@@ -7,10 +7,12 @@
   // interpolateYlOrRd
   // console.log(interpolateYlOrRd)
   let res = []
+  let max = 7
   let text = `i pronounce it to be the most whimsical take of the season`
   $: more = () => {
     let doc = nlp(text)
-    return doc.tfidf()
+    doc.compute('tfidf')
+    return doc.terms().json()
   }
   let example = `import stats from 'compromise-stats'
 nlp.plugin(stats)
@@ -26,7 +28,7 @@ doc.compute('tfidf').json()
 <div class="col">
   <Back href="https://compromise.cool" />
   <Page bottom="40px">
-    <div class="lib">compromise/one</div>
+    <div class="lib">compromise/two</div>
     <div class="plugin blue"><b class="">compromise-stats</b> plugin</div>
     <div class="plugin">tfidf</div>
     <div class="down tab desc">find the least-common words in a document</div>
@@ -34,12 +36,16 @@ doc.compute('tfidf').json()
       <div style="flex-grow:1">
         <CodeMirror bind:text />
         <div class="res row">
-          {#each more() as o}
-            <div class="word" style="background-color:{interpolateGnBu(o[2] * 10)}">
-              <div>
-                {o[0]}
-              </div>
-              <div class="smol">{o[2]}</div>
+          {#each more() as obj}
+            <div>
+              {#each obj.terms as o, i}
+                <div class="word" style="background-color:{interpolateGnBu(o.tfidf / max)}">
+                  <div>
+                    {o.normal}
+                  </div>
+                  <div class="smol">{o.tfidf}</div>
+                </div>
+              {/each}
             </div>
           {/each}
         </div>

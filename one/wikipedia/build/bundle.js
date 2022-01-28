@@ -14563,7 +14563,7 @@ var app = (function () {
 
     var tmp = { methods: methods$p, model: model$8, compute: compute$c, hooks };
 
-    const isArray$6 = input => Object.prototype.toString.call(input) === '[object Array]';
+    const isArray$7 = input => Object.prototype.toString.call(input) === '[object Array]';
 
     const fns$4 = {
       /** add metadata to term objects */
@@ -14575,7 +14575,7 @@ var app = (function () {
           compute[input](this);
         }
         // allow a list of methods
-        else if (isArray$6(input)) {
+        else if (isArray$7(input)) {
           input.forEach(name => world.compute.hasOwnProperty(name) && compute[name](this));
         }
         // allow a custom compute function
@@ -14962,7 +14962,7 @@ var app = (function () {
     };
     var extend$1 = extend;
 
-    const isArray$5 = arr => Object.prototype.toString.call(arr) === '[object Array]';
+    const isArray$6 = arr => Object.prototype.toString.call(arr) === '[object Array]';
 
     const isObject$3 = item => item && typeof item === 'object' && !Array.isArray(item);
 
@@ -14970,12 +14970,11 @@ var app = (function () {
 
     // deep-i-guess clone of model object
     const deepClone$1 = function (model) {
-      // console.log(Object.keys(obj))
       for (const key in model) {
         if (isObject$3(model[key])) {
           model[key] = Object.assign({}, model[key]);
           model[key] = deepClone$1(model[key]); //recursive
-        } else if (isArray$5(model[key])) {
+        } else if (isArray$6(model[key])) {
           model[key] = model[key].slice(0);
         } else if (isSet(model[key])) {
           model[key] = new Set(model[key]);
@@ -15226,7 +15225,7 @@ var app = (function () {
       }
     };
 
-    const isArray$4 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+    const isArray$5 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
 
     const getTerms = function (input, world) {
       const { methods } = world;
@@ -15239,8 +15238,8 @@ var app = (function () {
         return input.docs[0] //assume one sentence
       }
       //allow an array of terms, too
-      if (isArray$4(input)) {
-        return isArray$4(input[0]) ? input[0] : input
+      if (isArray$5(input)) {
+        return isArray$5(input[0]) ? input[0] : input
       }
       return []
     };
@@ -15696,7 +15695,7 @@ var app = (function () {
     };
     var fork = methods$k;
 
-    const isArray$3 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+    const isArray$4 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
 
     // append a new document, somehow
     const combineDocs = function (homeDocs, inputDocs) {
@@ -15743,7 +15742,7 @@ var app = (function () {
           return combineViews(this, input)
         }
         // assume it's an array of terms
-        if (isArray$3(input)) {
+        if (isArray$4(input)) {
           let docs = combineDocs(this.document, input);
           this.document = docs;
           return this.all()
@@ -16237,7 +16236,6 @@ var app = (function () {
     var split$1 = methods$g;
 
     const methods$f = Object.assign({}, match$3, lookaround, split$1);
-
     // aliases
     methods$f.lookBehind = methods$f.before;
     methods$f.lookBefore = methods$f.before;
@@ -16949,6 +16947,10 @@ var app = (function () {
       return false
     };
 
+    const isArray$3 = function (arr) {
+      return Object.prototype.toString.call(arr) === '[object Array]'
+    };
+
     const doOrBlock = function (state, skipN = 0) {
       let block = state.regs[state.r];
       let wasFound = false;
@@ -16956,6 +16958,14 @@ var app = (function () {
       for (let c = 0; c < block.choices.length; c += 1) {
         // try to match this list of tokens
         let regs = block.choices[c];
+        if (!isArray$3(regs)) {
+          // console.log('=-=-=-= bad -=-=-=-')
+          // console.dir(state.regs, { depth: 5 })
+          return false
+        }// } else {
+        //   // console.log('=-=-=-= good -=-=-=-')
+        //   // console.dir(state.regs[0], { depth: 5 })
+        // }
         wasFound = regs.every((cr, w_index) => {
           let extra = 0;
           let t = state.t + w_index + skipN + extra;
@@ -17884,7 +17894,6 @@ var app = (function () {
     };
 
     const methods$a = Object.assign({}, out$1, text, json);
-
     // aliases
     methods$a.data = methods$a.json;
 
@@ -18602,8 +18611,6 @@ var app = (function () {
       const { model, methods } = this.world();
       const tagSet = model.one.tagSet;
       const addTags = methods.one.addTags;
-      // console.log('=-=-=-= here -=-=-=-')
-      // console.log(Object.keys(model.one).length)
 
       let res = addTags(tags, tagSet);
       model.one.tagSet = res;
@@ -20316,7 +20323,7 @@ var app = (function () {
       // { before: 'd', out: preD }, // d'amerique
     ];
 
-    var model$4 = { two: { contractions: contractions$4 } };
+    var model$4 = { one: { contractions: contractions$4 } };
 
     // put n new words where 1 word was
     const insertContraction$1 = function (document, point, words) {
@@ -20779,7 +20786,7 @@ var app = (function () {
     const contractions$2 = (view) => {
       let { world, document } = view;
       const { model, methods } = world;
-      let list = model.two.contractions || [];
+      let list = model.one.contractions || [];
       // each sentence
       document.forEach((terms, n) => {
         // loop through terms backwards
@@ -23039,12 +23046,20 @@ var app = (function () {
     // console.log(convert('buy', toPresent))
 
     const adjToSuperlative = function (adj, model) {
-      const toSuper = model.two.models.toSuperlative;
-      return convert$1(adj, toSuper)
+      const mod = model.two.models.toSuperlative;
+      return convert$1(adj, mod)
     };
     const adjToComparative = function (adj, model) {
-      const toComp = model.two.models.toComparative;
-      return convert$1(adj, toComp)
+      const mod = model.two.models.toComparative;
+      return convert$1(adj, mod)
+    };
+    const adjFromComparative = function (adj, model) {
+      const mod = model.two.models.fromComparative;
+      return convert$1(adj, mod)
+    };
+    const adjFromSuperlative = function (adj, model) {
+      const mod = model.two.models.fromSuperlative;
+      return convert$1(adj, mod)
     };
 
     var transform = {
@@ -23052,7 +23067,7 @@ var app = (function () {
       verbToInfinitive, getTense: getTense$1,
       verbConjugate,
 
-      adjToSuperlative, adjToComparative
+      adjToSuperlative, adjToComparative, adjFromSuperlative, adjFromComparative
     };
 
     // transformations to make on our lexicon
@@ -24219,6 +24234,12 @@ var app = (function () {
     var preTagger$1 = preTagger;
 
     const toRoot = {
+      // 'spencer's' -> 'spencer'
+      'Possessive': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        str = str.replace(/'s$/, '');
+        return str
+      },
       // 'drinks' -> 'drink'
       'Plural': (term, world) => {
         let str = term.machine || term.normal || term.text;
@@ -24229,24 +24250,42 @@ var app = (function () {
         let str = term.machine || term.normal || term.text;
         return world.methods.two.transform.verbToInfinitive(str, world.model, 'PastTense')
       },
+      // 'walking' -> 'walk'
+      'Gerund': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.verbToInfinitive(str, world.model, 'Gerund')
+      },
       // 'walks' -> 'walk'
       'PresentTense': (term, world) => {
         let str = term.machine || term.normal || term.text;
         return world.methods.two.transform.verbToInfinitive(str, world.model, 'PresentTense')
+      },
+      // 'quieter' -> 'quiet'
+      'Comparative': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.adjFromComparative(str, world.model)
+      },
+      // 'quietest' -> 'quiet'
+      'Superlative': (term, world) => {
+        let str = term.machine || term.normal || term.text;
+        return world.methods.two.transform.adjFromSuperlative(str, world.model)
       },
     };
 
     const getRoot = function (view) {
       const world = view.world;
       const keys = Object.keys(toRoot);
-      // console.log(world.methods.two.transform.nounToSingular)
       view.docs.forEach(terms => {
         for (let i = 0; i < terms.length; i += 1) {
           const term = terms[i];
           for (let k = 0; k < keys.length; k += 1) {
             if (term.tags.has(keys[k])) {
               const fn = toRoot[keys[k]];
-              term.root = fn(term, world);
+              let root = fn(term, world);
+              if (term.normal !== root) {
+                term.root = root;
+              }
+              break
             }
           }
         }
@@ -26335,6 +26374,7 @@ var app = (function () {
           more.forEach(mo => {
             let newObj = Object.assign({}, obj); //clone
             newObj.regs = obj.regs.slice(0); //clone
+            // console.log(mo)
             newObj.regs[foundOr] = mo;
             newObj._expanded = true;
             all.push(newObj);
@@ -26348,7 +26388,7 @@ var app = (function () {
           more.forEach(mo => {
             let newObj = Object.assign({}, obj); //clone
             newObj.regs = obj.regs.slice(0); //clone
-            newObj.regs[foundOr] = mo;
+            newObj.regs[foundOr] = mo; //!fixme [mo]?
             newObj._expanded = true;
             all.push(newObj);
           });
