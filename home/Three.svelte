@@ -13,13 +13,13 @@
 <Page>
   <Left>
     <b class="sky f2">compromise/three</b>
-    <div>includes transforming <span class="plugin">chunks</span>, or groups of words.</div>
+    <div>helps interpret <span class="plugin">chunks</span>, or groups of words.</div>
 
     <!-- <kbd style="font-size:2rem; line-height:2rem">compromise/three</kbd><span class="f2">:</span> -->
     <div style="margin-top:2rem;" />
-    <div class="tab" style="font-size:1.8rem; ">
+    <!-- <div class="tab" style="font-size:1.8rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; chunks / phrases / clauses</span> -
-    </div>
+    </div> -->
     <!-- <div class="down tab">turn your novel into JSON.</div> -->
   </Left>
   <!-- <One>
@@ -43,7 +43,7 @@
       <!-- <div>it's too bad -</div> -->
       <div class="">
         a word can be two things,
-        <div class="tab f09">or a 3rd of a thing.</div>
+        <div class="tab f09">or a 1/3rd of a thing.</div>
       </div>
     </div>
   </One>

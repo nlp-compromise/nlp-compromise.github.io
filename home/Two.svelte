@@ -14,7 +14,7 @@
 <Page>
   <Left>
     <b class="sky f2">compromise/two</b>
-    <div>includes <span class="plugin">tagging</span> the grammar the words.</div>
+    <div>includes <span class="plugin">tagging</span> the light grammar of the words.</div>
 
     <!-- <kbd style="font-size:2rem; line-height:2rem">compromise/two</kbd><span class="f2">:</span> -->
     <div style="margin-top:5rem;" />

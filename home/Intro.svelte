@@ -11,7 +11,7 @@
       <div class="i" style="font-size:1.8rem; line-height:2rem;">we put</div>
       <div class="tab f2">all of our information</div>
     </div>
-    <div class="tab i f2 rose">in text</div>
+    <div class="tab i f2 rose">into text.</div>
     <div style="margin-top:3rem;" />
     <div class="margin-left:15rem;">
       <Grid seed="45ea07497996cea6af4" />
@@ -48,7 +48,7 @@
         <!-- <span style="font-size:1.5rem;" class="cherry">out</span> -->
         <span style="font-size:12px;">-◡</span>
       </div>
-      <div class="tab down f09"><span style="font-size:12px;">like</span>, to <i>use it</i>&nbsp; again.</div>
+      <div class="tab down f09"><span style="font-size:12px;">like</span>, to <i>use it</i>&nbsp; again?</div>
       <Grid seed="d6ba2837558e747e314" />
     </div>
     <div style="margin-top:3rem;" />
@@ -68,7 +68,7 @@
 
   <Two />
   <Two>
-    <div class="f09">and people</div>
+    <div class="f09">yet people</div>
     <div class="i sea tab">keep typing</div>
     <div class="f09 tab">more of it.</div>
   </Two>

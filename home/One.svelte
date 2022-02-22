@@ -15,12 +15,12 @@
 <Page>
   <Left>
     <b class="sky f2">compromise/one</b>
-    <div>just is <span class="plugin" style="margin-left:5px;">tokenization</span>.</div>
+    <div>is <span class="plugin" style="margin-left:5px;">tokenization</span>.</div>
     <div style="margin-top:2rem;" />
     <!-- <div class="tab" style="font-size:1rem; ">
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div> -->
-    <div class="desc">turn your novel into JSON</div>
+    <div class="desc">flip a novel into JSON</div>
     <!-- <div class="" style="margin-top:4.5rem;">
       <Tokenize />
     </div> -->

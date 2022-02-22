@@ -6,6 +6,7 @@
   import Row from '../lib/Row.svelte'
   import Grid from '../lib/Grid/Grid.svelte'
   import Block from '../lib/Block.svelte'
+  import friends from './graphs/people.js'
 </script>
 
 <!-- <Page /> -->
@@ -16,11 +17,21 @@
   <Left accent="steelblue">
     <div class="down" />
     <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem; margin-top:4rem;" />
+
+    <div>Compromise was created <b>in 2010</b>:</div>
+    <div class="tab f08">we've shipped >100 incremental releases</div>
+    <div>
+      {#each friends as friend}
+        <span class="friend">{friend}</span>
+      {/each}
+    </div>
+  </Left>
+  <Left>
     we think that &nbsp;<i>open-source, web-focused</i>&nbsp; tools
-    <div class="tab f09 down">
+    <!-- <div class="tab f09 down">
       and a <a class="sea b i" href="https://github.com/spencermountain/compromise/graphs/contributors">stupidly-good</a
       >&nbsp; group of contributers -
-    </div>
+    </div> -->
     <div class="down f2 fuscia tab">focusing on configurability</div>
     <div class="down f2 tulip" style="margin-top:100px; margin-left:25%;">
       <div class="tab">avoiding fancy engineering</div>
@@ -40,22 +51,25 @@
   </Left>
 
   <One>
-    <div>Compromise was created <b>in 2010</b></div>
     <!-- <div class="tab">we have published > 100 releases.</div> -->
 
     <div class="down f09">
       the benevolent dictator,
-      <div class="f09 tab sea">and territorial benefactor -</div>
+      <div class="f08  sea">and territorial benefactor</div>
       <div class="tab">
-        is <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a>
+        is <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a>.
       </div>
     </div>
     <!-- <div class="tab">paid work often shows up <a href="">in our public discord</a>.</div> -->
-    <div class="down f09">PRs are <span class="sky i">well-respected.</span></div>
+    <div class="down f09">
+      PRs are always <a href="https://github.com/spencermountain/compromise/wiki/Contributing" class="link sky i"
+        >well-respected.</a
+      >
+    </div>
   </One>
   <Two>
     <div class="f09 down">Web-Assembly <b>&lt;should definetly happen&gt;</b></div>
-    <div class="down"><b class="sea">Non-english versions</b> &lt;are happening slowly&gt;.</div>
+    <div class="down"><b class="sea">Non-english versions</b> &lt;are happening and need help&gt;.</div>
   </Two>
 
   <Left>
@@ -98,3 +112,15 @@
     MIT
   </Two>
 </Page>
+
+<style>
+  .f08 {
+    font-size: 0.7rem;
+  }
+  .friend {
+    font-size: 0.8rem;
+    padding: 1.2rem;
+    display: inline-block;
+    white-space: nowrap;
+  }
+</style>
