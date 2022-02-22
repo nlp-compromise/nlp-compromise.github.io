@@ -98,6 +98,17 @@ h2 {
 .tab {
   margin-left: 4rem;
 }
+@media only screen and (max-width:600px) {
+  .tab {
+    margin-left: 2rem;
+  }
+}
+@media only screen and (max-width:400px) {
+  .tab {
+    margin-left: 1rem;
+  }
+}
+
 .down {
   margin-top: 2rem;
 }

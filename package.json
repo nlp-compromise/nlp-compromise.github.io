@@ -5,12 +5,8 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "watch:tfidf": "PAGE=one/tfidf rollup -c -w",
-    "watch:wikipedia": "PAGE=one/wikipedia rollup -c -w",
-    "watch:typeahead": "PAGE=one/typeahead rollup -c -w",
-    "watch:contractions": "PAGE=two/contractions rollup -c -w",
-    "watch:dates": "PAGE=three/dates rollup -c -w",
-    "watch:redact": "PAGE=three/redact rollup -c -w",
+    "watch:demo": "PAGE=one/tokenize rollup -c -w",
+    "watch:tfidf": "rollup -c -w -- one/tfidf",
     "start": "sirv --no-clear"
   },
   "devDependencies": {

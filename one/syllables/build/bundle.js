@@ -11509,7 +11509,7 @@ var app = (function () {
      * @returns {string}
      */
     function lookahead(re) {
-      return concat('(?=', re, ')');
+      return concat$1('(?=', re, ')');
     }
 
     /**
@@ -11517,7 +11517,7 @@ var app = (function () {
      * @returns {string}
      */
     function anyNumberOfTimes(re) {
-      return concat('(?:', re, ')*');
+      return concat$1('(?:', re, ')*');
     }
 
     /**
@@ -11525,14 +11525,14 @@ var app = (function () {
      * @returns {string}
      */
     function optional(re) {
-      return concat('(?:', re, ')?');
+      return concat$1('(?:', re, ')?');
     }
 
     /**
      * @param {...(RegExp | string) } args
      * @returns {string}
      */
-    function concat(...args) {
+    function concat$1(...args) {
       const joined = args.map((x) => source(x)).join("");
       return joined;
     }
@@ -11655,7 +11655,7 @@ var app = (function () {
     const SHEBANG = (opts = {}) => {
       const beginShebang = /^#![ ]*\//;
       if (opts.binary) {
-        opts.begin = concat(
+        opts.begin = concat$1(
           beginShebang,
           /.*\b/,
           opts.binary,
@@ -11757,7 +11757,7 @@ var app = (function () {
           // for a visual example please see:
           // https://github.com/highlightjs/highlight.js/issues/2827
 
-          begin: concat(
+          begin: concat$1(
             /[ ]+/, // necessary to prevent us gobbling up doctags like /* @author Bob Mcgill */
             '(',
             ENGLISH_WORD,
@@ -11985,7 +11985,7 @@ var app = (function () {
       Object.keys(mode).forEach((key) => { delete mode[key]; });
 
       mode.keywords = originalMode.keywords;
-      mode.begin = concat(originalMode.beforeMatch, lookahead(originalMode.begin));
+      mode.begin = concat$1(originalMode.beforeMatch, lookahead(originalMode.begin));
       mode.starts = {
         relevance: 0,
         contains: [
@@ -13658,7 +13658,7 @@ var app = (function () {
       hljs.versionString = version$1;
 
       hljs.regex = {
-        concat: concat,
+        concat: concat$1,
         lookahead: lookahead,
         either: either,
         optional: optional,
@@ -14531,26 +14531,26 @@ var app = (function () {
     	}
     }
 
-    let methods$m = {
+    let methods$n = {
       one: {},
       two: {},
       three: {},
       four: {},
     };
 
-    let model$3 = {
+    let model$4 = {
       one: {},
       two: {},
       three: {},
     };
-    let compute$8 = {};
+    let compute$b = {};
     let hooks = [];
 
-    var tmp = { methods: methods$m, model: model$3, compute: compute$8, hooks };
+    var tmp = { methods: methods$n, model: model$4, compute: compute$b, hooks };
 
-    const isArray$4 = input => Object.prototype.toString.call(input) === '[object Array]';
+    const isArray$7 = input => Object.prototype.toString.call(input) === '[object Array]';
 
-    const fns$3 = {
+    const fns$4 = {
       /** add metadata to term objects */
       compute: function (input) {
         const { world } = this;
@@ -14560,7 +14560,7 @@ var app = (function () {
           compute[input](this);
         }
         // allow a list of methods
-        else if (isArray$4(input)) {
+        else if (isArray$7(input)) {
           input.forEach(name => world.compute.hasOwnProperty(name) && compute[name](this));
         }
         // allow a custom compute function
@@ -14572,7 +14572,7 @@ var app = (function () {
         return this
       },
     };
-    var compute$7 = fns$3;
+    var compute$a = fns$4;
 
     const forEach = function (cb) {
       let ptrs = this.fullPointer;
@@ -14747,6 +14747,7 @@ var app = (function () {
           return count
         }, 0)
       },
+
     };
     utils.group = utils.groups;
     utils.fullSentence = utils.fullSentences;
@@ -14755,40 +14756,11 @@ var app = (function () {
     utils.firstTerm = utils.firstTerms;
     var util = utils;
 
-    const methods$l = {
-      // allow re-use of this view, after a mutation
-      freeze: function () {
-        this.frozen = this.docs;
-        return this
-      },
-      // make it fast again
-      unfreeze: function () {
-        this.frozen = null;
-        return this
-      },
-    };
-    var freeze = methods$l;
-
-    const methods$k = Object.assign({}, util, compute$7, loops, freeze);
+    const methods$m = Object.assign({}, util, compute$a, loops);
 
     // aliases
-    methods$k.get = methods$k.eq;
-    var api$a = methods$k;
-
-    const getPtrs = function (view) {
-      const { methods, frozen, ptrs, document } = view;
-      let frznPtr = methods.one.pointerFromTerms(frozen);
-      // let docs = methods.one.getDoc(ptrs, document)
-      // remove any results that no-longer line-up
-      // console.log(docs)
-      // console.log('====')
-      // console.log(frozen)
-      // frznPtr = frznPtr.filter((p, n) => {
-      //   // check that every term is vaguly the same
-      //   return docs[n] && docs[n].every((term, i) => sameTerm(term, frozen[n][i]))
-      // })
-      return frznPtr
-    };
+    methods$m.get = methods$m.eq;
+    var api$b = methods$m;
 
     class View {
       constructor(document, pointer, groups = {}) {
@@ -14810,9 +14782,6 @@ var app = (function () {
       /* getters:  */
       get docs() {
         let docs = this.document;
-        if (this.frozen) {
-          return this.frozen
-        }
         if (this.ptrs) {
           docs = tmp.methods.one.getDoc(this.ptrs, this.document);
         }
@@ -14843,19 +14812,19 @@ var app = (function () {
       }
       // return a more-hackable pointer
       get fullPointer() {
-        let { docs, ptrs, document, frozen } = this;
-        // compute our pointer from frozen terms
-        if (frozen) {
-          return getPtrs(this)
-          // return this.methods.one.pointerFromTerms(frozen)
-        }
+        let { docs, ptrs, document } = this;
         // compute a proper pointer, from docs
         let pointers = ptrs || docs.map((_d, n) => [n]);
+        // do we need to repair it, first?
         return pointers.map(a => {
-          a = a.slice(0); //clone it
-          a[1] = a[1] || 0;
-          a[2] = a[2] || (document[a[0]] || []).length;
-          return a
+          let [n, start, end, id] = a;
+          start = start || 0;
+          end = end || (document[n] || []).length;
+          //add frozen id, for good-measure
+          if (document[n] && document[n][start]) {
+            id = id || document[n][start].id;
+          }
+          return [n, start, end, id]
         })
       }
       // create a new View, from this one
@@ -14884,6 +14853,16 @@ var app = (function () {
         // m._cache = this._cache // share this full thing
         return m
       }
+      fromText(input) {
+        const { methods, world } = this;
+        //assume ./01-tokenize is installed
+        let document = methods.one.tokenize(input, world);
+        let doc = new View(document);
+        doc.world = world;
+        // doc.compute(world.hooks)
+        doc.compute(['normal', 'lexicon', 'preTagger']);
+        return doc
+      }
       clone() {
         // clone the whole document
         let document = this.document.slice(0);
@@ -14901,10 +14880,10 @@ var app = (function () {
         return m
       }
     }
-    Object.assign(View.prototype, api$a);
+    Object.assign(View.prototype, api$b);
     var View$1 = View;
 
-    var version = '14rc';
+    var version = '13.11.4-rc5';
 
     const isObject$4 = function (item) {
       // let isSet = item instanceof Set
@@ -14936,14 +14915,6 @@ var app = (function () {
       }
       return model
     }
-
-    // wire-up existing tags
-    // const addTags = function (tags, world) {
-    //   const add = world.methods.one.addTags
-    //   const tagSet = world.model.one.tagSet
-    //   // console.log(world.model.one.tagSet)
-    //   world.model.one.tagSet = add(tags, tagSet)
-    // }
 
     const extend = function (plugin, world, View, nlp) {
       const { methods, model, compute, hooks } = world;
@@ -14977,7 +14948,7 @@ var app = (function () {
     };
     var extend$1 = extend;
 
-    const isArray$3 = arr => Object.prototype.toString.call(arr) === '[object Array]';
+    const isArray$6 = arr => Object.prototype.toString.call(arr) === '[object Array]';
 
     const isObject$3 = item => item && typeof item === 'object' && !Array.isArray(item);
 
@@ -14985,12 +14956,11 @@ var app = (function () {
 
     // deep-i-guess clone of model object
     const deepClone$1 = function (model) {
-      // console.log(Object.keys(obj))
       for (const key in model) {
         if (isObject$3(model[key])) {
           model[key] = Object.assign({}, model[key]);
           model[key] = deepClone$1(model[key]); //recursive
-        } else if (isArray$3(model[key])) {
+        } else if (isArray$6(model[key])) {
           model[key] = model[key].slice(0);
         } else if (isSet(model[key])) {
           model[key] = new Set(model[key]);
@@ -15004,7 +14974,7 @@ var app = (function () {
 
     /** log the decision-making to console */
     const verbose = function (set) {
-      let env = typeof process === 'undefined' ? self.env : process.env; //use window, in browser
+      let env = typeof process === 'undefined' ? self.env || {} : process.env; //use window, in browser
       env.DEBUG_TAGS = set === 'tagger' || set === true ? true : '';
       env.DEBUG_MATCH = set === 'match' || set === true ? true : '';
       env.DEBUG_CHUNKS = set === 'chunker' || set === true ? true : '';
@@ -15133,6 +15103,8 @@ var app = (function () {
 
     // splice an array into an array
     const spliceArr = (parent, index, child) => {
+      // tag them as dirty
+      child.forEach(term => term.dirty = true);
       let args = [index, 0].concat(child);
       Array.prototype.splice.apply(parent, args);
       return parent
@@ -15215,7 +15187,6 @@ var app = (function () {
     const cleanAppend = function (home, ptr, needle, document) {
       let [n, , end] = ptr;
       let total = document[n].length;
-
       if (end < total) {
         // are we in the middle?
         // add trailing space on self
@@ -15231,39 +15202,145 @@ var app = (function () {
       spliceArr(home, ptr[2], needle);
     };
 
-    const insert = function (str, view, prepend) {
-      const { methods, document, world } = view;
+    /*
+    unique & ordered term ids, based on time & term index
+
+    Base 36 (numbers+ascii)
+      3 digit 4,600
+      2 digit 1,200
+      1 digit 36
+
+      TTT|NNN|II|R
+
+    TTT -> 46 seconds since load
+    NNN -> 46 thousand sentences (>1 inf-jest)
+    II  -> 1,200 words in a sentence (nuts)
+    R   -> 1-36 random number 
+
+    novels: 
+      avg 80,000 words
+        15 words per sentence
+      5,000 sentences
+
+    Infinite Jest:
+      36,247 sentences
+      https://en.wikipedia.org/wiki/List_of_longest_novels
+
+    collisions are more-likely after
+        46 seconds have passed,
+      and 
+        after 46-thousand sentences
+
+    */
+    const start$1 = new Date().getTime();
+
+    const pad3 = (str) => {
+      str = str.length < 3 ? '0' + str : str;
+      return str.length < 3 ? '0' + str : str
+    };
+
+    const toId = function (term) {
+      let [n, i] = term.index || [0, 0];
+      var now = new Date().getTime() - start$1;
+      now = parseInt(now, 10);
+
+      //don't overflow time
+      now = now > 46655 ? 46655 : now;
+      //don't overflow sentences
+      n = n > 46655 ? 46655 : n;
+      // //don't overflow terms
+      i = i > 1294 ? 1294 : i;
+
+      // 3 digits for time
+      let id = pad3(now.toString(36));
+      // 3 digit  for sentence index (46k)
+      id += pad3(n.toString(36));
+
+      // 1 digit for term index (36)
+      let tx = i.toString(36);
+      tx = tx.length < 2 ? '0' + tx : tx; //pad2
+      id += tx;
+
+      // 1 digit random number
+      let r = parseInt(Math.random() * 36, 10);
+      id += (r).toString(36);
+
+      if (id.length !== 9) {
+        console.error('id !9 ' + id);
+      }
+      return term.normal + '|' + id.toUpperCase()
+    };
+
+    var uuid = toId;
+
+    // setInterval(() => console.log(toId(4, 12)), 100)
+
+    // are we inserting inside a contraction?
+    // expand it first
+    const expand$1 = function (m) {
+      if (m.has('@hasContraction') && m.after('^.').has('@hasContraction')) {
+        let more = m.grow('@hasContraction');
+        more.contractions().expand();
+      }
+    };
+
+    const isArray$5 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+
+    const addIds$2 = function (terms) {
+      terms.forEach((term, i) => {
+        term.id = uuid(term);
+      });
+      return terms
+    };
+
+    const getTerms = function (input, world) {
+      const { methods } = world;
+      // create our terms from a string
+      if (typeof input === 'string') {
+        return methods.one.tokenize(input, world)[0] //assume one sentence
+      }
+      //allow a view object
+      if (typeof input === 'object' && input.isView) {
+        return input.docs[0] //assume one sentence
+      }
+      //allow an array of terms, too
+      if (isArray$5(input)) {
+        return isArray$5(input[0]) ? input[0] : input
+      }
+      return []
+    };
+
+    const insert = function (input, view, prepend) {
+      const { document, world } = view;
       // insert words at end of each doc
       let ptrs = view.fullPointer;
       let selfPtrs = view.fullPointer;
-      // are we inserting inside a contraction?
-      // expand, it first
-      if (view.has('@hasContraction')) {
-        let more = view.grow('@hasContraction');
-        more.contractions().expand();
-      }
-      ptrs.forEach((ptr, i) => {
+      view.forEach((m, i) => {
+        let ptr = m.fullPointer[0];
         let [n] = ptr;
         // add-in the words
         let home = document[n];
-        let needle = [];
-        if (typeof str === 'string') {
-          needle = methods.one.tokenize(str, world)[0]; //assume one sentence
-        } else if (typeof str === 'object' && str.docs) {
-          needle = str.docs[0]; //assume one sentence
-        }
+        let terms = getTerms(input, world);
+        terms = addIds$2(terms);
         if (prepend) {
-          cleanPrepend(home, ptr, needle, document);
+          expand$1(view.update([ptr]).firstTerm());
+          cleanPrepend(home, ptr, terms, document);
         } else {
-          cleanAppend(home, ptr, needle, document);
+          expand$1(view.update([ptr]).lastTerm());
+          cleanAppend(home, ptr, terms, document);
+        }
+        // harden the pointer
+        if (!document[n][ptr[1]]) {
+          console.log('soft-pointer', ptr);
+        } else {
+          ptr[3] = document[n][ptr[1]].id;
         }
         // change self backwards by len
         selfPtrs[i] = ptr;
         // extend the pointer
-        ptr[2] += needle.length;
+        ptr[2] += terms.length;
+        ptrs[i] = ptr;
       });
-      // convert them to whole sentences
-      // ptrs = ptrs.map(a => [a[0]])
       let doc = view.toView(ptrs);
       // shift our self pointer, if necessary
       view.ptrs = selfPtrs;
@@ -15272,67 +15349,102 @@ var app = (function () {
       return doc
     };
 
-    const fns$2 = {
+    const fns$3 = {
       insertAfter: function (input) {
         return insert(input, this, false)
       },
       insertBefore: function (input) {
         return insert(input, this, true)
       },
-      // add string as new sentence
-      concat: function (input) {
-        const { methods, document, world } = this;
-        // parse and splice-in new terms
-        if (typeof input === 'string') {
-          let json = methods.one.tokenize(input, world);
-          let ptrs = this.fullPointer;
-          let lastN = ptrs[ptrs.length - 1][0];
-          spliceArr(document, lastN + 1, json);
-          return this.compute('index')
-        }
-        // is it other pointers from the same document?
-        if (this.document === input.document) {
-          let ptrs = this.fullPointer.concat(input.fullPointer);
-          return this.toView(ptrs).compute('index')
-        }
-        return this
-      },
+
     };
-    fns$2.append = fns$2.insertAfter;
-    fns$2.prepend = fns$2.insertBefore;
-    fns$2.insert = fns$2.insertAfter;
+    fns$3.append = fns$3.insertAfter;
+    fns$3.prepend = fns$3.insertBefore;
+    fns$3.insert = fns$3.insertAfter;
 
-    var insert$1 = fns$2;
+    var insert$1 = fns$3;
 
-    const fns$1 = {};
+    const dollarStub = /\$[0-9a-z]+/g;
+    const fns$2 = {};
 
-    fns$1.replaceWith = function (input) {
+    const titleCase$1 = function (str) {
+      return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+    };
+
+    // doc.replace('foo', (m)=>{})
+    const replaceByFn = function (main, fn) {
+      main.forEach(m => {
+        let out = fn(m);
+        m.replaceWith(out);
+      });
+      return main
+    };
+
+    // support 'foo $0' replacements
+    const subDollarSign = function (input, main) {
+      if (typeof input !== 'string') {
+        return input
+      }
+      let groups = main.groups();
+      input = input.replace(dollarStub, (a, b, c) => {
+        let num = a.replace(/\$/, '');
+        if (groups.hasOwnProperty(num)) {
+          return groups[num].text()
+        }
+        return a
+      });
+      return input
+    };
+
+    fns$2.replaceWith = function (input, keep = {}) {
       let ptrs = this.fullPointer;
-      // slide this in
-      this.insertAfter(input);
-      // delete the original terms
+      let main = this;
+      if (typeof input === 'function') {
+        return replaceByFn(main, input)
+      }
+      // support 'foo $0' replacements
+      input = subDollarSign(input, main);
+
       let original = this.update(ptrs);
+      // soften-up pointer
+      ptrs = ptrs.map(ptr => ptr.slice(0, 3));
+      // original.freeze()
+      let oldTags = (original.docs[0] || []).map(term => Array.from(term.tags));
+      // slide this in
+      main.insertAfter(input);
       // are we replacing part of a contraction?
-      if (original.has('@hasContraction')) {
-        let more = this.growLeft('@hasContraction+').growRight('@hasContraction+');
+      if (original.has('@hasContraction') && main.contractions) {
+        let more = main.grow('@hasContraction+');
         more.contractions().expand();
       }
-      this.delete(original);
+      // delete the original terms
+      main.delete(original); //science.
       // what should we return?
-      return this.toView(ptrs).compute(['index', 'lexicon', 'preTagger'])
+      let m = main.toView(ptrs).compute(['index', 'lexicon', 'preTagger']);
+      // replace any old tags
+      if (keep.tags) {
+        m.terms().forEach((term, i) => {
+          term.tagSafe(oldTags[i]);
+        });
+      }
+      // try to co-erce case, too
+      if (keep.case && m.docs[0] && m.docs[0][0] && m.docs[0][0].index[1] === 0) {
+        m.docs[0][0].text = titleCase$1(m.docs[0][0].text);
+      }
+      return m
     };
 
-    fns$1.replace = function (match, input) {
+    fns$2.replace = function (match, input, keep) {
       if (match && !input) {
-        return this.replaceWith(match)
+        return this.replaceWith(match, keep)
       }
       let m = this.match(match);
       if (!m.found) {
         return this
       }
-      return m.replaceWith(input)
+      return m.replaceWith(input, keep)
     };
-    var replace = fns$1;
+    var replace = fns$2;
 
     // transfer sentence-ending punctuation
     const repairPunct = function (terms, len) {
@@ -15383,7 +15495,9 @@ var app = (function () {
       return document
     };
 
-    const methods$j = {
+
+
+    const methods$l = {
       /** */
       remove: function (reg) {
         const { indexN } = this.methods.one;
@@ -15391,13 +15505,13 @@ var app = (function () {
         //  - a. remove self, from full parent
         let self = this.all();
         let not = this;
-        //  - b. remove a new match, from self
+        //  - b. remove a part, from self
         if (reg) {
           self = this;
           not = this.match(reg);
         }
         // is it part of a contraction?
-        if (self.has('@hasContraction')) {
+        if (self.has('@hasContraction') && self.contractions) {
           let more = self.grow('@hasContraction');
           more.contractions().expand();
         }
@@ -15422,29 +15536,37 @@ var app = (function () {
           });
           return ptr
         });
+
         // remove any now-empty pointers
         ptrs = ptrs.filter((ptr, i) => {
           const len = ptr[2] - ptr[1];
           if (len <= 0) {
             // adjust downstream pointers
             for (let x = i + 1; x < ptrs.length; x += 1) {
-              ptrs[x][0] -= 1;
+              ptrs.filter(a => a[0] === x).forEach(a => {
+                a[0] -= 1;
+              });
             }
             return false
           }
           return true
         });
+        // strip hardened-pointers
+        ptrs = ptrs.map(ptr => ptr.slice(0, 3));
         // mutate original
         self.ptrs = ptrs;
         self.document = document;
-        return self.toView(ptrs).compute('index') //return new document
+        if (reg) {
+          return self.toView(ptrs).compute('index') //return new document
+        }
+        return self.none()
       },
     };
     // aliases
-    methods$j.delete = methods$j.remove;
-    var remove = methods$j;
+    methods$l.delete = methods$l.remove;
+    var remove = methods$l;
 
-    const methods$i = {
+    const methods$k = {
       /** add this punctuation or whitespace before each match: */
       pre: function (str, concat) {
         if (str === undefined && this.found) {
@@ -15546,10 +15668,10 @@ var app = (function () {
         return this
       },
     };
-    methods$i.deHyphenate = methods$i.dehyphenate;
-    methods$i.toQuotation = methods$i.toQuotations;
+    methods$k.deHyphenate = methods$k.dehyphenate;
+    methods$k.toQuotation = methods$k.toQuotations;
 
-    var whitespace$1 = methods$i;
+    var whitespace$1 = methods$k;
 
     /** alphabetical order */
     const alpha = (a, b) => {
@@ -15588,15 +15710,13 @@ var app = (function () {
 
     /** count the # of terms in each match */
     const sequential = (a, b) => {
-      let left = a.pointer.join('');
-      let right = b.pointer.join('');
-      if (left < right) {
+      if (a[0] < b[0]) {
         return 1
       }
-      if (left > right) {
+      if (a[0] > b[0]) {
         return -1
       }
-      return 0
+      return a[1] > b[1] ? 1 : -1
     };
 
     /** sort by # of duplicates in the document*/
@@ -15621,15 +15741,31 @@ var app = (function () {
       return arr
     };
 
-    var methods$h = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
+    var methods$j = { alpha, length, wordCount: wordCount$2, sequential, byFreq };
 
     // aliases
     const seqNames = new Set(['index', 'sequence', 'seq', 'sequential', 'chron', 'chronological']);
     const freqNames = new Set(['freq', 'frequency', 'topk', 'repeats']);
+    const alphaNames = new Set(['alpha', 'alphabetical']);
+
+    // support function as parameter
+    const customSort = function (view, fn) {
+      let ptrs = view.fullPointer;
+      let all = [];
+      ptrs.forEach((ptr, i) => {
+        all.push(view.update([ptr]));
+      });
+      let none = view.none();
+      //! not working yet
+      return none.concat(all.sort(fn))
+    };
 
     /** re-arrange the order of the matches (in place) */
     const sort = function (input) {
       let { docs, pointer } = this;
+      if (typeof input === 'function') {
+        return customSort(this, input)
+      }
       input = input || 'alpha';
       let ptrs = pointer || docs.map((_d, n) => [n]);
       let arr = docs.map((terms, n) => {
@@ -15640,17 +15776,22 @@ var app = (function () {
           pointer: ptrs[n],
         }
       });
-      // // 'chronological' sorting
+      // 'chronological' sorting
       if (seqNames.has(input)) {
         input = 'sequential';
       }
+      // alphabetical sorting
+      if (alphaNames.has(input)) {
+        input = 'alpha';
+      }
+      // sort by frequency
       if (freqNames.has(input)) {
-        arr = methods$h.byFreq(arr);
+        arr = methods$j.byFreq(arr);
         return this.update(arr.map(o => o.pointer))
       }
       // apply sort method on each phrase
-      if (typeof methods$h[input] === 'function') {
-        arr = arr.sort(methods$h[input]);
+      if (typeof methods$j[input] === 'function') {
+        arr = arr.sort(methods$j[input]);
         return this.update(arr.map(o => o.pointer))
       }
       return this
@@ -15684,7 +15825,7 @@ var app = (function () {
     const deepClone = function (obj) {
       return JSON.parse(JSON.stringify(obj))
     };
-    const methods$g = {
+    const methods$i = {
       fork: function () {
         let after = this;
         after.world.model = deepClone(after.world.model);
@@ -15697,17 +15838,154 @@ var app = (function () {
         return after
       },
     };
-    var fork = methods$g;
+    var fork = methods$i;
 
-    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork);
+    const isArray$4 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
+
+    // append a new document, somehow
+    const combineDocs = function (homeDocs, inputDocs) {
+      // add a space
+      let end = homeDocs[homeDocs.length - 1];
+      let last = end[end.length - 1];
+      if (/ /.test(last.post) === false) {
+        last.post += ' ';
+      }
+      homeDocs = homeDocs.concat(inputDocs);
+      return homeDocs
+    };
+
+    const combineViews = function (home, input) {
+      // is it a view from the same document?
+      if (home.document === input.document) {
+        let ptrs = home.fullPointer.concat(input.fullPointer);
+        return home.toView(ptrs).compute('index')
+      }
+      // update n of new pointer, to end of our pointer
+      let ptrs = input.fullPointer;
+      ptrs = ptrs.map(a => {
+        a[0] += home.document.length;
+        return a
+      });
+      home.document = combineDocs(home.document, input.document);
+      return home.all()
+    };
+
+    var concat = {
+      // add string as new match/sentence
+      concat: function (input) {
+        const { methods, document, world } = this;
+        // parse and splice-in new terms
+        if (typeof input === 'string') {
+          let json = methods.one.tokenize(input, world);
+          let ptrs = this.fullPointer;
+          let lastN = ptrs[ptrs.length - 1][0];
+          spliceArr(document, lastN + 1, json);
+          return this.compute('index')
+        }
+        // plop some view objects together
+        if (typeof input === 'object' && input.isView) {
+          return combineViews(this, input)
+        }
+        // assume it's an array of terms
+        if (isArray$4(input)) {
+          let docs = combineDocs(this.document, input);
+          this.document = docs;
+          return this.all()
+        }
+        return this
+      },
+    };
+
+    const methods$h = {
+      // allow re-use of this view, after a mutation
+      freeze: function () {
+        // this.compute('id')
+        // let docs = this.docs
+        // let pointer = this.fullPointer
+        // pointer = pointer.map((a, n) => {
+        //   a[3] = docs[n].map(t => t.id)
+        //   return a
+        // })
+        // this.ptrs = pointer
+        // this.frozen = true
+        return this
+      },
+      // make it fast again
+      unFreeze: function () {
+        let pointer = this.fullPointer;
+        pointer = pointer.map((a, n) => {
+          return a.slice(0, 3)
+        });
+        this.ptrs = pointer;
+        delete this.frozen;
+        return this
+      },
+      // helper method for freeze-state
+      isFrozen: function () {
+        return Boolean(this.ptrs && this.ptrs[0] && this.ptrs[0][3])
+      }
+    };
+    // aliases
+    methods$h.unfreeze = methods$h.unFreeze;
+    var freeze = methods$h;
+
+    const methods$g = {
+      // fix a potentially-broken match
+      repair: function () {
+        // let ptrs = []
+        // let document = this.document
+        // if (this.ptrs && this.ptrs[0] && !this.ptrs[0][3]) {
+        //   console.warn('Compromise: .repair() called before .freeze()')//eslint-disable-line
+        //   return this
+        // }
+        // this.ptrs.forEach(ptr => {
+        //   let [n, i, end, ids] = ptr
+        //   ids = ids || []
+        //   let terms = (document[n] || []).slice(i, end)
+        //   // we still okay?
+        //   if (looksOk(terms, ids)) {
+        //     ptrs.push(ptr)
+        //   } else {
+        //     // look-around for a fix
+        //     let found = lookFor(ids, document, n)
+        //     if (found) {
+        //       ptrs.push(found)
+        //     }
+        //     //so, drop this match
+        //   }
+        // })
+        // this.ptrs = ptrs
+        // this.frozen = false
+        // this.freeze()
+        return this
+      }
+    };
+    var repair = methods$g;
+
+    const methods$f = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork, concat, freeze, repair);
 
     const addAPI$3 = function (View) {
       Object.assign(View.prototype, methods$f);
     };
-    var api$9 = addAPI$3;
+    var api$a = addAPI$3;
+
+    const compute$8 = {
+      id: function (view) {
+        let docs = view.docs;
+        for (let n = 0; n < docs.length; n += 1) {
+          for (let i = 0; i < docs[n].length; i += 1) {
+            let term = docs[n][i];
+            term.id = uuid(term);
+          }
+        }
+      }
+    };
+
+    var compute$9 = compute$8;
 
     var change = {
-      api: api$9,
+      api: api$a,
+      compute: compute$9,
     };
 
     const relPointer = function (ptrs, parent) {
@@ -15875,7 +16153,9 @@ var app = (function () {
       this.forEach((m, n) => {
         let more = m.before(regs, group);
         if (more.found) {
-          ptrs[n][1] -= more.terms().length;
+          let terms = more.terms();
+          ptrs[n][1] -= terms.length;
+          ptrs[n][3] = terms.docs[0][0].id;
         }
       });
       return this.update(ptrs)
@@ -15888,7 +16168,8 @@ var app = (function () {
       this.forEach((m, n) => {
         let more = m.after(regs, group);
         if (more.found) {
-          ptrs[n][2] += more.terms().length;
+          let terms = more.terms();
+          ptrs[n][2] += terms.length;
         }
       });
       return this.update(ptrs)
@@ -15904,24 +16185,32 @@ var app = (function () {
       return [left[0], left[1], right[2]]
     };
 
-    const getDoc$2 = (reg, view, group) => {
+    const getDoc$3 = (reg, view, group) => {
       let m = reg;
       if (typeof reg === 'string') {
         m = view.match(reg, group);
       }
       // are we splitting within a contraction?
-      if (m.has('@hasContraction')) {
-        let more = m.grow('@hasContraction');
-        more.contractions().expand();
-      }
+      // if (m.has('@hasContraction')) {
+      //   let more = m.grow('@hasContraction')
+      //   more.contractions().expand()
+      // }
       return m
+    };
+
+    const addIds$1 = function (ptr, view) {
+      let [n, start] = ptr;
+      if (view.document[n] && view.document[n][start]) {
+        ptr[3] = ptr[3] || view.document[n][start].id;
+      }
+      return ptr
     };
 
     const methods$e = {};
     // [before], [match], [after]
     methods$e.splitOn = function (m, group) {
       const { splitAll } = this.methods.one;
-      let splits = getDoc$2(m, this, group).fullPointer;
+      let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
       all.forEach(o => {
@@ -15931,13 +16220,14 @@ var app = (function () {
         res.push(o.after);
       });
       res = res.filter(p => p);
+      res = res.map(p => addIds$1(p, this));
       return this.update(res)
     };
 
     // [before], [match after]
     methods$e.splitBefore = function (m, group) {
       const { splitAll } = this.methods.one;
-      let splits = getDoc$2(m, this, group).fullPointer;
+      let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
       all.forEach(o => {
@@ -15951,13 +16241,14 @@ var app = (function () {
         }
       });
       res = res.filter(p => p);
+      res = res.map(p => addIds$1(p, this));
       return this.update(res)
     };
 
     // [before match], [after]
     methods$e.splitAfter = function (m, group) {
       const { splitAll } = this.methods.one;
-      let splits = getDoc$2(m, this, group).fullPointer;
+      let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
       all.forEach(o => {
@@ -15971,6 +16262,7 @@ var app = (function () {
         res.push(o.after);
       });
       res = res.filter(p => p);
+      res = res.map(p => addIds$1(p, this));
       return this.update(res)
     };
     methods$e.split = methods$e.splitAfter;
@@ -15978,7 +16270,6 @@ var app = (function () {
     var split$1 = methods$e;
 
     const methods$d = Object.assign({}, match$3, lookaround, split$1);
-
     // aliases
     methods$d.lookBehind = methods$d.before;
     methods$d.lookBefore = methods$d.before;
@@ -15990,7 +16281,7 @@ var app = (function () {
     const matchAPI = function (View) {
       Object.assign(View.prototype, methods$d);
     };
-    var api$8 = matchAPI;
+    var api$9 = matchAPI;
 
     // match  'foo /yes/' and not 'foo/no/bar'
     const bySlashes = /(?:^|\s)([![^]*(?:<[^<]*>)?\/.*?[^\\/]\/[?\]+*$~]*)(?:\s|$)/;
@@ -16188,6 +16479,11 @@ var app = (function () {
           obj.greedy = true;
           return obj
         }
+        if (start(w) === '%' && end(w) === '%') {
+          w = stripBoth(w);
+          obj.switch = w;
+          return obj
+        }
       }
       // support #Tag{1,9}
       if (hasMinMax.test(w) === true) {
@@ -16301,7 +16597,7 @@ var app = (function () {
       })
     };
 
-    const postProcess = function (regs, opts = {}) {
+    const postProcess$1 = function (regs, opts = {}) {
       // ensure all capture groups names are filled between start and end
       regs = nameGroups(regs);
       // convert 'choices' format to 'fastOr' format
@@ -16310,7 +16606,7 @@ var app = (function () {
       }
       return regs
     };
-    var postProcess$1 = postProcess;
+    var postProcess$2 = postProcess$1;
 
     // add fuzziness etc to each reg
     const addOptions = function (tokens, opts) {
@@ -16350,7 +16646,7 @@ var app = (function () {
       //turn them into objects
       tokens = tokens.map(str => parseToken$1(str, opts));
       //clean up anything weird
-      tokens = postProcess$1(tokens, opts);
+      tokens = postProcess$2(tokens, opts);
       // add fuzzy limits, etc
       tokens = addOptions(tokens, opts);
       // console.log(tokens)
@@ -16587,6 +16883,10 @@ var app = (function () {
       if (reg.chunk !== undefined) {
         return term.chunk === reg.chunk
       }
+      //support %Noun|Verb%
+      if (reg.switch !== undefined) {
+        return term.switch === reg.switch
+      }
       //support {machine}
       if (reg.machine !== undefined) {
         return term.normal === reg.machine || term.machine === reg.machine
@@ -16624,7 +16924,7 @@ var app = (function () {
     };
     var matchTerm = wrapMatch;
 
-    const env = typeof process === 'undefined' ? self.env : process.env;
+    const env = typeof process === 'undefined' ? self.env || {} : process.env;
     const log$1 = msg => {
       if (env.DEBUG_MATCH) {
         console.log(`\n  \x1b[32m ${msg} \x1b[0m`); // eslint-disable-line
@@ -16690,6 +16990,10 @@ var app = (function () {
       return false
     };
 
+    const isArray$3 = function (arr) {
+      return Object.prototype.toString.call(arr) === '[object Array]'
+    };
+
     const doOrBlock = function (state, skipN = 0) {
       let block = state.regs[state.r];
       let wasFound = false;
@@ -16697,6 +17001,14 @@ var app = (function () {
       for (let c = 0; c < block.choices.length; c += 1) {
         // try to match this list of tokens
         let regs = block.choices[c];
+        if (!isArray$3(regs)) {
+          // console.log('=-=-=-= bad -=-=-=-')
+          // console.dir(state.regs, { depth: 5 })
+          return false
+        }// } else {
+        //   // console.log('=-=-=-= good -=-=-=-')
+        //   // console.dir(state.regs[0], { depth: 5 })
+        // }
         wasFound = regs.every((cr, w_index) => {
           let extra = 0;
           let t = state.t + w_index + skipN + extra;
@@ -16770,7 +17082,7 @@ var app = (function () {
     };
 
     // const log = msg => {
-    //   const env = typeof process === 'undefined' ? self.env : process.env
+    //   const env = typeof process === 'undefined' ? self.env || {} : process.env
     //   if (env.DEBUG_MATCH === true) {
     //     console.log(`\n  \x1b[32m ${msg} \x1b[0m`) // eslint-disable-line
     //   }
@@ -17118,6 +17430,11 @@ var app = (function () {
       }
       // grab the requested group
       results = getGroup$1(results, group);
+      // add ids to pointers
+      results.ptrs.forEach(ptr => {
+        let [n, start] = ptr;
+        ptr.push(docs[n][start].id);
+      });
       return results
     };
 
@@ -17143,7 +17460,7 @@ var app = (function () {
     };
 
     var match = {
-      api: api$8,
+      api: api$9,
       methods: methods$b,
       lib: lib$3,
     };
@@ -17339,7 +17656,7 @@ var app = (function () {
     var debug$1 = debug;
 
     /** some named output formats */
-    const out$1 = function (method) {
+    const out = function (method) {
       // text out formats
       if (method === 'text') {
         return this.text()
@@ -17398,14 +17715,23 @@ var app = (function () {
       }
       return this.text()
     };
-    var out$2 = out$1;
+
+    const methods$9 = {
+      /** */
+      debug: debug$1,
+      /** */
+      out: out,
+    };
+
+    var out$1 = methods$9;
 
     const trimEnd = /[,:;)\]*.?~!\u0022\uFF02\u201D\u2019\u00BB\u203A\u2032\u2033\u2034\u301E\u00B4—-]+$/;
     const trimStart =
       /^[(['"*~\uFF02\u201C\u2018\u201F\u201B\u201E\u2E42\u201A\u00AB\u2039\u2035\u2036\u2037\u301D\u0060\u301F]+/;
 
-    const punctToKill = /[,:;)('"]/;
+    const punctToKill = /[,:;)('"\u201D]/;
     const isHyphen = /^[-–—]$/;
+    const hasSpace = / /;
 
     const textFromTerms = function (terms, opts, keepSpace = true) {
       let txt = '';
@@ -17420,7 +17746,7 @@ var app = (function () {
           }
           post = post.replace(punctToKill, '');
         }
-        if (opts.whitespcae === 'some') {
+        if (opts.whitespace === 'some') {
           pre = pre.replace(/\s/, ''); //remove pre-whitespace
           post = post.replace(/\s+/, ' '); //replace post-whitespace with a space
         }
@@ -17433,7 +17759,19 @@ var app = (function () {
           }
         }
         // grab the correct word format
-        let word = t[opts.use || 'text'] || t.normal || '';
+        let word = t[opts.form || 'text'] || t.normal || '';
+        if (opts.form === 'implicit') {
+          word = t.implicit || t.text;
+        }
+        if (opts.form === 'root' && t.implicit) {
+          word = t.root || t.implicit || t.normal;
+        }
+        // add an implicit space, for contractions
+        if ((opts.form === 'machine' || opts.form === 'implicit' || opts.form === 'root') && t.implicit) {
+          if (!post || !hasSpace.test(post)) {
+            post += ' ';
+          }
+        }
         txt += pre + word + post;
       });
       if (keepSpace === false) {
@@ -17464,111 +17802,42 @@ var app = (function () {
       return text
     };
 
-    const termJSON = function (terms) {
-      return terms.map(t => {
-        let term = Object.assign({}, t);
-        term.tags = Array.from(t.tags);
-        return term
-      })
-    };
-    const defaults$1 = {
-      text: true,
-      terms: true,
-    };
-
-    const toJson = function (view, opts) {
-      opts = opts || {};
-      if (typeof opts === 'string') {
-        opts = {};
-      }
-      opts = Object.assign({}, defaults$1, opts);
-      // run any necessary upfront steps
-      if (opts.offset) {
-        view.compute('offset');
-      }
-      return view.docs.map((terms, i) => {
-        let res = {};
-        if (opts.text) {
-          res.text = textFromTerms(terms, { keepPunct: true }, false);
-        }
-        if (opts.normal || opts.machine || opts.reduced) {
-          res.normal = textFromTerms(terms, { use: 'normal', punctuation: 'some' }, false);
-        }
-        if (opts.terms) {
-          res.terms = termJSON(terms);
-        }
-        if (opts.offset) {
-          let len = res.text.length;
-          res.offset = {
-            index: terms[0].offset.index,
-            start: terms[0].offset.start,
-            length: len,
-          };
-        }
-        if (opts.confidence && view.confidence) {
-          res.confidence = view.eq(i).confidence();
-        }
-        if (opts.syllables && view.syllables) {
-          res.syllables = view.syllables();
-        }
-        return res
-      })
-    };
-    var json = toJson;
-
-    const methods$9 = {
-      /** return data */
-      json: function (n) {
-        let res = json(this, n);
-        if (typeof n === 'number') {
-          return res[n]
-        }
-        return res
-      },
-
-      /** */
-      debug: debug$1,
-      /** */
-      out: out$2,
-    };
-    // aliases
-    methods$9.data = methods$9.json;
-
-    var out = methods$9;
-
-    const isObject$2 = val => {
-      return Object.prototype.toString.call(val) === '[object Object]'
-    };
-
     const fmts = {
       text: {
-        use: 'text',
+        form: 'text',
       },
       normal: {
         whitespace: 'some',
         punctuation: 'some',
         case: 'some',
         unicode: 'some',
-        use: 'normal',
+        form: 'normal',
       },
       machine: {
         whitespace: 'some',
         punctuation: 'some',
         case: 'none',
         unicode: 'some',
-        use: 'machine',
+        form: 'machine',
       },
       root: {
         whitespace: 'some',
         punctuation: 'some',
         case: 'some',
         unicode: 'some',
-        use: 'root',
+        form: 'root',
       },
+      implicit: {
+        form: 'implicit',
+      }
     };
     fmts.clean = fmts.normal;
     fmts.reduced = fmts.root;
-    fmts.implicit = fmts.machine;
+    var fmts$1 = fmts;
+
+    const isObject$2 = val => {
+      return Object.prototype.toString.call(val) === '[object Object]'
+    };
 
     var text = {
       /** */
@@ -17577,8 +17846,12 @@ var app = (function () {
           keepSpace: true,
           keepPunct: true,
         };
-        if (fmt && typeof fmt === 'string' && fmts.hasOwnProperty(fmt)) {
-          opts = Object.assign({}, fmts[fmt]);
+        if (fmt && typeof fmt === 'string' && fmts$1.hasOwnProperty(fmt)) {
+          opts = Object.assign({}, fmts$1[fmt]);
+          // silently trigger a root?
+          // if (fmt === 'root' && this.document[0][0] && !this.document[0][0].root) {
+          //   this.compute('root')
+          // }
         } else if (fmt && isObject$2(fmt)) {
           opts = Object.assign({}, fmt, opts);//todo: fixme
         }
@@ -17590,20 +17863,102 @@ var app = (function () {
           } else {
             opts.keepPunct = true;
           }
+        } else {
+          opts.keepPunct = true;
         }
         return textFromDoc(this.docs, opts)
       },
     };
 
-    const methods$8 = Object.assign({}, out, text);
+    const defaults$1 = {
+      text: true,
+      terms: true,
+    };
+
+    let opts = { case: 'none', unicode: 'some', form: 'machine', punctuation: 'some' };
+
+    const merge = function (a, b) {
+      return Object.assign({}, a, b)
+    };
+
+    const fns$1 = {
+      text: (terms) => {
+        return textFromTerms(terms, { keepPunct: true }, false)
+      },
+      normal: (terms) => textFromTerms(terms, merge(fmts$1.normal, { keepPunct: true }), false),
+      implicit: (terms) => textFromTerms(terms, merge(fmts$1.implicit, { keepPunct: true }), false),
+
+      machine: (terms) => textFromTerms(terms, opts, false),
+      root: (terms) => textFromTerms(terms, merge(opts, { form: 'root' }), false),
+
+      offset: (terms) => {
+        let len = fns$1.text(terms).length;
+        return {
+          index: terms[0].offset.index,
+          start: terms[0].offset.start,
+          length: len,
+        }
+      },
+      terms: (terms) => {
+        return terms.map(t => {
+          let term = Object.assign({}, t);
+          term.tags = Array.from(t.tags);
+          return term
+        })
+      },
+      confidence: (_terms, view, i) => view.eq(i).confidence(),
+      syllables: (_terms, view, i) => view.eq(i).syllables(),
+      sentence: (_terms, view, i) => view.eq(i).fullSentence().text(),
+      dirty: (terms) => terms.some(t => t.dirty === true)
+    };
+    fns$1.sentences = fns$1.sentence;
+    fns$1.clean = fns$1.normal;
+    fns$1.reduced = fns$1.root;
+
+    const toJSON = function (view, opts) {
+      opts = opts || {};
+      if (typeof opts === 'string') {
+        opts = {};
+      }
+      opts = Object.assign({}, defaults$1, opts);
+      // run any necessary upfront steps
+      if (opts.offset) {
+        view.compute('offset');
+      }
+      return view.docs.map((terms, i) => {
+        let res = {};
+        Object.keys(opts).forEach(k => {
+          if (opts[k] && fns$1[k]) {
+            res[k] = fns$1[k](terms, view, i);
+          }
+        });
+        return res
+      })
+    };
+
+
+    var json = {
+      /** return data */
+      json: function (n) {
+        let res = toJSON(this, n);
+        if (typeof n === 'number') {
+          return res[n]
+        }
+        return res
+      },
+    };
+
+    const methods$8 = Object.assign({}, out$1, text, json);
+    // aliases
+    methods$8.data = methods$8.json;
 
     const addAPI$2 = function (View) {
       Object.assign(View.prototype, methods$8);
     };
-    var api$7 = addAPI$2;
+    var api$8 = addAPI$2;
 
     var output = {
-      api: api$7,
+      api: api$8,
     };
 
     // do the pointers intersect?
@@ -17780,14 +18135,13 @@ var app = (function () {
         if (hmm.length === 0) {
           return
         }
-        // grow all b matches into one match
-        hmm = getExtent(hmm);
-        let overlap = intersection(ptr, hmm);
-        if (overlap) {
-          res.push(overlap);
-        }
+        hmm.forEach(h => {
+          let overlap = intersection(ptr, h);
+          if (overlap) {
+            res.push(overlap);
+          }
+        });
       });
-
       return res
     };
     var getIntersection$1 = getIntersection;
@@ -17828,16 +18182,68 @@ var app = (function () {
     // neighbours
     // console.log(getUnion([[0, 1, 3]], [[0, 3, 5]]))
 
-    const pointerFromTerms = function (docs) {
-      let ptr = [];
-      docs.forEach(terms => {
-        let [n, start] = terms[0].index;
-        let [_, end] = terms[terms.length - 1].index;
-        ptr.push([n, start, end + 1]);
-      });
-      return ptr
+    const max = 4;
+
+    // sweep-around looking for our term uuid
+    const blindSweep = function (id, doc, n) {
+      for (let i = 0; i < max; i += 1) {
+        // look up a sentence
+        if (doc[n - i]) {
+          let index = doc[n - i].findIndex(term => term.id === id);
+          if (index !== -1) {
+            return [n - i, index]
+          }
+        }
+        // look down a sentence
+        if (doc[n + i]) {
+          let index = doc[n + i].findIndex(term => term.id === id);
+          if (index !== -1) {
+            return [n + i, index]
+          }
+        }
+      }
+      return null
     };
-    var pointerFromTerms$1 = pointerFromTerms;
+
+    /** return a subset of the document, from a pointer */
+    const getDoc$1 = function (ptrs, document) {
+      let doc = [];
+      ptrs.forEach((ptr, i) => {
+        if (!ptr) {
+          return
+        }
+        let [n, start, end, id] = ptr; //parsePointer(ptr)
+        let terms = document[n] || [];
+        if (start === undefined) {
+          start = 0;
+        }
+        if (end === undefined) {
+          end = terms.length;
+        }
+        if (id && (!terms[start] || terms[start].id !== id)) {
+          // console.log('  repairing pointer...')
+          let wild = blindSweep(id, document, n);
+          if (wild !== null) {
+            let len = end - start;
+            terms = document[wild[0]].slice(wild[1], wild[1] + len);
+            // actually change the pointer
+            ptrs[i] = [wild[0], wild[1], wild[1] + len, terms[0].id];
+          }
+        } else {
+          terms = terms.slice(start, end);
+        }
+        if (terms.length === 0) {
+          return
+        }
+        if (start === end) {
+          return
+        }
+        // otherwise, looks good!
+        doc.push(terms);
+      });
+      return doc
+    };
+    var getDoc$2 = getDoc$1;
 
     // flat list of terms from nested document
     const termList = function (docs) {
@@ -17850,47 +18256,32 @@ var app = (function () {
       return arr
     };
 
-    /** return a subset of the document, from a pointer */
-    const getDoc$1 = function (pointer, document) {
-      let doc = [];
-      pointer.forEach(ptr => {
-        if (!ptr) {
-          return
-        }
-        let [n, start, end] = ptr; //parsePointer(ptr)
-        let terms = document[n] || [];
-        if (start === undefined) {
-          start = 0;
-        }
-        if (end === undefined) {
-          end = terms.length;
-        }
-        terms = terms.slice(start, end);
-        if (terms.length > 0) {
-          doc.push(terms);
-        }
-      });
-      return doc
-    };
-
     var methods$7 = {
       one: {
         termList,
-        getDoc: getDoc$1,
+        getDoc: getDoc$2,
         getUnion: getUnion$1,
         getIntersection: getIntersection$1,
         getDifference,
         indexN,
         doesOverlap,
         splitAll: splitAll$1,
-        pointerFromTerms: pointerFromTerms$1,
       },
     };
 
-    // import { getUnion, getIntersection, getDifference } from '../methods/lib/index.js'
-
     const getDoc = (m, view) => {
       return typeof m === 'string' ? view.match(m) : m
+    };
+
+    // 'harden' our json pointers, again
+    const addIds = function (ptrs, docs) {
+      return ptrs.map(ptr => {
+        let [n, start] = ptr;
+        if (docs[n][start]) {
+          ptr.push(docs[n][start].id);
+        }
+        return ptr
+      })
     };
 
     const methods$6 = {};
@@ -17900,6 +18291,7 @@ var app = (function () {
       const { getUnion } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getUnion(this.fullPointer, m.fullPointer);
+      ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
     methods$6.and = methods$6.union;
@@ -17909,6 +18301,7 @@ var app = (function () {
       const { getIntersection } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getIntersection(this.fullPointer, m.fullPointer);
+      ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
 
@@ -17917,6 +18310,7 @@ var app = (function () {
       const { getDifference } = this.methods.one;
       m = getDoc(m, this);
       let ptrs = getDifference(this.fullPointer, m.fullPointer);
+      ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
     methods$6.not = methods$6.difference;
@@ -17926,6 +18320,7 @@ var app = (function () {
       const { getDifference } = this.methods.one;
       let doc = this.all();
       let ptrs = getDifference(doc.fullPointer, this.fullPointer);
+      ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
 
@@ -17936,20 +18331,20 @@ var app = (function () {
       ptrs.forEach(ptr => {
         ptrs = getUnion(ptrs, [ptr]);
       });
+      ptrs = addIds(ptrs, this.document);
       return this.update(ptrs)
     };
 
-    var sets = methods$6;
 
     const addAPI$1 = function (View) {
       // add set/intersection/union
-      Object.assign(View.prototype, sets);
+      Object.assign(View.prototype, methods$6);
     };
-    var api$6 = addAPI$1;
+    var api$7 = addAPI$1;
 
     var pointers = {
       methods: methods$7,
-      api: api$6,
+      api: api$7,
     };
 
     const isMulti = / /;
@@ -17995,6 +18390,8 @@ var app = (function () {
       }
       // finally, add our tag
       term.tags.add(tag);
+      // now it's dirty
+      term.dirty = true;
       // add a chunk too, if it's easy
       addChunk(term, tag);
       return true
@@ -18092,8 +18489,6 @@ var app = (function () {
       return colors$1[found]
     };
 
-
-
     // convert tags to our final format
     const fmt = function (nodes) {
       const res = {};
@@ -18106,6 +18501,7 @@ var app = (function () {
         res[node.id] = {
           is,
           not,
+          also,
           parents,
           children: node._cache.children,
           color: getColor(node)
@@ -18115,7 +18511,9 @@ var app = (function () {
       Object.keys(res).forEach(k => {
         let nots = new Set(res[k].not);
         res[k].not.forEach(not => {
-          res[not].children.forEach(tag => nots.add(tag));
+          if (res[not]) {
+            res[not].children.forEach(tag => nots.add(tag));
+          }
         });
         res[k].not = Array.from(nots);
       });
@@ -18183,10 +18581,8 @@ var app = (function () {
     };
     var validate$1 = validate;
 
-    // import grad from '/Users/spencer/mountain/grad-school/src/index.js'
-
     // 'fill-down' parent logic inference
-    const compute$6 = function (allTags) {
+    const compute$7 = function (allTags) {
       // setup graph-lib format
       const flatList = Object.keys(allTags).map(k => {
         let o = allTags[k];
@@ -18203,7 +18599,7 @@ var app = (function () {
       let allTags = Object.assign({}, already, tags);
       // do some basic setting-up
       // 'fill-down' parent logic
-      const nodes = compute$6(allTags);
+      const nodes = compute$7(allTags);
       // convert it to our final format
       const res = fmt$1(nodes);
       return res
@@ -18303,13 +18699,14 @@ var app = (function () {
     const tagAPI = function (View) {
       Object.assign(View.prototype, tag$1);
     };
-    var api$5 = tagAPI;
+    var api$6 = tagAPI;
 
     // wire-up more pos-tags to our model
     const addTags = function (tags) {
       const { model, methods } = this.world();
       const tagSet = model.one.tagSet;
       const addTags = methods.one.addTags;
+
       let res = addTags(tags, tagSet);
       model.one.tagSet = res;
       return this
@@ -18322,7 +18719,7 @@ var app = (function () {
         one: { tagSet: {} }
       },
       methods: methods$5,
-      api: api$5,
+      api: api$6,
       lib: lib$2
     };
 
@@ -18677,12 +19074,12 @@ var app = (function () {
       //punctuation
       str = str.replace(/[,;.!?]+$/, '');
       // coerce single curly quotes
-      str = str.replace(/[\u0027\u0060\u00B4\u2018\u2019\u201A\u201B\u2032\u2035\u2039\u203A]+/g, "'");
-      // coerce double curly quotes
-      str = str.replace(
-        /[\u0022\u00AB\u00BB\u201C\u201D\u201E\u201F\u2033\u2034\u2036\u2037\u2E42\u301D\u301E\u301F\uFF02]+/g,
-        '"'
-      );
+      // str = str.replace(/[\u0027\u0060\u00B4\u2018\u2019\u201A\u201B\u2032\u2035\u2039\u203A]+/g, "'")
+      // // coerce double curly quotes
+      // str = str.replace(
+      //   /[\u0022\u00AB\u00BB\u201C\u201D\u201E\u201F\u2033\u2034\u2036\u2037\u2E42\u301D\u301E\u301F\uFF02]+/g,
+      //   '"'
+      // )
       //coerce Unicode ellipses
       str = str.replace(/\u2026/g, '...');
       //en-dash
@@ -18715,7 +19112,7 @@ var app = (function () {
       '!': '¡',
       '?': '¿Ɂ',
       '"': '“”"❝❞',
-      "'": '‘‛❛❜',
+      "'": '‘‛❛❜’',
       '-': '—–',
       a: 'ªÀÁÂÃÄÅàáâãäåĀāĂăĄąǍǎǞǟǠǡǺǻȀȁȂȃȦȧȺΆΑΔΛάαλАаѦѧӐӑӒӓƛæ',
       b: 'ßþƀƁƂƃƄƅɃΒβϐϦБВЪЬвъьѢѣҌҍ',
@@ -18808,7 +19205,7 @@ var app = (function () {
 
     // turn a string input into a 'document' json format
     const tokenize$2 = function (input, world) {
-      const { methods, model, compute } = world;
+      const { methods, model } = world;
       const { splitSentences, splitTerms, splitWhitespace } = methods.one;
       input = input || '';
       if (typeof input === 'number') {
@@ -18818,17 +19215,16 @@ var app = (function () {
         // split into sentences
         let sentences = splitSentences(input, model);
         // split into word objects
-        input = sentences.map(txt => {
+        input = sentences.map((txt, n) => {
           let terms = splitTerms(txt, model);
           // split into [pre-text-post]
           terms = terms.map(splitWhitespace);
           // add normalized term format, always
-          terms.forEach(normal);
+          terms.forEach((term, i) => {
+            normal(term);
+          });
           return terms
         });
-        // compute.normal(input)
-        // support slashes, apostrophes, etc
-        // compute.alias(input, world)
       }
       return input
     };
@@ -19153,7 +19549,7 @@ var app = (function () {
       // 'fold':true,
     };
 
-    var model$2 = {
+    var model$3 = {
       one: {
         aliases: aliases$1,
         abbreviations,
@@ -19208,8 +19604,7 @@ var app = (function () {
       str = str.replace(/['’]s$/, '');
       str = str.replace(/s['’]$/, 's');
       //lookin'->looking (make it easier for conjugation)
-      str = str.replace(/([aeiou][ktrp])in$/, '$1ing');
-
+      str = str.replace(/([aeiou][ktrp])in'$/, '$1ing');
       //turn re-enactment to reenactment
       if (/^(re|un)-?[^aeiou]./.test(str) === true) {
         str = str.replace('-', '');
@@ -19325,13 +19720,13 @@ var app = (function () {
       index: index$1,
       wordCount: wordCount$1,
     };
-    var compute$5 = methods$3;
+    var compute$6 = methods$3;
 
     var tokenize$1 = {
-      compute: compute$5,
+      compute: compute$6,
       methods: methods$4,
-      model: model$2,
-      hooks: ['alias', 'machine', 'index'],
+      model: model$3,
+      hooks: ['alias', 'machine', 'index', 'id'],
     };
 
     // const plugin = function (world) {
@@ -19384,7 +19779,6 @@ var app = (function () {
         }
         endAs[curr] = [words.length];
       });
-
       // f(s) = 0 for all states of depth 1 (the ones from which the 0 state can transition to)
       for (let word in goNext[0]) {
         n = goNext[0][word];
@@ -19395,7 +19789,9 @@ var app = (function () {
       while (xs.length) {
         let r = xs.shift();
         // for each symbol a such that g(r, a) = s
-        for (let word in goNext[r]) {
+        let keys = Object.keys(goNext[r]);
+        for (let i = 0; i < keys.length; i += 1) {
+          let word = keys[i];
           let s = goNext[r][word];
           xs.push(s);
           // set state = f(r)
@@ -19403,7 +19799,7 @@ var app = (function () {
           while (n > 0 && !goNext[n].hasOwnProperty(word)) {
             n = failTo[n];
           }
-          if (word in goNext[n]) {
+          if (goNext.hasOwnProperty(n)) {
             let fs = goNext[n][word];
             failTo[s] = fs;
             if (endAs[fs]) {
@@ -19451,11 +19847,11 @@ var app = (function () {
     var compress$1 = compress;
 
     // follow our trie structure
-    const scanWords = function (terms, trie) {
+    const scanWords = function (terms, trie, opts) {
       let n = 0;
       let results = [];
       for (let i = 0; i < terms.length; i++) {
-        let word = terms[i].normal;
+        let word = terms[i][opts.form] || terms[i].normal;
         // main match-logic loop:
         while (n > 0 && (trie.goNext[n] === undefined || !trie.goNext[n].hasOwnProperty(word))) {
           n = trie.failTo[n] || 0; // (usually back to 0)
@@ -19471,7 +19867,7 @@ var app = (function () {
             let len = arr[o];
             let term = terms[i - len + 1];
             let [n, start] = term.index;
-            results.push([n, start, start + len]);
+            results.push([n, start, start + len, term.id]);
           }
         }
       }
@@ -19487,9 +19883,14 @@ var app = (function () {
       return true
     };
 
-    const scan = function (view, trie) {
+    const scan = function (view, trie, opts) {
       let results = [];
+      opts.form = opts.form || 'normal';
       let docs = view.docs;
+      if (!trie.goNext || !trie.goNext[0]) {
+        console.error('Compromise invalid lookup trie');
+        return view.none()
+      }
       let firstWords = Object.keys(trie.goNext[0]);
       // do each phrase
       for (let i = 0; i < docs.length; i++) {
@@ -19498,7 +19899,7 @@ var app = (function () {
           continue
         }
         let terms = docs[i];
-        let found = scanWords(terms, trie);
+        let found = scanWords(terms, trie, opts);
         if (found.length > 0) {
           results = results.concat(found);
         }
@@ -19511,7 +19912,7 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const api$4 = function (View) {
+    const api$5 = function (View) {
       /** turn an array or object into a compressed trie*/
       View.prototype.compile = function (obj) {
         const trie = build(obj, this.world);
@@ -19519,7 +19920,7 @@ var app = (function () {
       };
 
       /** find all matches in this document */
-      View.prototype.lookup = function (input) {
+      View.prototype.lookup = function (input, opts = {}) {
         if (!input) {
           return this.none()
         }
@@ -19527,14 +19928,14 @@ var app = (function () {
           input = [input];
         }
         let trie = isObject$1(input) ? input : build(input, this.world);
-        let res = scan$1(this, trie);
+        let res = scan$1(this, trie, opts);
         res = res.settle();
         return res
       };
     };
 
     var lookup = {
-      api: api$4,
+      api: api$5,
     };
 
     const createCache = function (document) {
@@ -19544,6 +19945,10 @@ var app = (function () {
           // add words
           if (term.normal !== '') {
             stuff.add(term.normal);
+          }
+          // cache switch-status - '%Noun|Verb%'
+          if (term.switch) {
+            stuff.add(`%${term.switch}%`);
           }
           // cache implicit words, too
           if (term.implicit) {
@@ -19601,25 +20006,25 @@ var app = (function () {
     const addAPI = function (View) {
       Object.assign(View.prototype, methods$1);
     };
-    var api$3 = addAPI;
+    var api$4 = addAPI;
 
     const cache$1 = function (view) {
       view._cache = view.methods.one.cacheDoc(view.document);
     };
 
-    var compute$4 = {
+    var compute$5 = {
       cache: cache$1
     };
 
     var cache = {
-      api: api$3,
-      compute: compute$4,
+      api: api$4,
+      compute: compute$5,
       methods: methods$2,
       // hooks: ['cache']
     };
 
     // lookup last word in the type-ahead prefixes
-    const compute$2 = function (view) {
+    const compute$3 = function (view) {
       const prefixes = view.model.one.typeahead;
       const docs = view.docs;
       if (docs.length === 0 || Object.keys(prefixes).length === 0) {
@@ -19644,7 +20049,7 @@ var app = (function () {
       }
     };
 
-    var compute$3 = { typeahead: compute$2 };
+    var compute$4 = { typeahead: compute$3 };
 
     // assume any discovered prefixes
     const autoFill = function () {
@@ -19661,10 +20066,10 @@ var app = (function () {
       return this
     };
 
-    const api$1 = function (View) {
+    const api$2 = function (View) {
       View.prototype.autoFill = autoFill;
     };
-    var api$2 = api$1;
+    var api$3 = api$2;
 
     // generate all the possible prefixes up-front
     const getPrefixes = function (arr, opts, world) {
@@ -19740,21 +20145,21 @@ var app = (function () {
       typeAhead: prepare,
     };
 
-    const model$1 = {
+    const model$2 = {
       one: {
         typeahead: {}
       }
     };
     var typeahead = {
-      model: model$1,
-      api: api$2,
+      model: model$2,
+      api: api$3,
       lib: lib$1,
-      compute: compute$3,
+      compute: compute$4,
       hooks: ['typeahead']
     };
 
     // scan-ahead to match multiple-word terms - 'jack rabbit'
-    const checkMulti = function (terms, i, lexicon, fastTag) {
+    const checkMulti = function (terms, i, lexicon, setTag, world) {
       let max = i + 4 > terms.length ? terms.length - i : 4;
       let str = terms[i].machine || terms[i].normal;
       for (let skip = 1; skip < max; skip += 1) {
@@ -19763,7 +20168,8 @@ var app = (function () {
         str += ' ' + word;
         if (lexicon.hasOwnProperty(str) === true) {
           let tag = lexicon[str];
-          terms.slice(i, i + skip + 1).forEach(term => fastTag(term, tag, '1-multi-lexicon'));
+          let ts = terms.slice(i, i + skip + 1);
+          setTag(ts, tag, world, '1-multi-lexicon');
           return true
         }
       }
@@ -19772,7 +20178,8 @@ var app = (function () {
 
     const multiWord = function (terms, i, world) {
       const { model, methods } = world;
-      const { fastTag } = methods.one;
+      // const { fastTag } = methods.one
+      const setTag = methods.one.setTag;
       const multi = model.one._multiCache || {};
       const lexicon = model.one.lexicon || {};
       // basic lexicon lookup
@@ -19780,18 +20187,21 @@ var app = (function () {
       let word = t.machine || t.normal;
       // multi-word lookup
       if (terms[i + 1] !== undefined && multi[word] === true) {
-        return checkMulti(terms, i, lexicon, fastTag)
+        return checkMulti(terms, i, lexicon, setTag, world)
       }
       return null
     };
     var multiWord$1 = multiWord;
 
-    const underOver = /^(under|over)-?.{3}/;
+    const prefix = /^(under|over|mis|re|un|dis|pre|post)-?/;
+    // anti|non|extra|inter|intra|over
+    const allowPrefix = new Set(['Verb', 'Infinitive', 'PastTense', 'Gerund', 'PresentTense', 'Adjective', 'Participle']);
 
     // tag any words in our lexicon
     const checkLexicon = function (terms, i, world) {
       const { model, methods } = world;
-      const fastTag = methods.one.fastTag;
+      // const fastTag = methods.one.fastTag
+      const setTag = methods.one.setTag;
       const lexicon = model.one.lexicon;
       // basic lexicon lookup
       let t = terms[i];
@@ -19799,7 +20209,8 @@ var app = (function () {
       // normal lexicon lookup
       if (lexicon[word] !== undefined && lexicon.hasOwnProperty(word)) {
         let tag = lexicon[word];
-        fastTag(t, tag, '1-lexicon');
+        setTag([t], tag, world, '1-lexicon');
+        // fastTag(t, tag, '1-lexicon')
         return true
       }
       // lookup aliases in the lexicon
@@ -19807,17 +20218,22 @@ var app = (function () {
         let found = t.alias.find(str => lexicon.hasOwnProperty(str));
         if (found) {
           let tag = lexicon[found];
-          fastTag(t, tag, '1-lexicon-alias');
+          setTag([t], tag, world, '1-lexicon-alias');
+          // fastTag(t, tag, '1-lexicon-alias')
           return true
         }
       }
-      // try removing a word-stem
-      if (underOver.test(word) === true) {
-        let stem = word.replace(/^(under|over)-?/, '');
-        if (lexicon.hasOwnProperty(stem)) {
-          let tag = lexicon[stem];
-          fastTag(t, tag, '1-lexicon-prefix');
-          return true
+      // prefixing for verbs/adjectives
+      if (prefix.test(word) === true) {
+        let stem = word.replace(prefix, '');
+        if (lexicon.hasOwnProperty(stem) && stem.length > 3) {
+          // only allow prefixes for verbs/adjectives
+          if (allowPrefix.has(lexicon[stem])) {
+            // console.log('->', word, stem, lexicon[stem])
+            setTag([t], lexicon[stem], world, '1-lexicon-prefix');
+            // fastTag(t, lexicon[stem], '1-lexicon-prefix')
+            return true
+          }
         }
       }
       return null
@@ -19840,7 +20256,7 @@ var app = (function () {
       });
     };
 
-    var compute$1 = {
+    var compute$2 = {
       lexicon: firstPass
     };
 
@@ -19862,7 +20278,7 @@ var app = (function () {
         return
       }
       // some logging for debugging
-      let env = typeof process === 'undefined' ? self.env : process.env;
+      let env = typeof process === 'undefined' ? self.env || {} : process.env;
       if (env && env.DEBUG_TAGS) {
         log(term, tag, reason);
       }
@@ -19878,6 +20294,7 @@ var app = (function () {
 
     // derive clever things from our lexicon key-value pairs
     const expand = function (words, world) {
+      // const { methods, model } = world
       let lex = {};
       // console.log('start:', Object.keys(lex).length)
       let _multi = {};
@@ -19944,7 +20361,7 @@ var app = (function () {
       addWords
     };
 
-    const model = {
+    const model$1 = {
       one: {
         lexicon: {},
         _multiCache: {},
@@ -19952,18 +20369,561 @@ var app = (function () {
     };
 
     var lexicon = {
-      model,
+      model: model$1,
       methods,
-      compute: compute$1,
+      compute: compute$2,
       lib,
       hooks: ['lexicon']
     };
+
+    var contractions$3 = [
+      // simple mappings
+      { word: '@', out: ['at'] },
+      { word: 'alot', out: ['a', 'lot'] },
+      { word: 'brb', out: ['be', 'right', 'back'] },
+      { word: 'cannot', out: ['can', 'not'] },
+      { word: 'cant', out: ['can', 'not'] },
+      { word: 'dont', out: ['do', 'not'] },
+      { word: 'dun', out: ['do', 'not'] },
+      { word: 'wont', out: ['will', 'not'] },
+      { word: "can't", out: ['can', 'not'] },
+      { word: "shan't", out: ['should', 'not'] },
+      { word: "won't", out: ['will', 'not'] },
+      { word: "that's", out: ['that', 'is'] },
+      { word: 'dunno', out: ['do', 'not', 'know'] },
+      { word: 'gonna', out: ['going', 'to'] },
+      { word: 'gotta', out: ['have', 'got', 'to'] }, //hmm
+      { word: 'gtg', out: ['got', 'to', 'go'] },
+      { word: 'im', out: ['i', 'am'] },
+      { word: 'imma', out: ['I', 'will'] },
+      { word: 'imo', out: ['in', 'my', 'opinion'] },
+      { word: 'irl', out: ['in', 'real', 'life'] },
+      { word: 'ive', out: ['i', 'have'] },
+      { word: 'rn', out: ['right', 'now'] },
+      { word: 'tbh', out: ['to', 'be', 'honest'] },
+      { word: 'wanna', out: ['want', 'to'] },
+      // apostrophe d
+      { word: 'howd', out: ['how', 'did'] },
+      { word: 'whatd', out: ['what', 'did'] },
+      { word: 'whend', out: ['when', 'did'] },
+      { word: 'whered', out: ['where', 'did'] },
+
+      { word: "'tis", out: ['it', 'is'] },
+      { word: "'twas", out: ['it', 'was'] },
+      { word: 'twas', out: ['it', 'was'] },
+      { word: 'y\'know', out: ['you', 'know'] },
+      { word: "ne'er", out: ['never'] },
+      { word: "o'er ", out: ['over'] },
+      // contraction-part mappings
+      { after: 'll', out: ['will'] },
+      { after: 've', out: ['have'] },
+      { after: 're', out: ['are'] },
+      { after: 'm', out: ['am'] },
+      // french contractions
+      { before: 'c', out: ['ce'] },
+      { before: 'm', out: ['me'] },
+      { before: 'n', out: ['ne'] },
+      { before: 'qu', out: ['que'] },
+      { before: 's', out: ['se'] },
+      { before: 't', out: ['tu'] }, // t'aime
+      // more-complex ones
+      // { after: 's', out: apostropheS }, //spencer's
+      // { after: 'd', out: apostropheD }, //i'd
+      // { after: 't', out: apostropheT }, //isn't
+      // { before: 'l', out: preL }, // l'amour
+      // { before: 'd', out: preD }, // d'amerique
+    ];
+
+    var model = { one: { contractions: contractions$3 } };
+
+    // put n new words where 1 word was
+    const insertContraction = function (document, point, words) {
+      let [n, w] = point;
+      if (!words || words.length === 0) {
+        return
+      }
+      words = words.map((word) => {
+        word.implicit = word.text;
+        word.machine = word.text;
+        word.pre = '';
+        word.post = '';
+        word.text = '';
+        word.normal = '';
+        return word
+      });
+      if (words[0]) {
+        // move whitespace over
+        words[0].pre = document[n][w].pre;
+        words[words.length - 1].post = document[n][w].post;
+        // add the text/normal to the first term
+        words[0].text = document[n][w].text;
+        words[0].normal = document[n][w].normal; // move tags too?
+      }
+      // do the splice
+      document[n].splice(w, 1, ...words);
+    };
+    var splice = insertContraction;
+
+    const hasContraction$2 = /'/;
+    //look for a past-tense verb
+    // const hasPastTense = (terms, i) => {
+    //   let after = terms.slice(i + 1, i + 3)
+    //   return after.some(t => t.tags.has('PastTense'))
+    // }
+    // he'd walked -> had
+    // how'd -> did
+    // he'd go -> would
+
+    const alwaysDid = new Set([
+      'what',
+      'how',
+      'when',
+      'where',
+      'why',
+    ]);
+
+    // after-words
+    const useWould = new Set([
+      'be',
+      'go',
+      'start',
+      'think',
+      'need',
+    ]);
+
+    const useHad = new Set([
+      'been',
+      'gone'
+    ]);
+    // they'd gone
+    // they'd go
+
+
+    // he'd been
+    //    he had been
+    //    he would been
+
+    const _apostropheD = function (terms, i) {
+      let before = terms[i].normal.split(hasContraction$2)[0];
+
+      // what'd, how'd
+      if (alwaysDid.has(before)) {
+        return [before, 'did']
+      }
+      if (terms[i + 1]) {
+        // they'd gone
+        if (useHad.has(terms[i + 1].normal)) {
+          return [before, 'had']
+        }
+        // they'd go
+        if (useWould.has(terms[i + 1].normal)) {
+          return [before, 'would']
+        }
+      }
+      return null
+      //   if (hasPastTense(terms, i) === true) {
+      //     return [before, 'had']
+      //   }
+      //   // had/would/did
+      //   return [before, 'would']
+    };
+    var apostropheD = _apostropheD;
+
+    const hasContraction$1 = /'/;
+
+    const isHas = (terms, i) => {
+      //look for a past-tense verb
+      let after = terms.slice(i + 1, i + 3);
+      return after.some(t => t.tags.has('PastTense'))
+    };
+
+    // 's -> [possessive, 'has', or 'is']
+    const apostropheS = function (terms, i) {
+      // possessive, is/has
+      let before = terms[i].normal.split(hasContraction$1)[0];
+      // spencer's got -> 'has'
+      if (isHas(terms, i)) {
+        return [before, 'has']
+      }
+      // let's
+      if (before === 'let') {
+        return [before, 'us']
+      }
+      // allow slang "there's" -> there are
+      if (before === 'there') {
+        let nextTerm = terms[i + 1];
+        if (nextTerm && nextTerm.tags.has('Plural')) {
+          return [before, 'are']
+        }
+      }
+      return [before, 'is']
+    };
+    var apostropheS$1 = apostropheS;
+
+    //ain't -> are/is not
+    const apostropheT = function (terms, i) {
+      if (terms[i].normal === "ain't" || terms[i].normal === 'aint') {
+        return null //do this in ./two/
+      }
+      let before = terms[i].normal.replace(/n't/, '');
+      return [before, 'not']
+    };
+
+    var apostropheT$1 = apostropheT;
+
+    const hasContraction = /'/;
+
+    // l'amour
+    const preL = (terms, i) => {
+      // le/la
+      let after = terms[i].normal.split(hasContraction)[1];
+      // quick french gender disambig (rough)
+      if (after && after.endsWith('e')) {
+        return ['la', after]
+      }
+      return ['le', after]
+    };
+
+    // d'amerique
+    const preD = (terms, i) => {
+      let after = terms[i].normal.split(hasContraction)[1];
+      // quick guess for noun-agreement (rough)
+      if (after && after.endsWith('e')) {
+        return ['du', after]
+      } else if (after && after.endsWith('s')) {
+        return ['des', after]
+      }
+      return ['de', after]
+    };
+
+    // j'aime
+    const preJ = (terms, i) => {
+      let after = terms[i].normal.split(hasContraction)[1];
+      return ['je', after]
+    };
+
+    var french = {
+      preJ,
+      preL,
+      preD,
+    };
+
+    const isRange = /^([0-9.]{1,3}[a-z]{0,2}) ?[-–—] ?([0-9]{1,3}[a-z]{0,2})$/i;
+    const timeRange = /^([0-9]{1,2}(:[0-9][0-9])?(am|pm)?) ?[-–—] ?([0-9]{1,2}(:[0-9][0-9])?(am|pm)?)$/i;
+
+    const numberRange = function (terms, i) {
+      let term = terms[i];
+      if (term.tags.has('PhoneNumber') === true) {
+        return null
+      }
+      let parts = term.text.match(isRange);
+      if (parts !== null) {
+        return [parts[1], 'to', parts[2]]
+      } else {
+        parts = term.text.match(timeRange);
+        if (parts !== null) {
+          return [parts[1], 'to', parts[4]]
+        }
+      }
+      return null
+    };
+    var numberRange$1 = numberRange;
+
+    // always a contracttion
+    const always = new Set([
+      'here',
+      'there',
+      'she',
+      'it',
+      'he',
+      'that',
+      'here',
+      'there',
+      'your',
+      'who',
+      'what',
+      'where',
+      'why',
+      'when',
+      'how',
+      'let',
+      'else',
+
+      'name', //name's dave
+      // 'god', //god's gift
+    ]);
+
+    // // always a posessive
+    // const never = new Set([
+    //   'one',
+    //   'men',
+    //   'man',
+    //   'woman',
+    //   'women',
+    //   'girl',
+    //   'boy',
+    //   'mankind',
+    //   'world',
+    //   'today',
+    //   'tomorrow',
+    // ])
+
+    // // spencer's cool
+    const afterYes = new Set([
+      //   'cool',
+      //   'nice',
+      //   'beautiful',
+      //   'ugly',
+      //   'good',
+      //   'bad',
+      //   'ok',
+      //   'right',
+      //   'wrong',
+      //   'big',
+      //   'small',
+      //   'large',
+      //   'huge',
+      //   'above',
+      //   'below',
+      //   'in',
+      //   'out',
+      //   'inside',
+      //   'outside',
+      //   'always',
+      //   'even',
+      //   'same',
+      //   'still',
+      //   'cold',
+      //   'hot',
+      //   'old',
+      //   'young',
+      //   'rich',
+      //   'poor',
+      //   'early',
+      //   'late',
+      // 'new',
+      // 'old',
+      // 'tiny',
+      // 'huge',
+
+      // adverbs
+      'really',
+      'very',
+      'barely',
+      'also',
+      'not',
+      'just',
+      'more',
+      'only',
+      'often',
+      'quite',
+      'so',
+      'too',
+      'well',
+    ]);
+
+    const shouldSplit = (terms, i) => {
+      let term = terms[i];
+
+      const byApostrophe = /'s/;
+      let [before] = term.normal.split(byApostrophe);
+      if (always.has(before)) {
+        return true
+      }
+      // if (never.has(before)) {
+      //   return false
+      // }
+
+      // gandhi's so cool
+      let nextTerm = terms[i + 1];
+      if (nextTerm && afterYes.has(nextTerm.normal)) {
+        return true
+      }
+
+      // if (nextTerm) {
+      //   console.log(term.normal, nextTerm.normal)
+
+      // } else {
+      //   console.log(term.normal)
+      // }
+      // console.log(before)
+      // these can't be possessive
+      // if (hereThere.hasOwnProperty(term.machine)) {
+      //   return false
+      // }
+      // // if we already know it
+      // if (term.tags.has('Possessive')) {
+      //   return true
+      // }
+      // //a pronoun can't be possessive - "he's house"
+      // if (term.tags.has('Pronoun') || term.tags.has('QuestionWord')) {
+      //   return false
+      // }
+      // if (banList.hasOwnProperty(term.normal)) {
+      //   return false
+      // }
+      // //if end of sentence, it is possessive - "was spencer's"
+      // let nextTerm = terms[i + 1]
+      // if (!nextTerm) {
+      //   return true
+      // }
+      // //a gerund suggests 'is walking'
+      // if (nextTerm.tags.has('Verb')) {
+      //   //fix 'jamie's bite'
+      //   if (nextTerm.tags.has('Infinitive')) {
+      //     return true
+      //   }
+      //   //fix 'spencer's runs'
+      //   if (nextTerm.tags.has('PresentTense')) {
+      //     return true
+      //   }
+      //   return false
+      // }
+      // //spencer's house
+      // if (nextTerm.tags.has('Noun')) {
+      //   // 'spencer's here'
+      //   if (hereThere.hasOwnProperty(nextTerm.normal) === true) {
+      //     return false
+      //   }
+      //   return true
+      // }
+      // //rocket's red glare
+      // let twoTerm = terms[i + 2]
+      // if (twoTerm && twoTerm.tags.has('Noun') && !twoTerm.tags.has('Pronoun')) {
+      //   return true
+      // }
+      // //othwerwise, an adjective suggests 'is good'
+      // if (nextTerm.tags.has('Adjective') || nextTerm.tags.has('Adverb') || nextTerm.tags.has('Verb')) {
+      //   return false
+      // }
+      // default to posessive
+      return false
+    };
+    var shouldSplit$1 = shouldSplit;
+
+    const byApostrophe = /'/;
+    const numDash = /^[0-9][^-–—]*[-–—].*?[0-9]/;
+
+    // run tagger on our new implicit terms
+    const reTag = function (terms, view) {
+      let tmp = view.update();
+      tmp.document = [terms];
+      tmp.compute(['lexicon', 'preTagger', 'index']);
+    };
+
+    const byEnd = {
+      // ain't
+      t: (terms, i) => apostropheT$1(terms, i),
+      // how'd
+      d: (terms, i) => apostropheD(terms, i),
+      // bob's
+      s: (terms, i, world) => {
+        // [bob's house] vs [bob's cool]
+        if (shouldSplit$1(terms, i) === true) {
+          return apostropheS$1(terms, i)
+        }
+      },
+    };
+
+    const byStart = {
+      // j'aime
+      j: (terms, i) => french.preJ(terms, i),
+      // l'amour
+      l: (terms, i) => french.preL(terms, i),
+      // d'amerique
+      d: (terms, i) => french.preD(terms, i),
+    };
+
+    // pull-apart known contractions from model
+    const knownOnes = function (list, term, before, after) {
+      for (let i = 0; i < list.length; i += 1) {
+        let o = list[i];
+        // look for word-word match (cannot-> [can, not])
+        if (o.word === term.normal) {
+          return o.out
+        }
+        // look for after-match ('re -> [_, are])
+        else if (after !== null && after === o.after) {
+          return [before].concat(o.out)
+        }
+        // look for before-match (l' -> [le, _])
+        else if (before !== null && before === o.before) {
+          return o.out.concat(after)
+          // return [o.out, after] //typeof o.out === 'string' ? [o.out, after] : o.out(terms, i)
+        }
+      }
+      return null
+    };
+
+    const toDocs = function (words, view) {
+      return view.fromText(words.join(' ')).docs[0]
+    };
+
+    //really easy ones
+    const contractions$1 = (view) => {
+      let { world, document } = view;
+      const { model, methods } = world;
+      let list = model.one.contractions || [];
+      // each sentence
+      document.forEach((terms, n) => {
+        // loop through terms backwards
+        for (let i = terms.length - 1; i >= 0; i -= 1) {
+          let before = null;
+          let after = null;
+          if (byApostrophe.test(terms[i].normal) === true) {
+            [before, after] = terms[i].normal.split(byApostrophe);
+          }
+          // any known-ones, like 'dunno'?
+          let words = knownOnes(list, terms[i], before, after);
+          // ['foo', 's']
+          if (!words && byEnd.hasOwnProperty(after)) {
+            words = byEnd[after](terms, i, world);
+          }
+          // ['j', 'aime']
+          if (!words && byStart.hasOwnProperty(before)) {
+            words = byStart[before](terms, i);
+          }
+          // actually insert the new terms
+          if (words) {
+            words = toDocs(words, view);
+            splice(document, [n, i], words);
+            reTag(document[n], view);
+            continue
+          }
+          // '44-2' has special care
+          if (numDash.test(terms[i].normal)) {
+            words = numberRange$1(terms, i);
+            if (words) {
+              words = toDocs(words, view);
+              splice(document, [n, i], words);
+              methods.one.setTag(words, 'NumberRange', world);//add custom tag
+              // is it a time-range, like '5-9pm'
+              if (words[2] && words[2].tags.has('Time')) {
+                methods.one.setTag([words[0]], 'Time', world);
+              }
+              reTag(document[n], view);
+            }
+          }
+        }
+      });
+    };
+    var contractions$2 = contractions$1;
+
+    var compute$1 = { contractions: contractions$2 };
+
+    const plugin = {
+      model: model,
+      compute: compute$1,
+      hooks: ['contractions'],
+    };
+    var contractions = plugin;
 
     nlp$1.extend(change); //0kb
     nlp$1.extend(output); //0kb
     nlp$1.extend(match); //10kb
     nlp$1.extend(pointers); //2kb
     nlp$1.extend(tag); //2kb
+    nlp$1.plugin(contractions); //~6kb
     nlp$1.extend(tokenize$1); //7kb
     nlp$1.plugin(cache); //~1kb
     nlp$1.extend(lookup); //7kb
@@ -20050,41 +21010,46 @@ var app = (function () {
         return s //.charAt(0) + s.substr(1, s.length).replace(/[aeiou]/g, '');
       },
     };
+    var m = transformations;
 
     //a js version of the metaphone (#1) algorithm
 
     const metaphone = function (s) {
-      s = transformations.dedup(s);
-      s = transformations.dropInitialLetters(s);
-      s = transformations.dropBafterMAtEnd(s);
-      s = transformations.changeCK(s);
-      s = transformations.cchange(s);
-      s = transformations.dchange(s);
-      s = transformations.dropG(s);
-      s = transformations.changeG(s);
-      s = transformations.dropH(s);
-      s = transformations.changePH(s);
-      s = transformations.changeQ(s);
-      s = transformations.changeS(s);
-      s = transformations.changeX(s);
-      s = transformations.changeT(s);
-      s = transformations.dropT(s);
-      s = transformations.changeV(s);
-      s = transformations.changeWH(s);
-      s = transformations.dropW(s);
-      s = transformations.dropY(s);
-      s = transformations.changeZ(s);
-      s = transformations.dropVowels(s);
+      s = m.dedup(s);
+      s = m.dropInitialLetters(s);
+      s = m.dropBafterMAtEnd(s);
+      s = m.changeCK(s);
+      s = m.cchange(s);
+      s = m.dchange(s);
+      s = m.dropG(s);
+      s = m.changeG(s);
+      s = m.dropH(s);
+      s = m.changePH(s);
+      s = m.changeQ(s);
+      s = m.changeS(s);
+      s = m.changeX(s);
+      s = m.changeT(s);
+      s = m.dropT(s);
+      s = m.changeV(s);
+      s = m.changeWH(s);
+      s = m.dropW(s);
+      s = m.dropY(s);
+      s = m.changeZ(s);
+      s = m.dropVowels(s);
       return s.trim()
     };
+
+    var metaphone$1 = metaphone;
 
     const soundsLike = function (view) {
       view.docs.forEach(terms => {
         terms.forEach(term => {
-          term.soundsLike = metaphone(term.normal || term.text);
+          term.soundsLike = metaphone$1(term.normal || term.text);
         });
       });
     };
+
+    var soundsLike$1 = soundsLike;
 
     const starts_with_single_vowel_combos = /^(eu)/i;
     const joining_consonant_vowel = /^[^aeiou][e]([^d]|$)/;
@@ -20192,6 +21157,7 @@ var app = (function () {
 
       return arr
     };
+    var postProcess = postprocess;
 
     //chop a string into pronounced syllables
 
@@ -20256,7 +21222,7 @@ var app = (function () {
       return all
     };
 
-    let syllables$1 = function (str) {
+    let syllables$2 = function (str) {
       let all = [];
       if (!str) {
         return all
@@ -20267,7 +21233,7 @@ var app = (function () {
       });
 
       // str.split(whitespace_dash).forEach(doWord)
-      all = postprocess(all);
+      all = postProcess(all);
 
       //for words like 'tree' and 'free'
       if (all.length === 0) {
@@ -20279,17 +21245,23 @@ var app = (function () {
       return all
     };
 
+    // console.log(syllables('civilised'))
+
+    var getSyllables = syllables$2;
+
     const syllables = function (view) {
       view.docs.forEach(terms => {
         terms.forEach(term => {
-          term.syllables = syllables$1(term.normal || term.text);
+          term.syllables = getSyllables(term.normal || term.text);
         });
       });
     };
 
+    var syllables$1 = syllables;
+
     var compute = {
-      soundsLike,
-      syllables
+      soundsLike: soundsLike$1,
+      syllables: syllables$1
     };
 
     const api = function (View) {
@@ -20305,16 +21277,17 @@ var app = (function () {
         return all
       };
     };
+    var api$1 = api;
 
     var speech = {
-      api,
+      api: api$1,
       compute
     };
 
     /* one/syllables/App.svelte generated by Svelte v3.43.0 */
     const file = "one/syllables/App.svelte";
 
-    // (63:6) <Two>
+    // (34:4) <Two>
     function create_default_slot_2(ctx) {
     	let code;
     	let current;
@@ -20351,14 +21324,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(63:6) <Two>",
+    		source: "(34:4) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (55:2) <Page bottom="40px">
+    // (26:2) <Page bottom="40px">
     function create_default_slot_1(ctx) {
     	let div0;
     	let t1;
@@ -20419,13 +21392,13 @@ var app = (function () {
     			t10 = space();
     			create_component(two.$$.fragment);
     			attr_dev(div0, "class", "lib");
-    			add_location(div0, file, 55, 6, 1163);
+    			add_location(div0, file, 26, 4, 686);
     			attr_dev(div1, "class", "plugin");
-    			add_location(div1, file, 56, 6, 1207);
+    			add_location(div1, file, 27, 4, 728);
     			attr_dev(div2, "class", "down tab desc");
-    			add_location(div2, file, 57, 6, 1257);
-    			attr_dev(div3, "class", "res svelte-klj9yp");
-    			add_location(div3, file, 59, 6, 1384);
+    			add_location(div2, file, 28, 4, 776);
+    			attr_dev(div3, "class", "res svelte-1a75hkh");
+    			add_location(div3, file, 30, 4, 893);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -20493,14 +21466,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_1.name,
     		type: "slot",
-    		source: "(55:2) <Page bottom=\\\"40px\\\">",
+    		source: "(26:2) <Page bottom=\\\"40px\\\">",
     		ctx
     	});
 
     	return block;
     }
 
-    // (67:2) <Below>
+    // (38:2) <Below>
     function create_default_slot(ctx) {
     	let a0;
     	let t1;
@@ -20515,10 +21488,10 @@ var app = (function () {
     			a1.textContent = "github";
     			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/compromise");
     			attr_dev(a0, "class", "");
-    			add_location(a0, file, 67, 4, 1548);
+    			add_location(a0, file, 38, 4, 1039);
     			attr_dev(a1, "href", "https://github.com/spencermountain/compromise/");
     			attr_dev(a1, "class", "");
-    			add_location(a1, file, 68, 4, 1633);
+    			add_location(a1, file, 39, 4, 1124);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a0, anchor);
@@ -20536,7 +21509,7 @@ var app = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(67:2) <Below>",
+    		source: "(38:2) <Below>",
     		ctx
     	});
 
@@ -20551,7 +21524,11 @@ var app = (function () {
     	let t1;
     	let below;
     	let current;
-    	back = new Back({ $$inline: true });
+
+    	back = new Back({
+    			props: { href: "https://compromise.cool" },
+    			$$inline: true
+    		});
 
     	page = new Page({
     			props: {
@@ -20578,8 +21555,8 @@ var app = (function () {
     			create_component(page.$$.fragment);
     			t1 = space();
     			create_component(below.$$.fragment);
-    			attr_dev(div, "class", "col svelte-klj9yp");
-    			add_location(div, file, 52, 0, 1105);
+    			attr_dev(div, "class", "col svelte-1a75hkh");
+    			add_location(div, file, 23, 0, 599);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -20727,4 +21704,3 @@ doc.json({syllables: true})
     return app;
 
 })();
-//# sourceMappingURL=bundle.js.map

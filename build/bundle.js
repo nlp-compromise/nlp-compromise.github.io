@@ -34002,7 +34002,7 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			t0 = text$1("If you’re cautious, and worried this won’t work,\n    ");
+    			t0 = text$1("If you're cautious, and worried this won't work,\n    ");
     			div0 = element("div");
     			div0.textContent = "you are very clever.";
     			t2 = space();

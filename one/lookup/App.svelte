@@ -2,10 +2,11 @@
   import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
   import nlp from '/Users/spencer/mountain/compromise/src/one.js'
   import Picker from './Picker.svelte'
-  let choice=0
-  let trie=null
-  import words from './words.js'
-let example=`// pre-compile lookup words
+  let choice = 0
+  let trie = null
+  import tmp from './words.js'
+  let words = tmp
+  let example = `// pre-compile lookup words
 let m = nlp.compile(myWords)
 
 let doc = nlp(text)
@@ -14,22 +15,20 @@ doc.cache() // why not.
 let m = doc.lookup(m) // whoosh 💨
 m.debug()
 `
-let doc=nlp('')
+  let doc = nlp('')
 
-$: lookup=()=>{
-  let begin = new Date()
-const m=doc.lookup(trie)
-let end = new Date()
-let duration=(end.getTime() - begin.getTime()) / 1000)
-  console.log(m.length)
-  return m.fullSentences().unique().out('array')
-}
-function recompile(){
-  let terms=words.split(/\r?\n/).map(txt => txt.trim())
-  terms=terms.filter(str => str)
-  trie=nlp.compile(terms)
-}
-recompile()
+  $: lookup = () => {
+    const found = doc.lookup(trie)
+    let list = doc.if(found)
+    // list.debug()
+    return list.html({ show: found })
+  }
+  function recompile() {
+    let terms = words.split(/\r?\n/).map(txt => txt.trim())
+    terms = terms.filter(str => str)
+    trie = nlp.compile(terms)
+  }
+  recompile()
 </script>
 
 <div class="col">
@@ -39,24 +38,28 @@ recompile()
     <div class="plugin">.lookup()</div>
     <div class="down tab desc">super-fast scan for a list of words in a document</div>
     <div class="both">
-      <div>
+      <div style="max-width:500px; margin-right:2rem;">
         <Picker {choice} bind:doc title="state of the union:" />
-        <!-- <TextArea width="240px" height="250px" value={''} size="0.9rem" /> -->
       </div>
-      <div>
+      <div style="text-align:left;">
+        <div class="f08 grey">phrases to find:</div>
         <TextArea width="180px" height="300px" bind:value={words} size="0.9rem" />
-        <button on:click={recompile}>↻ compile</button>
+        <button style="margin-top:1rem; margin-left:1rem; font-size:0.9rem;" on:click={recompile}>↻ recompile</button>
       </div>
     </div>
     <!-- sentence-list -->
-    <div class="list">
-      {#each lookup() as m}
-        <div class="sentence">• {m}</div>
-      {/each}
+    <div class="both">
+      <div class="list">
+        {@html lookup()}
+        <!-- {#each lookup() as html}
+          <div class="sentence">• {@html html}</div>
+        {/each} -->
+      </div>
     </div>
 
     <!-- docs -->
-    <Left>
+    <Left />
+    <Left accent="blue">
       <div class="down tab desc">
         looking up a list of words in a text is a <i>suprisingly-tough</i> thing.
         <div class="down tab">
@@ -95,6 +98,34 @@ recompile()
     <a href="https://observablehq.com/@spencermountain/compromise-lookup" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#one" class="">github</a>
   </Below>
+  <span class="show" />
 </div>
 
-<style></style>
+<style>
+  .both {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
+  }
+  .f08 {
+    font-size: 0.7rem;
+  }
+  .sentence {
+    margin-top: 0.75rem;
+    margin-bottom: 1.75rem;
+    border-left: 4px solid #cc6966;
+    padding-left: 1rem;
+  }
+  .list {
+    margin: 2rem;
+    min-width: 150px;
+    max-width: 600px;
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+</style>

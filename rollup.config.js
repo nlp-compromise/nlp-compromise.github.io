@@ -6,9 +6,10 @@ import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
 
 
-let dir = process.env.PAGE || '.'
-let out = `${dir}/build/bundle.js`
-let input = dir + '/main.js'
+let dir = process.argv[4] || ''
+// let dir = process.env.PAGE || '.'
+let out = `./${dir}/build/bundle.js`
+let input = `${dir}/main.js`
 console.log(input)
 const production = !process.env.ROLLUP_WATCH
 
@@ -39,7 +40,7 @@ function serve() {
 export default {
   input: input,
   output: {
-    sourcemap: true,
+    sourcemap: false,
     format: 'iife',
     name: 'app',
     file: out,
