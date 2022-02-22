@@ -16984,7 +16984,7 @@ var app = (function () {
         return this.update(ptrs)
       }
       if (isView(regs)) {
-        return this.intersection(regs)
+        return this.filter(m => m.intersection(regs).found)
       }
       return this.none()
     };
@@ -18370,35 +18370,21 @@ var app = (function () {
       lib: lib$3,
     };
 
-    // some nice colors for client-side debug
-    const css = {
-      green: '#7f9c6c',
-      red: '#914045',
-      blue: '#6699cc',
-      magenta: '#6D5685',
-      cyan: '#2D85A8',
-      yellow: '#e6d7b3',
-      black: '#303b50',
-    };
     const logClientSide = function (view) {
-      let tagset = view.world.tags;
-      view.forEach(terms => {
-        terms.forEach(t => {
-          let tags = Array.from(t.tags);
+      console.log('%c -=-=- ', 'background-color:#6699cc;');
+      view.forEach(m => {
+        console.groupCollapsed(m.text());
+        let terms = m.docs[0];
+        let out = terms.map(t => {
           let text = t.text || '-';
           if (t.implicit) {
             text = '[' + t.implicit + ']';
           }
-          let word = "'" + text + "'";
-          word = word.padEnd(8);
-          let found = tags.find(tag => tagset[tag] && tagset[tag].color);
-          let color = 'steelblue';
-          if (tagset[found]) {
-            color = tagset[found].color;
-            color = css[color];
-          }
-          console.log(`   ${word}  -  %c${tags.join(', ')}`, `color: ${color || 'steelblue'};`); // eslint-disable-line
+          let tags = '[' + Array.from(t.tags).join(', ') + ']';
+          return { text, tags }
         });
+        console.table(out, ['text', 'tags']);
+        console.groupEnd();
       });
     };
     var logClientSide$1 = logClientSide;
@@ -18853,7 +18839,53 @@ var app = (function () {
       },
     };
 
-    const methods$a = Object.assign({}, out$1, text, json);
+    const trailSpace = /\s+$/;
+
+    const toText = function (term) {
+      let pre = term.pre || '';
+      let post = term.post || '';
+      return pre + term.text + post
+    };
+
+    const html = function (obj) {
+      // index ids to highlight
+      let starts = {};
+      Object.keys(obj).forEach(k => {
+        let ptrs = obj[k].fullPointer;
+        ptrs.forEach(a => {
+          starts[a[3]] = { tag: k, end: a[2] };
+        });
+      });
+      // create the text output
+      let out = '';
+      this.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          let t = terms[i];
+          // do a span tag
+          if (starts.hasOwnProperty(t.id)) {
+            let { tag, end } = starts[t.id];
+            out += `<span class="${tag}">`;
+            for (let k = i; k < end; k += 1) {
+              out += toText(terms[k]);
+            }
+            // move trailing whitespace after tag
+            let after = '';
+            out = out.replace(trailSpace, (a, b) => {
+              after = a;
+              return ''
+            });
+            out += `</span>${after}`;
+            i = end - 1;
+          } else {
+            out += toText(t);
+          }
+        }
+      });
+      return out
+    };
+    var html$1 = { html };
+
+    const methods$a = Object.assign({}, out$1, text, json, html$1);
     // aliases
     methods$a.data = methods$a.json;
 
@@ -28005,12 +28037,12 @@ var app = (function () {
     			t3 = space();
     			div2 = element("div");
     			t4 = text$1(t4_value);
-    			attr_dev(div0, "class", "space pre");
+    			attr_dev(div0, "class", "space pre svelte-1u7lvp5");
     			toggle_class(div0, "empty", !/*term*/ ctx[10].pre);
     			add_location(div0, file, 72, 12, 1594);
-    			attr_dev(div1, "class", "term");
+    			attr_dev(div1, "class", "term svelte-1u7lvp5");
     			add_location(div1, file, 73, 12, 1682);
-    			attr_dev(div2, "class", "space post");
+    			attr_dev(div2, "class", "space post svelte-1u7lvp5");
     			toggle_class(div2, "empty", !/*term*/ ctx[10].post);
     			add_location(div2, file, 74, 12, 1735);
     		},
@@ -28065,7 +28097,7 @@ var app = (function () {
     	const block = {
     		c: function create() {
     			div = element("div");
-    			attr_dev(div, "class", "div");
+    			attr_dev(div, "class", "div svelte-1u7lvp5");
     			add_location(div, file, 78, 10, 1882);
     		},
     		m: function mount(target, anchor) {
@@ -28113,7 +28145,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
-    			attr_dev(div, "class", "sentence row");
+    			attr_dev(div, "class", "sentence row svelte-1u7lvp5");
     			add_location(div, file, 70, 8, 1518);
     		},
     		m: function mount(target, anchor) {
@@ -28341,7 +28373,7 @@ var app = (function () {
     			add_location(div0, file, 63, 4, 1250);
     			attr_dev(div1, "class", "down tab desc");
     			add_location(div1, file, 65, 4, 1353);
-    			attr_dev(div2, "class", "res col");
+    			attr_dev(div2, "class", "res col svelte-1u7lvp5");
     			add_location(div2, file, 68, 4, 1462);
     		},
     		m: function mount(target, anchor) {
@@ -28535,7 +28567,7 @@ var app = (function () {
     			create_component(page.$$.fragment);
     			t1 = space();
     			create_component(below.$$.fragment);
-    			attr_dev(div, "class", "col");
+    			attr_dev(div, "class", "col svelte-1u7lvp5");
     			add_location(div, file, 60, 0, 1163);
     		},
     		l: function claim(nodes) {

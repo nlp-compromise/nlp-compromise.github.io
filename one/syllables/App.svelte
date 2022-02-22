@@ -29,7 +29,14 @@ doc.json({syllables: true})
     <div class="down tab desc">tokenize words into approximately spoken syllables</div>
     <CodeMirror bind:text />
     <div class="res">
-      [ {more().join(', ')} ]
+      {#each more() as list}
+        <div>
+          {#each list as str}
+            <span class="word">{str}</span>
+            <span class="dash">•</span>
+          {/each}
+        </div>
+      {/each}
     </div>
     <Two>
       <Code js={example} width="500px" />
@@ -42,20 +49,28 @@ doc.json({syllables: true})
 </div>
 
 <style>
+  .word {
+    display: inline-block;
+    margin: 1rem;
+    font-size: 3rem;
+  }
+  .dash {
+    color: grey;
+    font-size: 1rem;
+  }
   .res {
-    font-size: 4rem;
-    line-height: 4.5rem;
+    line-height: 3.5rem;
     margin-top: 6rem;
     margin-left: 2rem;
     margin-bottom: 8rem;
     color: #cc7066;
-    display: flex;
+    /* display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
     text-align: center;
     flex-wrap: wrap;
-    align-self: stretch;
+    align-self: stretch; */
   }
   .col {
     display: flex;

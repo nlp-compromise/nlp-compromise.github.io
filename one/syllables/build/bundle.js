@@ -88,6 +88,12 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
@@ -390,6 +396,15 @@ var app = (function () {
             return;
         dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -16079,7 +16094,7 @@ var app = (function () {
         return this.update(ptrs)
       }
       if (isView(regs)) {
-        return this.intersection(regs)
+        return this.filter(m => m.intersection(regs).found)
       }
       return this.none()
     };
@@ -17465,35 +17480,21 @@ var app = (function () {
       lib: lib$3,
     };
 
-    // some nice colors for client-side debug
-    const css = {
-      green: '#7f9c6c',
-      red: '#914045',
-      blue: '#6699cc',
-      magenta: '#6D5685',
-      cyan: '#2D85A8',
-      yellow: '#e6d7b3',
-      black: '#303b50',
-    };
     const logClientSide = function (view) {
-      let tagset = view.world.tags;
-      view.forEach(terms => {
-        terms.forEach(t => {
-          let tags = Array.from(t.tags);
+      console.log('%c -=-=- ', 'background-color:#6699cc;');
+      view.forEach(m => {
+        console.groupCollapsed(m.text());
+        let terms = m.docs[0];
+        let out = terms.map(t => {
           let text = t.text || '-';
           if (t.implicit) {
             text = '[' + t.implicit + ']';
           }
-          let word = "'" + text + "'";
-          word = word.padEnd(8);
-          let found = tags.find(tag => tagset[tag] && tagset[tag].color);
-          let color = 'steelblue';
-          if (tagset[found]) {
-            color = tagset[found].color;
-            color = css[color];
-          }
-          console.log(`   ${word}  -  %c${tags.join(', ')}`, `color: ${color || 'steelblue'};`); // eslint-disable-line
+          let tags = '[' + Array.from(t.tags).join(', ') + ']';
+          return { text, tags }
         });
+        console.table(out, ['text', 'tags']);
+        console.groupEnd();
       });
     };
     var logClientSide$1 = logClientSide;
@@ -17948,7 +17949,53 @@ var app = (function () {
       },
     };
 
-    const methods$8 = Object.assign({}, out$1, text, json);
+    const trailSpace = /\s+$/;
+
+    const toText = function (term) {
+      let pre = term.pre || '';
+      let post = term.post || '';
+      return pre + term.text + post
+    };
+
+    const html = function (obj) {
+      // index ids to highlight
+      let starts = {};
+      Object.keys(obj).forEach(k => {
+        let ptrs = obj[k].fullPointer;
+        ptrs.forEach(a => {
+          starts[a[3]] = { tag: k, end: a[2] };
+        });
+      });
+      // create the text output
+      let out = '';
+      this.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          let t = terms[i];
+          // do a span tag
+          if (starts.hasOwnProperty(t.id)) {
+            let { tag, end } = starts[t.id];
+            out += `<span class="${tag}">`;
+            for (let k = i; k < end; k += 1) {
+              out += toText(terms[k]);
+            }
+            // move trailing whitespace after tag
+            let after = '';
+            out = out.replace(trailSpace, (a, b) => {
+              after = a;
+              return ''
+            });
+            out += `</span>${after}`;
+            i = end - 1;
+          } else {
+            out += toText(t);
+          }
+        }
+      });
+      return out
+    };
+    var html$1 = { html };
+
+    const methods$8 = Object.assign({}, out$1, text, json, html$1);
     // aliases
     methods$8.data = methods$8.json;
 
@@ -21249,6 +21296,8 @@ var app = (function () {
 
     var getSyllables = syllables$2;
 
+    // const defaultObj = { normal: true, text: true, terms: false }
+
     const syllables = function (view) {
       view.docs.forEach(terms => {
         terms.forEach(term => {
@@ -21270,9 +21319,13 @@ var app = (function () {
         this.compute('syllables');
         let all = [];
         this.docs.forEach(terms => {
+          let some = [];
           terms.forEach(term => {
-            all = all.concat(term.syllables);
+            some = some.concat(term.syllables);
           });
+          if (some.length > 0) {
+            all.push(some);
+          }
         });
         return all
       };
@@ -21287,7 +21340,140 @@ var app = (function () {
     /* one/syllables/App.svelte generated by Svelte v3.43.0 */
     const file = "one/syllables/App.svelte";
 
-    // (34:4) <Two>
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[4] = list[i];
+    	return child_ctx;
+    }
+
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[7] = list[i];
+    	return child_ctx;
+    }
+
+    // (34:10) {#each list as str}
+    function create_each_block_1(ctx) {
+    	let span0;
+    	let t0_value = /*str*/ ctx[7] + "";
+    	let t0;
+    	let t1;
+    	let span1;
+
+    	const block = {
+    		c: function create() {
+    			span0 = element("span");
+    			t0 = text$1(t0_value);
+    			t1 = space();
+    			span1 = element("span");
+    			span1.textContent = "•";
+    			attr_dev(span0, "class", "word svelte-dp5hgf");
+    			add_location(span0, file, 34, 12, 996);
+    			attr_dev(span1, "class", "dash svelte-dp5hgf");
+    			add_location(span1, file, 35, 12, 1040);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span0, anchor);
+    			append_dev(span0, t0);
+    			insert_dev(target, t1, anchor);
+    			insert_dev(target, span1, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*more*/ 2 && t0_value !== (t0_value = /*str*/ ctx[7] + "")) set_data_dev(t0, t0_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span0);
+    			if (detaching) detach_dev(t1);
+    			if (detaching) detach_dev(span1);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(34:10) {#each list as str}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (32:6) {#each more() as list}
+    function create_each_block(ctx) {
+    	let div;
+    	let t;
+    	let each_value_1 = /*list*/ ctx[4];
+    	validate_each_argument(each_value_1);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t = space();
+    			add_location(div, file, 32, 8, 948);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			append_dev(div, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*more*/ 2) {
+    				each_value_1 = /*list*/ ctx[4];
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block_1(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div, t);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value_1.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_each(each_blocks, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(32:6) {#each more() as list}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (41:4) <Two>
     function create_default_slot_2(ctx) {
     	let code;
     	let current;
@@ -21324,7 +21510,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(34:4) <Two>",
+    		source: "(41:4) <Two>",
     		ctx
     	});
 
@@ -21344,10 +21530,6 @@ var app = (function () {
     	let t6;
     	let div3;
     	let t7;
-    	let t8_value = /*more*/ ctx[1]().join(', ') + "";
-    	let t8;
-    	let t9;
-    	let t10;
     	let two;
     	let current;
 
@@ -21363,6 +21545,13 @@ var app = (function () {
 
     	codemirror = new CodeMirror_1({ props: codemirror_props, $$inline: true });
     	binding_callbacks.push(() => bind(codemirror, 'text', codemirror_text_binding));
+    	let each_value = /*more*/ ctx[1]();
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
 
     	two = new Two({
     			props: {
@@ -21386,10 +21575,12 @@ var app = (function () {
     			create_component(codemirror.$$.fragment);
     			t6 = space();
     			div3 = element("div");
-    			t7 = text$1("[ ");
-    			t8 = text$1(t8_value);
-    			t9 = text$1(" ]");
-    			t10 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t7 = space();
     			create_component(two.$$.fragment);
     			attr_dev(div0, "class", "lib");
     			add_location(div0, file, 26, 4, 686);
@@ -21397,7 +21588,7 @@ var app = (function () {
     			add_location(div1, file, 27, 4, 728);
     			attr_dev(div2, "class", "down tab desc");
     			add_location(div2, file, 28, 4, 776);
-    			attr_dev(div3, "class", "res svelte-1a75hkh");
+    			attr_dev(div3, "class", "res svelte-dp5hgf");
     			add_location(div3, file, 30, 4, 893);
     		},
     		m: function mount(target, anchor) {
@@ -21410,10 +21601,12 @@ var app = (function () {
     			mount_component(codemirror, target, anchor);
     			insert_dev(target, t6, anchor);
     			insert_dev(target, div3, anchor);
-    			append_dev(div3, t7);
-    			append_dev(div3, t8);
-    			append_dev(div3, t9);
-    			insert_dev(target, t10, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div3, null);
+    			}
+
+    			insert_dev(target, t7, anchor);
     			mount_component(two, target, anchor);
     			current = true;
     		},
@@ -21427,10 +21620,34 @@ var app = (function () {
     			}
 
     			codemirror.$set(codemirror_changes);
-    			if ((!current || dirty & /*more*/ 2) && t8_value !== (t8_value = /*more*/ ctx[1]().join(', ') + "")) set_data_dev(t8, t8_value);
+
+    			if (dirty & /*more*/ 2) {
+    				each_value = /*more*/ ctx[1]();
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div3, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
     			const two_changes = {};
 
-    			if (dirty & /*$$scope*/ 16) {
+    			if (dirty & /*$$scope*/ 1024) {
     				two_changes.$$scope = { dirty, ctx };
     			}
 
@@ -21457,7 +21674,8 @@ var app = (function () {
     			destroy_component(codemirror, detaching);
     			if (detaching) detach_dev(t6);
     			if (detaching) detach_dev(div3);
-    			if (detaching) detach_dev(t10);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t7);
     			destroy_component(two, detaching);
     		}
     	};
@@ -21473,7 +21691,7 @@ var app = (function () {
     	return block;
     }
 
-    // (38:2) <Below>
+    // (45:2) <Below>
     function create_default_slot(ctx) {
     	let a0;
     	let t1;
@@ -21488,10 +21706,10 @@ var app = (function () {
     			a1.textContent = "github";
     			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/compromise");
     			attr_dev(a0, "class", "");
-    			add_location(a0, file, 38, 4, 1039);
+    			add_location(a0, file, 45, 4, 1213);
     			attr_dev(a1, "href", "https://github.com/spencermountain/compromise/");
     			attr_dev(a1, "class", "");
-    			add_location(a1, file, 39, 4, 1124);
+    			add_location(a1, file, 46, 4, 1298);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a0, anchor);
@@ -21509,7 +21727,7 @@ var app = (function () {
     		block,
     		id: create_default_slot.name,
     		type: "slot",
-    		source: "(38:2) <Below>",
+    		source: "(45:2) <Below>",
     		ctx
     	});
 
@@ -21555,7 +21773,7 @@ var app = (function () {
     			create_component(page.$$.fragment);
     			t1 = space();
     			create_component(below.$$.fragment);
-    			attr_dev(div, "class", "col svelte-1a75hkh");
+    			attr_dev(div, "class", "col svelte-dp5hgf");
     			add_location(div, file, 23, 0, 599);
     		},
     		l: function claim(nodes) {
@@ -21573,14 +21791,14 @@ var app = (function () {
     		p: function update(ctx, [dirty]) {
     			const page_changes = {};
 
-    			if (dirty & /*$$scope, more, text*/ 19) {
+    			if (dirty & /*$$scope, more, text*/ 1027) {
     				page_changes.$$scope = { dirty, ctx };
     			}
 
     			page.$set(page_changes);
     			const below_changes = {};
 
-    			if (dirty & /*$$scope*/ 16) {
+    			if (dirty & /*$$scope*/ 1024) {
     				below_changes.$$scope = { dirty, ctx };
     			}
 

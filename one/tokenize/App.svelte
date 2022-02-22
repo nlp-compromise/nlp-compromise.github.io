@@ -95,4 +95,69 @@ doc.json()
   </Below>
 </div>
 
-<style></style>
+<style>
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: center;
+    align-self: stretch;
+  }
+  .div {
+    background-color: lightgrey;
+    align-self: flex-start;
+    margin-top: 1rem;
+    margin-bottom: 4rem;
+    margin-left: 6rem;
+    width: 40px;
+    height: 2px;
+  }
+  .res {
+    margin-left: 4rem;
+    margin-top: 3rem;
+    overflow-x: scroll;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    flex-wrap: nowrap;
+    align-self: stretch;
+  }
+  .sentence {
+    margin-bottom: 30px;
+  }
+  .term {
+    /* border: 1px solid lightgrey; */
+    border-radius: 5px;
+    box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
+    min-width: 30px;
+    min-height: 30px;
+    padding: 1rem;
+  }
+  .space {
+    border: 2px solid #d68881;
+    border-radius: 5px;
+    box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
+    background-color: #d68881;
+    height: 25px;
+    min-width: 3px;
+    color: #d7d5d2;
+    font-weight: bold;
+    font-size: 10px;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  .empty {
+    opacity: 0.2;
+  }
+  .pre {
+    margin-left: 1rem;
+  }
+  .post {
+    margin-right: 1rem;
+  }
+</style>
