@@ -152,10 +152,6 @@ nlp(myText).match(tokens) //works fine
     flex-wrap: wrap;
     align-self: stretch;
   }
-  .token {
-    color: steelblue;
-    font-size: 2rem;
-  }
   li {
     margin-top: 2rem;
   }
