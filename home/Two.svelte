@@ -81,12 +81,25 @@
       or more often, some person's tired eyes:
     </div>
     <ul class="list down">
-      <li><a href="./two/match"><span class="choose down" style="color:white;">Match-syntax</span> <Caret /></a></li>
-      <li class="down">
-        <a href="./two/radaction"><span class="choose" style="color:white;">Redaction</span> <Caret /></a>
+      <li>
+        <a href="./two/match" class="nowrap">
+          <span class="choose down" style="color:white;">Match-syntax</span>
+          <span style="position:relative; ">
+            <Caret top="1rem" />
+          </span>
+        </a>
       </li>
       <li class="down">
-        <a href="./two/contractions"><span class="choose" style="color:white;">Contractions</span> <Caret /></a>
+        <a href="./two/radaction" class="nowrap">
+          <span class="choose" style="color:white;">Redaction</span>
+          <Caret top="1rem" />
+        </a>
+      </li>
+      <li class="down">
+        <a href="./two/contractions" class="nowrap">
+          <span class="choose" style="color:white;">Contractions</span>
+          <Caret top="1rem" />
+        </a>
       </li>
       <!-- <li class="down"><a href="#"><span class="choose" style="color:white;">Chat bots</span> <Caret /></a></li> -->
     </ul>
@@ -119,5 +132,17 @@
     color: #cc8a66;
     margin-top: 1rem;
     margin-left: 4px;
+  }
+  .nowrap {
+    white-space: nowrap;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+  }
+  @media only screen and (max-width: 600px) {
+    .list {
+      margin: 0.5rem;
+      padding-left: 0.5rem;
+    }
   }
 </style>

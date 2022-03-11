@@ -73,9 +73,24 @@
   <Two>
     <div class="down f09">this also lets things happen:</div>
     <ul class="list down">
-      <li><a href="#"><span class="choose" style="color:white;">Number parsing</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Date parsing</span> <Caret /></a></li>
-      <li class="down"><a href="#"><span class="choose" style="color:white;">Tense conjugation</span> <Caret /></a></li>
+      <li>
+        <a href="#" class="nowrap">
+          <span class="choose" style="color:white;">Number parsing</span>
+          <Caret top="1rem" />
+        </a>
+      </li>
+      <li class="down">
+        <a href="#" class="nowrap">
+          <span class="choose" style="color:white;">Date parsing</span>
+          <Caret top="1rem" />
+        </a>
+      </li>
+      <li class="down">
+        <a href="#" class="nowrap">
+          <span class="choose" style="color:white;">Tense conjugation</span>
+          <Caret top="1rem" />
+        </a>
+      </li>
     </ul>
   </Two>
 
@@ -103,3 +118,9 @@
     <div class="down tab f09">so the hard problem, still ahead ↓</div>
   </One>
 </Page>
+
+<style>
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

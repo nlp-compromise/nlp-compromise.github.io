@@ -2,9 +2,10 @@
   export let href = '#'
   export let color = '#50617A'
   export let width = '65px'
+  export let top = '0px'
 </script>
 
-<a {href} class="container">
+<a {href} class="container" style="position:relative; top:{top};">
   <svg {width} viewBox="0 0 2048 2048" xmlns="http://www.w3.org/2000/svg">
     <path
       fill={color}

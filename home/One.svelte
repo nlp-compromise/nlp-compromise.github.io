@@ -71,19 +71,34 @@
     <div class="down f09">so you can do:</div>
     <ul class="list down">
       <li class="down">
-        <a href="./one/lookup"><span class="choose" style="color:white;">Phrase Lookup</span> <Caret /></a>
+        <a href="./one/lookup" class="nowrap">
+          <span class="choose" style="color:white;">Phrase Lookup</span>
+          <Caret top="1rem" />
+        </a>
       </li>
       <li class="down">
-        <a href="./one/typeahead"><span class="choose" style="color:white;">TypeAhead</span> <Caret /></a>
+        <a href="./one/typeahead" class="nowrap">
+          <span class="choose" style="color:white;">TypeAhead</span>
+          <Caret top="1rem" />
+        </a>
       </li>
       <li class="down">
-        <a href="./one/syllables"><span class="choose" style="color:white;">Syllable parsing</span> <Caret /></a>
+        <a href="./one/syllables" class="nowrap">
+          <span class="choose" style="color:white;">Syllable parsing</span>
+          <Caret top="1rem" />
+        </a>
       </li>
       <li class="down">
-        <a href="./one/tfidf"><span class="choose" style="color:white;">TFIDF</span> <Caret /></a>
+        <a href="./one/tfidf" class="nowrap">
+          <span class="choose" style="color:white;">TFIDF</span>
+          <Caret top="1rem" />
+        </a>
       </li>
       <li class="down">
-        <a href="./one/wikipedia"><span class="choose" style="color:white;">Wikipedia Topics</span> <Caret /></a>
+        <a href="./one/wikipedia" class="nowrap">
+          <span class="choose" style="color:white;">Wikipedia Topics</span>
+          <Caret top="1rem" />
+        </a>
       </li>
     </ul>
   </Two>
@@ -145,5 +160,9 @@
     text-align: center;
     flex-wrap: wrap;
     align-self: stretch;
+  }
+
+  .nowrap {
+    white-space: nowrap;
   }
 </style>

@@ -1,5 +1,5 @@
 <script>
-  import { Page, One, Two, Three, Left, Grid } from '../lib/index.js'
+  import { Page, One, Two, Three, Left, Grid, Caret } from '../lib/index.js'
 </script>
 
 <Page>
@@ -111,14 +111,62 @@
 
   <One>
     <Grid seed="0e387bb94350923b76a" />
-    <div class="tab">
+    <div class="tab some">
       <div class="sea f09">seriously -</div>
-      <kbd>&lt;script src="https://unpkg.com/compromise"&gt;&lt;/script&gt;</kbd>
+      <kbd class="src">&lt;script src="https://unpkg.com/compromise"&gt;&lt;/script&gt;</kbd>
       <kbd>npm install compromise</kbd>
     </div>
     <Grid seed="80bb8622591df22c704" />
   </One>
+  <Three>
+    <div style="width:35px; margin-left:2rem; padding-top:4rem; transform: rotate(-6deg);;">
+      <svg
+        xmlns:svg="http://www.w3.org/2000/svg"
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+        viewBox="0 0 130 130"
+      >
+        <path
+          d="M 65,29 C 59,19 49,12 37,12 20,12 7,25 7,42 7,75 25,80 65,118 105,80 123,75 123,42 123,25 110,12 93,12 81,12 71,19 65,29 z"
+          id="path4"
+          style="fill:#cf9b97"
+        />
+      </svg>
+    </div>
+    <div class="row">
+      <a href="./two/spanish" class="nowrap">
+        spanish
+        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#72697D" /></span>
+      </a>
+      <a href="./two/french" style="margin-top:6rem;" class="nowrap">
+        french
+        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#cf9b97" /></span>
+      </a>
+      <a href="./two/german" style="margin-top:12rem;" class="nowrap">
+        german
+        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#2D85A8" /></span>
+      </a>
+    </div>
+  </Three>
 </Page>
 
 <style>
+  @media only screen and (max-width: 600px) {
+    .src {
+      font-size: 0.6rem;
+    }
+    .some {
+      margin-left: 0px;
+    }
+  }
+  .src {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow-x: scroll;
+    max-width: 70vw;
+  }
+  .nowrap {
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
 </style>

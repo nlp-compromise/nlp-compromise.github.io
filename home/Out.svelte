@@ -18,13 +18,19 @@
     <div class="down" />
     <hr style="height:3px; background-color:#50617A; width:250px; margin-bottom:3rem; margin-top:4rem;" />
 
-    <div>Compromise was created <b>in 2010</b>:</div>
-    <div class="tab f08">we've shipped >100 incremental releases</div>
+    <div>
+      Compromise is an <span class="cherry">open-source</span> <br />
+      <div class="tab f09">
+        community created <b>in 2010</b>:
+      </div>
+    </div>
+    <div class="f08">we've shipped >100 incremental releases.</div>
     <div>
       {#each friends as friend}
         <span class="friend">{friend}</span>
       {/each}
     </div>
+    <hr style="margin-top:3rem;" />
   </Left>
   <Left>
     we think that &nbsp;<i>open-source, web-focused</i>&nbsp; tools
@@ -44,10 +50,9 @@
       <div class="tab">minimizing jargon</div>
     </div> -->
     <div style="margin-top:100px;" />
-    <div class="down tab">
+    <!-- <div class="down tab">
       that's the best way to build this.
-      <!-- <div class="tab">a crazy set of things.</div> -->
-    </div>
+    </div> -->
   </Left>
 
   <One>
@@ -122,5 +127,11 @@
     padding: 1.2rem;
     display: inline-block;
     white-space: nowrap;
+  }
+  @media only screen and (max-width: 600px) {
+    .friend {
+      font-size: 0.7rem;
+      padding: 0.9rem;
+    }
   }
 </style>
