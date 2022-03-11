@@ -1,24 +1,29 @@
 <script>
-  import { Page, Back, One, Two, Three, Left, CodeMirror } from '../../lib/index.js'
+  import { Page, Back, One, Code, CodeMirror, Below } from '../../lib/index.js'
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src/index.mjs'
-  let text = 'next weekend'
-  // import Textarea from '../../lib/TextArea.svelte'
-  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
-
   import spacetime from 'spacetime'
-  // import Align from './Align.svelte'
-  // nlp.plugin(nlpDates)
-  // nlp.plugin(nlpNumbers)
+  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
+  import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/builds/compromise-dates.mjs'
+  nlp.plugin(nlpDates)
+  let text = 'next weekend'
+
+  let example = `let doc = nlp('sometime next tuesday')
+doc.dates().json()
+/*[{ 
+text: 'next tuesday',
+date: {
+  start: '2022-03-28',
+  end: '2022-03-28'
+}
+}]*/
+`
   let days = {}
   let start = spacetime()
   let end = null
-  let date = null
-  let from = null
 
   const highlight = function (str = '') {
-    // let dates = nlp(str).dates()
-    // let json = dates.json({ offset: true })
-    let json = nlp(str).match('. [.]', 0).json({ offset: true }) //temp
+    let dates = nlp(str).dates()
+    let json = dates.json({ offset: true })
     let offsets = json.map(obj => {
       let offset = obj.offset
       return {
@@ -28,60 +33,38 @@
       }
     })
     if (json[0] && json[0]) {
-      start = spacetime(json[0].start)
-      end = spacetime(json[0].end)
-      let show = start.minus(1, 'second').every('day', end).slice(0, 400)
-      // from = show[0]
-      // to = show[show.length - 1]
+      start = spacetime(json[0].dates.start)
+      end = spacetime(json[0].dates.end)
       days = {}
+      let show = start.minus(1, 'second').every('day', end).slice(0, 400)
       show.forEach(s => {
         let iso = s.format('iso-short')
         days[iso] = 'blue'
       })
-      from = Object.keys(days)[0]
     } else {
       days = []
     }
-
     return offsets
-  }
-
-  const fmt = function (s) {
-    if (s) {
-      return s.format('{day-short} {month-short} {date-ordinal} {time}')
-    }
-    return '-'
-  }
-  const fmtYear = function (s) {
-    if (s) {
-      return s.format('{year}')
-    }
-    return '-'
   }
 </script>
 
 <Back href="https://compromise.cool" />
 <Page bottom="40px">
-  <Left>
-    <kbd style="font-size:1.7rem; line-height:2rem">compromise/three/dates</kbd>
-    <div style="margin-top:2rem;" />
-    <div class="down tab">parse natural-language dates-</div>
-  </Left>
-
-  <One>
+  <div class="lib">compromise/three/dates</div>
+  <div class="down tab desc">parse natural-language dates -</div>
+  <div style="margin:2rem;">
     <CodeMirror bind:text {highlight} />
     <div class="months">
-      <!-- <Resize start={from} end={to} {days} /> -->
       <Year date={start.format('iso-short')} {days} showToday={false} />
     </div>
-  </One>
-
+  </div>
   <One>
-    <!-- <Align/> -->
+    <Code js={example} width="500px" />
   </One>
 </Page>
-<div class="right light f09">
-  <a href="https://github.com/spencermountain/compromise/" class="">github</a>
-</div>
+<Below>
+  <a href="https://observablehq.com/@spencermountain/compromise-dates" class="">docs</a>
+  <a href="https://github.com/spencermountain/compromise/tree/master/plugins/dates" class="">github</a>
+</Below>
 
 <style></style>
