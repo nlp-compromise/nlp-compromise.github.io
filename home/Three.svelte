@@ -74,19 +74,25 @@
     <div class="down f09">this also lets things happen:</div>
     <ul class="list down">
       <li>
-        <a href="#" class="nowrap">
+        <a href="./three/numbers" class="nowrap">
           <span class="choose" style="color:white;">Number parsing</span>
           <Caret top="1rem" />
         </a>
       </li>
       <li class="down">
-        <a href="#" class="nowrap">
+        <a href="./three/redact" class="nowrap">
+          <span class="choose" style="color:white;">Redaction</span>
+          <Caret top="1rem" />
+        </a>
+      </li>
+      <li class="down">
+        <a href="./three/redact" class="nowrap">
           <span class="choose" style="color:white;">Date parsing</span>
           <Caret top="1rem" />
         </a>
       </li>
       <li class="down">
-        <a href="#" class="nowrap">
+        <a href="./three/verbs" class="nowrap">
           <span class="choose" style="color:white;">Tense conjugation</span>
           <Caret top="1rem" />
         </a>

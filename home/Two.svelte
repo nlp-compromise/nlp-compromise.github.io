@@ -90,12 +90,6 @@
         </a>
       </li>
       <li class="down">
-        <a href="./two/radaction" class="nowrap">
-          <span class="choose" style="color:white;">Redaction</span>
-          <Caret top="1rem" />
-        </a>
-      </li>
-      <li class="down">
         <a href="./two/contractions" class="nowrap">
           <span class="choose" style="color:white;">Contractions</span>
           <Caret top="1rem" />
