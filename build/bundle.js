@@ -29557,21 +29557,21 @@ var app = (function () {
     			div6 = element("div");
     			create_component(grid.$$.fragment);
     			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$d, 8, 4, 127);
+    			add_location(div0, file$d, 8, 4, 121);
     			attr_dev(div1, "class", "i");
     			set_style(div1, "font-size", "1.8rem");
     			set_style(div1, "line-height", "2rem");
-    			add_location(div1, file$d, 10, 6, 198);
+    			add_location(div1, file$d, 10, 6, 192);
     			attr_dev(div2, "class", "tab f2");
-    			add_location(div2, file$d, 11, 6, 276);
+    			add_location(div2, file$d, 11, 6, 270);
     			attr_dev(div3, "class", "more m1");
-    			add_location(div3, file$d, 9, 4, 170);
+    			add_location(div3, file$d, 9, 4, 164);
     			attr_dev(div4, "class", "tab i f2 rose");
-    			add_location(div4, file$d, 13, 4, 340);
+    			add_location(div4, file$d, 13, 4, 334);
     			set_style(div5, "margin-top", "3rem");
-    			add_location(div5, file$d, 14, 4, 388);
+    			add_location(div5, file$d, 14, 4, 382);
     			attr_dev(div6, "class", "margin-left:15rem;");
-    			add_location(div6, file$d, 15, 4, 425);
+    			add_location(div6, file$d, 15, 4, 419);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -29659,14 +29659,14 @@ var app = (function () {
     			t5 = text$1(" it-");
     			set_style(div0, "max-width", "180px");
     			set_style(div0, "margin-bottom", "1rem");
-    			add_location(div0, file$d, 21, 6, 569);
+    			add_location(div0, file$d, 21, 6, 563);
     			attr_dev(span0, "class", "sky");
-    			add_location(span0, file$d, 26, 8, 716);
+    			add_location(span0, file$d, 26, 8, 710);
     			attr_dev(span1, "class", "sky");
-    			add_location(span1, file$d, 27, 15, 764);
-    			add_location(div1, file$d, 24, 6, 683);
+    			add_location(span1, file$d, 27, 15, 758);
+    			add_location(div1, file$d, 24, 6, 677);
     			attr_dev(div2, "class", "tab down f09 col");
-    			add_location(div2, file$d, 20, 4, 532);
+    			add_location(div2, file$d, 20, 4, 526);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -29811,50 +29811,50 @@ var app = (function () {
     			t27 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(span0, "class", "down i");
-    			add_location(span0, file$d, 33, 6, 864);
+    			add_location(span0, file$d, 33, 6, 858);
     			attr_dev(div0, "class", "sea i f2 sky");
-    			add_location(div0, file$d, 35, 8, 939);
+    			add_location(div0, file$d, 35, 8, 933);
     			attr_dev(span1, "class", "red ");
-    			add_location(span1, file$d, 37, 10, 1045);
+    			add_location(span1, file$d, 37, 10, 1039);
     			attr_dev(span2, "class", "red f09 i");
-    			add_location(span2, file$d, 38, 10, 1087);
+    			add_location(span2, file$d, 38, 10, 1081);
     			attr_dev(span3, "class", "sea b i f2");
     			set_style(span3, "top", "22px");
     			set_style(span3, "left", "32px");
     			set_style(span3, "position", "absolute");
-    			add_location(span3, file$d, 39, 10, 1137);
+    			add_location(span3, file$d, 39, 10, 1131);
     			set_style(div1, "position", "relative");
     			set_style(div1, "margin-top", "1.2rem");
-    			add_location(div1, file$d, 36, 8, 983);
+    			add_location(div1, file$d, 36, 8, 977);
     			attr_dev(div2, "class", "tab ");
-    			add_location(div2, file$d, 34, 6, 912);
+    			add_location(div2, file$d, 34, 6, 906);
     			set_style(sup, "font-size", "12px");
-    			add_location(sup, file$d, 43, 8, 1356);
+    			add_location(sup, file$d, 43, 8, 1350);
     			set_style(sub, "font-size", "1.1rem");
-    			add_location(sub, file$d, 45, 8, 1417);
+    			add_location(sub, file$d, 45, 8, 1411);
     			set_style(span4, "margin-left", "0.4rem");
     			set_style(span4, "font-size", "12px");
-    			add_location(span4, file$d, 46, 8, 1470);
+    			add_location(span4, file$d, 46, 8, 1464);
     			set_style(span5, "font-size", "12px");
-    			add_location(span5, file$d, 48, 8, 1612);
+    			add_location(span5, file$d, 48, 8, 1606);
     			attr_dev(div3, "class", "sky i ");
     			set_style(div3, "font-size", "2.0rem");
     			set_style(div3, "margin-left", "20px");
     			set_style(div3, "margin-top", "2.3rem");
-    			add_location(div3, file$d, 42, 6, 1263);
+    			add_location(div3, file$d, 42, 6, 1257);
     			set_style(span6, "font-size", "12px");
-    			add_location(span6, file$d, 50, 32, 1697);
-    			add_location(i, file$d, 50, 78, 1743);
+    			add_location(span6, file$d, 50, 32, 1691);
+    			add_location(i, file$d, 50, 78, 1737);
     			attr_dev(div4, "class", "tab down f09");
-    			add_location(div4, file$d, 50, 6, 1671);
+    			add_location(div4, file$d, 50, 6, 1665);
     			attr_dev(div5, "style", "");
-    			add_location(div5, file$d, 32, 4, 843);
+    			add_location(div5, file$d, 32, 4, 837);
     			set_style(div6, "margin-top", "3rem");
-    			add_location(div6, file$d, 53, 4, 1833);
+    			add_location(div6, file$d, 53, 4, 1827);
     			attr_dev(div7, "class", "tab down f09");
-    			add_location(div7, file$d, 55, 4, 1981);
+    			add_location(div7, file$d, 55, 4, 1975);
     			attr_dev(div8, "class", "tab down f09");
-    			add_location(div8, file$d, 56, 4, 2042);
+    			add_location(div8, file$d, 56, 4, 2036);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
@@ -29952,11 +29952,11 @@ var app = (function () {
     			div2 = element("div");
     			div2.textContent = "more of it.";
     			attr_dev(div0, "class", "f09");
-    			add_location(div0, file$d, 70, 4, 2555);
+    			add_location(div0, file$d, 70, 4, 2549);
     			attr_dev(div1, "class", "i sea tab");
-    			add_location(div1, file$d, 71, 4, 2593);
+    			add_location(div1, file$d, 71, 4, 2587);
     			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$d, 72, 4, 2638);
+    			add_location(div2, file$d, 72, 4, 2632);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -30003,7 +30003,7 @@ var app = (function () {
     			t = space();
     			create_component(grid.$$.fragment);
     			set_style(div, "width", "250px");
-    			add_location(div, file$d, 76, 4, 2699);
+    			add_location(div, file$d, 76, 4, 2693);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -30100,30 +30100,30 @@ var app = (function () {
     			t17 = space();
     			div9 = element("div");
     			attr_dev(div0, "class", "space");
-    			add_location(div0, file$d, 82, 4, 2862);
+    			add_location(div0, file$d, 82, 4, 2856);
     			attr_dev(b, "class", "sky f2");
-    			add_location(b, file$d, 84, 6, 2900);
+    			add_location(b, file$d, 84, 6, 2894);
     			attr_dev(div1, "class", "tab");
     			set_style(div1, "margin-top", "1.4rem");
-    			add_location(div1, file$d, 85, 6, 2954);
-    			add_location(div2, file$d, 83, 4, 2888);
-    			add_location(div3, file$d, 89, 6, 3120);
+    			add_location(div1, file$d, 85, 6, 2948);
+    			add_location(div2, file$d, 83, 4, 2882);
+    			add_location(div3, file$d, 89, 6, 3114);
     			attr_dev(div4, "style", "");
-    			add_location(div4, file$d, 95, 24, 3399);
+    			add_location(div4, file$d, 95, 24, 3393);
     			attr_dev(div5, "class", "sea down tab f2 ");
     			set_style(div5, "position", "relative");
     			set_style(div5, "margin", "4rem");
-    			add_location(div5, file$d, 94, 6, 3304);
+    			add_location(div5, file$d, 94, 6, 3298);
     			attr_dev(div6, "class", "f09 i down");
-    			add_location(div6, file$d, 97, 6, 3448);
+    			add_location(div6, file$d, 97, 6, 3442);
     			attr_dev(div7, "class", "down");
-    			add_location(div7, file$d, 101, 6, 3607);
-    			add_location(i, file$d, 102, 32, 3687);
+    			add_location(div7, file$d, 101, 6, 3601);
+    			add_location(i, file$d, 102, 32, 3681);
     			attr_dev(div8, "class", "down f09");
-    			add_location(div8, file$d, 102, 6, 3661);
-    			add_location(ul, file$d, 88, 4, 3109);
+    			add_location(div8, file$d, 102, 6, 3655);
+    			add_location(ul, file$d, 88, 4, 3103);
     			attr_dev(div9, "class", "down");
-    			add_location(div9, file$d, 108, 4, 3884);
+    			add_location(div9, file$d, 108, 4, 3878);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -30213,12 +30213,12 @@ var app = (function () {
     			t6 = space();
     			create_component(grid1.$$.fragment);
     			attr_dev(div0, "class", "sea f09");
-    			add_location(div0, file$d, 114, 6, 3996);
+    			add_location(div0, file$d, 114, 6, 3990);
     			attr_dev(kbd0, "class", "src svelte-130n4an");
-    			add_location(kbd0, file$d, 115, 6, 4041);
-    			add_location(kbd1, file$d, 116, 6, 4135);
+    			add_location(kbd0, file$d, 115, 6, 4035);
+    			add_location(kbd1, file$d, 116, 6, 4129);
     			attr_dev(div1, "class", "tab some svelte-130n4an");
-    			add_location(div1, file$d, 113, 4, 3967);
+    			add_location(div1, file$d, 113, 4, 3961);
     		},
     		m: function mount(target, anchor) {
     			mount_component(grid0, target, anchor);
@@ -30327,39 +30327,39 @@ var app = (function () {
     			attr_dev(path, "d", "M 65,29 C 59,19 49,12 37,12 20,12 7,25 7,42 7,75 25,80 65,118 105,80 123,75 123,42 123,25 110,12 93,12 81,12 71,19 65,29 z");
     			attr_dev(path, "id", "path4");
     			set_style(path, "fill", "#cf9b97");
-    			add_location(path, file$d, 128, 8, 4501);
+    			add_location(path, file$d, 128, 8, 4495);
     			attr_dev(svg, "xmlns:svg", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "version", "1.1");
     			attr_dev(svg, "viewBox", "0 0 130 130");
-    			add_location(svg, file$d, 122, 6, 4338);
+    			add_location(svg, file$d, 122, 6, 4332);
     			set_style(div0, "width", "35px");
     			set_style(div0, "margin-left", "2rem");
     			set_style(div0, "padding-top", "4rem");
     			set_style(div0, "transform", "rotate(-6deg)");
-    			add_location(div0, file$d, 121, 4, 4243);
+    			add_location(div0, file$d, 121, 4, 4237);
     			set_style(span0, "position", "relative");
     			set_style(span0, "top", "0.4rem");
-    			add_location(span0, file$d, 138, 8, 4823);
-    			attr_dev(a0, "href", "./two/spanish");
+    			add_location(span0, file$d, 138, 8, 4817);
+    			attr_dev(a0, "href", "./one/spanish");
     			attr_dev(a0, "class", "nowrap svelte-130n4an");
-    			add_location(a0, file$d, 136, 6, 4759);
+    			add_location(a0, file$d, 136, 6, 4753);
     			set_style(span1, "position", "relative");
     			set_style(span1, "top", "0.4rem");
-    			add_location(span1, file$d, 142, 8, 5016);
-    			attr_dev(a1, "href", "./two/french");
+    			add_location(span1, file$d, 142, 8, 5010);
+    			attr_dev(a1, "href", "./one/french");
     			set_style(a1, "margin-top", "6rem");
     			attr_dev(a1, "class", "nowrap svelte-130n4an");
-    			add_location(a1, file$d, 140, 6, 4929);
+    			add_location(a1, file$d, 140, 6, 4923);
     			set_style(span2, "position", "relative");
     			set_style(span2, "top", "0.4rem");
-    			add_location(span2, file$d, 146, 8, 5210);
-    			attr_dev(a2, "href", "./two/german");
+    			add_location(span2, file$d, 146, 8, 5204);
+    			attr_dev(a2, "href", "./one/german");
     			set_style(a2, "margin-top", "12rem");
     			attr_dev(a2, "class", "nowrap svelte-130n4an");
-    			add_location(a2, file$d, 144, 6, 5122);
+    			add_location(a2, file$d, 144, 6, 5116);
     			attr_dev(div1, "class", "row");
-    			add_location(div1, file$d, 135, 4, 4735);
+    			add_location(div1, file$d, 135, 4, 4729);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -30737,7 +30737,7 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Intro> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Page, One, Two, Three: Three$1, Left, Grid, Caret });
+    	$$self.$capture_state = () => ({ Page, One, Two, Three: Three$1, Grid, Caret });
     	return [];
     }
 
@@ -35339,9 +35339,11 @@ var app = (function () {
     nlp$1.plugin(verbs); //
 
     /* home/Tagger.svelte generated by Svelte v3.43.0 */
+
+    const { console: console_1$2 } = globals;
     const file$c = "home/Tagger.svelte";
 
-    // (24:0) <Page>
+    // (25:0) <Page>
     function create_default_slot$5(ctx) {
     	let div0;
     	let textarea;
@@ -35378,12 +35380,12 @@ var app = (function () {
     			div2 = element("div");
     			create_component(grid.$$.fragment);
     			attr_dev(div0, "class", "top svelte-skmwn1");
-    			add_location(div0, file$c, 24, 2, 899);
+    			add_location(div0, file$c, 25, 2, 926);
     			attr_dev(div1, "class", "res svelte-skmwn1");
     			set_style(div1, "position", "relative");
-    			add_location(div1, file$c, 27, 2, 1011);
+    			add_location(div1, file$c, 28, 2, 1038);
     			attr_dev(div2, "class", "end svelte-skmwn1");
-    			add_location(div2, file$c, 30, 2, 1084);
+    			add_location(div2, file$c, 31, 2, 1111);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -35424,7 +35426,7 @@ var app = (function () {
     		block,
     		id: create_default_slot$5.name,
     		type: "slot",
-    		source: "(24:0) <Page>",
+    		source: "(25:0) <Page>",
     		ctx
     	});
 
@@ -35495,8 +35497,9 @@ var app = (function () {
     	let html = '';
     	nlp$1.addWords({ shelbyville: 'City', morganville: 'City' });
 
-    	const onchange = function () {
-    		let doc = nlp$1(text);
+    	const onchange = function (txt) {
+    		console.log(txt);
+    		let doc = nlp$1(txt);
     		let nouns = doc.nouns();
     		let verbs = doc.verbs();
     		let places = doc.places();
@@ -35508,11 +35511,11 @@ var app = (function () {
     		}));
     	};
 
-    	onchange();
+    	onchange(text);
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Tagger> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$2.warn(`<Tagger> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$capture_state = () => ({
@@ -36788,12 +36791,12 @@ var app = (function () {
     			attr_dev(div1, "class", "tab");
     			add_location(div1, file$8, 31, 4, 1179);
     			attr_dev(span0, "class", "cherry");
-    			add_location(span0, file$8, 37, 22, 1340);
+    			add_location(span0, file$8, 37, 22, 1345);
     			attr_dev(span1, "class", "rose");
-    			add_location(span1, file$8, 37, 64, 1382);
+    			add_location(span1, file$8, 37, 64, 1387);
     			attr_dev(span2, "class", "sky");
-    			add_location(span2, file$8, 38, 6, 1424);
-    			attr_dev(div2, "class", "tab");
+    			add_location(span2, file$8, 38, 6, 1429);
+    			attr_dev(div2, "class", "tab down");
     			add_location(div2, file$8, 36, 4, 1300);
     		},
     		m: function mount(target, anchor) {
@@ -36845,11 +36848,11 @@ var app = (function () {
     			div1 = element("div");
     			div1.textContent = "haha, i dunno man!";
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$8, 51, 6, 2016);
+    			add_location(div0, file$8, 51, 6, 2021);
     			attr_dev(div1, "class", "tab i f09 down");
-    			add_location(div1, file$8, 52, 6, 2066);
+    			add_location(div1, file$8, 52, 6, 2071);
     			attr_dev(div2, "class", "tab down f09");
-    			add_location(div2, file$8, 49, 4, 1937);
+    			add_location(div2, file$8, 49, 4, 1942);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -36899,10 +36902,10 @@ var app = (function () {
     			div0.textContent = "is 20kb of javascript:";
     			t3 = space();
     			create_component(grid.$$.fragment);
-    			add_location(kbd, file$8, 58, 6, 2164);
+    			add_location(kbd, file$8, 58, 6, 2169);
     			attr_dev(div0, "class", "tab");
-    			add_location(div0, file$8, 59, 6, 2196);
-    			add_location(div1, file$8, 57, 4, 2152);
+    			add_location(div0, file$8, 59, 6, 2201);
+    			add_location(div1, file$8, 57, 4, 2157);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -37023,49 +37026,49 @@ var app = (function () {
     			t15 = space();
     			create_component(caret4.$$.fragment);
     			attr_dev(div, "class", "down f09");
-    			add_location(div, file$8, 70, 4, 2444);
+    			add_location(div, file$8, 70, 4, 2449);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$8, 74, 10, 2595);
+    			add_location(span0, file$8, 74, 10, 2600);
     			attr_dev(a0, "href", "./one/lookup");
     			attr_dev(a0, "class", "nowrap svelte-19nv297");
-    			add_location(a0, file$8, 73, 8, 2546);
+    			add_location(a0, file$8, 73, 8, 2551);
     			attr_dev(li0, "class", "down");
-    			add_location(li0, file$8, 72, 6, 2520);
+    			add_location(li0, file$8, 72, 6, 2525);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$8, 80, 10, 2798);
+    			add_location(span1, file$8, 80, 10, 2803);
     			attr_dev(a1, "href", "./one/typeahead");
     			attr_dev(a1, "class", "nowrap svelte-19nv297");
-    			add_location(a1, file$8, 79, 8, 2746);
+    			add_location(a1, file$8, 79, 8, 2751);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$8, 78, 6, 2720);
+    			add_location(li1, file$8, 78, 6, 2725);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$8, 86, 10, 2997);
+    			add_location(span2, file$8, 86, 10, 3002);
     			attr_dev(a2, "href", "./one/syllables");
     			attr_dev(a2, "class", "nowrap svelte-19nv297");
-    			add_location(a2, file$8, 85, 8, 2945);
+    			add_location(a2, file$8, 85, 8, 2950);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$8, 84, 6, 2919);
+    			add_location(li2, file$8, 84, 6, 2924);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$8, 92, 10, 3199);
+    			add_location(span3, file$8, 92, 10, 3204);
     			attr_dev(a3, "href", "./one/tfidf");
     			attr_dev(a3, "class", "nowrap svelte-19nv297");
-    			add_location(a3, file$8, 91, 8, 3151);
+    			add_location(a3, file$8, 91, 8, 3156);
     			attr_dev(li3, "class", "down");
-    			add_location(li3, file$8, 90, 6, 3125);
+    			add_location(li3, file$8, 90, 6, 3130);
     			attr_dev(span4, "class", "choose");
     			set_style(span4, "color", "white");
-    			add_location(span4, file$8, 98, 10, 3394);
+    			add_location(span4, file$8, 98, 10, 3399);
     			attr_dev(a4, "href", "./one/wikipedia");
     			attr_dev(a4, "class", "nowrap svelte-19nv297");
-    			add_location(a4, file$8, 97, 8, 3342);
+    			add_location(a4, file$8, 97, 8, 3347);
     			attr_dev(li4, "class", "down");
-    			add_location(li4, file$8, 96, 6, 3316);
+    			add_location(li4, file$8, 96, 6, 3321);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$8, 71, 4, 2491);
+    			add_location(ul, file$8, 71, 4, 2496);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -37183,23 +37186,23 @@ var app = (function () {
     			div3 = element("div");
     			div3.textContent = "or a bookshelf in 12s.";
     			attr_dev(span0, "class", "lib svelte-19nv297");
-    			add_location(span0, file$8, 108, 8, 3592);
+    			add_location(span0, file$8, 108, 8, 3597);
     			attr_dev(span1, "class", "sea");
-    			add_location(span1, file$8, 108, 51, 3635);
-    			add_location(div0, file$8, 107, 6, 3578);
+    			add_location(span1, file$8, 108, 51, 3640);
+    			add_location(div0, file$8, 107, 6, 3583);
     			attr_dev(img, "class", "clean svelte-19nv297");
     			set_style(img, "width", "450px");
     			if (!src_url_equal(img.src, img_src_value = "./home/img/one.jpg")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "compromise/one filesize");
-    			add_location(img, file$8, 112, 6, 3713);
+    			add_location(img, file$8, 112, 6, 3718);
     			attr_dev(div1, "class", "down col svelte-19nv297");
-    			add_location(div1, file$8, 106, 4, 3549);
+    			add_location(div1, file$8, 106, 4, 3554);
     			set_style(div2, "max-width", "600px");
     			set_style(div2, "margin-top", "6rem");
-    			add_location(div2, file$8, 114, 4, 3826);
-    			add_location(div3, file$8, 119, 6, 3980);
+    			add_location(div2, file$8, 114, 4, 3831);
+    			add_location(div3, file$8, 119, 6, 3985);
     			attr_dev(div4, "class", "f09 right down svelte-19nv297");
-    			add_location(div4, file$8, 117, 4, 3904);
+    			add_location(div4, file$8, 117, 4, 3909);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -37341,14 +37344,14 @@ var app = (function () {
     			t9 = space();
     			div2 = element("div");
     			div2.textContent = "or swing harder ↓";
-    			add_location(div0, file$8, 123, 4, 4090);
+    			add_location(div0, file$8, 123, 4, 4095);
     			attr_dev(div1, "class", "m1");
-    			add_location(div1, file$8, 124, 4, 4151);
+    			add_location(div1, file$8, 124, 4, 4156);
     			attr_dev(div2, "class", "m2 sea down f09");
-    			add_location(div2, file$8, 125, 4, 4211);
+    			add_location(div2, file$8, 125, 4, 4216);
     			set_style(div3, "margin-top", "6rem");
     			set_style(div3, "margin-left", "2rem");
-    			add_location(div3, file$8, 122, 2, 4037);
+    			add_location(div3, file$8, 122, 2, 4042);
     		},
     		m: function mount(target, anchor) {
     			mount_component(left0, target, anchor);
@@ -37741,7 +37744,7 @@ var app = (function () {
     			div3.textContent = "which is more handy than you may think.";
     			attr_dev(b, "class", "sky f2");
     			add_location(b, file$6, 15, 4, 438);
-    			attr_dev(span0, "class", "plugin svelte-1wkfp1m");
+    			attr_dev(span0, "class", "plugin svelte-16d7el4");
     			add_location(span0, file$6, 16, 18, 493);
     			add_location(div0, file$6, 16, 4, 479);
     			set_style(div1, "margin-top", "5rem");
@@ -38188,18 +38191,18 @@ var app = (function () {
     			set_style(span2, "position", "relative");
     			add_location(span2, file$6, 86, 10, 3257);
     			attr_dev(a0, "href", "./two/match");
-    			attr_dev(a0, "class", "nowrap svelte-1wkfp1m");
+    			attr_dev(a0, "class", "nowrap svelte-16d7el4");
     			add_location(a0, file$6, 84, 8, 3132);
     			add_location(li0, file$6, 83, 6, 3119);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
     			add_location(span3, file$6, 93, 10, 3455);
     			attr_dev(a1, "href", "./two/contractions");
-    			attr_dev(a1, "class", "nowrap svelte-1wkfp1m");
+    			attr_dev(a1, "class", "nowrap svelte-16d7el4");
     			add_location(a1, file$6, 92, 8, 3400);
     			attr_dev(li1, "class", "down");
     			add_location(li1, file$6, 91, 6, 3374);
-    			attr_dev(ul, "class", "list down svelte-1wkfp1m");
+    			attr_dev(ul, "class", "list down svelte-16d7el4");
     			add_location(ul, file$6, 82, 4, 3090);
     		},
     		m: function mount(target, anchor) {
@@ -38522,7 +38525,7 @@ var app = (function () {
     			if (!src_url_equal(img1.src, img1_src_value = "./home/img/two.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "compromise/two filesize");
     			add_location(img1, file$6, 114, 4, 4187);
-    			attr_dev(div, "class", "row");
+    			attr_dev(div, "class", "row svelte-16d7el4");
     			add_location(div, file$6, 112, 2, 4063);
     		},
     		m: function mount(target, anchor) {
@@ -38955,7 +38958,7 @@ var app = (function () {
     	return block;
     }
 
-    // (29:2) <One>
+    // (29:2) <Left>
     function create_default_slot_4$1(ctx) {
     	let div7;
     	let div2;
@@ -39017,34 +39020,34 @@ var app = (function () {
     			div9 = element("div");
     			div9.textContent = "or a 1/3rd of a thing.";
     			attr_dev(div0, "class", "blue");
-    			add_location(div0, file$4, 31, 8, 981);
+    			add_location(div0, file$4, 31, 8, 982);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file$4, 32, 8, 1044);
+    			add_location(div1, file$4, 32, 8, 1045);
     			attr_dev(div2, "class", "f2");
-    			add_location(div2, file$4, 30, 6, 956);
+    			add_location(div2, file$4, 30, 6, 957);
     			attr_dev(span0, "class", "sea i");
-    			add_location(span0, file$4, 35, 36, 1154);
+    			add_location(span0, file$4, 35, 36, 1155);
     			attr_dev(div3, "class", "down tab");
-    			add_location(div3, file$4, 35, 8, 1126);
+    			add_location(div3, file$4, 35, 8, 1127);
     			attr_dev(span1, "class", "sky i");
-    			add_location(span1, file$4, 36, 26, 1226);
+    			add_location(span1, file$4, 36, 26, 1227);
     			attr_dev(div4, "class", "down");
-    			add_location(div4, file$4, 36, 8, 1208);
+    			add_location(div4, file$4, 36, 8, 1209);
     			attr_dev(span2, "class", "rose i");
-    			add_location(span2, file$4, 37, 34, 1307);
+    			add_location(span2, file$4, 37, 34, 1308);
     			attr_dev(div5, "class", "down tab");
-    			add_location(div5, file$4, 37, 8, 1281);
+    			add_location(div5, file$4, 37, 8, 1282);
     			attr_dev(div6, "class", "tab");
-    			add_location(div6, file$4, 34, 6, 1100);
-    			add_location(div7, file$4, 29, 4, 944);
+    			add_location(div6, file$4, 34, 6, 1101);
+    			add_location(div7, file$4, 29, 4, 945);
     			attr_dev(div8, "class", "mt4");
-    			add_location(div8, file$4, 40, 4, 1388);
+    			add_location(div8, file$4, 40, 4, 1389);
     			attr_dev(div9, "class", "tab f09");
-    			add_location(div9, file$4, 45, 8, 1535);
+    			add_location(div9, file$4, 45, 8, 1536);
     			attr_dev(div10, "class", "");
-    			add_location(div10, file$4, 43, 6, 1478);
+    			add_location(div10, file$4, 43, 6, 1479);
     			attr_dev(div11, "class", "tab");
-    			add_location(div11, file$4, 41, 4, 1412);
+    			add_location(div11, file$4, 41, 4, 1413);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div7, anchor);
@@ -39086,7 +39089,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_4$1.name,
     		type: "slot",
-    		source: "(29:2) <One>",
+    		source: "(29:2) <Left>",
     		ctx
     	});
 
@@ -39120,14 +39123,14 @@ var app = (function () {
     			div2 = element("div");
     			div2.textContent = "or contraction, or something.";
     			attr_dev(i, "class", "sea");
-    			add_location(i, file$4, 50, 36, 1662);
-    			add_location(div0, file$4, 50, 4, 1630);
+    			add_location(i, file$4, 50, 36, 1664);
+    			add_location(div0, file$4, 50, 4, 1632);
     			attr_dev(div1, "class", "down sky");
-    			add_location(div1, file$4, 53, 6, 1764);
+    			add_location(div1, file$4, 53, 6, 1766);
     			attr_dev(div2, "class", "f09 tab");
-    			add_location(div2, file$4, 54, 6, 1830);
+    			add_location(div2, file$4, 54, 6, 1832);
     			attr_dev(div3, "class", "tab i");
-    			add_location(div3, file$4, 51, 4, 1699);
+    			add_location(div3, file$4, 51, 4, 1701);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -39226,40 +39229,40 @@ var app = (function () {
     			t12 = space();
     			create_component(caret3.$$.fragment);
     			attr_dev(div, "class", "down f09");
-    			add_location(div, file$4, 73, 4, 2473);
+    			add_location(div, file$4, 73, 4, 2475);
     			attr_dev(span0, "class", "choose");
     			set_style(span0, "color", "white");
-    			add_location(span0, file$4, 77, 10, 2629);
+    			add_location(span0, file$4, 77, 10, 2631);
     			attr_dev(a0, "href", "./three/numbers");
-    			attr_dev(a0, "class", "nowrap svelte-39b014");
-    			add_location(a0, file$4, 76, 8, 2577);
-    			add_location(li0, file$4, 75, 6, 2564);
+    			attr_dev(a0, "class", "nowrap svelte-f59h9p");
+    			add_location(a0, file$4, 76, 8, 2579);
+    			add_location(li0, file$4, 75, 6, 2566);
     			attr_dev(span1, "class", "choose");
     			set_style(span1, "color", "white");
-    			add_location(span1, file$4, 83, 10, 2832);
+    			add_location(span1, file$4, 83, 10, 2834);
     			attr_dev(a1, "href", "./three/redact");
-    			attr_dev(a1, "class", "nowrap svelte-39b014");
-    			add_location(a1, file$4, 82, 8, 2781);
+    			attr_dev(a1, "class", "nowrap svelte-f59h9p");
+    			add_location(a1, file$4, 82, 8, 2783);
     			attr_dev(li1, "class", "down");
-    			add_location(li1, file$4, 81, 6, 2755);
+    			add_location(li1, file$4, 81, 6, 2757);
     			attr_dev(span2, "class", "choose");
     			set_style(span2, "color", "white");
-    			add_location(span2, file$4, 89, 10, 3030);
-    			attr_dev(a2, "href", "./three/redact");
-    			attr_dev(a2, "class", "nowrap svelte-39b014");
-    			add_location(a2, file$4, 88, 8, 2979);
+    			add_location(span2, file$4, 89, 10, 3031);
+    			attr_dev(a2, "href", "./three/dates");
+    			attr_dev(a2, "class", "nowrap svelte-f59h9p");
+    			add_location(a2, file$4, 88, 8, 2981);
     			attr_dev(li2, "class", "down");
-    			add_location(li2, file$4, 87, 6, 2953);
+    			add_location(li2, file$4, 87, 6, 2955);
     			attr_dev(span3, "class", "choose");
     			set_style(span3, "color", "white");
-    			add_location(span3, file$4, 95, 10, 3230);
+    			add_location(span3, file$4, 95, 10, 3231);
     			attr_dev(a3, "href", "./three/verbs");
-    			attr_dev(a3, "class", "nowrap svelte-39b014");
-    			add_location(a3, file$4, 94, 8, 3180);
+    			attr_dev(a3, "class", "nowrap svelte-f59h9p");
+    			add_location(a3, file$4, 94, 8, 3181);
     			attr_dev(li3, "class", "down");
-    			add_location(li3, file$4, 93, 6, 3154);
+    			add_location(li3, file$4, 93, 6, 3155);
     			attr_dev(ul, "class", "list down");
-    			add_location(ul, file$4, 74, 4, 2535);
+    			add_location(ul, file$4, 74, 4, 2537);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -39383,26 +39386,26 @@ var app = (function () {
     			div5 = element("div");
     			div5.textContent = "so the hard problem, still ahead ↓";
     			attr_dev(div0, "class", "tab sea");
-    			add_location(div0, file$4, 109, 4, 3777);
+    			add_location(div0, file$4, 109, 4, 3778);
     			attr_dev(div1, "class", "tab down");
-    			add_location(div1, file$4, 110, 4, 3829);
+    			add_location(div1, file$4, 110, 4, 3830);
     			attr_dev(span0, "class", "sky i");
-    			add_location(span0, file$4, 112, 6, 3904);
+    			add_location(span0, file$4, 112, 6, 3905);
     			attr_dev(span1, "class", "rose i");
-    			add_location(span1, file$4, 114, 17, 4008);
+    			add_location(span1, file$4, 114, 17, 4009);
     			attr_dev(span2, "class", "red i");
-    			add_location(span2, file$4, 115, 8, 4052);
+    			add_location(span2, file$4, 115, 8, 4053);
     			attr_dev(div2, "class", "tab");
     			set_style(div2, "font-size", "1.2rem");
-    			add_location(div2, file$4, 113, 6, 3946);
+    			add_location(div2, file$4, 113, 6, 3947);
     			attr_dev(div3, "class", "f2 down");
-    			add_location(div3, file$4, 111, 4, 3876);
+    			add_location(div3, file$4, 111, 4, 3877);
     			attr_dev(b, "class", "sky i");
-    			add_location(b, file$4, 119, 34, 4167);
+    			add_location(b, file$4, 119, 34, 4168);
     			attr_dev(div4, "class", "down");
-    			add_location(div4, file$4, 118, 4, 4114);
+    			add_location(div4, file$4, 118, 4, 4115);
     			attr_dev(div5, "class", "down tab f09");
-    			add_location(div5, file$4, 121, 4, 4216);
+    			add_location(div5, file$4, 121, 4, 4217);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -39454,11 +39457,11 @@ var app = (function () {
 
     // (13:0) <Page>
     function create_default_slot$2(ctx) {
-    	let left;
+    	let left0;
     	let t0;
-    	let one0;
+    	let left1;
     	let t1;
-    	let one1;
+    	let one0;
     	let t2;
     	let two;
     	let t3;
@@ -39472,10 +39475,10 @@ var app = (function () {
     	let img2;
     	let img2_src_value;
     	let t6;
-    	let one2;
+    	let one1;
     	let current;
 
-    	left = new Left({
+    	left0 = new Left({
     			props: {
     				$$slots: { default: [create_default_slot_5$1] },
     				$$scope: { ctx }
@@ -39483,7 +39486,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	one0 = new One({
+    	left1 = new Left({
     			props: {
     				$$slots: { default: [create_default_slot_4$1] },
     				$$scope: { ctx }
@@ -39491,7 +39494,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	one1 = new One({
+    	one0 = new One({
     			props: {
     				$$slots: { default: [create_default_slot_3$1] },
     				$$scope: { ctx }
@@ -39507,7 +39510,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	one2 = new One({
+    	one1 = new One({
     			props: {
     				$$slots: { default: [create_default_slot_1$1] },
     				$$scope: { ctx }
@@ -39517,11 +39520,11 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			create_component(left.$$.fragment);
+    			create_component(left0.$$.fragment);
     			t0 = space();
-    			create_component(one0.$$.fragment);
+    			create_component(left1.$$.fragment);
     			t1 = space();
-    			create_component(one1.$$.fragment);
+    			create_component(one0.$$.fragment);
     			t2 = space();
     			create_component(two.$$.fragment);
     			t3 = space();
@@ -39532,31 +39535,31 @@ var app = (function () {
     			t5 = space();
     			img2 = element("img");
     			t6 = space();
-    			create_component(one2.$$.fragment);
+    			create_component(one1.$$.fragment);
     			attr_dev(img0, "class", "clean");
     			set_style(img0, "width", "250px");
     			if (!src_url_equal(img0.src, img0_src_value = "./home/img/one.jpg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "compromise/one filesize");
-    			add_location(img0, file$4, 103, 4, 3397);
+    			add_location(img0, file$4, 103, 4, 3398);
     			attr_dev(img1, "class", "clean");
     			set_style(img1, "width", "250px");
     			if (!src_url_equal(img1.src, img1_src_value = "./home/img/two.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "compromise/two filesize");
-    			add_location(img1, file$4, 104, 4, 3499);
+    			add_location(img1, file$4, 104, 4, 3500);
     			attr_dev(img2, "class", "clean");
     			set_style(img2, "width", "250px");
     			if (!src_url_equal(img2.src, img2_src_value = "./home/img/three.jpg")) attr_dev(img2, "src", img2_src_value);
     			attr_dev(img2, "alt", "compromise/three filesize");
-    			add_location(img2, file$4, 105, 4, 3601);
-    			attr_dev(div, "class", "row");
-    			add_location(div, file$4, 102, 2, 3375);
+    			add_location(img2, file$4, 105, 4, 3602);
+    			attr_dev(div, "class", "row svelte-f59h9p");
+    			add_location(div, file$4, 102, 2, 3376);
     		},
     		m: function mount(target, anchor) {
-    			mount_component(left, target, anchor);
+    			mount_component(left0, target, anchor);
     			insert_dev(target, t0, anchor);
-    			mount_component(one0, target, anchor);
+    			mount_component(left1, target, anchor);
     			insert_dev(target, t1, anchor);
-    			mount_component(one1, target, anchor);
+    			mount_component(one0, target, anchor);
     			insert_dev(target, t2, anchor);
     			mount_component(two, target, anchor);
     			insert_dev(target, t3, anchor);
@@ -39567,17 +39570,24 @@ var app = (function () {
     			append_dev(div, t5);
     			append_dev(div, img2);
     			insert_dev(target, t6, anchor);
-    			mount_component(one2, target, anchor);
+    			mount_component(one1, target, anchor);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			const left_changes = {};
+    			const left0_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				left_changes.$$scope = { dirty, ctx };
+    				left0_changes.$$scope = { dirty, ctx };
     			}
 
-    			left.$set(left_changes);
+    			left0.$set(left0_changes);
+    			const left1_changes = {};
+
+    			if (dirty & /*$$scope*/ 1) {
+    				left1_changes.$$scope = { dirty, ctx };
+    			}
+
+    			left1.$set(left1_changes);
     			const one0_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
@@ -39585,13 +39595,6 @@ var app = (function () {
     			}
 
     			one0.$set(one0_changes);
-    			const one1_changes = {};
-
-    			if (dirty & /*$$scope*/ 1) {
-    				one1_changes.$$scope = { dirty, ctx };
-    			}
-
-    			one1.$set(one1_changes);
     			const two_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
@@ -39599,43 +39602,43 @@ var app = (function () {
     			}
 
     			two.$set(two_changes);
-    			const one2_changes = {};
+    			const one1_changes = {};
 
     			if (dirty & /*$$scope*/ 1) {
-    				one2_changes.$$scope = { dirty, ctx };
+    				one1_changes.$$scope = { dirty, ctx };
     			}
 
-    			one2.$set(one2_changes);
+    			one1.$set(one1_changes);
     		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(left.$$.fragment, local);
+    			transition_in(left0.$$.fragment, local);
+    			transition_in(left1.$$.fragment, local);
     			transition_in(one0.$$.fragment, local);
-    			transition_in(one1.$$.fragment, local);
     			transition_in(two.$$.fragment, local);
-    			transition_in(one2.$$.fragment, local);
+    			transition_in(one1.$$.fragment, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(left.$$.fragment, local);
+    			transition_out(left0.$$.fragment, local);
+    			transition_out(left1.$$.fragment, local);
     			transition_out(one0.$$.fragment, local);
-    			transition_out(one1.$$.fragment, local);
     			transition_out(two.$$.fragment, local);
-    			transition_out(one2.$$.fragment, local);
+    			transition_out(one1.$$.fragment, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			destroy_component(left, detaching);
+    			destroy_component(left0, detaching);
     			if (detaching) detach_dev(t0);
-    			destroy_component(one0, detaching);
+    			destroy_component(left1, detaching);
     			if (detaching) detach_dev(t1);
-    			destroy_component(one1, detaching);
+    			destroy_component(one0, detaching);
     			if (detaching) detach_dev(t2);
     			destroy_component(two, detaching);
     			if (detaching) detach_dev(t3);
     			if (detaching) detach_dev(div);
     			if (detaching) detach_dev(t6);
-    			destroy_component(one2, detaching);
+    			destroy_component(one1, detaching);
     		}
     	};
 
@@ -41509,7 +41512,7 @@ var app = (function () {
     			span = element("span");
     			t = text$1(t_value);
     			attr_dev(span, "class", "friend svelte-16xe8xk");
-    			add_location(span, file, 29, 8, 861);
+    			add_location(span, file, 29, 8, 866);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, span, anchor);
@@ -41607,11 +41610,11 @@ var app = (function () {
     			attr_dev(div1, "class", "tab f09");
     			add_location(div1, file, 22, 6, 655);
     			add_location(div2, file, 20, 4, 573);
-    			attr_dev(div3, "class", "f08 svelte-16xe8xk");
+    			attr_dev(div3, "class", "f08 down svelte-16xe8xk");
     			add_location(div3, file, 26, 4, 747);
-    			add_location(div4, file, 27, 4, 815);
+    			add_location(div4, file, 27, 4, 820);
     			set_style(hr1, "margin-top", "3rem");
-    			add_location(hr1, file, 32, 4, 927);
+    			add_location(hr1, file, 32, 4, 932);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -41707,6 +41710,8 @@ var app = (function () {
     	let div3;
     	let t9;
     	let div5;
+    	let t10;
+    	let div6;
 
     	const block = {
     		c: function create() {
@@ -41727,23 +41732,28 @@ var app = (function () {
     			div3.textContent = "keeping filesize tiny.";
     			t9 = space();
     			div5 = element("div");
-    			add_location(i, file, 35, 24, 1002);
+    			t10 = space();
+    			div6 = element("div");
+    			div6.textContent = "is the best way to build this.";
+    			add_location(i, file, 35, 24, 1007);
     			attr_dev(div0, "class", "down f2 fuscia tab");
-    			add_location(div0, file, 40, 4, 1260);
+    			add_location(div0, file, 40, 4, 1265);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file, 42, 6, 1407);
+    			add_location(div1, file, 42, 6, 1412);
     			attr_dev(div2, "class", "down f2 tulip");
     			set_style(div2, "margin-top", "100px");
     			set_style(div2, "margin-left", "25%");
-    			add_location(div2, file, 41, 4, 1330);
+    			add_location(div2, file, 41, 4, 1335);
     			attr_dev(div3, "class", "tab f2 blue");
-    			add_location(div3, file, 46, 6, 1554);
+    			add_location(div3, file, 46, 6, 1559);
     			attr_dev(div4, "class", "down ");
     			set_style(div4, "margin-top", "100px");
     			set_style(div4, "margin-left", "100px");
-    			add_location(div4, file, 44, 4, 1472);
+    			add_location(div4, file, 44, 4, 1477);
     			set_style(div5, "margin-top", "100px");
-    			add_location(div5, file, 51, 4, 1765);
+    			add_location(div5, file, 51, 4, 1770);
+    			attr_dev(div6, "class", "down tab");
+    			add_location(div6, file, 52, 4, 1808);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, t0, anchor);
@@ -41759,6 +41769,8 @@ var app = (function () {
     			append_dev(div4, div3);
     			insert_dev(target, t9, anchor);
     			insert_dev(target, div5, anchor);
+    			insert_dev(target, t10, anchor);
+    			insert_dev(target, div6, anchor);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(t0);
@@ -41771,6 +41783,8 @@ var app = (function () {
     			if (detaching) detach_dev(div4);
     			if (detaching) detach_dev(t9);
     			if (detaching) detach_dev(div5);
+    			if (detaching) detach_dev(t10);
+    			if (detaching) detach_dev(div6);
     		}
     	};
 
@@ -41785,7 +41799,7 @@ var app = (function () {
     	return block;
     }
 
-    // (58:2) <One>
+    // (56:2) <One>
     function create_default_slot_5(ctx) {
     	let div2;
     	let t0;
@@ -41818,19 +41832,19 @@ var app = (function () {
     			a1 = element("a");
     			a1.textContent = "well-respected.";
     			attr_dev(div0, "class", "f08 sea svelte-16xe8xk");
-    			add_location(div0, file, 62, 6, 2041);
+    			add_location(div0, file, 60, 6, 2021);
     			attr_dev(a0, "href", "https://spencermounta.in/");
     			attr_dev(a0, "class", "sky");
-    			add_location(a0, file, 64, 11, 2131);
+    			add_location(a0, file, 62, 11, 2111);
     			attr_dev(div1, "class", "tab");
-    			add_location(div1, file, 63, 6, 2102);
+    			add_location(div1, file, 61, 6, 2082);
     			attr_dev(div2, "class", "down f09");
-    			add_location(div2, file, 60, 4, 1981);
+    			add_location(div2, file, 58, 4, 1961);
     			attr_dev(a1, "href", "https://github.com/spencermountain/compromise/wiki/Contributing");
     			attr_dev(a1, "class", "link sky i");
-    			add_location(a1, file, 69, 21, 2369);
+    			add_location(a1, file, 67, 21, 2349);
     			attr_dev(div3, "class", "down f09");
-    			add_location(div3, file, 68, 4, 2325);
+    			add_location(div3, file, 66, 4, 2305);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -41857,14 +41871,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_5.name,
     		type: "slot",
-    		source: "(58:2) <One>",
+    		source: "(56:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (75:2) <Two>
+    // (73:2) <Two>
     function create_default_slot_4(ctx) {
     	let div0;
     	let t0;
@@ -41885,13 +41899,13 @@ var app = (function () {
     			b1 = element("b");
     			b1.textContent = "Non-english versions";
     			t4 = text$1(" <are happening and need help>.");
-    			add_location(b0, file, 75, 39, 2565);
+    			add_location(b0, file, 73, 39, 2545);
     			attr_dev(div0, "class", "f09 down");
-    			add_location(div0, file, 75, 4, 2530);
+    			add_location(div0, file, 73, 4, 2510);
     			attr_dev(b1, "class", "sea");
-    			add_location(b1, file, 76, 22, 2632);
+    			add_location(b1, file, 74, 22, 2612);
     			attr_dev(div1, "class", "down");
-    			add_location(div1, file, 76, 4, 2614);
+    			add_location(div1, file, 74, 4, 2594);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -41913,14 +41927,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_4.name,
     		type: "slot",
-    		source: "(75:2) <Two>",
+    		source: "(73:2) <Two>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (80:2) <Left>
+    // (78:2) <Left>
     function create_default_slot_3(ctx) {
     	let div2;
     	let div0;
@@ -41949,19 +41963,19 @@ var app = (function () {
     			t2 = text$1("\n          Twitter");
     			if (!src_url_equal(img0.src, img0_src_value = "")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file, 84, 10, 2925);
+    			add_location(img0, file, 82, 10, 2905);
     			attr_dev(a0, "href", "https://github.com/spencermountain/compromise/");
-    			add_location(a0, file, 83, 8, 2857);
-    			add_location(div0, file, 82, 6, 2843);
+    			add_location(a0, file, 81, 8, 2837);
+    			add_location(div0, file, 80, 6, 2823);
     			if (!src_url_equal(img1.src, img1_src_value = "")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file, 90, 10, 3066);
+    			add_location(img1, file, 88, 10, 3046);
     			attr_dev(a1, "href", "https://twitter.com/nlp_compromise");
-    			add_location(a1, file, 89, 8, 3010);
-    			add_location(div1, file, 88, 6, 2996);
+    			add_location(a1, file, 87, 8, 2990);
+    			add_location(div1, file, 86, 6, 2976);
     			attr_dev(div2, "class", "row ");
     			set_style(div2, "font-size", "1.5rem");
-    			add_location(div2, file, 81, 4, 2792);
+    			add_location(div2, file, 79, 4, 2772);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -41984,14 +41998,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_3.name,
     		type: "slot",
-    		source: "(80:2) <Left>",
+    		source: "(78:2) <Left>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (98:2) <One>
+    // (96:2) <One>
     function create_default_slot_2(ctx) {
     	let div2;
     	let div0;
@@ -42011,16 +42025,16 @@ var app = (function () {
     			a = element("a");
     			img = element("img");
     			t1 = text$1("\n          Observable");
-    			add_location(div0, file, 99, 6, 3217);
+    			add_location(div0, file, 97, 6, 3197);
     			if (!src_url_equal(img.src, img_src_value = "")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
-    			add_location(img, file, 107, 10, 3426);
+    			add_location(img, file, 105, 10, 3406);
     			attr_dev(a, "href", "https://observablehq.com/@spencermountain/nlp-compromise");
-    			add_location(a, file, 106, 8, 3348);
-    			add_location(div1, file, 105, 6, 3334);
+    			add_location(a, file, 104, 8, 3328);
+    			add_location(div1, file, 103, 6, 3314);
     			attr_dev(div2, "class", "row ");
     			set_style(div2, "font-size", "1.5rem");
-    			add_location(div2, file, 98, 4, 3166);
+    			add_location(div2, file, 96, 4, 3146);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -42040,14 +42054,14 @@ var app = (function () {
     		block,
     		id: create_default_slot_2.name,
     		type: "slot",
-    		source: "(98:2) <One>",
+    		source: "(96:2) <One>",
     		ctx
     	});
 
     	return block;
     }
 
-    // (114:2) <Two>
+    // (112:2) <Two>
     function create_default_slot_1(ctx) {
     	let div;
     	let t0;
@@ -42067,7 +42081,7 @@ var app = (function () {
     			create_component(grid.$$.fragment);
     			t1 = text$1("\n    MIT");
     			set_style(div, "width", "300px");
-    			add_location(div, file, 114, 4, 3527);
+    			add_location(div, file, 112, 4, 3507);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -42098,7 +42112,7 @@ var app = (function () {
     		block,
     		id: create_default_slot_1.name,
     		type: "slot",
-    		source: "(114:2) <Two>",
+    		source: "(112:2) <Two>",
     		ctx
     	});
 

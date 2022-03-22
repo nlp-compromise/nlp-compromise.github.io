@@ -8,8 +8,7 @@
     morganville: 'City',
   })
   const onchange = function (txt) {
-    console.log(txt)
-    let doc = nlp(text)
+    let doc = nlp(txt)
     let nouns = doc.nouns()
     let verbs = doc.verbs()
     let places = doc.places()
@@ -19,7 +18,7 @@
       '.places': places,
     })
   }
-  onchange()
+  onchange(text)
 </script>
 
 <Page>

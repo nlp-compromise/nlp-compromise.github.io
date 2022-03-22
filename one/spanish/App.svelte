@@ -12,15 +12,15 @@ Ya, ya me estás gustando más de lo normal
 Todos mis sentidos van pidiendo más
 Esto hay que tomarlo sin ningún apuro`
   let html = ''
-  const onchange = function () {
-    let doc = nlp(text)
+  const onchange = function (txt) {
+    let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
       '.adjectives': '#Adjective',
     })
   }
-  onchange()
+  onchange(text)
   let example = `import pln from 'es-compromise'
 
 let doc = pln('Tú eres el imán ..')

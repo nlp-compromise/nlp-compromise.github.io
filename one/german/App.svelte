@@ -21,15 +21,15 @@ Dann sind wir Helden für diesen Tag.
 Dann sind wir Helden.
       `
   let html = ''
-  const onchange = function () {
-    let doc = nlp(text)
+  const onchange = function (txt) {
+    let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
       '.adjectives': '#Adjective',
     })
   }
-  onchange()
+  onchange(text)
   let example = `import pln from 'de-compromise'
 
 let doc = pln('Hast du etwas Zeit für mich?')

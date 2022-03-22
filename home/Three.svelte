@@ -5,7 +5,6 @@
   import Left from '../lib/Left.svelte'
   import Caret from '../lib/Caret.svelte'
   import Block from '../lib/Block.svelte'
-  import Chunker from './demos/Chunker.svelte'
 </script>
 
 <Block color="#e6b3bc" />
@@ -26,7 +25,7 @@
     <Chunker />
   </One> -->
 
-  <One>
+  <Left>
     <div>
       <div class="f2">
         <div class="blue">'captain of the football team'</div>
@@ -46,7 +45,7 @@
         <div class="tab f09">or a 1/3rd of a thing.</div>
       </div>
     </div>
-  </One>
+  </Left>
   <One>
     <div>in practice, people want a <i class="sea">group</i> -</div>
     <div class="tab i">

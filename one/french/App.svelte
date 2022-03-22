@@ -9,15 +9,15 @@ Aux Champs-Elysées, aux Champs-Elysées
 Au soleil, sous la pluie, à midi ou à minuit
 Il y a tout ce que vous voulez aux Champs-Elysées `
   let html = ''
-  const onchange = function () {
-    let doc = nlp(text)
+  const onchange = function (txt) {
+    let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
       '.adjectives': '#Adjective',
     })
   }
-  onchange()
+  onchange(text)
   let example = `import tal from 'fr-compromise'
 
 let doc = tal('Aux Champs-Elysées ...')

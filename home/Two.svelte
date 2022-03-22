@@ -139,4 +139,13 @@
       padding-left: 0.5rem;
     }
   }
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
+  }
 </style>

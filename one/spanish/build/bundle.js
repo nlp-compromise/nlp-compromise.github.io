@@ -14675,18 +14675,18 @@ var app = (function () {
     			t5 = space();
     			create_component(two.$$.fragment);
     			attr_dev(div0, "class", "lib");
-    			add_location(div0, file, 45, 4, 1157);
+    			add_location(div0, file, 45, 4, 1163);
     			attr_dev(div1, "class", "down tab desc");
-    			add_location(div1, file, 46, 4, 1198);
+    			add_location(div1, file, 46, 4, 1204);
     			attr_dev(div2, "class", "top");
-    			add_location(div2, file, 49, 8, 1328);
+    			add_location(div2, file, 49, 8, 1334);
     			attr_dev(div3, "class", "res svelte-da5iiy");
     			set_style(div3, "position", "relative");
-    			add_location(div3, file, 52, 8, 1458);
+    			add_location(div3, file, 52, 8, 1464);
     			set_style(div4, "flex-grow", "1");
-    			add_location(div4, file, 48, 6, 1294);
+    			add_location(div4, file, 48, 6, 1300);
     			attr_dev(div5, "class", "both");
-    			add_location(div5, file, 47, 4, 1269);
+    			add_location(div5, file, 47, 4, 1275);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div0, anchor);
@@ -14762,10 +14762,10 @@ var app = (function () {
     			a1.textContent = "github";
     			attr_dev(a0, "href", "https://observablehq.com/@spencermountain/es-compromise");
     			attr_dev(a0, "class", "");
-    			add_location(a0, file, 62, 4, 1652);
+    			add_location(a0, file, 62, 4, 1658);
     			attr_dev(a1, "href", "https://github.com/nlp-compromise/es-compromise");
     			attr_dev(a1, "class", "");
-    			add_location(a1, file, 63, 4, 1740);
+    			add_location(a1, file, 63, 4, 1746);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a0, anchor);
@@ -14830,7 +14830,7 @@ var app = (function () {
     			t1 = space();
     			create_component(below.$$.fragment);
     			attr_dev(div, "class", "col");
-    			add_location(div, file, 42, 0, 1070);
+    			add_location(div, file, 42, 0, 1076);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -14909,8 +14909,8 @@ Esto hay que tomarlo sin ningún apuro`;
 
     	let html = '';
 
-    	const onchange = function () {
-    		let doc = $n(text);
+    	const onchange = function (txt) {
+    		let doc = $n(txt);
 
     		$$invalidate(0, html = doc.html({
     			'.nouns': '#Noun+',
@@ -14919,7 +14919,7 @@ Esto hay que tomarlo sin ningún apuro`;
     		}));
     	};
 
-    	onchange();
+    	onchange(text);
 
     	let example = `import pln from 'es-compromise'
 
