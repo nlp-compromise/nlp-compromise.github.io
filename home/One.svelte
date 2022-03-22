@@ -57,7 +57,7 @@
   <One>
     <div>
       <kbd>compromise/one</kbd>
-      <div class="tab">is 20kb of javascript:</div>
+      <div class="tab">is 40kb of javascript:</div>
     </div>
     <Grid seed="1645e30c3c09ed478e5" />
   </One>
