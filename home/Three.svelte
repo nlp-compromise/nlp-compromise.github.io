@@ -100,13 +100,11 @@
     </ul>
   </Two>
 
-  <One>
-    <div class="row">
-      <img class="clean" style="width:250px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
-      <img class="clean" style="width:250px;" src="./home/img/two.jpg" alt="compromise/two filesize" />
-      <img class="clean" style="width:250px;" src="./home/img/three.jpg" alt="compromise/three filesize" />
-    </div>
-  </One>
+  <div class="row">
+    <img class="clean" style="width:250px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+    <img class="clean" style="width:250px;" src="./home/img/two.jpg" alt="compromise/two filesize" />
+    <img class="clean" style="width:250px;" src="./home/img/three.jpg" alt="compromise/three filesize" />
+  </div>
   <One>
     If you're cautious, and worried this won't work,
     <div class="tab sea">you are very clever.</div>

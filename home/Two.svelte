@@ -110,11 +110,11 @@
     <div class="i">so is this gif</div>
     <img src="./build/assets/jesus.gif" alt="jesus gif" />
   </Two>
+  <div class="row">
+    <img class="clean" style="width:350px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+    <img class="clean" style="width:350px;" src="./home/img/two.jpg" alt="compromise/two filesize" />
+  </div>
   <Three>
-    <div class="row">
-      <img class="clean" style="width:350px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
-      <img class="clean" style="width:350px;" src="./home/img/two.jpg" alt="compromise/two filesize" />
-    </div>
     <div style="width:200px;" />
     <Grid seed="76b36bcb2b4e1fec394" />
   </Three>
