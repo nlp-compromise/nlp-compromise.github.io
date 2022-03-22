@@ -86,7 +86,7 @@
         </a>
       </li>
       <li class="down">
-        <a href="./three/redact" class="nowrap">
+        <a href="./three/dates" class="nowrap">
           <span class="choose" style="color:white;">Date parsing</span>
           <Caret top="1rem" />
         </a>
@@ -124,6 +124,15 @@
 </Page>
 
 <style>
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
+  }
   .nowrap {
     white-space: nowrap;
   }

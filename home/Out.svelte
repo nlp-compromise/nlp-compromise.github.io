@@ -24,7 +24,7 @@
         community created <b>in 2010</b>:
       </div>
     </div>
-    <div class="f08">we've shipped >100 incremental releases.</div>
+    <div class="f08 down">we've shipped >100 incremental releases.</div>
     <div>
       {#each friends as friend}
         <span class="friend">{friend}</span>
@@ -50,9 +50,7 @@
       <div class="tab">minimizing jargon</div>
     </div> -->
     <div style="margin-top:100px;" />
-    <!-- <div class="down tab">
-      that's the best way to build this.
-    </div> -->
+    <div class="down tab">is the best way to build this.</div>
   </Left>
 
   <One>

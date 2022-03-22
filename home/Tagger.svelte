@@ -7,7 +7,8 @@
     shelbyville: 'City',
     morganville: 'City',
   })
-  const onchange = function () {
+  const onchange = function (txt) {
+    console.log(txt)
     let doc = nlp(text)
     let nouns = doc.nouns()
     let verbs = doc.verbs()

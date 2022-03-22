@@ -1,5 +1,5 @@
 <script>
-  import { Page, One, Two, Three, Left, Grid, Caret } from '../lib/index.js'
+  import { Page, One, Two, Three, Grid, Caret } from '../lib/index.js'
 </script>
 
 <Page>
@@ -134,15 +134,15 @@
       </svg>
     </div>
     <div class="row">
-      <a href="./two/spanish" class="nowrap">
+      <a href="./one/spanish" class="nowrap">
         spanish
         <span style="position:relative; top:0.4rem;"><Caret width={30} color="#72697D" /></span>
       </a>
-      <a href="./two/french" style="margin-top:6rem;" class="nowrap">
+      <a href="./one/french" style="margin-top:6rem;" class="nowrap">
         french
         <span style="position:relative; top:0.4rem;"><Caret width={30} color="#cf9b97" /></span>
       </a>
-      <a href="./two/german" style="margin-top:12rem;" class="nowrap">
+      <a href="./one/german" style="margin-top:12rem;" class="nowrap">
         german
         <span style="position:relative; top:0.4rem;"><Caret width={30} color="#2D85A8" /></span>
       </a>

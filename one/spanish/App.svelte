@@ -1,13 +1,16 @@
 <script>
   import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/fr-compromise/builds/fr-compromise.mjs'
-  let text = `Je m'baladais sur l'avenue le cœur ouvert à l'inconnu
-J'avais envie de dire bonjour à n'importe qui
-N'importe qui et ce fut toi, je t'ai dit n'importe quoi
-Il suffisait de te parler, pour t'apprivoiser
-Aux Champs-Elysées, aux Champs-Elysées
-Au soleil, sous la pluie, à midi ou à minuit
-Il y a tout ce que vous voulez aux Champs-Elysées `
+  import nlp from '/Users/spencer/mountain/es-compromise/builds/es-compromise.mjs'
+  let text = `Sí, sabes que ya llevo un rato mirándote
+Tengo que bailar contigo hoy
+Vi que tu mirada ya estaba llamándome
+Muéstrame el camino que yo voy
+Oh, tú, tú eres el imán y yo soy el metal
+Me voy acercando y voy armando el plan
+Solo con pensarlo se acelera el pulso (oh yeah)
+Ya, ya me estás gustando más de lo normal
+Todos mis sentidos van pidiendo más
+Esto hay que tomarlo sin ningún apuro`
   let html = ''
   const onchange = function () {
     let doc = nlp(text)
@@ -18,30 +21,30 @@ Il y a tout ce que vous voulez aux Champs-Elysées `
     })
   }
   onchange()
-  let example = `import tal from 'fr-compromise'
+  let example = `import pln from 'es-compromise'
 
-let doc = tal('Aux Champs-Elysées ...')
+let doc = pln('Tú eres el imán ..')
 doc.json()
 /*[{
-  "text": "Aux Champs-Elysées",
-  "terms": [
-    {
-      "text": "Aux",
-      "tags": ["Preposition"],
-      "normal": "aux",
-      "implicit": "à",
-    },
-  ...
-  ]
-}]
+    "text": "Tú eres el imán ..",
+    "terms": [
+      {
+        "text": "Tú",
+        "tags": ["Noun"],
+        "normal": "tú",
+        "chunk": "Noun"
+      },
+      ...
+    ]
+}
 `
 </script>
 
 <div class="col">
   <Back href="https://compromise.cool" />
   <Page bottom="40px">
-    <div class="lib">fr-compromise</div>
-    <div class="down tab desc">part-of speech tagging in french</div>
+    <div class="lib">es-compromise</div>
+    <div class="down tab desc">part-of speech tagging in spanish</div>
     <div class="both">
       <div style="flex-grow:1">
         <div class="top">
@@ -57,8 +60,8 @@ doc.json()
     </Two>
   </Page>
   <Below>
-    <a href="https://observablehq.com/@spencermountain/fr-compromise" class="">docs</a>
-    <a href="https://github.com/spencermountain/fr-compromise" class="">github</a>
+    <a href="https://observablehq.com/@spencermountain/es-compromise" class="">docs</a>
+    <a href="https://github.com/nlp-compromise/es-compromise" class="">github</a>
   </Below>
 </div>
 

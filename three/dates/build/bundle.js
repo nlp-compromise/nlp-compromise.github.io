@@ -1481,7 +1481,7 @@ var app = (function () {
     	throw new Error('Could not dynamically require "' + target + '". Please configure the dynamicRequireTargets option of @rollup/plugin-commonjs appropriately for this require call to behave properly.');
     }
 
-    var lib$4 = createCommonjsModule$2(function (module, exports) {
+    var lib$5 = createCommonjsModule$2(function (module, exports) {
     // CodeMirror, copyright (c) by Marijn Haverbeke and others
     // Distributed under an MIT license: https://codemirror.net/LICENSE
 
@@ -11329,7 +11329,7 @@ var app = (function () {
     	} } = $$props;
 
     	let { onEnter = e => {
-    		return lib$4.Pass;
+    		return lib$5.Pass;
     	} } = $$props;
 
     	const clear = function (doc) {
@@ -11338,7 +11338,7 @@ var app = (function () {
 
     	onMount(() => {
     		// create codemirror instance
-    		editor = lib$4.fromTextArea(el, {
+    		editor = lib$5.fromTextArea(el, {
     			autofocus,
     			viewportMargin: Infinity,
     			extraKeys: { Enter: onEnter }
@@ -11357,7 +11357,7 @@ var app = (function () {
     			});
     		});
 
-    		lib$4.signal(editor, 'change', editor);
+    		lib$5.signal(editor, 'change', editor);
 
     		setTimeout(
     			() => {
@@ -11390,7 +11390,7 @@ var app = (function () {
 
     	$$self.$capture_state = () => ({
     		onMount,
-    		CodeMirror: lib$4,
+    		CodeMirror: lib$5,
     		text,
     		autofocus,
     		editor,
@@ -15011,7 +15011,7 @@ var app = (function () {
     let compute$d = {};
     let hooks = [];
 
-    var tmp = { methods: methods$w, model: model$7, compute: compute$d, hooks };
+    var tmpWrld = { methods: methods$w, model: model$7, compute: compute$d, hooks };
 
     const isArray$8 = input => Object.prototype.toString.call(input) === '[object Array]';
 
@@ -15059,8 +15059,15 @@ var app = (function () {
       }
       // return an array of values, or View objects?
       // user can return either from their callback
-      if (res[0] !== undefined && typeof res[0] === 'object' && (res[0] === null || !res[0].isView)) {
-        return res
+      if (res[0] !== undefined) {
+        // array of strings
+        if (typeof res[0] === 'string') {
+          return res
+        }
+        // array of objects
+        if (typeof res[0] === 'object' && (res[0] === null || !res[0].isView)) {
+          return res
+        }
       }
       // return a View object
       let all = [];
@@ -15079,7 +15086,7 @@ var app = (function () {
       return this.update(ptrs)
     };
 
-    const find$d = function (cb) {
+    const find$e = function (cb) {
       let ptrs = this.fullPointer;
       let found = ptrs.find((ptr, i) => {
         let view = this.update([ptr]);
@@ -15107,7 +15114,7 @@ var app = (function () {
       ptrs = ptrs.slice(r, r + n);
       return this.update(ptrs)
     };
-    var loops = { forEach, map, filter, find: find$d, some, random };
+    var loops = { forEach, map, filter, find: find$e, some, random };
 
     const utils = {
       /** */
@@ -15186,7 +15193,7 @@ var app = (function () {
       },
 
       /** are these two views looking at the same words? */
-      is: function (b) {
+      isDoc: function (b) {
         if (!b || !b.isView) {
           return false
         }
@@ -15225,14 +15232,14 @@ var app = (function () {
 
     // aliases
     methods$v.get = methods$v.eq;
-    var api$n = methods$v;
+    var api$v = methods$v;
 
     class View {
       constructor(document, pointer, groups = {}) {
         // invisible props
         [
           ['document', document],
-          ['world', tmp],
+          ['world', tmpWrld],
           ['_groups', groups],
           ['_cache', null],
           ['viewType', 'View']
@@ -15248,7 +15255,7 @@ var app = (function () {
       get docs() {
         let docs = this.document;
         if (this.ptrs) {
-          docs = tmp.methods.one.getDoc(this.ptrs, this.document);
+          docs = tmpWrld.methods.one.getDoc(this.ptrs, this.document);
         }
         return docs
       }
@@ -15282,14 +15289,17 @@ var app = (function () {
         let pointers = ptrs || docs.map((_d, n) => [n]);
         // do we need to repair it, first?
         return pointers.map(a => {
-          let [n, start, end, id] = a;
+          let [n, start, end, id, endId] = a;
           start = start || 0;
           end = end || (document[n] || []).length;
           //add frozen id, for good-measure
           if (document[n] && document[n][start]) {
             id = id || document[n][start].id;
+            if (document[n][end - 1]) {
+              endId = endId || document[n][end - 1].id;
+            }
           }
-          return [n, start, end, id]
+          return [n, start, end, id, endId]
         })
       }
       // create a new View, from this one
@@ -15321,7 +15331,7 @@ var app = (function () {
       fromText(input) {
         const { methods } = this;
         //assume ./01-tokenize is installed
-        let document = methods.one.tokenize(input, this.world);
+        let document = methods.one.tokenize.fromString(input, this.world);
         let doc = new View(document);
         doc.world = this.world;
         // doc.compute(world.hooks)
@@ -15345,13 +15355,12 @@ var app = (function () {
         return m
       }
     }
-    Object.assign(View.prototype, api$n);
+    Object.assign(View.prototype, api$v);
     var View$1 = View;
 
-    var version$1 = '13.11.4-rc5';
+    var version$1 = '13.11.4-rc7';
 
     const isObject$6 = function (item) {
-      // let isSet = item instanceof Set
       return item && typeof item === 'object' && !Array.isArray(item)
     };
 
@@ -15362,6 +15371,9 @@ var app = (function () {
           if (isObject$6(plugin[key])) {
             if (!model[key]) Object.assign(model, { [key]: {} });
             mergeDeep(model[key], plugin[key]); //recursion
+            // } else if (isArray(plugin[key])) {
+            // console.log(key)
+            // console.log(model)
           } else {
             Object.assign(model, { [key]: plugin[key] });
           }
@@ -15416,30 +15428,6 @@ var app = (function () {
     };
     var extend$1 = extend;
 
-    const isArray$7 = arr => Object.prototype.toString.call(arr) === '[object Array]';
-
-    const isObject$5 = item => item && typeof item === 'object' && !Array.isArray(item);
-
-    const isSet = item => item instanceof Set;
-
-    // deep-i-guess clone of model object
-    const deepClone$1 = function (model) {
-      for (const key in model) {
-        if (isObject$5(model[key])) {
-          model[key] = Object.assign({}, model[key]);
-          model[key] = deepClone$1(model[key]); //recursive
-        } else if (isArray$7(model[key])) {
-          model[key] = model[key].slice(0);
-        } else if (isSet(model[key])) {
-          model[key] = new Set(model[key]);
-        }
-      }
-      return model
-    };
-    var clone = deepClone$1;
-
-    /** add words to assume by prefix in typeahead */
-
     /** log the decision-making to console */
     const verbose = function (set) {
       let env = typeof process === 'undefined' ? self.env || {} : process.env; //use window, in browser
@@ -15449,23 +15437,85 @@ var app = (function () {
       return this
     };
 
-    /** pre-compile a list of matches to lookup */
-    const compile$2 = function (input) {
-      return this().compile(input)
+    const isObject$5 = val => {
+      return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    let world = Object.assign({}, tmp);
+    const isArray$7 = function (arr) {
+      return Object.prototype.toString.call(arr) === '[object Array]'
+    };
+
+    // internal Term objects are slightly different
+    const fromJson = function (json) {
+      return json.map(o => {
+        return o.terms.map(term => {
+          if (isArray$7(term.tags)) {
+            term.tags = new Set(term.tags);
+          }
+          return term
+        })
+      })
+    };
+
+    // interpret an array-of-arrays
+    const preTokenized = function (arr) {
+      return arr.map((a) => {
+        return a.map(str => {
+          return {
+            text: str,
+            normal: str,//cleanup
+            pre: '',
+            post: ' ',
+            tags: new Set()
+          }
+        })
+      })
+    };
+
+    const inputs = function (input, View, world) {
+      const { methods } = world;
+      let doc = new View([]);
+      doc.world = world;
+      // support a number
+      if (typeof input === 'number') {
+        input = String(input);
+      }
+      // return empty doc
+      if (!input) {
+        return doc
+      }
+      // parse a string
+      if (typeof input === 'string') {
+        let document = methods.one.tokenize.fromString(input, world);
+        return new View(document)
+      }
+      // handle compromise View
+      if (isObject$5(input) && input.isView) {
+        return new View(input.document, input.ptrs)
+      }
+      // handle json input
+      if (isArray$7(input)) {
+        // pre-tokenized array-of-arrays 
+        if (isArray$7(input[0])) {
+          let document = preTokenized(input);
+          return new View(document)
+        }
+        // handle json output
+        let document = fromJson(input);
+        return new View(document)
+      }
+      return doc
+    };
+    var handleInputs = inputs;
+
+    let world = Object.assign({}, tmpWrld);
 
     const nlp = function (input, lex) {
-      const { methods, hooks } = world;
       if (lex) {
         nlp.addWords(lex);
       }
-      //assume ./01-tokenize is installed
-      let document = methods.one.tokenize(input, world);
-      let doc = new View$1(document);
-      doc.world = world;
-      doc.compute(hooks);
+      let doc = handleInputs(input, View$1, world);
+      doc.compute(world.hooks);
       return doc
     };
     Object.defineProperty(nlp, '_world', {
@@ -15475,14 +15525,13 @@ var app = (function () {
 
     /** don't run the POS-tagger */
     nlp.tokenize = function (input, lex) {
-      const { methods, compute } = this._world;
+      const { compute } = this._world;
       // add user-given words to lexicon
       if (lex) {
         nlp.addWords(lex);
       }
       // run the tokenizer
-      let document = methods.one.tokenize(input, this._world);
-      let doc = new View$1(document);
+      let doc = handleInputs(input, View$1, world);
       // give contractions a shot, at least
       if (compute.contractions) {
         doc.compute(['alias', 'normal', 'machine', 'contractions']); //run it if we've got it
@@ -15490,14 +15539,6 @@ var app = (function () {
       return doc
     };
 
-    /** deep-clone the library's model*/
-    nlp.fork = function (str) {
-      this._world = Object.assign({}, this._world);
-      this._world.methods = Object.assign({}, this._world.methods);
-      this._world.model = clone(this._world.model);
-      this._world.model.fork = str;
-      return this
-    };
 
     /** extend compromise functionality */
     nlp.plugin = function (plugin) {
@@ -15506,12 +15547,7 @@ var app = (function () {
     };
     nlp.extend = nlp.plugin;
 
-    /** log the decision-making to console */
-    nlp.verbose = verbose;
-    /** pre-compile a list of matches to lookup */
-    nlp.compile = compile$2;
-    /** current library release version */
-    nlp.version = version$1;
+
     /** reach-into compromise internals */
     nlp.world = function () {
       return this._world
@@ -15526,7 +15562,11 @@ var app = (function () {
       return this._world.hooks
     };
 
-    // apply our only default plugins
+    /** log the decision-making to console */
+    nlp.verbose = verbose;
+    /** current library release version */
+    nlp.version = version$1;
+
     var nlp$1 = nlp;
 
     var caseFns = {
@@ -15573,8 +15613,10 @@ var app = (function () {
     const spliceArr = (parent, index, child) => {
       // tag them as dirty
       child.forEach(term => term.dirty = true);
-      let args = [index, 0].concat(child);
-      Array.prototype.splice.apply(parent, args);
+      if (parent) {
+        let args = [index, 0].concat(child);
+        Array.prototype.splice.apply(parent, args);
+      }
       return parent
     };
 
@@ -15599,7 +15641,7 @@ var app = (function () {
       if (juicy.test(post)) {
         let punct = post.match(juicy).join(''); //not perfect
         let last = needle[needle.length - 1];
-        last.post = punct + last.post; //+ ' '
+        last.post = punct + last.post;
         // remove it, from source
         wasLast.post = wasLast.post.replace(juicy, '');
       }
@@ -15648,13 +15690,13 @@ var app = (function () {
         endSpace([home[ptr[1]]]);
       }
       moveTitleCase(home, start, needle);
-      movePunct(home, end, needle);
+      // movePunct(home, end, needle)
       spliceArr(home, start, needle);
     };
 
     const cleanAppend = function (home, ptr, needle, document) {
       let [n, , end] = ptr;
-      let total = document[n].length;
+      let total = (document[n] || []).length;
       if (end < total) {
         // are we in the middle?
         // add trailing space on self
@@ -15666,8 +15708,14 @@ var app = (function () {
         endSpace(home);
         // very end, move period
         movePunct(home, end, needle);
+        // is there another sentence after?
+        if (document[n + 1]) {
+          needle[needle.length - 1].post += ' ';
+        }
       }
       spliceArr(home, ptr[2], needle);
+      // set new endId
+      ptr[4] = needle[needle.length - 1].id;
     };
 
     /*
@@ -15742,8 +15790,8 @@ var app = (function () {
 
     // are we inserting inside a contraction?
     // expand it first
-    const expand$6 = function (m) {
-      if (m.has('@hasContraction') && m.after('^.').has('@hasContraction')) {
+    const expand$4 = function (m) {
+      if (m.has('@hasContraction')) {//&& m.after('^.').has('@hasContraction')
         let more = m.grow('@hasContraction');
         more.contractions().expand();
       }
@@ -15762,7 +15810,7 @@ var app = (function () {
       const { methods } = world;
       // create our terms from a string
       if (typeof input === 'string') {
-        return methods.one.tokenize(input, world)[0] //assume one sentence
+        return methods.one.tokenize.fromString(input, world)[0] //assume one sentence
       }
       //allow a view object
       if (typeof input === 'object' && input.isView) {
@@ -15788,14 +15836,14 @@ var app = (function () {
         let terms = getTerms(input, world);
         terms = addIds$2(terms);
         if (prepend) {
-          expand$6(view.update([ptr]).firstTerm());
+          expand$4(view.update([ptr]).firstTerm());
           cleanPrepend(home, ptr, terms, document);
         } else {
-          expand$6(view.update([ptr]).lastTerm());
+          expand$4(view.update([ptr]).lastTerm());
           cleanAppend(home, ptr, terms, document);
         }
         // harden the pointer
-        if (!document[n][ptr[1]]) ; else {
+        if (document[n] && document[n][ptr[1]]) {
           ptr[3] = document[n][ptr[1]].id;
         }
         // change self backwards by len
@@ -15954,7 +16002,6 @@ var app = (function () {
           // }
         }
       }
-      // console.log(document)
       return document
     };
 
@@ -15962,7 +16009,7 @@ var app = (function () {
     const methods$u = {
       /** */
       remove: function (reg) {
-        const { indexN } = this.methods.one;
+        const { indexN } = this.methods.one.pointer;
         // two modes:
         //  - a. remove self, from full parent
         let self = this.all();
@@ -16013,17 +16060,18 @@ var app = (function () {
           }
           return true
         });
-        // re-harden pointers
+        // remove old hard-pointers
         ptrs = ptrs.map((ptr) => {
-          let [n, start] = ptr;
-          ptr[3] = document[n] && document[n][start] ? document[n][start].id : null;
+          ptr[3] = null;
+          ptr[4] = null;
           return ptr
         });
         // mutate original
         self.ptrs = ptrs;
         self.document = document;
+        self.compute('index');
         if (reg) {
-          return self.toView(ptrs).compute('index') //return new document
+          return self.toView(ptrs) //return new document
         }
         return self.none()
       },
@@ -16217,13 +16265,13 @@ var app = (function () {
     // support function as parameter
     const customSort = function (view, fn) {
       let ptrs = view.fullPointer;
-      let all = [];
-      ptrs.forEach((ptr) => {
-        all.push(view.update([ptr]));
+      ptrs = ptrs.sort((a, b) => {
+        a = view.update([a]);
+        b = view.update([b]);
+        return fn(a, b)
       });
-      let none = view.none();
-      //! not working yet
-      return none.concat(all.sort(fn))
+      view.ptrs = ptrs; //mutate original
+      return view
     };
 
     /** re-arrange the order of the matches (in place) */
@@ -16288,24 +16336,6 @@ var app = (function () {
 
     var sort$1 = { unique, reverse: reverse$2, sort };
 
-    const deepClone = function (obj) {
-      return JSON.parse(JSON.stringify(obj))
-    };
-    const methods$r = {
-      fork: function () {
-        let after = this;
-        after.world.model = deepClone(after.world.model);
-        after.world.methods = Object.assign({}, after.world.methods);
-        if (after.ptrs) {
-          after.ptrs = after.ptrs.slice(0);
-        }
-        // clone the cache?
-        // clone the document?
-        return after
-      },
-    };
-    var fork = methods$r;
-
     const isArray$5 = (arr) => Object.prototype.toString.call(arr) === '[object Array]';
 
     // append a new document, somehow
@@ -16341,7 +16371,7 @@ var app = (function () {
         const { methods, document, world } = this;
         // parse and splice-in new terms
         if (typeof input === 'string') {
-          let json = methods.one.tokenize(input, world);
+          let json = methods.one.tokenize.fromString(input, world);
           let ptrs = this.fullPointer;
           let lastN = ptrs[ptrs.length - 1][0];
           spliceArr(document, lastN + 1, json);
@@ -16361,45 +16391,12 @@ var app = (function () {
       },
     };
 
-    const methods$q = {
-      // allow re-use of this view, after a mutation
-      freeze: function () {
-        // this.compute('id')
-        // let docs = this.docs
-        // let pointer = this.fullPointer
-        // pointer = pointer.map((a, n) => {
-        //   a[3] = docs[n].map(t => t.id)
-        //   return a
-        // })
-        // this.ptrs = pointer
-        // this.frozen = true
-        return this
-      },
-      // make it fast again
-      unFreeze: function () {
-        let pointer = this.fullPointer;
-        pointer = pointer.map((a) => {
-          return a.slice(0, 3)
-        });
-        this.ptrs = pointer;
-        delete this.frozen;
-        return this
-      },
-      // helper method for freeze-state
-      isFrozen: function () {
-        return Boolean(this.ptrs && this.ptrs[0] && this.ptrs[0][3])
-      }
-    };
-    // aliases
-    methods$q.unfreeze = methods$q.unFreeze;
-    var freeze = methods$q;
-
-    const methods$p = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, fork, concat, freeze);
+    const methods$r = Object.assign({}, caseFns, insert$1, replace, remove, whitespace$1, sort$1, concat);
 
     const addAPI$3 = function (View) {
-      Object.assign(View.prototype, methods$p);
+      Object.assign(View.prototype, methods$r);
     };
-    var api$m = addAPI$3;
+    var api$u = addAPI$3;
 
     const compute$a = {
       id: function (view) {
@@ -16407,7 +16404,7 @@ var app = (function () {
         for (let n = 0; n < docs.length; n += 1) {
           for (let i = 0; i < docs[n].length; i += 1) {
             let term = docs[n][i];
-            term.id = uuid(term);
+            term.id = term.id || uuid(term);
           }
         }
       }
@@ -16416,7 +16413,7 @@ var app = (function () {
     var compute$b = compute$a;
 
     var change = {
-      api: api$m,
+      api: api$u,
       compute: compute$b,
     };
 
@@ -16427,9 +16424,9 @@ var app = (function () {
       ptrs.forEach(ptr => {
         let n = ptr[0];
         if (parent[n]) {
-          ptr[0] = parent[n][0];
-          ptr[1] += parent[n][1];
-          ptr[2] += parent[n][1];
+          ptr[0] = parent[n][0]; //n
+          ptr[1] += parent[n][1]; //start
+          ptr[2] += parent[n][1]; //end
         }
       });
       return ptrs
@@ -16448,7 +16445,7 @@ var app = (function () {
     // did they pass-in a compromise object?
     const isView = regs => regs && typeof regs === 'object' && regs.isView === true;
 
-    const match$2 = function (regs, group) {
+    const match$2 = function (regs, group, opts) {
       const one = this.methods.one;
       // support param as view object
       if (isView(regs)) {
@@ -16456,7 +16453,7 @@ var app = (function () {
       }
       // support param as string
       if (typeof regs === 'string') {
-        regs = one.parseMatch(regs);
+        regs = one.parseMatch(regs, opts);
       }
       let todo = { regs, group };
       let res = one.match(this.docs, todo, this._cache);
@@ -16466,14 +16463,14 @@ var app = (function () {
       return view
     };
 
-    const matchOne = function (regs, group) {
+    const matchOne = function (regs, group, opts) {
       const one = this.methods.one;
       // support at view as a param
       if (isView(regs)) {
         return this.intersection(regs).eq(0)
       }
       if (typeof regs === 'string') {
-        regs = one.parseMatch(regs);
+        regs = one.parseMatch(regs, opts);
       }
       let todo = { regs, group, justOne: true };
       let res = one.match(this.docs, todo, this._cache);
@@ -16483,11 +16480,11 @@ var app = (function () {
       return view
     };
 
-    const has = function (regs, group) {
+    const has = function (regs, group, opts) {
       const one = this.methods.one;
       let ptrs;
       if (typeof regs === 'string') {
-        regs = one.parseMatch(regs);
+        regs = one.parseMatch(regs, opts);
         let todo = { regs, group, justOne: true };
         ptrs = one.match(this.docs, todo, this._cache).ptrs;
       } else if (isView(regs)) {
@@ -16497,10 +16494,10 @@ var app = (function () {
     };
 
     // 'if'
-    const ifFn = function (regs, group) {
+    const ifFn = function (regs, group, opts) {
       const one = this.methods.one;
       if (typeof regs === 'string') {
-        regs = one.parseMatch(regs);
+        regs = one.parseMatch(regs, opts);
         let todo = { regs, group, justOne: true };
         let ptrs = this.fullPointer;
         ptrs = ptrs.filter(ptr => {
@@ -16516,7 +16513,7 @@ var app = (function () {
       return this.none()
     };
 
-    const ifNo = function (regs, group) {
+    const ifNo = function (regs, group, opts) {
       const { methods } = this;
       const one = methods.one;
       // support a view object as input
@@ -16525,7 +16522,7 @@ var app = (function () {
       }
       // otherwise parse the match string
       if (typeof regs === 'string') {
-        regs = one.parseMatch(regs);
+        regs = one.parseMatch(regs, opts);
       }
       return this.filter(m => {
         let todo = { regs, group, justOne: true };
@@ -16537,11 +16534,8 @@ var app = (function () {
 
     var match$3 = { matchOne, match: match$2, has, if: ifFn, ifNo };
 
-    // import { indexN } from '../../pointers/methods/lib/index.js'
-
-
     const before = function (regs, group) {
-      const { indexN } = this.methods.one;
+      const { indexN } = this.methods.one.pointer;
       let pre = [];
       let byN = indexN(this.fullPointer);
       Object.keys(byN).forEach(k => {
@@ -16559,7 +16553,7 @@ var app = (function () {
     };
 
     const after = function (regs, group) {
-      const { indexN } = this.methods.one;
+      const { indexN } = this.methods.one.pointer;
       let post = [];
       let byN = indexN(this.fullPointer);
       let document = this.document;
@@ -16578,8 +16572,8 @@ var app = (function () {
       return postWords.match(regs, group)
     };
 
-    const growLeft = function (regs, group) {
-      regs = this.world.methods.one.parseMatch(regs);
+    const growLeft = function (regs, group, opts) {
+      regs = this.world.methods.one.parseMatch(regs, opts);
       regs[regs.length - 1].end = true;// ensure matches are beside us ←
       let ptrs = this.fullPointer;
       this.forEach((m, n) => {
@@ -16593,8 +16587,8 @@ var app = (function () {
       return this.update(ptrs)
     };
 
-    const growRight = function (regs, group) {
-      regs = this.world.methods.one.parseMatch(regs);
+    const growRight = function (regs, group, opts) {
+      regs = this.world.methods.one.parseMatch(regs, opts);
       regs[0].start = true;// ensure matches are beside us →
       let ptrs = this.fullPointer;
       this.forEach((m, n) => {
@@ -16602,6 +16596,7 @@ var app = (function () {
         if (more.found) {
           let terms = more.terms();
           ptrs[n][2] += terms.length;
+          ptrs[n][4] = null; //remove end-id
         }
       });
       return this.update(ptrs)
@@ -16622,11 +16617,6 @@ var app = (function () {
       if (typeof reg === 'string') {
         m = view.match(reg, group);
       }
-      // are we splitting within a contraction?
-      // if (m.has('@hasContraction')) {
-      //   let more = m.grow('@hasContraction')
-      //   more.contractions().expand()
-      // }
       return m
     };
 
@@ -16638,10 +16628,10 @@ var app = (function () {
       return ptr
     };
 
-    const methods$o = {};
+    const methods$q = {};
     // [before], [match], [after]
-    methods$o.splitOn = function (m, group) {
-      const { splitAll } = this.methods.one;
+    methods$q.splitOn = function (m, group) {
+      const { splitAll } = this.methods.one.pointer;
       let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
@@ -16657,8 +16647,8 @@ var app = (function () {
     };
 
     // [before], [match after]
-    methods$o.splitBefore = function (m, group) {
-      const { splitAll } = this.methods.one;
+    methods$q.splitBefore = function (m, group) {
+      const { splitAll } = this.methods.one.pointer;
       let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
@@ -16666,6 +16656,7 @@ var app = (function () {
         res.push(o.passthrough);
         res.push(o.before);
         if (o.match && o.after) {
+          // console.log(combine(o.match, o.after))
           res.push(combine(o.match, o.after));
         } else {
           res.push(o.match);
@@ -16678,8 +16669,8 @@ var app = (function () {
     };
 
     // [before match], [after]
-    methods$o.splitAfter = function (m, group) {
-      const { splitAll } = this.methods.one;
+    methods$q.splitAfter = function (m, group) {
+      const { splitAll } = this.methods.one.pointer;
       let splits = getDoc$3(m, this, group).fullPointer;
       let all = splitAll(this.fullPointer, splits);
       let res = [];
@@ -16697,28 +16688,28 @@ var app = (function () {
       res = res.map(p => addIds$1(p, this));
       return this.update(res)
     };
-    methods$o.split = methods$o.splitAfter;
+    methods$q.split = methods$q.splitAfter;
 
-    var split$1 = methods$o;
+    var split$2 = methods$q;
 
-    const methods$n = Object.assign({}, match$3, lookaround, split$1);
+    const methods$p = Object.assign({}, match$3, lookaround, split$2);
     // aliases
-    methods$n.lookBehind = methods$n.before;
-    methods$n.lookBefore = methods$n.before;
+    methods$p.lookBehind = methods$p.before;
+    methods$p.lookBefore = methods$p.before;
 
-    methods$n.lookAhead = methods$n.after;
-    methods$n.lookAfter = methods$n.after;
+    methods$p.lookAhead = methods$p.after;
+    methods$p.lookAfter = methods$p.after;
 
-    methods$n.notIf = methods$n.ifNo;
+    methods$p.notIf = methods$p.ifNo;
     const matchAPI = function (View) {
-      Object.assign(View.prototype, methods$n);
+      Object.assign(View.prototype, methods$p);
     };
-    var api$l = matchAPI;
+    var api$t = matchAPI;
 
     // match  'foo /yes/' and not 'foo/no/bar'
     const bySlashes = /(?:^|\s)([![^]*(?:<[^<]*>)?\/.*?[^\\/]\/[?\]+*$~]*)(?:\s|$)/;
     // match '(yes) but not foo(no)bar'
-    const byParentheses = /([![^]*(?:<[^<]*>)?\([^)]+[^\\)]\)[?\]+*$~]*)(?:\s|$)/;
+    const byParentheses = /([!~[^]*(?:<[^<]*>)?\([^)]+[^\\)]\)[?\]+*$~]*)(?:\s|$)/;
     // okay
     const byWord = / /g;
 
@@ -16805,7 +16796,7 @@ var app = (function () {
       return str
     };
     //
-    const parseToken = function (w) {
+    const parseToken = function (w, opts) {
       let obj = {};
       //collect any flags (do it twice)
       for (let i = 0; i < 2; i += 1) {
@@ -16857,6 +16848,17 @@ var app = (function () {
           // obj.optional = true
           w = stripStart(w);
         }
+        //soft-match
+        if (start(w) === '~' && end(w) === '~' && w.length > 2) {
+          w = stripBoth(w);
+          obj.fuzzy = true;
+          obj.min = opts.fuzzy || 0.85;
+          if (/\(/.test(w) === false) {
+            obj.word = w;
+            return obj
+          }
+        }
+
         //wrapped-flags
         if (start(w) === '(' && end(w) === ')') {
           // support (one && two)
@@ -16876,7 +16878,7 @@ var app = (function () {
           obj.choices = obj.choices.filter(s => s);
           //recursion alert!
           obj.choices = obj.choices.map(str => {
-            return str.split(/ /g).map(parseToken)
+            return str.split(/ /g).map(s => parseToken(s, opts))
           });
           w = '';
         }
@@ -16886,13 +16888,7 @@ var app = (function () {
           obj.regex = new RegExp(w); //potential vuln - security/detect-non-literal-regexp
           return obj
         }
-        //soft-match
-        if (start(w) === '~' && end(w) === '~') {
-          w = stripBoth(w);
-          obj.soft = true;
-          obj.word = w;
-          return obj
-        }
+
         //machine/sense overloaded
         if (start(w) === '{' && end(w) === '}') {
           w = stripBoth(w);
@@ -17002,12 +16998,19 @@ var app = (function () {
           if (token.operator !== 'or') {
             return token
           }
+          if (token.fuzzy === true) {
+            return token
+          }
           // are they all straight-up words? then optimize them.
           let shouldPack = token.choices.every(block => {
             if (block.length !== 1) {
               return false
             }
             let reg = block[0];
+            // ~fuzzy~ words need more care
+            if (reg.fuzzy === true) {
+              return false
+            }
             // ^ and $ get lost in fastOr
             if (reg.start || reg.end) {
               return false
@@ -17029,42 +17032,33 @@ var app = (function () {
       })
     };
 
-    const postProcess = function (regs, opts = {}) {
+    // support ~(a|b|c)~
+    const fuzzyOr = function (regs) {
+      return regs.map(reg => {
+        if (reg.fuzzy && reg.choices) {
+          // pass fuzzy-data to each OR choice
+          reg.choices.forEach(r => {
+            if (r.length === 1 && r[0].word) {
+              r[0].fuzzy = true;
+              r[0].min = reg.min;
+            }
+          });
+        }
+        return reg
+      })
+    };
+
+    const postProcess = function (regs) {
       // ensure all capture groups names are filled between start and end
       regs = nameGroups(regs);
       // convert 'choices' format to 'fastOr' format
-      if (!opts.fuzzy) {
-        regs = doFastOrMode(regs);
-      }
+      regs = doFastOrMode(regs);
+      // support ~(foo|bar)~
+      regs = fuzzyOr(regs);
       return regs
     };
     var postProcess$1 = postProcess;
 
-    // add fuzziness etc to each reg
-    const addOptions = function (tokens, opts) {
-      // add default fuzzy-search limit
-      if (opts.fuzzy === true) {
-        opts.fuzzy = 0.85;
-      }
-      if (typeof opts.fuzzy === 'number') {
-        tokens = tokens.map(reg => {
-          // add a fuzzy-match on 'word' tokens
-          if (opts.fuzzy > 0 && reg.word) {
-            reg.fuzzy = opts.fuzzy;
-          }
-          //add it to or|and choices too
-          if (reg.choices) {
-            reg.choices.forEach(block => {
-              block.forEach(r => {
-                r.fuzzy = opts.fuzzy;
-              });
-            });
-          }
-          return reg
-        });
-      }
-      return tokens
-    };
     /** parse a match-syntax string into json */
     const syntax = function (input, opts = {}) {
       // fail-fast
@@ -17079,12 +17073,10 @@ var app = (function () {
       tokens = tokens.map(str => parseToken$1(str, opts));
       //clean up anything weird
       tokens = postProcess$1(tokens, opts);
-      // add fuzzy limits, etc
-      tokens = addOptions(tokens, opts);
       // console.log(tokens)
       return tokens
     };
-    var parseMatch$1 = syntax;
+    var parseMatch = syntax;
 
     const anyIntersection = function (setA, setB) {
       for (let elem of setB) {
@@ -17206,7 +17198,7 @@ var app = (function () {
     /** search the term's 'pre' punctuation  */
     const hasPre = (term, punct) => term.pre.indexOf(punct) !== -1;
 
-    const methods$m = {
+    const methods$o = {
       /** does it have a quotation symbol?  */
       hasQuote: term => startQuote.test(term.pre) || endQuote.test(term.post),
       /** does it have a comma?  */
@@ -17235,9 +17227,9 @@ var app = (function () {
       isTitleCase: term => /^[A-Z][a-z'\u00C0-\u00FF]/.test(term.text), //|| /^[A-Z]$/.test(term.text)
     };
     // aliases
-    methods$m.hasQuotation = methods$m.hasQuote;
+    methods$o.hasQuotation = methods$o.hasQuote;
 
-    var termMethods = methods$m;
+    var termMethods = methods$o;
 
     //declare it up here
     let wrapMatch = function () { };
@@ -17265,24 +17257,17 @@ var app = (function () {
         if (term.alias !== undefined && term.alias.hasOwnProperty(reg.word)) {
           return true
         }
-        // support ~ match
-        if (reg.soft === true && reg.word === term.root) {
-          return true
-        }
-        // support fuzzy match param
-        if (reg.fuzzy !== undefined) {
-          let score = fuzzy(reg.word, term.normal);
-          if (score > reg.fuzzy) {
+        // support ~ fuzzy match
+        if (reg.fuzzy === true) {
+          if (reg.word === term.root) {
             return true
           }
-          // support fuzzy + soft match
-          if (reg.soft === true) {
-            score = fuzzy(reg.word, term.root);
-            if (score > reg.fuzzy) {
-              return true
-            }
+          let score = fuzzy(reg.word, term.normal);
+          if (score >= reg.min) {
+            return true
           }
         }
+        // match slashes and things
         if (term.alias && term.alias.some(str => str === reg.word)) {
           return true
         }
@@ -17321,7 +17306,7 @@ var app = (function () {
       }
       //support {machine}
       if (reg.machine !== undefined) {
-        return term.normal === reg.machine || term.machine === reg.machine
+        return term.normal === reg.machine || term.machine === reg.machine || term.root === reg.machine
       }
       //support {word/sense}
       if (reg.sense !== undefined) {
@@ -17357,7 +17342,7 @@ var app = (function () {
     var matchTerm = wrapMatch;
 
     const env$1 = typeof process === 'undefined' ? self.env || {} : process.env;
-    const log$3 = msg => {
+    const log$2 = msg => {
       if (env$1.DEBUG_MATCH) {
         console.log(`\n  \x1b[32m ${msg} \x1b[0m`); // eslint-disable-line
       }
@@ -17401,7 +17386,7 @@ var app = (function () {
       //otherwise, we're looking for the next one
       for (; t < state.terms.length; t += 1) {
         if (matchTerm(state.terms[t], nextReg, state.start_i + t, state.phrase_length) === true) {
-          log$3(`greedyTo ${state.terms[t].normal}`);
+          log$2(`greedyTo ${state.terms[t].normal}`);
           return t
         }
       }
@@ -17414,7 +17399,7 @@ var app = (function () {
         if (state.start_i + state.t < state.phrase_length - 1) {
           let tmpReg = Object.assign({}, reg, { end: false });
           if (matchTerm(state.terms[state.t], tmpReg, state.start_i + state.t, state.phrase_length) === true) {
-            log$3(`endGreedy ${state.terms[state.t].normal}`);
+            log$2(`endGreedy ${state.terms[state.t].normal}`);
             return true
           }
         }
@@ -17496,7 +17481,7 @@ var app = (function () {
         return allWords
       });
       if (allDidMatch === true) {
-        log$3(`doAndBlock ${state.terms[state.t].normal}`);
+        log$2(`doAndBlock ${state.terms[state.t].normal}`);
         return longest
       }
       return false
@@ -17864,38 +17849,311 @@ var app = (function () {
       results = getGroup$1(results, group);
       // add ids to pointers
       results.ptrs.forEach(ptr => {
-        let [n, start] = ptr;
-        ptr[3] = docs[n][start].id;
+        let [n, start, end] = ptr;
+        ptr[3] = docs[n][start].id;//start-id
+        ptr[4] = docs[n][end - 1].id;//end-id
       });
       return results
     };
 
     var match$1 = runMatch$2;
 
-    const methods$k = {
+    const methods$m = {
       one: {
         termMethods,
-        parseMatch: parseMatch$1,
+        parseMatch,
         match: match$1,
       },
     };
 
-    var methods$l = methods$k;
+    var methods$n = methods$m;
 
-    /** pre-parse any match statements */
-    const parseMatch = function (str) {
-      const world = this.world();
-      return world.methods.one.parseMatch(str)
-    };
-    var lib$3 = {
-      parseMatch
+    var lib$4 = {
+      /** pre-parse any match statements */
+      parseMatch: function (str, opts) {
+        const world = this.world();
+        return world.methods.one.parseMatch(str, opts)
+      }
     };
 
     var match = {
-      api: api$l,
-      methods: methods$l,
-      lib: lib$3,
+      api: api$t,
+      methods: methods$n,
+      lib: lib$4,
     };
+
+    const isClass = /^\../;
+    const isId = /^#./;
+
+    const escapeXml = (str) => {
+      str = str.replace(/&/g, '&amp;');
+      str = str.replace(/</g, '&lt;');
+      str = str.replace(/>/g, '&gt;');
+      str = str.replace(/"/g, '&quot;');
+      str = str.replace(/'/g, '&apos;');
+      return str
+    };
+
+    // interpret .class, #id, tagName
+    const toTag = function (k) {
+      let start = '';
+      let end = '</span>';
+      k = escapeXml(k);
+      if (isClass.test(k)) {
+        start = `<span class="${k.replace(/^\./, '')}"`;
+      } else if (isId.test(k)) {
+        start = `<span id="${k.replace(/^#/, '')}"`;
+      } else {
+        start = `<${k}`;
+        end = `</${k}>`;
+      }
+      start += '>';
+      return { start, end }
+    };
+
+    const getIndex = function (doc, obj) {
+      let starts = {};
+      let ends = {};
+      Object.keys(obj).forEach(k => {
+        let res = obj[k];
+        let tag = toTag(k);
+        if (typeof res === 'string') {
+          res = doc.match(res);
+        }
+        res.docs.forEach(terms => {
+          // don't highlight implicit terms
+          if (terms.every(t => t.implicit)) {
+            return
+          }
+          let a = terms[0].id;
+          starts[a] = starts[a] || [];
+          starts[a].push(tag.start);
+          let b = terms[terms.length - 1].id;
+          ends[b] = ends[b] || [];
+          ends[b].push(tag.end);
+        });
+      });
+      return { starts, ends }
+    };
+
+    const html = function (obj) {
+      // index ids to highlight
+      let { starts, ends } = getIndex(this, obj);
+      // create the text output
+      let out = '';
+      this.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          let t = terms[i];
+          // do a span tag
+          if (starts.hasOwnProperty(t.id)) {
+            out += starts[t.id].join('');
+          }
+          out += t.pre || '' + t.text || '';
+          if (ends.hasOwnProperty(t.id)) {
+            out += ends[t.id].join('');
+          }
+          out += t.post || '';
+        }
+      });
+      return out
+    };
+    var html$1 = { html };
+
+    const trimEnd = /[,:;)\]*.?~!\u0022\uFF02\u201D\u2019\u00BB\u203A\u2032\u2033\u2034\u301E\u00B4—-]+$/;
+    const trimStart =
+      /^[(['"*~\uFF02\u201C\u2018\u201F\u201B\u201E\u2E42\u201A\u00AB\u2039\u2035\u2036\u2037\u301D\u0060\u301F]+/;
+
+    const punctToKill = /[,:;)('"\u201D\]]/;
+    const isHyphen = /^[-–—]$/;
+    const hasSpace = / /;
+
+    const textFromTerms = function (terms, opts, keepSpace = true) {
+      let txt = '';
+      terms.forEach(t => {
+        let pre = t.pre || '';
+        let post = t.post || '';
+        if (opts.punctuation === 'some') {
+          pre = pre.replace(trimStart, '');
+          // replace a hyphen with a space
+          if (isHyphen.test(post)) {
+            post = ' ';
+          }
+          post = post.replace(punctToKill, '');
+          // cleanup exclamations
+          post = post.replace(/\?!+/, '?');
+          post = post.replace(/!+/, '!');
+          post = post.replace(/\?+/, '?');
+          // kill elipses
+          post = post.replace(/\.{2,}/, '');
+        }
+        if (opts.whitespace === 'some') {
+          pre = pre.replace(/\s/, ''); //remove pre-whitespace
+          post = post.replace(/\s+/, ' '); //replace post-whitespace with a space
+        }
+        if (!opts.keepPunct) {
+          pre = pre.replace(trimStart, '');
+          if (post === '-') {
+            post = ' ';
+          } else {
+            post = post.replace(trimEnd, '');
+          }
+        }
+        // grab the correct word format
+        let word = t[opts.form || 'text'] || t.normal || '';
+        if (opts.form === 'implicit') {
+          word = t.implicit || t.text;
+        }
+        if (opts.form === 'root' && t.implicit) {
+          word = t.root || t.implicit || t.normal;
+        }
+        // add an implicit space, for contractions
+        if ((opts.form === 'machine' || opts.form === 'implicit' || opts.form === 'root') && t.implicit) {
+          if (!post || !hasSpace.test(post)) {
+            post += ' ';
+          }
+        }
+        txt += pre + word + post;
+      });
+      if (keepSpace === false) {
+        txt = txt.trim();
+      }
+      if (opts.lowerCase === true) {
+        txt = txt.toLowerCase();
+      }
+      return txt
+    };
+
+    const textFromDoc = function (docs, opts) {
+      let text = '';
+      for (let i = 0; i < docs.length; i += 1) {
+        // middle
+        text += textFromTerms(docs[i], opts, true);
+      }
+      if (!opts.keepSpace) {
+        text = text.trim();
+      }
+      if (opts.keepPunct === false) {
+        text = text.replace(trimStart, '');
+        text = text.replace(trimEnd, '');
+      }
+      if (opts.cleanWhitespace === true) {
+        text = text.trim();
+      }
+      return text
+    };
+
+    const fmts = {
+      text: {
+        form: 'text',
+      },
+      normal: {
+        whitespace: 'some',
+        punctuation: 'some',
+        case: 'some',
+        unicode: 'some',
+        form: 'normal',
+      },
+      machine: {
+        whitespace: 'some',
+        punctuation: 'some',
+        case: 'none',
+        unicode: 'some',
+        form: 'machine',
+      },
+      root: {
+        whitespace: 'some',
+        punctuation: 'some',
+        case: 'some',
+        unicode: 'some',
+        form: 'root',
+      },
+      implicit: {
+        form: 'implicit',
+      }
+    };
+    fmts.clean = fmts.normal;
+    fmts.reduced = fmts.root;
+    var fmts$1 = fmts;
+
+    const defaults$6 = {
+      text: true,
+      terms: true,
+    };
+
+    let opts = { case: 'none', unicode: 'some', form: 'machine', punctuation: 'some' };
+
+    const merge = function (a, b) {
+      return Object.assign({}, a, b)
+    };
+
+    const fns$5 = {
+      text: (terms) => {
+        return textFromTerms(terms, { keepPunct: true }, false)
+      },
+      normal: (terms) => textFromTerms(terms, merge(fmts$1.normal, { keepPunct: true }), false),
+      implicit: (terms) => textFromTerms(terms, merge(fmts$1.implicit, { keepPunct: true }), false),
+
+      machine: (terms) => textFromTerms(terms, opts, false),
+      root: (terms) => textFromTerms(terms, merge(opts, { form: 'root' }), false),
+
+      offset: (terms) => {
+        let len = fns$5.text(terms).length;
+        return {
+          index: terms[0].offset.index,
+          start: terms[0].offset.start,
+          length: len,
+        }
+      },
+      terms: (terms) => {
+        return terms.map(t => {
+          let term = Object.assign({}, t);
+          term.tags = Array.from(t.tags);
+          return term
+        })
+      },
+      confidence: (_terms, view, i) => view.eq(i).confidence(),
+      syllables: (_terms, view, i) => view.eq(i).syllables(),
+      sentence: (_terms, view, i) => view.eq(i).fullSentence().text(),
+      dirty: (terms) => terms.some(t => t.dirty === true)
+    };
+    fns$5.sentences = fns$5.sentence;
+    fns$5.clean = fns$5.normal;
+    fns$5.reduced = fns$5.root;
+
+    const toJSON$4 = function (view, option) {
+      option = option || {};
+      if (typeof option === 'string') {
+        option = {};
+      }
+      option = Object.assign({}, defaults$6, option);
+      // run any necessary upfront steps
+      if (option.offset) {
+        view.compute('offset');
+      }
+      return view.docs.map((terms, i) => {
+        let res = {};
+        Object.keys(option).forEach(k => {
+          if (option[k] && fns$5[k]) {
+            res[k] = fns$5[k](terms, view, i);
+          }
+        });
+        return res
+      })
+    };
+
+
+    const methods$l = {
+      /** return data */
+      json: function (n) {
+        let res = toJSON$4(this, n);
+        if (typeof n === 'number') {
+          return res[n]
+        }
+        return res
+      },
+    };
+    methods$l.data = methods$l.json;
+    var json = methods$l;
 
     /* eslint-disable no-console */
     const logClientSide = function (view) {
@@ -17965,9 +18223,7 @@ var app = (function () {
           if (t.implicit) {
             text = '[' + t.implicit + ']';
           }
-          if (typeof module !== undefined) {
-            text = cli$1.yellow(text);
-          }
+          text = cli$1.yellow(text);
           let word = "'" + text + "'";
           word = word.padEnd(18);
           let str = cli$1.blue('  │ ') + cli$1.i(word) + '  - ' + tagString(tags, model);
@@ -18002,7 +18258,7 @@ var app = (function () {
     };
     var showChunks$1 = showChunks;
 
-    const split = (txt, offset, index) => {
+    const split$1 = (txt, offset, index) => {
       let buff = index * 9; //there are 9 new chars addded to each highlight
       let start = offset.start + buff;
       let end = start + offset.length;
@@ -18013,7 +18269,7 @@ var app = (function () {
     };
 
     const spliceIn = function (txt, offset, index) {
-      let parts = split(txt, offset, index);
+      let parts = split$1(txt, offset, index);
       return `${parts[0]}${cli$1.blue(parts[1])}${parts[2]}`
     };
 
@@ -18118,6 +18374,18 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
+    // sort by frequency
+    const topk = function (arr) {
+      let obj = {};
+      arr.forEach(a => {
+        obj[a] = obj[a] || 0;
+        obj[a] += 1;
+      });
+      let res = Object.keys(obj).map(k => {
+        return { normal: k, count: obj[k] }
+      });
+      return res.sort((a, b) => (a.count > b.count ? -1 : 0))
+    };
 
     /** some named output formats */
     const out = function (method) {
@@ -18156,8 +18424,7 @@ var app = (function () {
       }
       // return terms sorted by frequency
       if (method === 'freq' || method === 'frequency' || method === 'topk') {
-        let terms = this.compute('freq').terms().unique().termList();
-        return terms.sort((a, b) => (a.freq > b.freq ? -1 : 0))
+        return topk(this.json({ normal: true }).map(o => o.normal))
       }
 
       // some handy ad-hoc outputs
@@ -18179,129 +18446,19 @@ var app = (function () {
         })
       }
       if (method === 'debug') {
-        return this.debug()
+        return this.debug() //allow
       }
       return this.text()
     };
 
-    const methods$j = {
+    const methods$k = {
       /** */
       debug: debug$1,
       /** */
       out: out,
     };
 
-    var out$1 = methods$j;
-
-    const trimEnd = /[,:;)\]*.?~!\u0022\uFF02\u201D\u2019\u00BB\u203A\u2032\u2033\u2034\u301E\u00B4—-]+$/;
-    const trimStart =
-      /^[(['"*~\uFF02\u201C\u2018\u201F\u201B\u201E\u2E42\u201A\u00AB\u2039\u2035\u2036\u2037\u301D\u0060\u301F]+/;
-
-    const punctToKill = /[,:;)('"\u201D]/;
-    const isHyphen = /^[-–—]$/;
-    const hasSpace = / /;
-
-    const textFromTerms = function (terms, opts, keepSpace = true) {
-      let txt = '';
-      terms.forEach(t => {
-        let pre = t.pre || '';
-        let post = t.post || '';
-        if (opts.punctuation === 'some') {
-          pre = pre.replace(trimStart, '');
-          // replace a hyphen with a space
-          if (isHyphen.test(post)) {
-            post = ' ';
-          }
-          post = post.replace(punctToKill, '');
-        }
-        if (opts.whitespace === 'some') {
-          pre = pre.replace(/\s/, ''); //remove pre-whitespace
-          post = post.replace(/\s+/, ' '); //replace post-whitespace with a space
-        }
-        if (!opts.keepPunct) {
-          pre = pre.replace(trimStart, '');
-          if (post === '-') {
-            post = ' ';
-          } else {
-            post = post.replace(trimEnd, '');
-          }
-        }
-        // grab the correct word format
-        let word = t[opts.form || 'text'] || t.normal || '';
-        if (opts.form === 'implicit') {
-          word = t.implicit || t.text;
-        }
-        if (opts.form === 'root' && t.implicit) {
-          word = t.root || t.implicit || t.normal;
-        }
-        // add an implicit space, for contractions
-        if ((opts.form === 'machine' || opts.form === 'implicit' || opts.form === 'root') && t.implicit) {
-          if (!post || !hasSpace.test(post)) {
-            post += ' ';
-          }
-        }
-        txt += pre + word + post;
-      });
-      if (keepSpace === false) {
-        txt = txt.trim();
-      }
-      if (opts.lowerCase === true) {
-        txt = txt.toLowerCase();
-      }
-      return txt
-    };
-
-    const textFromDoc = function (docs, opts) {
-      let text = '';
-      for (let i = 0; i < docs.length; i += 1) {
-        // middle
-        text += textFromTerms(docs[i], opts, true);
-      }
-      if (!opts.keepSpace) {
-        text = text.trim();
-      }
-      if (opts.keepPunct === false) {
-        text = text.replace(trimStart, '');
-        text = text.replace(trimEnd, '');
-      }
-      if (opts.cleanWhitespace === true) {
-        text = text.trim();
-      }
-      return text
-    };
-
-    const fmts = {
-      text: {
-        form: 'text',
-      },
-      normal: {
-        whitespace: 'some',
-        punctuation: 'some',
-        case: 'some',
-        unicode: 'some',
-        form: 'normal',
-      },
-      machine: {
-        whitespace: 'some',
-        punctuation: 'some',
-        case: 'none',
-        unicode: 'some',
-        form: 'machine',
-      },
-      root: {
-        whitespace: 'some',
-        punctuation: 'some',
-        case: 'some',
-        unicode: 'some',
-        form: 'root',
-      },
-      implicit: {
-        form: 'implicit',
-      }
-    };
-    fmts.clean = fmts.normal;
-    fmts.reduced = fmts.root;
-    var fmts$1 = fmts;
+    var out$1 = methods$k;
 
     const isObject$3 = val => {
       return Object.prototype.toString.call(val) === '[object Object]'
@@ -18316,10 +18473,6 @@ var app = (function () {
         };
         if (fmt && typeof fmt === 'string' && fmts$1.hasOwnProperty(fmt)) {
           opts = Object.assign({}, fmts$1[fmt]);
-          // silently trigger a root?
-          // if (fmt === 'root' && this.document[0][0] && !this.document[0][0].root) {
-          //   this.compute('root')
-          // }
         } else if (fmt && isObject$3(fmt)) {
           opts = Object.assign({}, fmt, opts);//todo: fixme
         }
@@ -18338,168 +18491,15 @@ var app = (function () {
       },
     };
 
-    const defaults$6 = {
-      text: true,
-      terms: true,
-    };
-
-    let opts = { case: 'none', unicode: 'some', form: 'machine', punctuation: 'some' };
-
-    const merge = function (a, b) {
-      return Object.assign({}, a, b)
-    };
-
-    const fns$5 = {
-      text: (terms) => {
-        return textFromTerms(terms, { keepPunct: true }, false)
-      },
-      normal: (terms) => textFromTerms(terms, merge(fmts$1.normal, { keepPunct: true }), false),
-      implicit: (terms) => textFromTerms(terms, merge(fmts$1.implicit, { keepPunct: true }), false),
-
-      machine: (terms) => textFromTerms(terms, opts, false),
-      root: (terms) => textFromTerms(terms, merge(opts, { form: 'root' }), false),
-
-      offset: (terms) => {
-        let len = fns$5.text(terms).length;
-        return {
-          index: terms[0].offset.index,
-          start: terms[0].offset.start,
-          length: len,
-        }
-      },
-      terms: (terms) => {
-        return terms.map(t => {
-          let term = Object.assign({}, t);
-          term.tags = Array.from(t.tags);
-          return term
-        })
-      },
-      confidence: (_terms, view, i) => view.eq(i).confidence(),
-      syllables: (_terms, view, i) => view.eq(i).syllables(),
-      sentence: (_terms, view, i) => view.eq(i).fullSentence().text(),
-      dirty: (terms) => terms.some(t => t.dirty === true)
-    };
-    fns$5.sentences = fns$5.sentence;
-    fns$5.clean = fns$5.normal;
-    fns$5.reduced = fns$5.root;
-
-    const toJSON$4 = function (view, opts) {
-      opts = opts || {};
-      if (typeof opts === 'string') {
-        opts = {};
-      }
-      opts = Object.assign({}, defaults$6, opts);
-      // run any necessary upfront steps
-      if (opts.offset) {
-        view.compute('offset');
-      }
-      return view.docs.map((terms, i) => {
-        let res = {};
-        Object.keys(opts).forEach(k => {
-          if (opts[k] && fns$5[k]) {
-            res[k] = fns$5[k](terms, view, i);
-          }
-        });
-        return res
-      })
-    };
-
-
-    var json = {
-      /** return data */
-      json: function (n) {
-        let res = toJSON$4(this, n);
-        if (typeof n === 'number') {
-          return res[n]
-        }
-        return res
-      },
-    };
-
-    const isClass = /^\../;
-    const isId = /^#./;
-
-    const escapeXml = (str) => {
-      str = str.replace(/&/g, '&amp;');
-      str = str.replace(/</g, '&lt;');
-      str = str.replace(/>/g, '&gt;');
-      str = str.replace(/"/g, '&quot;');
-      str = str.replace(/'/g, '&apos;');
-      return str
-    };
-
-    // interpret .class, #id, tagName
-    const toTag = function (k) {
-      let start = '';
-      let end = '</span>';
-      k = escapeXml(k);
-      if (isClass.test(k)) {
-        start = `<span class="${k.replace(/^\./, '')}"`;
-      } else if (isId.test(k)) {
-        start = `<span id="${k.replace(/^#/, '')}"`;
-      } else {
-        start = `<${k}`;
-        end = `</${k}>`;
-      }
-      start += '>';
-      return { start, end }
-    };
-
-    const getIndex = function (doc, obj) {
-      let starts = {};
-      let ends = {};
-      Object.keys(obj).forEach(k => {
-        let res = obj[k];
-        let tag = toTag(k);
-        if (typeof res === 'string') {
-          res = doc.match(res);
-        }
-        res.docs.forEach(terms => {
-          let a = terms[0].id;
-          starts[a] = starts[a] || [];
-          starts[a].push(tag.start);
-          let b = terms[terms.length - 1].id;
-          ends[b] = ends[b] || [];
-          ends[b].push(tag.end);
-        });
-      });
-      return { starts, ends }
-    };
-
-    const html = function (obj) {
-      // index ids to highlight
-      let { starts, ends } = getIndex(this, obj);
-      // create the text output
-      let out = '';
-      this.docs.forEach(terms => {
-        for (let i = 0; i < terms.length; i += 1) {
-          let t = terms[i];
-          // do a span tag
-          if (starts.hasOwnProperty(t.id)) {
-            out += starts[t.id].join('');
-          }
-          out += t.pre || '' + t.text || '';
-          if (ends.hasOwnProperty(t.id)) {
-            out += ends[t.id].join('');
-          }
-          out += t.post || '';
-        }
-      });
-      return out
-    };
-    var html$1 = { html };
-
-    const methods$i = Object.assign({}, out$1, text, json, html$1);
-    // aliases
-    methods$i.data = methods$i.json;
+    const methods$j = Object.assign({}, out$1, text, json, html$1);
 
     const addAPI$2 = function (View) {
-      Object.assign(View.prototype, methods$i);
+      Object.assign(View.prototype, methods$j);
     };
-    var api$k = addAPI$2;
+    var api$s = addAPI$2;
 
     var output = {
-      api: api$k,
+      api: api$s,
     };
 
     // do the pointers intersect?
@@ -18630,6 +18630,145 @@ var app = (function () {
 
     var splitAll$1 = splitAll;
 
+    const max$1 = 4;
+
+    // sweep-around looking for our start term uuid
+    const blindSweep = function (id, doc, n) {
+      for (let i = 0; i < max$1; i += 1) {
+        // look up a sentence
+        if (doc[n - i]) {
+          let index = doc[n - i].findIndex(term => term.id === id);
+          if (index !== -1) {
+            return [n - i, index]
+          }
+        }
+        // look down a sentence
+        if (doc[n + i]) {
+          let index = doc[n + i].findIndex(term => term.id === id);
+          if (index !== -1) {
+            return [n + i, index]
+          }
+        }
+      }
+      return null
+    };
+
+    const repairEnding = function (ptr, document) {
+      let [n, start, , , endId] = ptr;
+      let terms = document[n];
+      // look for end-id
+      let newEnd = terms.findIndex(t => t.id === endId);
+      if (newEnd === -1) {
+        // if end-term wasn't found, so go all the way to the end
+        ptr[2] = document[n].length;
+        ptr[4] = terms.length ? terms[terms.length - 1].id : null;
+      } else {
+        ptr[2] = newEnd; // repair ending pointer
+      }
+      return document[n].slice(start, ptr[2] + 1)
+    };
+
+    /** return a subset of the document, from a pointer */
+    const getDoc$1 = function (ptrs, document) {
+      let doc = [];
+      ptrs.forEach((ptr, i) => {
+        if (!ptr) {
+          return
+        }
+        let [n, start, end, id, endId] = ptr; //parsePointer(ptr)
+        let terms = document[n] || [];
+        if (start === undefined) {
+          start = 0;
+        }
+        if (end === undefined) {
+          end = terms.length;
+        }
+        if (id && (!terms[start] || terms[start].id !== id)) {
+          // console.log('  repairing pointer...')
+          let wild = blindSweep(id, document, n);
+          if (wild !== null) {
+            let len = end - start;
+            terms = document[wild[0]].slice(wild[1], wild[1] + len);
+            // actually change the pointer
+            let startId = terms[0] ? terms[0].id : null;
+            ptrs[i] = [wild[0], wild[1], wild[1] + len, startId];
+          }
+        } else {
+          terms = terms.slice(start, end);
+        }
+        if (terms.length === 0) {
+          return
+        }
+        if (start === end) {
+          return
+        }
+        // test end-id, if it exists
+        if (endId && terms[terms.length - 1].id !== endId) {
+          terms = repairEnding(ptr, document);
+        }
+        // otherwise, looks good!
+        doc.push(terms);
+      });
+      return doc
+    };
+    var getDoc$2 = getDoc$1;
+
+    // flat list of terms from nested document
+    const termList = function (docs) {
+      let arr = [];
+      for (let i = 0; i < docs.length; i += 1) {
+        for (let t = 0; t < docs[i].length; t += 1) {
+          arr.push(docs[i][t]);
+        }
+      }
+      return arr
+    };
+
+    var methods$i = {
+      one: {
+        termList,
+        getDoc: getDoc$2,
+        pointer: {
+          indexN,
+          splitAll: splitAll$1,
+        }
+      },
+    };
+
+    // a union is a + b, minus duplicates
+    const getUnion = function (a, b) {
+      let both = a.concat(b);
+      let byN = indexN(both);
+      let res = [];
+      both.forEach(ptr => {
+        let [n] = ptr;
+        if (byN[n].length === 1) {
+          // we're alone on this sentence, so we're good
+          res.push(ptr);
+          return
+        }
+        // there may be overlaps
+        let hmm = byN[n].filter(m => doesOverlap(ptr, m));
+        hmm.push(ptr);
+        let range = getExtent(hmm);
+        res.push(range);
+      });
+      res = uniquePtrs(res);
+      return res
+    };
+    var getUnion$1 = getUnion;
+
+    // two disjoint
+    // console.log(getUnion([[1, 3, 4]], [[0, 1, 2]]))
+    // two disjoint
+    // console.log(getUnion([[0, 3, 4]], [[0, 1, 2]]))
+    // overlap-plus
+    // console.log(getUnion([[0, 1, 4]], [[0, 2, 6]]))
+    // overlap
+    // console.log(getUnion([[0, 1, 4]], [[0, 2, 3]]))
+    // neighbours
+    // console.log(getUnion([[0, 1, 3]], [[0, 3, 5]]))
+
     const subtract = function (refs, not) {
       let res = [];
       let found = splitAll$1(refs, not);
@@ -18689,127 +18828,6 @@ var app = (function () {
 
     // console.log(getIntersection([[0, 1, 3]], [[0, 2, 4]]))
 
-    // a union is a + b, minus duplicates
-    const getUnion = function (a, b) {
-      let both = a.concat(b);
-      let byN = indexN(both);
-      let res = [];
-      both.forEach(ptr => {
-        let [n] = ptr;
-        if (byN[n].length === 1) {
-          // we're alone on this sentence, so we're good
-          res.push(ptr);
-          return
-        }
-        // there may be overlaps
-        let hmm = byN[n].filter(m => doesOverlap(ptr, m));
-        hmm.push(ptr);
-        let range = getExtent(hmm);
-        res.push(range);
-      });
-      res = uniquePtrs(res);
-      return res
-    };
-    var getUnion$1 = getUnion;
-
-    // two disjoint
-    // console.log(getUnion([[1, 3, 4]], [[0, 1, 2]]))
-    // two disjoint
-    // console.log(getUnion([[0, 3, 4]], [[0, 1, 2]]))
-    // overlap-plus
-    // console.log(getUnion([[0, 1, 4]], [[0, 2, 6]]))
-    // overlap
-    // console.log(getUnion([[0, 1, 4]], [[0, 2, 3]]))
-    // neighbours
-    // console.log(getUnion([[0, 1, 3]], [[0, 3, 5]]))
-
-    const max$1 = 4;
-
-    // sweep-around looking for our term uuid
-    const blindSweep = function (id, doc, n) {
-      for (let i = 0; i < max$1; i += 1) {
-        // look up a sentence
-        if (doc[n - i]) {
-          let index = doc[n - i].findIndex(term => term.id === id);
-          if (index !== -1) {
-            return [n - i, index]
-          }
-        }
-        // look down a sentence
-        if (doc[n + i]) {
-          let index = doc[n + i].findIndex(term => term.id === id);
-          if (index !== -1) {
-            return [n + i, index]
-          }
-        }
-      }
-      return null
-    };
-
-    /** return a subset of the document, from a pointer */
-    const getDoc$1 = function (ptrs, document) {
-      let doc = [];
-      ptrs.forEach((ptr, i) => {
-        if (!ptr) {
-          return
-        }
-        let [n, start, end, id] = ptr; //parsePointer(ptr)
-        let terms = document[n] || [];
-        if (start === undefined) {
-          start = 0;
-        }
-        if (end === undefined) {
-          end = terms.length;
-        }
-        if (id && (!terms[start] || terms[start].id !== id)) {
-          // console.log('  repairing pointer...')
-          let wild = blindSweep(id, document, n);
-          if (wild !== null) {
-            let len = end - start;
-            terms = document[wild[0]].slice(wild[1], wild[1] + len);
-            // actually change the pointer
-            ptrs[i] = [wild[0], wild[1], wild[1] + len, terms[0].id];
-          }
-        } else {
-          terms = terms.slice(start, end);
-        }
-        if (terms.length === 0) {
-          return
-        }
-        if (start === end) {
-          return
-        }
-        // otherwise, looks good!
-        doc.push(terms);
-      });
-      return doc
-    };
-    var getDoc$2 = getDoc$1;
-
-    // flat list of terms from nested document
-    const termList = function (docs) {
-      let arr = [];
-      for (let i = 0; i < docs.length; i += 1) {
-        for (let t = 0; t < docs[i].length; t += 1) {
-          arr.push(docs[i][t]);
-        }
-      }
-      return arr
-    };
-
-    var methods$h = {
-      one: {
-        termList,
-        getDoc: getDoc$2,
-        getUnion: getUnion$1,
-        getIntersection: getIntersection$1,
-        getDifference,
-        indexN,
-        doesOverlap,
-        splitAll: splitAll$1,
-      },
-    };
-
     const getDoc = (m, view) => {
       return typeof m === 'string' ? view.match(m) : m
     };
@@ -18818,47 +18836,43 @@ var app = (function () {
     const addIds = function (ptrs, docs) {
       return ptrs.map(ptr => {
         let [n, start] = ptr;
-        if (docs[n][start]) {
+        if (docs[n] && docs[n][start]) {
           ptr[3] = docs[n][start].id;
         }
         return ptr
       })
     };
 
-    const methods$g = {};
+    const methods$h = {};
 
     // all parts, minus duplicates
-    methods$g.union = function (m) {
-      const { getUnion } = this.methods.one;
+    methods$h.union = function (m) {
       m = getDoc(m, this);
-      let ptrs = getUnion(this.fullPointer, m.fullPointer);
+      let ptrs = getUnion$1(this.fullPointer, m.fullPointer);
       ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
-    methods$g.and = methods$g.union;
+    methods$h.and = methods$h.union;
 
     // only parts they both have
-    methods$g.intersection = function (m) {
-      const { getIntersection } = this.methods.one;
+    methods$h.intersection = function (m) {
       m = getDoc(m, this);
-      let ptrs = getIntersection(this.fullPointer, m.fullPointer);
+      let ptrs = getIntersection$1(this.fullPointer, m.fullPointer);
       ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
 
     // only parts of a that b does not have
-    methods$g.difference = function (m) {
-      const { getDifference } = this.methods.one;
+    methods$h.not = function (m) {
       m = getDoc(m, this);
       let ptrs = getDifference(this.fullPointer, m.fullPointer);
       ptrs = addIds(ptrs, this.document);
       return this.toView(ptrs)
     };
-    methods$g.not = methods$g.difference;
+    methods$h.difference = methods$h.not;
 
     // get opposite of a
-    methods$g.complement = function () {
-      const { getDifference } = this.methods.one;
+    methods$h.complement = function () {
       let doc = this.all();
       let ptrs = getDifference(doc.fullPointer, this.fullPointer);
       ptrs = addIds(ptrs, this.document);
@@ -18866,11 +18880,10 @@ var app = (function () {
     };
 
     // remove overlaps
-    methods$g.settle = function () {
-      const { getUnion } = this.methods.one;
+    methods$h.settle = function () {
       let ptrs = this.fullPointer;
       ptrs.forEach(ptr => {
-        ptrs = getUnion(ptrs, [ptr]);
+        ptrs = getUnion$1(ptrs, [ptr]);
       });
       ptrs = addIds(ptrs, this.document);
       return this.update(ptrs)
@@ -18879,13 +18892,13 @@ var app = (function () {
 
     const addAPI$1 = function (View) {
       // add set/intersection/union
-      Object.assign(View.prototype, methods$g);
+      Object.assign(View.prototype, methods$h);
     };
-    var api$j = addAPI$1;
+    var api$r = addAPI$1;
 
     var pointers = {
-      methods: methods$h,
-      api: api$j,
+      methods: methods$i,
+      api: api$r,
     };
 
     const isMulti = / /;
@@ -18955,7 +18968,7 @@ var app = (function () {
     };
 
     // verbose-mode tagger debuging
-    const log$2 = (term, tag, reason = '') => {
+    const log$1 = (term, tag, reason = '') => {
       const yellow = str => '\x1b[33m\x1b[3m' + str + '\x1b[0m';
       const i = str => '\x1b[3m' + str + '\x1b[0m';
       let word = term.text || '[' + term.implicit + ']';
@@ -18967,7 +18980,7 @@ var app = (function () {
     };
 
     // add a tag to all these terms
-    const setTag$2 = function (terms, tag, world = {}, isSafe, reason) {
+    const setTag$1 = function (terms, tag, world = {}, isSafe, reason) {
       const tagSet = world.model.one.tagSet || {};
       if (!tag) {
         return
@@ -18975,10 +18988,10 @@ var app = (function () {
       // some logging for debugging
       let env = typeof process === 'undefined' ? self.env || {} : process.env;
       if (env && env.DEBUG_TAGS) {
-        log$2(terms[0], tag, reason);
+        log$1(terms[0], tag, reason);
       }
       if (isArray$3(tag) === true) {
-        tag.forEach(tg => setTag$2(terms, tg, world, isSafe));
+        tag.forEach(tg => setTag$1(terms, tg, world, isSafe));
         return
       }
       tag = tag.trim();
@@ -18993,7 +19006,7 @@ var app = (function () {
         tagTerm(terms[i], tag, tagSet, isSafe);
       }
     };
-    var setTag$3 = setTag$2;
+    var setTag$2 = setTag$1;
 
     // remove this tag, and its children, from these terms
     const unTag = function (terms, tag, tagSet) {
@@ -19018,7 +19031,7 @@ var app = (function () {
     };
     var unTag$1 = unTag;
 
-    const e=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t$1=/^ *(#|\/\/)/,n$2=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e({id:t}))),n}return [e({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r$1=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i$3=e=>"[object Array]"===Object.prototype.toString.call(e),c$1=e=>(e=e||"").trim(),s$1=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t$1.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n$2(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e(s),s}(c):i$3(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e({});return t.forEach((t=>{if((t=e(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r$1(s=c).forEach(e),s);var s;},h$1=e=>"[31m"+e+"[0m",o$4=e=>"[2m"+e+"[0m",l$1=function(e,t){let n="-> ";t&&(n=o$4("→ "));let i="";return r$1(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h$1(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a$1=function(e){let t=r$1(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p$2={text:l$1,txt:l$1,array:a$1,flat:a$1},d$1=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l$1(e,!0)),null):p$2.hasOwnProperty(t)?p$2[t](e):e},u$1=e=>{r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f$2=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i$3(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j$1=/\//;class g$2{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c$1(t),!j$1.test(t)){let e=this.json.children.find((e=>e.id===t));return new g$2(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e({});return new g$2(n)}add(t,n={}){if(i$3(t))return t.forEach((e=>this.add(c$1(e),n))),this;t=c$1(t);let r=e({id:t,props:n});return this.json.children.push(r),new g$2(r)}remove(e){return e=c$1(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r$1(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r$1(this.json)}fillDown(){var e;return e=this.json,r$1(e,((e,t)=>{t.props=f$2(t.props,e.props);})),this}depth(){u$1(this.json);let e=r$1(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u$1(this.json),d$1(this.json,e)}debug(){return u$1(this.json),d$1(this.json,"debug"),this}}const _$1=function(e){let t=s$1(e);return new g$2(t)};_$1.prototype.plugin=function(e){e(this);};
+    const e=function(e){return e.children=e.children||[],e._cache=e._cache||{},e.props=e.props||{},e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],e},t$1=/^ *(#|\/\/)/,n$2=function(t){let n=t.trim().split(/->/),r=[];n.forEach((t=>{r=r.concat(function(t){if(!(t=t.trim()))return null;if(/^\[/.test(t)&&/\]$/.test(t)){let n=(t=(t=t.replace(/^\[/,"")).replace(/\]$/,"")).split(/,/);return n=n.map((e=>e.trim())).filter((e=>e)),n=n.map((t=>e({id:t}))),n}return [e({id:t})]}(t));})),r=r.filter((e=>e));let i=r[0];for(let e=1;e<r.length;e+=1)i.children.push(r[e]),i=r[e];return r[0]},r$1=(e,t)=>{let n=[],r=[e];for(;r.length>0;){let e=r.pop();n.push(e),e.children&&e.children.forEach((n=>{t&&t(e,n),r.push(n);}));}return n},i$3=e=>"[object Array]"===Object.prototype.toString.call(e),c$1=e=>(e=e||"").trim(),s$2=function(c=[]){return "string"==typeof c?function(r){let i=r.split(/\r?\n/),c=[];i.forEach((e=>{if(!e.trim()||t$1.test(e))return;let r=(e=>{const t=/^( {2}|\t)/;let n=0;for(;t.test(e);)e=e.replace(t,""),n+=1;return n})(e);c.push({indent:r,node:n$2(e)});}));let s=function(e){let t={children:[]};return e.forEach(((n,r)=>{0===n.indent?t.children=t.children.concat(n.node):e[r-1]&&function(e,t){let n=e[t].indent;for(;t>=0;t-=1)if(e[t].indent<n)return e[t];return e[0]}(e,r).node.children.push(n.node);})),t}(c);return s=e(s),s}(c):i$3(c)?function(t){let n={};t.forEach((e=>{n[e.id]=e;}));let r=e({});return t.forEach((t=>{if((t=e(t)).parent)if(n.hasOwnProperty(t.parent)){let e=n[t.parent];delete t.parent,e.children.push(t);}else console.warn(`[Grad] - missing node '${t.parent}'`);else r.children.push(t);})),r}(c):(r$1(s=c).forEach(e),s);var s;},h$1=e=>"[31m"+e+"[0m",o$4=e=>"[2m"+e+"[0m",l$1=function(e,t){let n="-> ";t&&(n=o$4("→ "));let i="";return r$1(e).forEach(((e,r)=>{let c=e.id||"";if(t&&(c=h$1(c)),0===r&&!e.id)return;let s=e._cache.parents.length;i+="    ".repeat(s)+n+c+"\n";})),i},a$1=function(e){let t=r$1(e);t.forEach((e=>{delete(e=Object.assign({},e)).children;}));let n=t[0];return n&&!n.id&&0===Object.keys(n.props).length&&t.shift(),t},p$2={text:l$1,txt:l$1,array:a$1,flat:a$1},d$1=function(e,t){return "nested"===t||"json"===t?e:"debug"===t?(console.log(l$1(e,!0)),null):p$2.hasOwnProperty(t)?p$2[t](e):e},u$1=e=>{r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],t._cache.parents=e._cache.parents.concat([e.id]));}));},f$2=(e,t)=>(Object.keys(t).forEach((n=>{if(t[n]instanceof Set){let r=e[n]||new Set;e[n]=new Set([...r,...t[n]]);}else {if((e=>e&&"object"==typeof e&&!Array.isArray(e))(t[n])){let r=e[n]||{};e[n]=Object.assign({},t[n],r);}else i$3(t[n])?e[n]=t[n].concat(e[n]||[]):void 0===e[n]&&(e[n]=t[n]);}})),e),j$1=/\//;class g$2{constructor(e={}){Object.defineProperty(this,"json",{enumerable:!1,value:e,writable:!0});}get children(){return this.json.children}get id(){return this.json.id}get found(){return this.json.id||this.json.children.length>0}props(e={}){let t=this.json.props||{};return "string"==typeof e&&(t[e]=!0),this.json.props=Object.assign(t,e),this}get(t){if(t=c$1(t),!j$1.test(t)){let e=this.json.children.find((e=>e.id===t));return new g$2(e)}let n=((e,t)=>{let n=(e=>"string"!=typeof e?e:(e=e.replace(/^\//,"")).split(/\//))(t=t||"");for(let t=0;t<n.length;t+=1){let r=e.children.find((e=>e.id===n[t]));if(!r)return null;e=r;}return e})(this.json,t)||e({});return new g$2(n)}add(t,n={}){if(i$3(t))return t.forEach((e=>this.add(c$1(e),n))),this;t=c$1(t);let r=e({id:t,props:n});return this.json.children.push(r),new g$2(r)}remove(e){return e=c$1(e),this.json.children=this.json.children.filter((t=>t.id!==e)),this}nodes(){return r$1(this.json).map((e=>(delete(e=Object.assign({},e)).children,e)))}cache(){return (e=>{let t=r$1(e,((e,t)=>{e.id&&(e._cache.parents=e._cache.parents||[],e._cache.children=e._cache.children||[],t._cache.parents=e._cache.parents.concat([e.id]));})),n={};t.forEach((e=>{e.id&&(n[e.id]=e);})),t.forEach((e=>{e._cache.parents.forEach((t=>{n.hasOwnProperty(t)&&n[t]._cache.children.push(e.id);}));})),e._cache.children=Object.keys(n);})(this.json),this}list(){return r$1(this.json)}fillDown(){var e;return e=this.json,r$1(e,((e,t)=>{t.props=f$2(t.props,e.props);})),this}depth(){u$1(this.json);let e=r$1(this.json),t=e.length>1?1:0;return e.forEach((e=>{if(0===e._cache.parents.length)return;let n=e._cache.parents.length+1;n>t&&(t=n);})),t}out(e){return u$1(this.json),d$1(this.json,e)}debug(){return u$1(this.json),d$1(this.json,"debug"),this}}const _$1=function(e){let t=s$2(e);return new g$2(t)};_$1.prototype.plugin=function(e){e(this);};
 
     // i just made these up
     const colors = {
@@ -19164,9 +19177,9 @@ var app = (function () {
     };
     var addTags$2 = addTags$1;
 
-    var methods$f = {
+    var methods$g = {
       one: {
-        setTag: setTag$3,
+        setTag: setTag$2,
         unTag: unTag$1,
         addTags: addTags$2
       },
@@ -19257,7 +19270,7 @@ var app = (function () {
     const tagAPI = function (View) {
       Object.assign(View.prototype, tag$1);
     };
-    var api$i = tagAPI;
+    var api$q = tagAPI;
 
     // wire-up more pos-tags to our model
     const addTags = function (tags) {
@@ -19269,7 +19282,7 @@ var app = (function () {
       return this
     };
 
-    var lib$2 = { addTags };
+    var lib$3 = { addTags };
 
     const boringTags = new Set(['Auxiliary', 'Possessive']);
 
@@ -19310,9 +19323,9 @@ var app = (function () {
       compute: {
         tagRank: tagRank$1
       },
-      methods: methods$f,
-      api: api$i,
-      lib: lib$2
+      methods: methods$g,
+      api: api$q,
+      lib: lib$3
     };
 
     const initSplit = /(\S.+?[.!?\u203D\u2E18\u203C\u2047-\u2049])(?=\s|$)/g;
@@ -19642,11 +19655,11 @@ var app = (function () {
       }
       return { str, pre, post }
     };
-    var tokenize$3 = normalizePunctuation;
+    var tokenize$2 = normalizePunctuation;
 
     const parseTerm = txt => {
       // cleanup any punctuation as whitespace
-      let { str, pre, post } = tokenize$3(txt);
+      let { str, pre, post } = tokenize$2(txt);
       const parsed = {
         text: str,
         pre: pre,
@@ -19665,13 +19678,6 @@ var app = (function () {
       let original = str;
       //punctuation
       str = str.replace(/[,;.!?]+$/, '');
-      // coerce single curly quotes
-      // str = str.replace(/[\u0027\u0060\u00B4\u2018\u2019\u201A\u201B\u2032\u2035\u2039\u203A]+/g, "'")
-      // // coerce double curly quotes
-      // str = str.replace(
-      //   /[\u0022\u00AB\u00BB\u201C\u201D\u201E\u201F\u2033\u2034\u2036\u2037\u2E42\u301D\u301E\u301F\uFF02]+/g,
-      //   '"'
-      // )
       //coerce Unicode ellipses
       str = str.replace(/\u2026/g, '...');
       //en-dash
@@ -19695,18 +19701,6 @@ var app = (function () {
       return str
     };
     var cleanup = clean;
-
-    const killUnicode = function (str, world) {
-      const unicode = world.model.one.unicode || {};
-      let chars = str.split('');
-      chars.forEach((s, i) => {
-        if (unicode[s]) {
-          chars[i] = unicode[s];
-        }
-      });
-      return chars.join('')
-    };
-    var doUnicode = killUnicode;
 
     const periodAcronym$1 = /([A-Z]\.)+[A-Z]?,?$/;
     const oneLetterAcronym$1 = /^[A-Z]\.,?$/;
@@ -19741,48 +19735,61 @@ var app = (function () {
     };
     var doAcronyms = doAcronym;
 
-    const normalize$6 = function (term, world) {
+    const normalize$7 = function (term, world) {
+      const killUnicode = world.methods.one.killUnicode;
+      // console.log(world.methods.one)
       let str = term.text || '';
       str = cleanup(str);
       //(very) rough ASCII transliteration -  bjŏrk -> bjork
-      str = doUnicode(str, world);
+      str = killUnicode(str, world);
       str = doAcronyms(str);
       term.normal = str;
     };
-    var normal = normalize$6;
+    var normal = normalize$7;
+
+    // 'Björk' to 'Bjork'.
+    const killUnicode = function (str, world) {
+      const unicode = world.model.one.unicode || {};
+      let chars = str.split('');
+      chars.forEach((s, i) => {
+        if (unicode[s]) {
+          chars[i] = unicode[s];
+        }
+      });
+      return chars.join('')
+    };
+    var killUnicode$1 = killUnicode;
 
     // turn a string input into a 'document' json format
-    const tokenize$2 = function (input, world) {
+    const fromString = function (input, world) {
       const { methods, model } = world;
-      const { splitSentences, splitTerms, splitWhitespace } = methods.one;
+      const { splitSentences, splitTerms, splitWhitespace } = methods.one.tokenize;
       input = input || '';
-      if (typeof input === 'number') {
-        input = String(input);
-      }
-      if (typeof input === 'string') {
-        // split into sentences
-        let sentences = splitSentences(input, model);
-        // split into word objects
-        input = sentences.map((txt) => {
-          let terms = splitTerms(txt, model);
-          // split into [pre-text-post]
-          terms = terms.map(splitWhitespace);
-          // add normalized term format, always
-          terms.forEach((t) => {
-            normal(t, world);
-          });
-          return terms
+      // split into sentences
+      let sentences = splitSentences(input, model);
+      // split into word objects
+      input = sentences.map((txt) => {
+        let terms = splitTerms(txt, model);
+        // split into [pre-text-post]
+        terms = terms.map(splitWhitespace);
+        // add normalized term format, always
+        terms.forEach((t) => {
+          normal(t, world);
         });
-      }
+        return terms
+      });
       return input
     };
 
-    var methods$e = {
+    var methods$f = {
       one: {
-        splitSentences: sentence,
-        splitTerms: term,
-        splitWhitespace: whitespace,
-        tokenize: tokenize$2,
+        killUnicode: killUnicode$1,
+        tokenize: {
+          splitSentences: sentence,
+          splitTerms: term,
+          splitWhitespace: whitespace,
+          fromString,
+        },
       },
     };
 
@@ -19793,7 +19800,7 @@ var app = (function () {
     };
     var aliases$6 = aliases$5;
 
-    var misc$8 = [
+    var misc$9 = [
       'approx',
       'apt',
       'bc',
@@ -20015,7 +20022,7 @@ var app = (function () {
 
     // add our abbreviation list to our lexicon
     let list$2 = [
-      [misc$8],
+      [misc$9],
       [units$6, 'Unit'],
       [nouns$2, 'Noun'],
       [honorifics$1, 'Honorific'],
@@ -20086,7 +20093,7 @@ var app = (function () {
 
     // dashed suffixes that are not independent words
     //  'flower-like', 'president-elect'
-    var suffixes$2 = {
+    var suffixes$5 = {
       'like': true,
       'ish': true,
       'less': true,
@@ -20149,7 +20156,7 @@ var app = (function () {
         aliases: aliases$6,
         abbreviations,
         prefixes: prefixes$2,
-        suffixes: suffixes$2,
+        suffixes: suffixes$5,
         lexicon: lexicon$2, //give this one forward
         unicode: unicode$1,
       },
@@ -20298,7 +20305,7 @@ var app = (function () {
     var wordCount$1 = wordCount;
 
     // cheat-method for a quick loop
-    const termLoop = function (view, fn) {
+    const termLoop$1 = function (view, fn) {
       let docs = view.docs;
       for (let i = 0; i < docs.length; i += 1) {
         for (let t = 0; t < docs[i].length; t += 1) {
@@ -20307,20 +20314,20 @@ var app = (function () {
       }
     };
 
-    const methods$d = {
-      alias: (view) => termLoop(view, alias),
-      machine: (view) => termLoop(view, machine),
-      normal: (view) => termLoop(view, normal),
+    const methods$e = {
+      alias: (view) => termLoop$1(view, alias),
+      machine: (view) => termLoop$1(view, machine),
+      normal: (view) => termLoop$1(view, normal),
       freq: freq$1,
       offset: offset$1,
       index: index$1,
       wordCount: wordCount$1,
     };
-    var compute$8 = methods$d;
+    var compute$8 = methods$e;
 
     var tokenize$1 = {
       compute: compute$8,
-      methods: methods$e,
+      methods: methods$f,
       model: model$6,
       hooks: ['alias', 'machine', 'index', 'id'],
     };
@@ -20329,7 +20336,7 @@ var app = (function () {
     //   let { methods, model, parsers } = world
     //   Object.assign({}, methods, _methods)
     //   Object.assign(model, _model)
-    //   methods.one.tokenize = tokenize
+    //   methods.one.tokenize.fromString = tokenize
     //   parsers.push('normal')
     //   parsers.push('alias')
     //   parsers.push('machine')
@@ -20343,7 +20350,7 @@ var app = (function () {
 
     const tokenize = function (phrase, world) {
       const { methods, model } = world;
-      let terms = methods.one.splitTerms(phrase, model).map(methods.one.splitWhitespace);
+      let terms = methods.one.tokenize.splitTerms(phrase, model).map(methods.one.tokenize.splitWhitespace);
       return terms.map(term => term.text.toLowerCase())
     };
 
@@ -20413,35 +20420,6 @@ var app = (function () {
 
     // console.log(buildTrie(['smart and cool', 'smart and nice']))
 
-    // chop-off tail of redundant vals at end of array
-    const truncate = (list, val) => {
-      for (let i = list.length - 1; i >= 0; i -= 1) {
-        if (list[i] !== val) {
-          list = list.slice(0, i + 1);
-          return list
-        }
-      }
-      return list
-    };
-
-    // prune trie a bit
-    const compress = function (trie) {
-      trie.goNext = trie.goNext.map(o => {
-        if (Object.keys(o).length === 0) {
-          return undefined
-        }
-        return o
-      });
-      // chop-off tail of undefined vals in goNext array
-      trie.goNext = truncate(trie.goNext, undefined);
-      // chop-off tail of zeros in failTo array
-      trie.failTo = truncate(trie.failTo, 0);
-      // chop-off tail of nulls in endAs array
-      trie.endAs = truncate(trie.endAs, null);
-      return trie
-    };
-    var compress$1 = compress;
-
     // follow our trie structure
     const scanWords = function (terms, trie, opts) {
       let n = 0;
@@ -20508,12 +20486,7 @@ var app = (function () {
       return Object.prototype.toString.call(val) === '[object Object]'
     };
 
-    const api$h = function (View) {
-      /** turn an array or object into a compressed trie*/
-      View.prototype.compile = function (obj) {
-        const trie = build(obj, this.world);
-        return compress$1(trie)
-      };
+    function api$p (View) {
 
       /** find all matches in this document */
       View.prototype.lookup = function (input, opts = {}) {
@@ -20528,10 +20501,49 @@ var app = (function () {
         res = res.settle();
         return res
       };
+    }
+
+    // chop-off tail of redundant vals at end of array
+    const truncate = (list, val) => {
+      for (let i = list.length - 1; i >= 0; i -= 1) {
+        if (list[i] !== val) {
+          list = list.slice(0, i + 1);
+          return list
+        }
+      }
+      return list
+    };
+
+    // prune trie a bit
+    const compress = function (trie) {
+      trie.goNext = trie.goNext.map(o => {
+        if (Object.keys(o).length === 0) {
+          return undefined
+        }
+        return o
+      });
+      // chop-off tail of undefined vals in goNext array
+      trie.goNext = truncate(trie.goNext, undefined);
+      // chop-off tail of zeros in failTo array
+      trie.failTo = truncate(trie.failTo, 0);
+      // chop-off tail of nulls in endAs array
+      trie.endAs = truncate(trie.endAs, null);
+      return trie
+    };
+    var compress$1 = compress;
+
+    /** pre-compile a list of matches to lookup */
+    const lib$2 = {
+      /** turn an array or object into a compressed trie*/
+      compile: function (input) {
+        const trie = build(input, this.world());
+        return compress$1(trie)
+      }
     };
 
     var lookup = {
-      api: api$h,
+      api: api$p,
+      lib: lib$2
     };
 
     const createCache = function (document) {
@@ -20580,14 +20592,14 @@ var app = (function () {
     };
     var cacheMatch$1 = cacheMatch;
 
-    var methods$c = {
+    var methods$d = {
       one: {
         cacheDoc,
         cacheMatch: cacheMatch$1,
       },
     };
 
-    const methods$b = {
+    const methods$c = {
       /** */
       cache: function () {
         this._cache = this.methods.one.cacheDoc(this.document);
@@ -20600,27 +20612,24 @@ var app = (function () {
       },
     };
     const addAPI = function (View) {
-      Object.assign(View.prototype, methods$b);
+      Object.assign(View.prototype, methods$c);
     };
-    var api$g = addAPI;
-
-    const cache$4 = function (view) {
-      view._cache = view.methods.one.cacheDoc(view.document);
-    };
+    var api$o = addAPI;
 
     var compute$7 = {
-      cache: cache$4
+      cache: function (view) {
+        view._cache = view.methods.one.cacheDoc(view.document);
+      }
     };
 
     var cache$3 = {
-      api: api$g,
+      api: api$o,
       compute: compute$7,
-      methods: methods$c,
-      // hooks: ['cache']
+      methods: methods$d,
     };
 
     // lookup last word in the type-ahead prefixes
-    const compute$5 = function (view) {
+    const typeahead$1 = function (view) {
       const prefixes = view.model.one.typeahead;
       const docs = view.docs;
       if (docs.length === 0 || Object.keys(prefixes).length === 0) {
@@ -20636,6 +20645,7 @@ var app = (function () {
       if (prefixes.hasOwnProperty(lastTerm.normal)) {
         let found = prefixes[lastTerm.normal];
         // add full-word as an implicit result
+        lastTerm.implicit = found;
         lastTerm.machine = found;
         lastTerm.typeahead = true;
         // tag it, as our assumed term
@@ -20645,7 +20655,7 @@ var app = (function () {
       }
     };
 
-    var compute$6 = { typeahead: compute$5 };
+    var compute$6 = { typeahead: typeahead$1 };
 
     // assume any discovered prefixes
     const autoFill = function () {
@@ -20662,10 +20672,10 @@ var app = (function () {
       return this
     };
 
-    const api$e = function (View) {
+    const api$m = function (View) {
       View.prototype.autoFill = autoFill;
     };
-    var api$f = api$e;
+    var api$n = api$m;
 
     // generate all the possible prefixes up-front
     const getPrefixes = function (arr, opts, world) {
@@ -20737,18 +20747,17 @@ var app = (function () {
     };
 
     var lib$1 = {
-      typeahead: prepare,
-      typeAhead: prepare,
+      typeahead: prepare
     };
 
     const model$5 = {
       one: {
-        typeahead: {}
+        typeahead: {} //set a blank key-val
       }
     };
     var typeahead = {
       model: model$5,
-      api: api$f,
+      api: api$n,
       lib: lib$1,
       compute: compute$6,
       hooks: ['typeahead']
@@ -20799,6 +20808,7 @@ var app = (function () {
       // const fastTag = methods.one.fastTag
       const setTag = methods.one.setTag;
       const lexicon = model.one.lexicon;
+
       // basic lexicon lookup
       let t = terms[i];
       let word = t.machine || t.normal;
@@ -20852,44 +20862,12 @@ var app = (function () {
       });
     };
 
-    var compute$4 = {
+    var compute$5 = {
       lexicon: firstPass
     };
 
-    // verbose-mode tagger debuging
-    const log$1 = (term, tag, reason = '') => {
-      const yellow = str => '\x1b[33m\x1b[3m' + str + '\x1b[0m';
-      const i = str => '\x1b[3m' + str + '\x1b[0m';
-      let word = term.text || '[' + term.implicit + ']';
-      if (typeof tag !== 'string' && tag.length > 2) {
-        tag = tag.slice(0, 2).join(', #') + ' +'; //truncate the list of tags
-      }
-      tag = typeof tag !== 'string' ? tag.join(', #') : tag;
-      console.log(` ${yellow(word).padEnd(24)} \x1b[32m→\x1b[0m #${tag.padEnd(25)}  ${i(reason)}`); // eslint-disable-line
-    };
-
-    // a faster version than the user-facing one in ./methods
-    const fastTag$1 = function (term, tag, reason) {
-      if (!tag || tag.length === 0) {
-        return
-      }
-      // some logging for debugging
-      let env = typeof process === 'undefined' ? self.env || {} : process.env;
-      if (env && env.DEBUG_TAGS) {
-        log$1(term, tag, reason);
-      }
-      term.tags = term.tags || new Set();
-      if (typeof tag === 'string') {
-        term.tags.add(tag);
-      } else {
-        tag.forEach(tg => term.tags.add(tg));
-      }
-    };
-
-    var fastTag$2 = fastTag$1;
-
     // derive clever things from our lexicon key-value pairs
-    const expand$5 = function (words) {
+    const expand$3 = function (words) {
       // const { methods, model } = world
       let lex = {};
       // console.log('start:', Object.keys(lex).length)
@@ -20913,12 +20891,11 @@ var app = (function () {
       delete lex[' '];
       return { lex, _multi }
     };
-    var expandLexicon$3 = expand$5;
+    var expandLexicon$3 = expand$3;
 
-    var methods$a = {
+    var methods$b = {
       one: {
         expandLexicon: expandLexicon$3,
-        fastTag: fastTag$2
       }
     };
 
@@ -20929,7 +20906,6 @@ var app = (function () {
       if (!words) {
         return
       }
-
       // normalize tag vals
       Object.keys(words).forEach(k => {
         if (typeof words[k] === 'string' && words[k].startsWith('#')) {
@@ -20953,26 +20929,24 @@ var app = (function () {
       }
     };
 
-    var lib = {
-      addWords
-    };
+    var lib = { addWords };
 
     const model$4 = {
       one: {
-        lexicon: {},
+        lexicon: {}, //setup blank lexicon
         _multiCache: {},
       }
     };
 
     var lexicon$1 = {
       model: model$4,
-      methods: methods$a,
-      compute: compute$4,
+      methods: methods$b,
+      compute: compute$5,
       lib,
       hooks: ['lexicon']
     };
 
-    var contractions$4 = [
+    var contractions$3 = [
       // simple mappings
       { word: '@', out: ['at'] },
       { word: 'alot', out: ['a', 'lot'] },
@@ -21004,6 +20978,7 @@ var app = (function () {
       { word: 'whend', out: ['when', 'did'] },
       { word: 'whered', out: ['where', 'did'] },
 
+      // { after: `cause`, out: ['because'] },
       { word: "'tis", out: ['it', 'is'] },
       { word: "'twas", out: ['it', 'was'] },
       { word: 'twas', out: ['it', 'was'] },
@@ -21030,7 +21005,7 @@ var app = (function () {
       // { before: 'd', out: preD }, // d'amerique
     ];
 
-    var model$3 = { one: { contractions: contractions$4 } };
+    var model$3 = { one: { contractions: contractions$3 } };
 
     // put n new words where 1 word was
     const insertContraction$1 = function (document, point, words) {
@@ -21244,64 +21219,12 @@ var app = (function () {
       'how',
       'let',
       'else',
-
       'name', //name's dave
       // 'god', //god's gift
     ]);
 
-    // // always a posessive
-    // const never = new Set([
-    //   'one',
-    //   'men',
-    //   'man',
-    //   'woman',
-    //   'women',
-    //   'girl',
-    //   'boy',
-    //   'mankind',
-    //   'world',
-    //   'today',
-    //   'tomorrow',
-    // ])
-
     // // spencer's cool
     const afterYes = new Set([
-      //   'cool',
-      //   'nice',
-      //   'beautiful',
-      //   'ugly',
-      //   'good',
-      //   'bad',
-      //   'ok',
-      //   'right',
-      //   'wrong',
-      //   'big',
-      //   'small',
-      //   'large',
-      //   'huge',
-      //   'above',
-      //   'below',
-      //   'in',
-      //   'out',
-      //   'inside',
-      //   'outside',
-      //   'always',
-      //   'even',
-      //   'same',
-      //   'still',
-      //   'cold',
-      //   'hot',
-      //   'old',
-      //   'young',
-      //   'rich',
-      //   'poor',
-      //   'early',
-      //   'late',
-      // 'new',
-      // 'old',
-      // 'tiny',
-      // 'huge',
-
       // adverbs
       'really',
       'very',
@@ -21326,9 +21249,6 @@ var app = (function () {
       if (always.has(before)) {
         return true
       }
-      // if (never.has(before)) {
-      //   return false
-      // }
 
       // gandhi's so cool
       let nextTerm = terms[i + 1];
@@ -21336,62 +21256,6 @@ var app = (function () {
         return true
       }
 
-      // if (nextTerm) {
-      //   console.log(term.normal, nextTerm.normal)
-
-      // } else {
-      //   console.log(term.normal)
-      // }
-      // console.log(before)
-      // these can't be possessive
-      // if (hereThere.hasOwnProperty(term.machine)) {
-      //   return false
-      // }
-      // // if we already know it
-      // if (term.tags.has('Possessive')) {
-      //   return true
-      // }
-      // //a pronoun can't be possessive - "he's house"
-      // if (term.tags.has('Pronoun') || term.tags.has('QuestionWord')) {
-      //   return false
-      // }
-      // if (banList.hasOwnProperty(term.normal)) {
-      //   return false
-      // }
-      // //if end of sentence, it is possessive - "was spencer's"
-      // let nextTerm = terms[i + 1]
-      // if (!nextTerm) {
-      //   return true
-      // }
-      // //a gerund suggests 'is walking'
-      // if (nextTerm.tags.has('Verb')) {
-      //   //fix 'jamie's bite'
-      //   if (nextTerm.tags.has('Infinitive')) {
-      //     return true
-      //   }
-      //   //fix 'spencer's runs'
-      //   if (nextTerm.tags.has('PresentTense')) {
-      //     return true
-      //   }
-      //   return false
-      // }
-      // //spencer's house
-      // if (nextTerm.tags.has('Noun')) {
-      //   // 'spencer's here'
-      //   if (hereThere.hasOwnProperty(nextTerm.normal) === true) {
-      //     return false
-      //   }
-      //   return true
-      // }
-      // //rocket's red glare
-      // let twoTerm = terms[i + 2]
-      // if (twoTerm && twoTerm.tags.has('Noun') && !twoTerm.tags.has('Pronoun')) {
-      //   return true
-      // }
-      // //othwerwise, an adjective suggests 'is good'
-      // if (nextTerm.tags.has('Adjective') || nextTerm.tags.has('Adverb') || nextTerm.tags.has('Verb')) {
-      //   return false
-      // }
       // default to posessive
       return false
     };
@@ -21416,8 +21280,9 @@ var app = (function () {
       s: (terms, i) => {
         // [bob's house] vs [bob's cool]
         if (shouldSplit$1(terms, i) === true) {
-          apostropheS$4(terms, i);
+          return apostropheS$4(terms, i)
         }
+        return null
       },
     };
 
@@ -21456,7 +21321,7 @@ var app = (function () {
     };
 
     //really easy ones
-    const contractions$2 = (view) => {
+    const contractions$1 = (view) => {
       let { world, document } = view;
       const { model, methods } = world;
       let list = model.one.contractions || [];
@@ -21503,23 +21368,23 @@ var app = (function () {
         }
       });
     };
-    var contractions$3 = contractions$2;
+    var contractions$2 = contractions$1;
 
-    var compute$3 = { contractions: contractions$3 };
+    var compute$4 = { contractions: contractions$2 };
 
     const plugin$3 = {
       model: model$3,
-      compute: compute$3,
+      compute: compute$4,
       hooks: ['contractions'],
     };
-    var contractions$1 = plugin$3;
+    var contractions = plugin$3;
 
     nlp$1.extend(change); //0kb
     nlp$1.extend(output); //0kb
     nlp$1.extend(match); //10kb
     nlp$1.extend(pointers); //2kb
     nlp$1.extend(tag); //2kb
-    nlp$1.plugin(contractions$1); //~6kb
+    nlp$1.plugin(contractions); //~6kb
     nlp$1.extend(tokenize$1); //7kb
     nlp$1.plugin(cache$3); //~1kb
     nlp$1.extend(lookup); //7kb
@@ -21617,17 +21482,21 @@ var app = (function () {
       "Expression": "true¦a0Qb0Mco0Ld0He0Ffuck,g09hUjeez,lRmQnOoLpIshHtGuDvoi0Sw6y0;a4e3i1u0;ck,p;kYp0;ee,pee;ah,p,s;!a,h6y;ah5h2o1t0;af,f;rd up,w;e1o0;a,ops;e,w;oo;gh,h0;! 0h,m;huh,oh;sk,ut tut;eesh,hh,it;ff,h1l0ow,sst;ease,z;ew,ooey;h1i,o0uch,w,y;h,o,ps;!h;ah,o0;!pe;eh,mm;ah,m1ol0;!s;ao,fao;aBe9i7o2u0;h,mph,rra0zzB;h,y;ly1o0;r4y8;! 0;cow,moCsmok0;es;!p hip hoor0;ay;ck,e,ll0y;!o;ha1i,lleluj0;ah;!ha;ah,ee4o1r0;eat scott,r;l1od0sh; grief,bye;ly;! whiz;e0h,t cetera,ww;k,p;'oh,a0rat,uh;m0ng;mit,n0;!it;ngratulations,wabunga;a2oo1r0ye;avo,r;!ya;h,m; 1h0las,men,rgh;!a,em,oy;la",
       "Negative": "true¦n0;ever,o0;n,t",
       "QuestionWord": "true¦how3wh0;at,e1ich,o0y;!m,se;n,re; come,'s",
+      "Reflexive": "true¦h4my5o1the0your2;ir1m1;ne3ur0;sel0;f,ves;er0im0;self",
+      "Uncountable": "true¦0:2J;1:1M;2:1Z;a28b1Zc1Rd1Je1Bf15g0Yh0Ri0Lj0Kk0Jl0Fm05n03o02pWrRsGt8vi7w3;a5i4oo3;d,l;ldlife,ne;rm7t2;neg1Ool0Ktae;e9h8oothpas1Hr4un3yranny;a,gst1O;affZea14ou4ue nor3;th;ble3sers,t;!shoot1R;ermod25und2;a,nnis;aBcene0Geri1hAil9ki8o7p6t4u3weepstak1;g1Enshi0Z;ati24e3;am,el;ace1Xeci1;ap,cc2;n,ttl1;k,v2;eep,ingl1;d0Mfe1Ql3nd,t0A;m1Gt;a6e4ic3;e,ke0U;c3laxa0Rsearch;ogni0Qrea0Q;bi1in;aUe7hys0lastDo5re3;amble,mis1s3ten1F;en1Esu0B;l3rk;it0yC;a1Jtr05;bstetr0vercrowd12xyg0V;a3ews;il polVtional securi1B;aAe8o5u3;mps,s3;ic;n3o14;ey,o3;gamy;a3chan0rchandi11tallurgy;sl1t;chine3themat0; learn0Qry;aught2e5i4ogi17u3;ck,g0S;ce,ghtn0Nngui15teraR;ath2isuRss;indergart0Enowled0Q;azz,ewelCusti10;ce,gnor7mp4n3tself;formaYternet;a3ort5;ti3;en0V;an0U;a6eIisto5o3;ckey,mework,ne3rserad7spitali0N;s0My;ry;ir,libXppiGs3;h3te;ish;ene6l5o4r3um,ymna0O;aDeed;lf,re;utWyce0A; 3t0;edit01po3;ol;icFlour,o5urni3;tu3;re;od,rgive3uri2wl;ne3;ss;conom0duca9lectr8n6quip7th0very4xper3;ti00;body,o3thR;ne;joy3tertain3;ment;iciYon0;tiO;e8i4ope,raugh3ynasW;ts;abet1s3;honSrepu3;te;es;b3miN;ut;a9elci8h5iv0lass0o3urrency;al,ld w3nfusiEttEusco7;ar;aos,e4ick3;en;eGw8;us;d,rI;a8eef,i6lood,owls,read,u3;nt4tt2;er;ing;lliarDs3;on;g3ss;ga3;ge;cDdviCeroAir9m5ni4ppeal court,spi3thlet0;rin;se;en5n3;es3;ty;ds;craft;b0d3naut0;ynam0;ce;id,ou3;st0;ics",
       "Plural": "true¦ones,records",
       "Value": "true¦a few",
+      "Imperative": "true¦come here",
+      "PhrasalVerb": "true¦0:81;1:7Q;2:8E;3:84;4:7J;5:8H;6:7P;7:7E;8:7C;9:86;A:7Z;B:89;C:87;D:80;E:6L;F:6D;a8Kb73c66d61e60f4Yg4Gh3Viron0j3Rk3Ml33m2Pn2No2Lp22quietEr1Ns0GtWuUvacuum 1wJyammerAzG;ero Dip HonG;e0k0;by,up;aNeIhHiGor7Vrit37;mp0n34pe0r8s8;eel Dip 8P;aIiGn2S;gh Grd0;in,up;n Dr G;d2in,o4D;it 6Hk8lk Hrm 0Ysh Gt79v5F;aw3d2o5up;aw3in,o84;rgeAsG;e 1herF;aVeThRiNoMrIuGypL;ckFrn G;d2in,o45up;aHiGot0y 2O;ckleEp 8A;ckEdG;e 0N;neEp 2Zs4Z;ck IdHe Gghte5Yme0p o0Ire0;aw3ba4d2in,up;e 6Hy 1;by,oC;ink Grow 6U;ba4ov6up;aGe 6Fll5G;m 1r 53;ckAke Hlk G;ov6shit,u5H;aGba4d2in,o3Pup;ba4ft6p5Mw3;a0Lc0Ke0Eh0Ai07l03m02n01o00pVquar4XtMuKwG;earIiG;ngHtch G;aw3ba4o7O; by;ck Git 1m 1ss0;in,o7Bup;aMe10iLoJrHuG;c36d2O;aigh22iG;ke 6Wn3L;p Grm24;by,in,oC;n31r 1tc44;c30mp0nd Gr7Fve9y 1;ba4d2up;ar2YeJiIlHrGurA;ingAuc8;a3Rit 5R;l17n 1;e69ll0;ber 1rt0und like;ap 56ow D;ash 5Woke0;eep HiGow 7;c1Lp 1;in,oG;ff,v6;de12gn HngGt 5Rz8; al5Mle0;in,o5up;aIoGu5A;ot Gut0w 6U;aw3ba4f3SoC;c2GdeFk5Pve9;e Kll1Gnd Jrv8tG; Gtl4W;d2f5Bin,o5upG;!on;aw3ba4d2in,o2Nup;o6Dto;al5Iout0rap5I;il9v8;aTeQiPoLuG;b 5Ble0n Gstl8;aIba4d2inHoGt3Lu0X;ut,v6;!to;c2HrBw3;ll Iot HuG;g33nd9;a2Hf3Ao5;arBin,o5;ng 5Ip9;aGel9inFnt0;c5Rd G;o3Bup;c1Tt0;aUeTiRlPoNrKsyc2RuG;ll It G;aGba4d2in,o1Zt3Rup;p3Ww3;ap3Vd2in,o5t3Pup;attleAess HiJoG;p 1;ah1Zon;iGp 5Wr4CurEwer 5W;nt0;ay4SuG;gFmp 7;ck Gg0leAn 7p4P;o1Oup;el 4ZncilF;c4Hir 2Xn0ss ItHy G;ba4oC; d2c2E;aw3ba4in,o1J;pGw4C;e4Bt D;arrowEerd0oG;d9teE;aQeNiMoIuG;ddl8lG;l 3W;c12nkeyIp 7uth9ve G;aGd2in,o5up;l41w3; wi3Y;ss0x 1;asur8lHss G;a1Oup;t 7;ke Hn 7rGs1Xx0;k 7ry9;do,o4Vup;aWeRiMoGuck0;aKc3Ug JoGse0;k Gse3S;aft6ba4d2forw2Sin4Iov6uG;nd6p;in,o0V;d 7;e 04ghtJnIsHvG;e 3E;ten 4Y;e 1k 1; 1e3J;ave It HvelG; o4H;d2go,in,o5up;in,oG;pen,ut;c8p 1sh GtchAugh9y26;in43o5;eHick9nock G;d2o4Aup;eGyF;l 2Yp G;aw3ba4d2fYin,o0Dto,up;aIoHuG;ic8mpF;ke3BtE;c3Kzz 1;aVeQiNoKuG;nHrrGsh 7;y 1;kerEt G;arBd2;lGneFrse34;d Ge 1;ba4d2fast,o04up;de Ht G;ba4on,up;aw3o5;aGlp0;d Il 2Gr Gt 1;fGof;rom;in,oWu1K;cJm 1nHve Gz2B;it,to;d Gg 2MkerJ;d2in,o5;k 1;aUeOive Mloss 27oIrHunG; f0O;in3Now 2H; Gof 26;aHb1Fit,oGrBt0Qu1A;ff,n,v6;bo5ft6hMw3;aw3ba4d2in,oGrise,up,w3;ff,n,ut;ar 7ek0t G;aHb19d2in,oGrBup;ff,n,ut,v6;cHhGl23rBt,w3;ead;ross;d aHnG;g 1;bo5;a0Ae03iUlQoMrIuG;ck Ge28;arBup;eHighten GownAy 1;aw3oC;eGshe1U; 1z8;lIol G;aGwi1N;bo5rB;d 7low 1;aHeGip0;sh0;g 7ke0mGrGttenE;e 2Y;gNlLnJrHsGzzle0;h 2W;e Gm 1;aw3ba4up;d0isG;h 1;e Gl 1G;aw3fLin,o5;ht ba4ure0;eLnHsG;s 1;cId G;fGoC;or;e D;dYl 1;cKll Grm0t13;ap07bId2in,oHtG;hrough;ff,ut,v6;a4ehi27;e G;d2oCup;a0Ldge0nd 0Py8;oJrG;aHess 7op G;aw3bWin,o1U;gAwA; 0Iubl0Y;a00hXleaWoJrGut 16;ackAeep Goss D;by,d2in,oGup;n,ut;me JoHuntG; o1W;k 7l G;d2oC;aMbLforJin,oItHuG;nd6;ogeth6;n,ut,v6;th,wG;ard;a4y;pGrBw3;art;n 7;eGipF;ck Der G;on,up;lNncel0rKsItch HveF; in;o1Eup;h Dt G;doubt,oC;ry HvG;e 02;aw3o19;l HmE; d2;aGba4d2o16up;rBw3;a0Me0El07oYrLuG;bblIcklZil05lk 7ndlZrGst VtHy 16zz9;n 0AsG;t D;e G;ov6;anReaPiHush G;oCup;ghLng G;aIba4d2fGin,o5up;orG;th;bo5lGrBw3;ong;teG;n 1;k G;d2in,o5up;ch0;arNg 7iLn8oJssIttlHunce Gx D;aw3ba4;e 7; arB;k Dt 1;e 1;l 7;d2up;d 1;aLeed0oGurt0;cIw G;aw3ba4d2o5up;ck;k G;in,oX;ck0nk0st9; oLaJef 1nd G;d2ov6up;er;up;r0t G;d2in,oQup;ff,nG;to;ck Mil0nIrgHsG;h D;ainAe D;g DkA; on;in,o5; o5;aw3d2oGup;ff,ut;ay;cPdLsk Iuction9; oC;ff;arBo5;ouG;nd;d G;d2oGup;ff,n;own;t G;o5up;ut",
+      "Verb": "true¦born,cannot,gonna,has,keep tabs,m0;ake sure,sg",
       "Demonym": "true¦0:15;1:12;a0Vb0Oc0Dd0Ce08f07g04h02iYjVkTlPmLnIomHpEqatari,rCs7t5u4v3welAz2;am0Gimbabwe0;enezuel0ietnam0I;gAkrai1;aiwTex0hai,rinida0Ju2;ni0Prkmen;a5cotti4e3ingapoOlovak,oma0Spaniard,udRw2y0W;ede,iss;negal0Cr09;sh;mo0uT;o5us0Jw2;and0;a2eru0Fhilippi0Nortugu07uerto r0S;kist3lesti1na2raguay0;ma1;ani;ami00i2orweP;caragu0geri2;an,en;a3ex0Lo2;ngo0Drocc0;cedo1la2;gasy,y07;a4eb9i2;b2thua1;e0Cy0;o,t01;azakh,eny0o2uwaiI;re0;a2orda1;ma0Ap2;anO;celandic,nd4r2sraeli,ta01vo05;a2iB;ni0qi;i0oneU;aiAin2ondur0unO;di;amEe2hanai0reek,uatemal0;or2rm0;gi0;ilipino,ren8;cuadoVgyp4mira3ngli2sto1thiopi0urope0;shm0;ti;ti0;aPominUut3;a9h6o4roat3ub0ze2;ch;!i0;lom2ngol5;bi0;a6i2;le0n2;ese;lifor1m2na3;bo2eroo1;di0;angladeshi,el6o4r3ul2;gaE;azi9it;li2s1;vi0;aru2gi0;si0;fAl7merBngol0r5si0us2;sie,tr2;a2i0;li0;genti2me1;ne;ba1ge2;ri0;ni0;gh0r2;ic0;an",
       "Organization": "true¦0:4B;a3Eb2Wc2Dd25e21f1Wg1Oh1Ji1Gj1Ek1Cl17m0Vn0Io0Fp08qu07r00sTtGuBv8w3xiaomi,y1;amaha,m12ou1w12;gov,tu2X;a3e1orld trade organizati2Q;lls fargo,st1;fie27inghou2G;l1rner br3G;gree35l street journ28m16;an halOeriz2Lisa,o1;dafo2Ml1;kswagMvo;b4kip,n2ps,s1;a tod2Wps;es38i1;lev31ted natio2Y;er,s; mobi2Oaco bePd bMeAgi frida9h3im horto2Wmz,o1witt2Z;shiba,y1;ota,s r Z;e 1in lizzy;b3carpen35daily ma2Zguess w2holli0rolling st1Qs1w2;mashing pumpki2Ruprem0;ho;ea1lack eyed pe3Jyrds;ch bo1tl0;ys;l2n3Bs1xas instrumen1I;co,la m14;efoni0Bus;a6e4ieme2Jnp,o2pice gir5quare03ta1ubaru;rbucks,to2P;ny,undgard1;en;a2Tx pisto1;ls;few29insbury2PlesforYmsu21;.e.m.,adiohead,b6e3oyal 1yana2Z;b1dutch she4;ank;aders dige1Gd 1max,vl1Q;bu1c1Yhot chili peppe2Mlobst2B;ll;c,s;ant2Zizno2H;a5bs,e3fiz27hilip morrCi2r1;emier29udenti16;nk floyd,zza hut;psi2Atro1uge0A;br2Uchina,n2U;lant2Mn1yp12; 2ason1Zda2H;ld navy,pec,range juli2xf1;am;us;aAb9e6fl,h5i4o1sa,vid3wa;k2tre dame,vart1;is;ia;ke,ntendo,ss0L;l,s;c,st1Gtflix,w1; 1sweek;kids on the block,york09;a,c;nd1Us2t1;ional aca2Ho,we0Q;a,cYd0O;aBcdonaldAe7i5lb,o3tv,y1;spa1;ce;b1Lnsanto,ody blu0t1;ley crue,or0N;crosoft,t1;as,subisM;dica2rcedes benz,talli1;ca;id,re;'s,s;c's milk,tt13z1Y;'ore08a3e1g,ittle caesa1J;novo,x1;is,mark; 1bour party;pres0Az boy;atv,fc,kk,m1od1I;art;iffy lu0Loy divisi0Fpmorgan1sa;! cha06;bm,hop,n1tv;g,te1;l,rpol;asbro,ewlett pack1Qi3o1sbc,yundai;me dep1n1K;ot;tac1zbollah;hi;eneral 6hq,ithub,l5mb,o2reen d0Ku1;cci,ns n ros0;ldman sachs,o1;dye1g0D;ar;axo smith kli02encoU;electr0Jm1;oto0V;a4bi,da,edex,i2leetwood mac,o1rito l0C;rd,xcW;at,nancial1restoX; tim0;cebook,nnie mae;b07sa,u3xxon1; m1m1;ob0G;!rosceptics;aiml0Ae6isney,o4u1;nkin donu2po0Wran dur1;an;ts;j,w j1;on0;a,f lepp0Yll,peche mode,r spiegYstiny's chi1;ld;aHbc,hDiBloudflaAnn,o3r1;aigsli5eedence clearwater reviv1ossra05;al;ca c6inba5l4m1o0Ast05;ca2p1;aq;st;dplOgate;se;ola;re;a,sco1tigroup;! systems;ev2i1;ck fil-a,na daily;r1y;on;dbury,pital o1rl's jr;ne;aEbc,eBf9l5mw,ni,o1p,rexiteeU;ei3mbardiIston 1;glo1pizza;be;ng;o2ue c1;roV;ckbuster video,omingda1;le; g1g1;oodriL;cht2e ge0rkshire hathaw1;ay;el;idu,nana republ3s1xt5y5;f,kin robbi1;ns;ic;bYcTdidSerosmith,iRlKmEnheuser-busDol,pple9r6s3utodesk,v2y1;er;is,on;hland1sociated F; o1;il;by4g2m1;co;os; compu2bee1;'s;te1;rs;ch;c,d,erican3t1;!r1;ak; ex1;pre1;ss; 5catel2ta1;ir;!-lu1;ce1;nt;jazeera,qae1;da;g,rbnb;as;/dc,a3er,tivision1;! blizz1;ard;demy of scienc0;es;ba,c",
-      "Possessive": "true¦any6h4its,my3no8o1somet7the0yo1;ir1mselves;ur0;!s;!s1;ers0ims0;elf;o1t0;hing;ne",
-      "Noun|Verb": "true¦0:7O;1:6H;2:7K;3:7U;4:7X;5:7T;6:6T;7:7E;8:71;9:6P;a7Gb6Sc5Rd56e4Yf4Ag41h3Ti3Nj3Lk3Jl39m30n2Wo2Sp20ques7Ir1Cs07tTuRvMwCyBzA;ip,o6A;awn,e1Vie4Q;aHeaGhEiCoAre7I;nd0rA;k,ry;mp,nApe,re,sh,tne7Z;!d,g;e6EiA;p,st6;r,th0;it,rAs5t2ve,x;ehou1ra7Y;aDiCoA;iAlunte0te,w;ce,d;be,ew,s8;cuum,l37;pAsh0;da5gra4V;aLeKhrJiIoHrDuBwiAy4K;n,st;nArn;e,n5Z;aCeBiAu7;bu5ck,gg0m,p;at,nd;ck,de,in,nsf0p,v5V;ll,ne,r3Oss,t72u2;ck,e,me,p,re;e1Kow,u7;ar,e,st;g,lArg5Zs5;k,ly;a4Lc09e06h01iZkXlVmUnTou68pPtFuBwA;ear,it2;b1Vit,m,ppBrAspe4;ge,pri1vey;lAo58;e55y;aHeGiFoDrBuAy6;dy,ff,mb6;a68eAi4B;am,ss,t2;p,rA;e,m;ck,t2;m,p;ck,in,ke,ll,mp,nd,rAte,y;!e,t;aCeed,iBla4Hons6IrAy;ay,e0Zink6u3;n,r6Ete;n,rk;ee1Cow;e0Ei6o3Y;eep,iA;ce,p,t;ateboa5ViA;!p;de,gnA;!al;aDeCiBoA;ck,p,w;ft,p,v0;d,i2Z;pe,re;aBed,nAr5Wt;se,t1V;l,r2t;aDhedu6oCrA;at2eA;en,w;re,ut;le,n,r0G;aVeEiDoCuA;b,in,le,n,sA;h,t;a7ck,ll,ot;de,ng,p,s1A;as5BcOdo,el,fMgLje4lKmInHo0TpFque7sCturn,vAwa59;eAi1H;al,r1;er5GoBt,uA;lt,me;l5Ert;air,eaAly,o3W;l,t;dezvo23t;aAedy;ke,rk;ea1i3C;a4Xist0r4B;act5Borm,uA;nd,se;aAo4Uru8;ll;ck,i1ke,l45nAtT;ge,k;aYeVhTiQlLoIrBuA;mp,n2rcha1sh;ai1eEi3oAu3I;be,ceCdu3grAje4mi1te7;amAe5A;!me;ed,ss;sAy;er4Ss;iBlAol,p,re,s2Qw0;i3l;nt,s4H;aCeBuA;g,n9;ad;ce,nAy;!t;ck,lBnApe,t,vot;!e;e,ot;a1oA;ne,tograph;ak,eBn,rAt;fu3Tm8;!l;cka9iBn,rtAss,t2u1;!y;nt,r;bCff0il,oBrAutli2S;d0ie4Q;ze;je4;a3KeCoA;d,tA;e,i3;ed,gle4rd,t;aFeDiCoBuA;rd0;d2Tnit43p,ve;lk,n2Xrr42x;asu11n3NrAss;ge,it;il,nBp,rk2YsAt2;h,k;da5oeuv0X;aGeDiCoAump;aAbby,ck,g,ok,ve;d,n;cen1ft,m8nEst;aBc0CvA;el,y;ch,d,p,se;bBcAnd,t2un2;e,k;el,o24;e2CiAno3B;ck,ll,ss;am,o15uA;d9i3;mpEnBr35ssA;ue;cr18dex,fluBha6k,se1UterviAvoi3;ew;en3;a4le1P;aEeCiBoAu3Q;ld,no1Sok,pe,r1st,u1;ghlight,ke,re,t;aAlp;d,t;ndBrAte;bo2Zm,ne3Fve7;!le;aHeek,lo3DoGrCuA;arAe3Ci0L;antee,d;aCiBoAumb6;om,u2A;nd,p;de,sp;of,ssip;in,me,s,ze;aWeSiNlJoGrCuA;el,nAzz;c2Fd;aBoAy;st,wn;cAme;tuP;cBg,ol,rA;ce,e1Om;us;aCe0Kip,oAy;at,od,wA;!er;g,re,sh,vo0Z;eDgClBnAre,sh,t,x;an3i0F;e,m,t0;ht,uE;ld;aBeAn3;d,l;r,tuA;re;ce,il,ll,rm,vo21;cho,nGsExAye;cCerci1hib8pAtra4;eriAo0J;en3me2I;el,han9;caAtima5;pe;count0d,gine0vy;aSeLiFoErBuAye;b,mp;aBeam,iA;ft,nk,ve;ft,in;cu06d9ubt;p,sCvA;e,iAor3;de;char9liBpA;at2lay;ke;al,ba5cEfeDlCma0Xpos8siBtaA;il;gn,re;ay,ega5;at,ct;liXrA;ea1;ma9n3rAte;e,t;a07ent06hZlWoGrCuA;be,rAt;e,l;aft,eCoBuAy;sh;p,ss,wd;d8ep;de,in,lNmHnCok,py,re,st,uAv0;gh,nAp6;sVt;ceCdu4glomeDstru4tAveI;a4rA;a7ol;ntArn;ra5;biEfoDmCpA;leAou08romi1;me1B;a06e1Au5;rt;ne;lap1oA;r,ur;aBiA;ck,p;im,w;aBeAip;at,ck,er;iDllen9mpi09nBrAse,uffe0F;ge,m,t;ge,nA;el;n,r;er,re;ke,ll,mp,p,rBsh,t2u1ve;se;d,e;aTeQiPlMoIrDuAypa0M;bb6ck6dgBff0lArn,st,zz;ly;et;anDeaCid9oadA;ca7;ge;ch,k;ch,d;aCmb,ne,oBss,tt6x,ycott;le;k,st,t;rd,st;aBeAitz,oP;nd;me;as,d,ke,te;aBnef8t;it;r,t;il,lan3nCrgaBsA;e,h;in;!d,g,k;c00dTffilSge,iRlt0nOppLrHssFttDucBwaA;rd;tiA;on;aAempt;ck;i7ocM;st;chBmoA;ur;!iA;ve;eBroa2;ch;al;chAsw0;or;er;d,m,r;ia5;dDvA;an3oca5;te;ce;i4reA;ss;ct;cAhe,t;eCoA;rd,uA;nt;nt,ss",
+      "Possessive": "true¦any2its,my,no4o0somet3their1yo0;ur0;!s;o1t0;hing;ne",
+      "Noun|Verb": "true¦0:7O;1:6H;2:7K;3:7U;4:7X;5:7T;6:6T;7:7E;8:71;9:6P;a7Gb6Sc5Rd56e4Yf4Ag41h3Ti3Nj3Lk3Jl39m30n2Wo2Sp20ques7Ir1Cs07tTuRvMwCyBzA;ip,o6A;awn,e1Vie4Q;aHeaGhEiCoAre7I;nd0rA;k,ry;mp,nApe,re,sh,tne7Z;!d,g;e6EiA;p,st6;r,th0;it,rAs5t2ve,x;ehou1ra7Y;aDiCoA;iAlunte0te,w;ce,d;be,ew,s8;cuum,l37;pAsh0;da5gra4V;aLeKhrJiIoHrDuBwiAy4K;n,st;nArn;e,n5Z;aCeBiAu7;bu5ck,gg0m,p;at,nd;ck,de,in,nsf0p,v5V;ll,ne,r3Oss,t72u2;ck,e,me,p,re;e1Kow,u7;ar,e,st;g,lArg5Zs5;k,ly;a4Lc09e06h01iZkXlVmUnTou68pPtFuBwA;ear,it2;b1Vit,m,ppBrAspe4;ge,pri1vey;lAo58;e55y;aHeGiFoDrBuAy6;dy,ff,mb6;a68eAi4B;am,ss,t2;p,rA;e,m;ck,t2;m,p;ck,in,ke,ll,mp,nd,rAte,y;!e,t;aCeed,iBla4Hons6IrAy;ay,e0Zink6u3;n,r6Ete;n,rk;ee1Cow;e0Ei6o3Y;eep,iA;ce,p,t;ateboa5ViA;!p;de,gnAze;!al;aDeCiBoA;ck,p,w;ft,p,v0;d,i2Z;pe,re;aBed,nAr5Wt;se,t1V;l,r2t;aDhedu6oCrA;at2eA;en,w;re,ut;le,n,r0G;aVeEiDoCuA;b,in,le,n,sA;h,t;a7ck,ll,ot;de,ng,p,s1A;as5BcOdo,el,fMgLje4lKmInHo0TpFque7sCturn,vAwa59;eAi1H;al,r1;er5GoBt,uA;lt,me;l5Ert;air,eaAly,o3W;l,t;dezvo23t;aAedy;ke,rk;ea1i3C;a4Xist0r4B;act5Borm,uA;nd,se;aAo4Uru8;ll;ck,i1ke,l45nAtT;ge,k;aYeVhTiQlLoIrBuA;mp,n2rcha1sh;ai1eEi3oAu3I;be,ceCdu3grAje4mi1te7;amAe5A;!me;ed,ss;sAy;er4Ss;iBlAol,p,re,s2Qw0;i3l;nt,s4H;aCeBuA;g,n9;ad;ce,nAy;!t;ck,lBnApe,t,vot;!e;e,ot;a1oA;ne,tograph;ak,eBn,rAt;fu3Tm8;!l;cka9iBn,rtAss,t2u1;!y;nt,r;bCff0il,oBrAutli2S;d0ie4Q;ze;je4;a3KeCoA;d,tA;e,i3;ed,gle4rd,t;aFeDiCoBuA;rd0;d2Tnit43p,ve;lk,n2Xrr42x;asu11n3NrAss;ge,it;il,nBp,rk2YsAt2;h,k;da5oeuv0X;aGeDiCoAump;aAbby,ck,g,ok,ve;d,n;cen1ft,m8nEst;aBc0CvA;el,y;ch,d,p,se;bBcAnd,t2un2;e,k;el,o24;e2CiAno3B;ck,ll,ss;am,o15uA;d9i3;mpEnBr35ssA;ue;cr18dex,fluBha6k,se1UterviAvoi3;ew;en3;a4le1P;aEeCiBoAu3Q;ld,no1Sok,pe,r1st,u1;ghlight,ke,re,t;aAlp;d,t;ndBrAte;bo2Zm,ne3Fve7;!le;aHeek,lo3DoGrCuA;arAe3Ci0Ln;antee,d;aCiBoAumb6;om,u2A;nd,p;de,sp;of,ssip;in,me,ng,s,ze;aWeSiNlJoGrCuA;el,nAzz;c2Fd;aBoAy;st,wn;cAme;tuP;cBg,ol,rA;ce,e1Om;us;aCe0Kip,oAy;at,od,wA;!er;g,re,sh,vo0Z;eDgClBnAre,sh,t,x;an3i0F;e,m,t0;ht,uE;ld;aBeAn3;d,l;r,tuA;re;ce,il,ll,rm,vo21;cho,nGsExAye;cCerci1hib8pAtra4;eriAo0J;en3me2I;el,han9;caAtima5;pe;count0d,gine0vy;aSeLiFoErBuAye;b,mp;aBeam,iA;ft,nk,ve;ft,in;cu06d9ubt;p,sCvA;e,iAor3;de;char9liBpA;at2lay;ke;al,ba5cEfeDlCma0Xpos8siBtaA;il;gn,re;ay,ega5;at,ct;liXrA;ea1;ma9n3rAte;e,t;a07ent06hZlWoGrCuA;be,rAt;e,l;aft,eCoBuAy;sh;p,ss,wd;d8ep;de,in,lNmHnCok,py,re,st,uAv0;gh,nAp6;sVt;ceCdu4glomeDstru4tAveI;a4rA;a7ol;ntArn;ra5;biEfoDmCpA;leAou08romi1;me1B;a06e1Au5;rt;ne;lap1oA;r,ur;aBiA;ck,p;im,w;aBeAip;at,ck,er;iDllen9mpi09nBrAse,uffe0F;ge,m,t;ge,nA;el;n,r;er,re;ke,ll,mp,p,rBsh,t2u1ve;se;d,e;aTeQiPlMoIrDuAypa0M;bb6ck6dgBff0lArn,st,zz;ly;et;anDeaCid9oadA;ca7;ge;ch,k;ch,d;aCmb,ne,oBss,tt6x,ycott;le;k,st,t;rd,st;aBeAitz,oP;nd;me;as,d,ke,te;aBnef8t;it;r,t;il,lan3nCrgaBsA;e,h;in;!d,g,k;c00dTffilSge,iRlt0nOppLrHssFttDucBwaA;rd;tiA;on;aAempt;ck;i7ocM;st;chBmoA;ur;!iA;ve;eBroa2;ch;al;chAsw0;or;er;d,m,r;ia5;dDvA;an3oca5;te;ce;i4reA;ss;ct;cAhe,t;eCoA;rd,uA;nt;nt,ss",
       "Actor": "true¦aJbGcFdCfAgardenIh9instructPjournalLlawyIm8nurse,opeOp5r3s1t0;echnCherapK;ailNcientJecretary,oldiGu0;pervKrgeon;e0oofE;ceptionGsearC;hotographClumbColi1r0sychologF;actitionBogrammB;cem6t5;echanic,inist9us4;airdress8ousekeep8;arm7ire0;fight6m2;eputy,iet0;ici0;an;arpent2lerk;ricklay1ut0;ch0;er;ccoun6d2ge7r0ssis6ttenda7;chitect,t0;ist;minist1v0;is1;rat0;or;ta0;nt",
       "Honorific": "true¦aNbrigadiMcGdFexcellency,fiAliCma9officMp5queen,r2s0taoiseach,vice4;e0ultI;cond liArgeaB;abbi,e0;ar0verend; adJ;astFr0;eside6i0ofessE;me ministEnce0;!ss;gistrate,r4yB;eld mar3rst l0;ady,i0;eutena0;nt;shA;oct5utchess;aptain,hance3o0;lonel,mmand4ngress0unci2;m0wom0;an;ll0;or;er;d0yatullah;mir0;al",
-      "Pronoun": "true¦'em,elle,h4i3me,ourselves,she5th1us,we,you0;!rself;e0ou;m,y;!l,t;e0im;!'s",
-      "Singular": "true¦0:4A;1:4U;2:4T;3:4J;4:4H;5:3J;6:4G;7:4B;8:3P;a4Kb3Zc35d2Pe2Hf29g1Yh1Min1Kjel3k1Il1Fm18n16o12p0Mqu0Lr0CsStJuGvCw9;a9ha37om25;f0i4Ct0Dy9;! arou47;arn47eAo9;cabu06l4R;gIr9;di6t1E;nc30p2KrAs 9;doll3Ls4R;bani2in1; rex,aGeFhEiCoBrAu9v show;m2Cn5rntIto12;agedy,ibe,o3U;p5rq3A;c,de,m9;etE;ere,i7;am,mp35;ct5le4x return;aRcPeOhNiMkKoJtEuBy9;ll9n21st4C;ab2M;bAnri15per bowl,r9;f0roga2;st8tot1;aCepBipe3KrAudent9;! lo1F;ang0i7;fa1Amo1A;ff0t2W;loi3Jme11;elet0Yi9;er,ll,rm3E;te,ze;ack,or3X;ab0Ocurity gu29;e4ho9;l2Sol;la2V;av0QeChetor5iAo9;de4om;te,v9;erb0H;bCcBf9publ5r0Ispi2;er9orm0;e4r1;it1ord label;a2u3N;estion mark,ot23;aLeKhJiHlFrAu9yram14;ddi7ppy,rpo0D;eCie2Yo9;bl3Gs9;pe6t9;a2itu2;diction,mi08roga1Gss relea08;a9ebisci2;q22te,y0;cn5e9g;!r;armaci2PotocoG;dest1ncil,rcen36t1;nAte9;!nt;el2Kop3;bjec16cApia2rde1thers,ve9;n,rview;cu9e0A;pi0;an25it8ot9umb0;a1Zhi7;aDed5ili0XoAu9é0B;m0Nr1;mAnopo3pMrni7sq1Mt9u11;h0i0Y;!my;mm1nd12te9yf3;ri1;aurea2iAu9;ddi2nch;ght bulb,p09;ey9ittK;!no2;cide4dices,se6te4vert9;eb8;aJeaFighDo9uman right,ygie11;le,meAtb9;ed;! r9;un; scho13ri9;se;dAv9;en; start,ph9;one;m,ndful,ze;aHeFirl1JlaPoErAu9;l3n,y;an9enadi0id;a15d9; slam,fa9mo9;th0;d,lf0;lat0Fntlem9;an;df3ng,r9;l5n1B;aFella,iDlCol3r9;ee market,iAon9;ti0;e16ga2;ame,u2;nan9ref3;ci0;br5mi3n0Vth0;conoFffEgg,lecto8nDs1Rth5venCxAyel9;id;ampXe9te4;cuOmpl0I;i7t;er1G;e6i1F;my;adNeHiEoAr9uC;agonf3i0;cBg1Bi3or,ssi0wn9;si9;de;to8umenB;ale6gniAnn0s9vide0N;conte4incenCtri6;ta09;aDc1fCni1te9;c9rre4;ti9;ve;ault 8err1;th;!dy;aYeVhNiMlKoDr9;edit cBit5uc9;ib9;le;ard;efficElCmmuniqMnBpi0rr1t0Uu9yo2;ri0s9;in;ne6suI;ic,um9;ni07;ie4;er9ie4;gy,ic;ty,vil wJ;aDeqCocoBr9;istmas car9ysanthemum;ol;la2;ue;ndeli0racter9;ist5;ic;ili7llAr9;e1tifica2;ar;hi0naBpit1r9shi0ucus;bohyd8ri0;ra2;ry;aPeOiLlemKoHrDu9;ddhiMnBr9tterf3;glar9i1;!y;ny;eakAo9;!th0;faGthro9;ugh;dy,g,y9;!frie9;nd;ish;cyc9oI;li9;st;an,l3;nki7r9;!ri0;er;ng;cMdJllHnEppeti2rray,sBthle2u9;nt,to9;psy;ce4pe6;ct;nt;ecAoma3tiA;ly;do2;er9y;gy; hominAvan9;tage;em;cru1eAqui9;tt1;ta2;te;al",
-      "Uncountable": "true¦0:2J;1:1M;2:1Z;a28b1Zc1Rd1Je1Bf15g0Yh0Ri0Lj0Kk0Jl0Fm05n03o02pWrRsGt8vi7w3;a5i4oo3;d,l;ldlife,ne;rm7t2;neg1Ool0Ktae;e9h8oothpas1Hr4un3yranny;a,gst1O;affZea14ou4ue nor3;th;ble3sers,t;!shoot1R;ermod25und2;a,nnis;aBcene0Geri1hAil9ki8o7p6t4u3weepstak1;g1Enshi0Z;ati24e3;am,el;ace1Xeci1;ap,cc2;n,ttl1;k,v2;eep,ingl1;d0Mfe1Ql3nd,t0A;m1Gt;a6e4ic3;e,ke0U;c3laxa0Rsearch;ogni0Qrea0Q;bi1in;aUe7hys0lastDo5re3;amble,mis1s3ten1F;en1Esu0B;l3rk;it0yC;a1Jtr05;bstetr0vercrowd12xyg0V;a3ews;il polVtional securi1B;aAe8o5u3;mps,s3;ic;n3o14;ey,o3;gamy;a3chan0rchandi11tallurgy;sl1t;chine3themat0; learn0Qry;aught2e5i4ogi17u3;ck,g0S;ce,ghtn0Nngui15teraR;ath2isuRss;indergart0Enowled0Q;azz,ewelCusti10;ce,gnor7mp4n3tself;formaYternet;a3ort5;ti3;en0V;an0U;a6eIisto5o3;ckey,mework,ne3rserad7spitali0N;s0My;ry;ir,libXppiGs3;h3te;ish;ene6l5o4r3um,ymna0O;aDeed;lf,re;utWyce0A; 3t0;edit01po3;ol;icFlour,o5urni3;tu3;re;od,rgive3uri2wl;ne3;ss;conom0duca9lectr8n6quip7th0very4xper3;ti00;body,o3thR;ne;joy3tertain3;ment;iciYon0;tiO;e8i4ope,raugh3ynasW;ts;abet1s3;honSrepu3;te;es;b3miN;ut;a9elci8h5iv0lass0o3urrency;al,ld w3nfusiEttEusco7;ar;aos,e4ick3;en;eGw8;us;d,rI;a8eef,i6lood,owls,read,u3;nt4tt2;er;ing;lliarDs3;on;g3ss;ga3;ge;cDdviCeroAir9m5ni4ppeal court,spi3thlet0;rin;se;en5n3;es3;ty;ds;craft;b0d3naut0;ynam0;ce;id,ou3;st0;ics",
+      "Pronoun": "true¦'em,elle,h3i2me,she4th0us,we,you;e0ou;m,y;!l,t;e0im;!'s",
+      "Singular": "true¦0:49;1:4S;2:4T;3:4I;4:4G;5:3H;6:4F;7:4A;a4Ib3Wc32d2Ne2Ff27g1Wh1Kin1Ijel3k1Gl1Dm16n14o10p0Kqu0Jr0AsRtIuFvBw8;a8ha34om23;f0i4At0By8;! arou45;arn45e9o8;cabu04l4P;gHr8;di6t1C;nc2Xp2Ir9s 8;doll3Is4P;bani1in2; rex,aFeEhDiBoAr9u8v show;m2An5rntHto10;agedy,ibe,o3S;p5rq37;c,de,m8;etD;ere,i7;am,mp32;ct5le4x return;aPcNeMhLi1kJoItDuAy8;ll8n1Zst4A;ab2J;b9nri13per bowl,r8;f0roga1;st35tot2;aBepAipe3Ir9udent8;! lo1D;ang0i7;fa18mo18;ff0t2T;loi3Hme0Z;elet0Wi8;er,ll,rm3C;ack,or3W;ab0Ncurity gu27;e4ho8;l2Qol;la2T;av0PeBhetor5i9o8;de4om;te,v8;erb0G;bBcAf8publ5r0Hspi1;er8orm0;e4r2;it2ord label;a1u3M;estion mark,ot21;aKeJhIiGlEr9u8yram13;ddi7ppy,rpo0C;eBie2Xo8;bl3Fs8;pe6t8;a1itu1;diction,mi07roga1Ess relea07;a8ebisci1;q20te,y0;cn5e8g;!r;armaci2OotocoF;dest2ncil,rcen35t2;n9te8;!nt;el2Jop3;bjec14c9pia1rde2thers,ve8;n,rview;cu8e09;pi0;an23it1Xot8umb0;a1Xhi7;aCed5ili0Vo9u8é0A;m0Mr2;m9nopo3pLrni7sq1Kt8u0Z;h0i0W;!my;mm2nd10te8yf3;ri2;aurea1i9u8;ddi1nch;ght bulb,p08;ey8ittJ;!no1;cide4dices,se6te4vert8;eb1I;aIeaEighCo8uman right,ygie0Z;le,me9tb8;ed;! r8;un; scho11ri8;se;d9v8;en; start,ph8;one;m,ndful,ze;aGeEirl1IlaOoDr9u8;l3y;an8enadi0id;a13d8; slam,fa8mo8;th0;d,lf0;lat0Dntlem8;an;df3r8;l5n1A;aEella,iClBol3r8;ee market,i9on8;ti0;e15ga1;ame,u1;nan8ref3;ci0;br5mi3n0Tth0;conoEffDgg,lecto0MnCs1Qth5venBx9yel8;id;ampVe8te4;cuMmpl0G;i7t;er1F;e6i1E;my;adLeFiCo9r8u0N;agonf3i0;c9g1Ai3or,ssi0wn8;si0K;to0AumenA;ale6gni9nn0s8vide0N;conte4incenBtri6;ta08;aCc2fBni2te8;c8rre4;ti8;ve;ault 02err2;th;!dy;aXeUhMiLlJoCr8;edit cAit5uc8;ib8;le;ard;efficDlBmmuniqLnApi0rr2t0Uu8yo1;ri0s8;in;ne6suH;ic,um8;ni07;ie4;er8ie4;gy,ic;ty,vil wI;aCeqBocoAr8;istmas car8ysanthemum;ol;la1;ue;ndeli0racter8;ist5;ic;ili7ll9r8;e2tifica1;ar;hi0naApit2r8shi0ucus;bohyd8ri0;ra1;ry;aPeOiLlemKoHrCu8;ddhiMnAr8tterf3;glar8i2;!y;ny;eakAi9o8;!th0;de;faFthro8;ugh;dy,g,y8;!frie8;nd;ish;cyc8oH;li8;st;an,l3;nki7r8;!ri0;er;ng;cLdIllGnDppeti1rray,sAthle1u8;nt,to8;psy;ce4pe6;ct;nt;ec9oma3ti9;ly;do1;er8y;gy; homin9van8;tage;em;cru2e9qui8;tt2;ta1;te;al",
       "Preposition": "true¦'o,-,aLbIcHdGexcept,fFinEmid,notwithstandiRoCpSqua,sBt7u4v2w0;/o,hereNith0;!in,oR;ersus,i0;a,s-a-vis;n1p0;!on;like,til;h0ill,owards;an,r0;ough0u;!oI;ans,ince,o that;',f0n1ut;!f;!to;or,rom;espite,own,u3;hez,irca;ar1e0oAy;sides,tween;ri6;',bo7cross,ft6lo5m3propos,round,s1t0;!op;! long 0;as;id0ong0;!st;ng;er;ut",
       "SportsTeam": "true¦0:1A;1:1H;2:1G;a1Eb16c0Td0Kfc dallas,g0Ihouston 0Hindiana0Gjacksonville jagua0k0El0Bm01newToQpJqueens parkIreal salt lake,sAt5utah jazz,vancouver whitecaps,w3yW;ashington 3est ham0Rh10;natio1Oredski2wizar0W;ampa bay 6e5o3;ronto 3ttenham hotspur;blue ja0Mrapto0;nnessee tita2xasC;buccanee0ra0K;a7eattle 5heffield0Kporting kansas0Wt3;. louis 3oke0V;c1Frams;marine0s3;eah15ounG;cramento Rn 3;antonio spu0diego 3francisco gJjose earthquak1;char08paA; ran07;a8h5ittsburgh 4ortland t3;imbe0rail blaze0;pirat1steele0;il3oenix su2;adelphia 3li1;eagl1philNunE;dr1;akland 3klahoma city thunder,rlando magic;athle0Mrai3;de0; 3castle01;england 7orleans 6york 3;city fc,g4je0FknXme0Fred bul0Yy3;anke1;ian0D;pelica2sain0C;patrio0Brevolut3;ion;anchester Be9i3ontreal impact;ami 7lwaukee b6nnesota 3;t4u0Fvi3;kings;imberwolv1wi2;rewe0uc0K;dolphi2heat,marli2;mphis grizz3ts;li1;cXu08;a4eicesterVos angeles 3;clippe0dodDla9; galaxy,ke0;ansas city 3nE;chiefs,roya0E; pace0polis colU;astr06dynamo,rockeTtexa2;olden state warrio0reen bay pac3;ke0;.c.Aallas 7e3i05od5;nver 5troit 3;lio2pisto2ti3;ge0;broncZnuggeM;cowbo4maver3;ic00;ys; uQ;arCelKh8incinnati 6leveland 5ol3;orado r3umbus crew sc;api5ocki1;brow2cavalie0india2;bengaWre3;ds;arlotte horAicago 3;b4cubs,fire,wh3;iteB;ea0ulR;diff3olina panthe0; c3;ity;altimore 9lackburn rove0oston 5rooklyn 3uffalo bilN;ne3;ts;cel4red3; sox;tics;rs;oriol1rave2;rizona Ast8tlanta 3;brav1falco2h4u3;nited;aw9;ns;es;on villa,r3;os;c5di3;amondbac3;ks;ardi3;na3;ls",
       "Person|Noun": "true¦a07b01cYdRePfOgMhJjFkClBm9olive,p6r3s2trini00v0wang;an,enus,iol0;a,et;ky,on5umm03;ay,e1o0uby;b9d,se;ed,x;atQe0ol;aIn0;ny;a0eloTiles;x,ya;aBeo,iG;elv1i0;ng,tM;in;a2e1o0;lDy;an,w3;de,smi4y;a0iKol8;ll,z0;el;ail,e0;ne;aith,ern,lo;a0dDmir,ula,ve;rl;a4e3i1ol0;ly;ck,x0;ie;an,ja;i0wn;sy;h0liff,rystal;ari0in,ristian;ty;ak4e3i2r0;an0ook;dy;ll;nedict,rg;er;l0rt;fredo,ma",
@@ -21658,10 +21527,8 @@ var app = (function () {
       "Currency": "true¦$,aud,bQcOdJeurIfHgbp,hkd,iGjpy,kElDp8r7s3usd,x2y1z0¢,£,¥,ден,лв,руб,฿,₡,₨,€,₭,﷼;lotyQł;en,uanP;af,of;h0t5;e0il5;k0q0;elK;oubleJp,upeeJ;e2ound st0;er0;lingG;n0soF;ceEnies;empi7i7;n,r0wanzaCyatC;!onaBw;ls,nr;ori7ranc9;!os;en3i2kk,o0;b0ll2;ra5;me4n0rham4;ar3;e0ny;nt1;aht,itcoin0;!s",
       "Adj|Present": "true¦a00bluZcRdMeKfHhollGidNlEmCnarrGoBp9qua8r7s4t2utt3w0;aIet,ound,ro0;ng,ug01;end0hin,op;er;e1l0mooth,our,pa8u8;i2ow;cu6daVlNpaJ;eplicaUigV;ck;aDr0;eseOime,ompt;bscu1pen,wn;atu0eLodeD;re;ay,eJi0;gNve;ow;i1r0;ee,inge;rm;l0mpty,xpress;abo4ic7;amp,e2i1oub0ry;le;ffu8r5;fu7libe0;raB;l4o0;mple9n2ol,rr1unterfe0;it;ect;juga6sum5;e1o0;se;an;nt;lig2pproxi0;ma0;te;ht",
       "Comparable": "true¦0:3D;1:3H;2:3S;3:2F;a3Wb3Ec32d2Se2Lf28g1Wh1Mi1Fj1Ek1Bl14m0Yn0To0Sp0Jqu0Hr08sJtEuDvBw5y4za0R;el11ou3C;a8e6hi1Hi4ry;ck0Dde,l4n2ry,se;d,y;a4i3V;k,ry;nti36ry;a4erda1ulgar;gue,in,st;g0pcomi33;a7en2Vhi6i5ough,r4;anqu2Aen2ue;dy,g38me0ny,r03;ck,rs26;ll,me,rt,wd3K;aRcarQePhNiMkin0BlImGoEpDt7u5w4;eet,ift;b4dd0Vperfi1Yrre26;sta24t3;a8e7iff,r5u4;pUr2;a4ict,o2R;ig2Yn0N;a2ep,rn;le,rk;e1Qi2Yright0;ci1Xft,l4on,re;emn,id;a4el0;ll,rt;e6i4y;g2Pm4;!y;ek,nd2V;ck,l0mp3;a4iRort,rill,y;dy,l01rp;ve0Jxy;ce,y;d,fe,int0l1Gv0V;a9e7i6o4ude;mantic,o17sy,u4;gh,nd;ch,pe,tzy;a4d,mo0A;dy,l;gg5ndom,p4re,w;id;ed;ai1i4;ck,et;hoBi1ElAo9r6u4;ny,r4;e,p3;egna1ic5o4;fouSud;ey,k0;liXor;ain,easa1;ny;dd,i0ld,ranL;aive,e6i5o4;b3isy,rm0Xsy;ce,mb3;a4w;r,t;ad,e6ild,o5u4;nda10te;ist,o2;a5ek,l4;low;s0ty;a8ewd,i7o4ucky;f0In5o14u4ve0w0Yy0M;d,sy;e0g;ke0tt3ve0;me,r4te;ge;e5i4;nd;en;ol0ui1D;cy,ll,n4;s7t4;e4ima5;llege1rmedia4;te;ecu4ta1;re;aBe8i7o6u4;ge,m4ng1F;b3id;me0t;gh,l0;a4fWsita1;dy,v4;en0y;nd16ppy,r4;d,sh;aEenDhBiAl9oofy,r4;a7e6is0o4ue13;o4ss;vy;at,en,y;nd,y;ad,ib,ooE;a1d2;a4o4;st0;t3uiT;u2y;aEeeb3i9lat,o7r6u4;ll,n4r0T;!ny;aEesh,iend0;a4rmFul;my;erce6n4;an4e;ciB;! ;le;ir,ke,n08r,st,ul4;ty;a7erie,sse5v4xtre0G;il;nti4;al;r5s4;tern,y;ly,th0;aCe9i6ru5u4;ll,mb;nk;r5vi4;ne;e,ty;a4ep,nB;d4f,r;!ly;ppVrk;aDhAl8o6r5u4;dd0r0te;isp,uel;ar4ld,mmon,st0ward0zy;se;e4ou2;ar,vO;e4il0;ap,e4;sy;gey,lm,ri4;ng;aJiHlEoCr6u4;r0sy;ly;a8i5o4;ad,wn;g5llia1;nt;ht;sh,ve;ld,un4;cy;a5o4ue;nd,o2;ck,nd;g,tt4;er;d,ld,w2;dy;bsu7ng6we4;so4;me;ry;rd",
-      "Infinitive": "true¦0:8S;1:8F;2:9A;3:8Y;4:7Z;5:7M;6:81;7:96;8:8Z;9:9E;A:9D;B:8U;C:7T;D:7P;E:7J;F:86;a7Zb7Dc6Nd5Ee4Cf42g3Yh3Ui3Bj38k35l2Wm2Pnou3To2Kp23qu22r18s08tWuRvPwG;aMeLiJrG;eHiG;ng,te;ak,st4;d5e7BthG;draw,er;a2d,ep;i2ke,nGrn;d0t;aGie;li99ry;nGplift;cov0dHear7GlGplug,tie,ve82;eaAo3I;erGo;go,sta9Bval91whelm;aPeNhKoJrG;aGemb4;ffi3Dmp4nsG;aCpi6;pp4ugh5;aHiHrGwaD;eat5i2;nk;aGll,m8X;ch,se;ck4ilor,keGmp0r7K;! paD;a0Ec0De0Bh07i05l03m02n01oZpUqua44tNuIwG;all6Ye2DiG;m,ng;bIccumb,ffHggeBmm8Yp2ErG;mouFvi2;er,i3;li7Xmer8siGveD;de,st;aKe7QiIrG;ang4eGi2;ng1Zw;fGnV;f5le;gg0rGte ch5E;t4ve;awn,eJiIlHoGri6A;il,of;ay,it;ll,t;ak,nd;lGot6Kw;icEve;eak,i0K;aAugg4;aGi9;m,y;ft,nGt;g,k;aIi5EoHriGun;nk,v5Q;ot,rt5;ke,rp5tt0ve;eGll,nd,que7Hv0w;!k,m;aven8ul7V;dd5tis17y;att4eHip5oG;am,ut;a05b03c01d00fXgroup,heaWiVlTmSnRpPq2ZsLtJvG;amp,eHiGo2O;sEve;l,rt;i6rG;ie2ofE;eFiItGurfa3;aDo1UrG;a5SiCuctu6;de,gn,st;el,hra1lGreseF;a3e65;d0ew,o02;a5Ne2Uo2;a7eFiGoad,y;e2nq3Eve;mbur1nf2N;r1t;inHleCocus,reAuG;el,rbiA;an3e;aCu3;ei2k7Dla3HoGyc4;gni57nci4up,v0;oot,uG;ff;ct,d,liG;se,ze;aAen5Mit,o7;aUerSiRlumm0UoQrIuG;b3Ike,niArGt;poDs6R;eKoG;cId,fe32hibEnoHpo1sp0tru9vG;e,i9o4R;un3;la33u6;a5Dc1MdHf0ocSsup0EvG;a5IeF;etermi41iC;a5Art4S;er3npoiF;cei2fo3AiAmea7plex,sGva9;eve6iB;mp0n12rGtrol,ve,y;a5Ot5K;bser2cJpIutHverGwe;lap,s14tu64u1;gr4Lnu1Vpa3;era7i3Rpo1;cupy;aLe08iHoGultiply;leBu5Z;micInHsG;pla3s;ce,g4us;!k;im,ke,na8;aNeJiGo1u34;e,ke,ng0quGv5;eGi61;fy;aInG;d,gG;th5;rn,ve;ng1Zu18;eHnG;e3Low;ep;o42uG;gg4xtaG;po1;gno6mTnG;c0LdQfPgeBhOitia7ju6q0XsMtIun5NvG;eGo0M;nt,st;erHimi5KoxiOrG;odu3u9;aCn,prGru5K;et;iBpi6tGu6;il,ruC;abEibE;eBo24u1;iGul8;ca7;b57mer1pG;aDer44ly,oHrG;is5Io2;rt,se,veG;riA;aIear,iGoiBuD;de,jaGnd0;ck;mp0ng,pp5ve;ath0et,i2le1PoIrG;aGow;b,pp4ze;!ve4O;ast5er3Ji54lOorJrHuG;lf3Rr3N;ee30olG;ic;b3CeIfeEgGs4A;eGi2;!t;clo1go,sGwa4G;had2X;ee,i2M;a0FdEl0Dm08nQquip,rPsOt3CvMxG;cKeDha4iJpHtG;ing0Pol;eGi6loEo1un8;ct,di7;st,t;lu9;alua7oG;ke,l2;chew,pou1tab11;a1u4F;aWcTdRfQgOhan3joy,lNqMrLsuKtIvG;e0TisG;a8i4K;er,i3rG;a2Jen2XuB;e,re;i2Vol;ui6;ar8iB;a8eGra2ulf;nd0;or3;ang0oGu6;r1w;lo1ou0ArHuG;mb0;oa2Ly3Y;b4ct;bHer8pG;hasi1Yow0;a0Tody,rG;a3oiG;d0l;ap1eCuG;ci3Ode;rGt;ma0Nn;a0Ne01iIo,rGwind4;aw,ed8oG;p,wn;agno1e,ff0g,mi29sJvG;eGul8;rGst;ge,t;ab4bTcNlod8mant4pLru3GsKtG;iGoDu2W;lHngG;uiA;!l;ol2ua9;eGla3o1ro2;n1r1;a18e2WlJoHuG;ss;uGv0;ra8;aGo1;im;a37ur1;af5bXcRduCep5fPliOmLnJpIra1Uta1OvG;eGol2;lop;aDiCoD;oGy;te,un3;eHoG;liA;an;mEv0;a3i04oGraud,y;rm;ei2iKoIrG;ee,yG;!pt;de,mGup4;missi2Tpo1;de,ma7ph0;aIrHuG;g,nk;ief;rk;mp5rk5uF;a03ea1h01i00lZoHrGurta17;a2ea7ipp4;ales3eWhabEinci9llVmTnGrro9;cQdNfLju6no7qu0sJtIvG;eGin3;ne,r8;a0Hin23ribu7;er2iGoli25pi6titu7ult;d0st;iGroFu1;de,gu6rm;eHoG;ne;mn,n1;eGlu9;al,i2;buBe,men3pG;e7ly;eCi9u9;r3xiB;ean1iQ;rcumveFte;eGoo1;riAw;ncGre5t0ulk;el;aYeSi1TlPoNrJuG;iHrGy;st,y;ld;aIeHiGoad5;ng;astfeKed;ke;il,l10mbaGrrMth0;rd;aHeGow;ed;ze;!come,gKha2liJnd,queaIstHtGwild0;ray;ow;th;e2tt4;in;bysEckfi6ff4tG;he;it;b13c0Rd0Iffix,gr0Hl0Dm09n03ppZrXsQttNuLvIwaG;it,k5;en;eDoG;id;rt;gGto06;meF;aHeBraC;ct;ch;pi6sHtoG;niA;aIeGi03u6;mb4rt;le;il;re;g0Fi1ou1rG;an8i2;eaIly,oiFrG;ai1o2;nt;r,se;aKiOnHtG;icipa7;eHoGul;un3y;al;ly1;aHu1;se;lgaGze;ma7;iIlG;e8oGu9;t,w;gn;ee;aZjLmiIoHsoG;rb;pt,rn;niGt;st0;er;ouHuB;st;rn;cJhie2knowled8quiGtiva7;es3re;ce;ge;eMomIrHusG;e,tom;ue;moHpG;any,liA;da7;te;pt;andMet,i9oIsG;coIol2;ve;liArt,uG;nd;sh;de;on",
+      "Infinitive": "true¦0:8T;1:8G;2:9B;3:8Z;4:80;5:7N;6:97;7:82;8:90;9:9F;A:9E;B:8V;C:7U;D:7Q;E:7K;F:87;a80b7Ec6Od5Fe4Df43g3Zh3Vi3Bj38k35l2Wm2Pnou3Uo2Kp23qu22r18s08tWuRvPwG;aMeLiJrG;eHiG;ng,te;ak,st4;d5e7CthG;draw,er;a2d,ep;i2ke,nGrn;d0t;aGie;li9Ary;nGplift;cov0dHear7HlGplug,tie,ve83;eaAo3J;erGo;go,sta9Cval92whelm;aPeNhKoJrG;aGemb4;ffi3Emp4nsG;aCpi7;pp4ugh5;aHiHrGwaD;eat5i2;nk;aGll,m8Y;ch,se;ck4ilor,keGmp0r7L;! paD;a0Ec0De0Bh07i05l03m02n01oZpUqua45tNuIwG;all6Ze2DiG;m,ng;bIccumb,ffHggeBmm8Zp2ErG;mouFvi2;er,i3;li7Ymer8siGveD;de,st;aKe7RiIrG;ang4eGi2;ng1Zw;fGnV;f5le;gg0rGte ch5F;t4ve;awn,eJiIlHoGri6B;il,of;ay,it;ll,t;ak,nd;lGot6Lw;icEve;eak,i0K;aAugg4;aGi9;m,y;ft,nGt;g,k;aIi5FoHriGun;nk,v5R;ot,rt5;ke,rp5tt0ve;eGll,nd,que7Iv0w;!k,m;aven8ul7W;dd5tis17y;att4eHip5oG;am,ut;a05b03c01d00fXgroup,heaWiVlTmSnRpPq30sLtJvG;amp,eHiGo2P;sEve;l,rt;i7rG;ie2ofE;eFiItGurfa3;aDo1VrG;a5TiCuctu7;de,gn,st;el,hra1lGreseF;a3e66;d0ew,o02;a5Oe2Vo2;a6eFiGoad,y;e2nq3Fve;mbur1nf2O;r1t;inHleCocus,reAuG;el,rbiA;an3e;aCu3;ei2k7Ela3IoGyc4;gni58nci4up,v0;oot,uG;ff;ct,d,liG;se,ze;aAen5Nit,o6;aUerSiRlumm0UoQrIuG;b3Jke,niArGt;poDs6S;eKoG;cId,fe33hibEnoHpo1sp0tru9vG;e,i9o4S;un3;la34u7;a5Ec1NdHf0ocSsup0EvG;a5JeF;etermi42iC;a5Brt4T;er3npoiF;cei2fo3BiAmea6plex,sGva9;eve7iB;mp0n13rGtrol,ve,y;a5Pt5L;bser2cJpIutHverGwe;lap,s15tu65u1;gr4Mnu1Wpa3;era6i3Spo1;cupy;aLe08iHoGultiply;leBu60;micInHsG;pla3s;ce,g4us;!k;im,ke,na8;aNeJiGo1u35;e,ke,ng0quGv5;eGi62;fy;aInG;d,gG;th5;rn,ve;ng20u19;eHnG;e3Mow;ep;o43uG;gg4xtaG;po1;gno7mUnG;cSdQfPgeBhOitia6ju7q0YsMtIun5OvG;eGo0N;nt,st;erHimi5LoxiOrG;odu3u9;aCn,prGru5L;et;iBpi7tGu7;il,ruC;abEibE;eBo25u1;iGul8;ca6;i6lu9;b57mer1pG;aDer44ly,oHrG;is5Io2;rt,se,veG;riA;aIear,iGoiBuD;de,jaGnd0;ck;mp0ng,pp5ve;ath0et,i2le1PoIrG;aGow;b,pp4ze;!ve4O;ast5er3Ji54lOorJrHuG;lf3Rr3N;ee30olG;ic;b3CeIfeEgGs4A;eGi2;!t;clo1go,sGwa4G;had2X;ee,i2M;a0FdEl0Dm08nQquip,rPsOt3CvMxG;cKeDha4iJpHtG;ing0Pol;eGi7loEo1un8;ct,di6;st,t;lu9;alua6oG;ke,l2;chew,pou1tab11;a1u4F;aWcTdRfQgOhan3joy,lNqMrLsuKtIvG;e0TisG;a8i4K;er,i3rG;a2Jen2XuB;e,re;i2Vol;ui7;ar8iB;a8eGra2ulf;nd0;or3;ang0oGu7;r1w;lo1ou0ArHuG;mb0;oa2Ly3Y;b4ct;bHer8pG;hasi1Yow0;a0Tody,rG;a3oiG;d0l;ap1eCuG;ci3Ode;rGt;ma0Nn;a0Ne01iIo,rGwind4;aw,ed8oG;p,wn;agno1e,ff0g,mi29sJvG;eGul8;rGst;ge,t;ab4bTcNlod8mant4pLru3GsKtG;iGoDu2W;lHngG;uiA;!l;ol2ua9;eGla3o1ro2;n1r1;a18e2WlJoHuG;ss;uGv0;ra8;aGo1;im;a37ur1;af5bXcRduCep5fPliOmLnJpIra1Uta1OvG;eGol2;lop;aDiCoD;oGy;te,un3;eHoG;liA;an;mEv0;a3i04oGraud,y;rm;ei2iKoIrG;ee,yG;!pt;de,mGup4;missi2Tpo1;de,ma6ph0;aIrHuG;g,nk;ief;rk;mp5rk5uF;a03ea1h01i00lZoHrGurta17;a2ea6ipp4;ales3eWhabEinci9llVmTnGrro9;cQdNfLju7no6qu0sJtIvG;eGin3;ne,r8;a0Hin23ribu6;er2iGoli25pi7titu6ult;d0st;iGroFu1;de,gu7rm;eHoG;ne;mn,n1;eGlu9;al,i2;buBe,men3pG;e6ly;eCi9u9;r3xiB;ean1iQ;rcumveFte;eGoo1;riAw;ncGre5t0ulk;el;aYeSi1TlPoNrJuG;iHrGy;st,y;ld;aIeHiGoad5;ng;astfeKed;ke;il,l10mbaGrrMth0;rd;aHeGow;ed;ze;!come,gKha2liJnd,queaIstHtGwild0;ray;ow;th;e2tt4;in;bysEckfi7ff4tG;he;it;b13c0Rd0Iffix,gr0Hl0Dm09n03ppZrXsQttNuLvIwaG;it,k5;en;eDoG;id;rt;gGto06;meF;aHeBraC;ct;ch;pi7sHtoG;niA;aIeGi03u7;mb4rt;le;il;re;g0Fi1ou1rG;an8i2;eaIly,oiFrG;ai1o2;nt;r,se;aKiOnHtG;icipa6;eHoGul;un3y;al;ly1;aHu1;se;lgaGze;ma6;iIlG;e8oGu9;t,w;gn;ee;aZjLmiIoHsoG;rb;pt,rn;niGt;st0;er;ouHuB;st;rn;cJhie2knowled8quiGtiva6;es3re;ce;ge;eMomIrHusG;e,tom;ue;moHpG;any,liA;da6;te;pt;andMet,i9oIsG;coIol2;ve;liArt,uG;nd;sh;de;on",
       "Modal": "true¦c5lets,m4ought3sh1w0;ill,o5;a0o4;ll,nt;! to,a;ight,ust;an,o0;uld",
-      "Verb": "true¦born,cannot,gonna,has,keep tabs,m0;ake sure,sg",
-      "PhrasalVerb": "true¦0:81;1:7Q;2:8E;3:84;4:7J;5:8H;6:7P;7:7E;8:7C;9:86;A:7Z;B:89;C:87;D:80;E:6L;F:6D;a8Kb73c66d61e60f4Yg4Gh3Viron0j3Rk3Ml33m2Pn2No2Lp22quietEr1Ns0GtWuUvacuum 1wJyammerAzG;ero Dip HonG;e0k0;by,up;aNeIhHiGor7Vrit37;mp0n34pe0r8s8;eel Dip 8P;aIiGn2S;gh Grd0;in,up;n Dr G;d2in,o4D;it 6Hk8lk Hrm 0Ysh Gt79v5F;aw3d2o5up;aw3in,o84;rgeAsG;e 1herF;aVeThRiNoMrIuGypL;ckFrn G;d2in,o45up;aHiGot0y 2O;ckleEp 8A;ckEdG;e 0N;neEp 2Zs4Z;ck IdHe Gghte5Yme0p o0Ire0;aw3ba4d2in,up;e 6Hy 1;by,oC;ink Grow 6U;ba4ov6up;aGe 6Fll5G;m 1r 53;ckAke Hlk G;ov6shit,u5H;aGba4d2in,o3Pup;ba4ft6p5Mw3;a0Lc0Ke0Eh0Ai07l03m02n01o00pVquar4XtMuKwG;earIiG;ngHtch G;aw3ba4o7O; by;ck Git 1m 1ss0;in,o7Bup;aMe10iLoJrHuG;c36d2O;aigh22iG;ke 6Wn3L;p Grm24;by,in,oC;n31r 1tc44;c30mp0nd Gr7Fve9y 1;ba4d2up;ar2YeJiIlHrGurA;ingAuc8;a3Rit 5R;l17n 1;e69ll0;ber 1rt0und like;ap 56ow D;ash 5Woke0;eep HiGow 7;c1Lp 1;in,oG;ff,v6;de12gn HngGt 5Rz8; al5Mle0;in,o5up;aIoGu5A;ot Gut0w 6U;aw3ba4f3SoC;c2GdeFk5Pve9;e Kll1Gnd Jrv8tG; Gtl4W;d2f5Bin,o5upG;!on;aw3ba4d2in,o2Nup;o6Dto;al5Iout0rap5I;il9v8;aTeQiPoLuG;b 5Ble0n Gstl8;aIba4d2inHoGt3Lu0X;ut,v6;!to;c2HrBw3;ll Iot HuG;g33nd9;a2Hf3Ao5;arBin,o5;ng 5Ip9;aGel9inFnt0;c5Rd G;o3Bup;c1Tt0;aUeTiRlPoNrKsyc2RuG;ll It G;aGba4d2in,o1Zt3Rup;p3Ww3;ap3Vd2in,o5t3Pup;attleAess HiJoG;p 1;ah1Zon;iGp 5Wr4CurEwer 5W;nt0;ay4SuG;gFmp 7;ck Gg0leAn 7p4P;o1Oup;el 4ZncilF;c4Hir 2Xn0ss ItHy G;ba4oC; d2c2E;aw3ba4in,o1J;pGw4C;e4Bt D;arrowEerd0oG;d9teE;aQeNiMoIuG;ddl8lG;l 3W;c12nkeyIp 7uth9ve G;aGd2in,o5up;l41w3; wi3Y;ss0x 1;asur8lHss G;a1Oup;t 7;ke Hn 7rGs1Xx0;k 7ry9;do,o4Vup;aWeRiMoGuck0;aKc3Ug JoGse0;k Gse3S;aft6ba4d2forw2Sin4Iov6uG;nd6p;in,o0V;d 7;e 04ghtJnIsHvG;e 3E;ten 4Y;e 1k 1; 1e3J;ave It HvelG; o4H;d2go,in,o5up;in,oG;pen,ut;c8p 1sh GtchAugh9y26;in43o5;eHick9nock G;d2o4Aup;eGyF;l 2Yp G;aw3ba4d2fYin,o0Dto,up;aIoHuG;ic8mpF;ke3BtE;c3Kzz 1;aVeQiNoKuG;nHrrGsh 7;y 1;kerEt G;arBd2;lGneFrse34;d Ge 1;ba4d2fast,o04up;de Ht G;ba4on,up;aw3o5;aGlp0;d Il 2Gr Gt 1;fGof;rom;in,oWu1K;cJm 1nHve Gz2B;it,to;d Gg 2MkerJ;d2in,o5;k 1;aUeOive Mloss 27oIrHunG; f0O;in3Now 2H; Gof 26;aHb1Fit,oGrBt0Qu1A;ff,n,v6;bo5ft6hMw3;aw3ba4d2in,oGrise,up,w3;ff,n,ut;ar 7ek0t G;aHb19d2in,oGrBup;ff,n,ut,v6;cHhGl23rBt,w3;ead;ross;d aHnG;g 1;bo5;a0Ae03iUlQoMrIuG;ck Ge28;arBup;eHighten GownAy 1;aw3oC;eGshe1U; 1z8;lIol G;aGwi1N;bo5rB;d 7low 1;aHeGip0;sh0;g 7ke0mGrGttenE;e 2Y;gNlLnJrHsGzzle0;h 2W;e Gm 1;aw3ba4up;d0isG;h 1;e Gl 1G;aw3fLin,o5;ht ba4ure0;eLnHsG;s 1;cId G;fGoC;or;e D;dYl 1;cKll Grm0t13;ap07bId2in,oHtG;hrough;ff,ut,v6;a4ehi27;e G;d2oCup;a0Ldge0nd 0Py8;oJrG;aHess 7op G;aw3bWin,o1U;gAwA; 0Iubl0Y;a00hXleaWoJrGut 16;ackAeep Goss D;by,d2in,oGup;n,ut;me JoHuntG; o1W;k 7l G;d2oC;aMbLforJin,oItHuG;nd6;ogeth6;n,ut,v6;th,wG;ard;a4y;pGrBw3;art;n 7;eGipF;ck Der G;on,up;lNncel0rKsItch HveF; in;o1Eup;h Dt G;doubt,oC;ry HvG;e 02;aw3o19;l HmE; d2;aGba4d2o16up;rBw3;a0Me0El07oYrLuG;bblIcklZil05lk 7ndlZrGst VtHy 16zz9;n 0AsG;t D;e G;ov6;anReaPiHush G;oCup;ghLng G;aIba4d2fGin,o5up;orG;th;bo5lGrBw3;ong;teG;n 1;k G;d2in,o5up;ch0;arNg 7iLn8oJssIttlHunce Gx D;aw3ba4;e 7; arB;k Dt 1;e 1;l 7;d2up;d 1;aLeed0oGurt0;cIw G;aw3ba4d2o5up;ck;k G;in,oX;ck0nk0st9; oLaJef 1nd G;d2ov6up;er;up;r0t G;d2in,oQup;ff,nG;to;ck Mil0nIrgHsG;h D;ainAe D;g DkA; on;in,o5; o5;aw3d2oGup;ff,ut;ay;cPdLsk Iuction9; oC;ff;arBo5;ouG;nd;d G;d2oGup;ff,n;own;t G;o5up;ut",
       "Participle": "true¦f4g3h2less6s1w0;ors5ritt5;e4h5;ast3e2;iv2one;l2r0;ight0;en;own",
       "Adj|Gerund": "true¦0:2C;1:2E;2:22;3:20;4:24;5:1X;a1Zb1Uc1Cd0Ze0Uf0Kg0Eh0Di07jud1Sl04m01oXpTrNsCt7up6veWw0Lyiel5;lif0sZ;aUe9hr7i3ouc22r6wis0;eZoub2us0yi1;ea0Ji6;l2vi1;l2mp0;atisf28creec1Xhoc0Bkyrocke0lo0ZoEpDt9u7we6;e0Yl2;pp1Gr6;gi1pri4roun5;a7ea1Zi6ri07un18;mula0r3;gge3r6;t2vi1;ark2ee5;a6ot1O;ki1ri1;aAe7ive0o6us1M;a3l2;defi0Zfres1Kig0ZlaCs0v6war5;ea2itali6ol0M;si1zi1;gi1ll1Smb2vi1;a1Rerple8ier19r6un1F;e6o0X;ce5s4vai2;xi1;ffs8pKut7ver6wi1;arc1Blap0Dri5whel1H;goi1l1Lst0U;et0;eande3i7o0Bu6;mb2;s4tiga0;a7i6o08;fesa07mi0vi1;cHg0Rs0;mAn6rri08;c8s7te13vi6;go1Cti1;pi3ul0;orpo1Area4;po4;arrowi1ea2orrif17umilia0;lAr6;a0ipWo7uel6;i1li1;undbrea6wi1;ki1;a3ea0W;aEetc0Pit0lBo9r7ulf6;il2;ee0Vigh6ust0Z;te01;r6un5;ebo5th0E;a7o6;a0we3;mi1tte3;di1scina0;m9n7x6;ac0ci0is0;ab2c6du3ga01sQ;han0oura00;barras4erZpowe3;aHeAi6;s6zz0K;appoin0gus0sen0t6;r6u0L;ac0es4;biliBcAfiKgra5m9pres4ser8v6;asAelo6;pi1;vi1;an5eaG;a0BliF;ta0;maMri1sYun0;aMhJlo4o6ripp2ut0;mCn6rrespon5;cerAf9spi3t6vinO;in7r6;as0ibu0ol2;ui1;lic0u4;ni1;fAm9p6;e7ro6;mi4;l2ti1;an5;or0;a6ea0il2;llen6rO;gi1;lMptiva0;e9in5lin5o7rui4u6;d5st2;i2oJri1un6;ci1;coH;bsoOcJgonHlarGmEppea2rCs6;pi3su3to6;n7un5;di1;is6;hi1;ri1;res0;li1;a9u4;si1;mi1;i6zi1;zi1;c6hi1;ele7ompan6;yi1;ra0;ti1;rbi1;ng",
       "Adj|Past": "true¦0:2T;1:2K;2:2N;3:23;a2Db28c1Qd1Ae14f0Zgift0h0Wi0Pj0Oknown,l0Lm0Gn0Eo0Bp04qua03rUsEtAu8v6w4;arp0ea4or6;kIth2N;a4e0V;ri0;ni4pd1s0;fi0t0;ar6hreatDr4wi2M;a4ou18;ck0in0pp0;get0ni1K;aHcaGeFhEimDm01oak0pBt7u4;bsid23gge2Hs4;pe4ta1O;ct0nd0;at0e6r4uV;ength4ip0;en0;am0reotyp0;eci4ik0ott0;al1Vfi0;pIul1;ar0ut;al0c1Fle2t1N;r0tt21;t4ut0;is3ur1;aBe4;c8duc0f19g7l1new0qu6s4;pe2t4;or0ri2;e1Yir0;ist1Tul1;eiv0o4;mme0Ard0v1R;lli0ti3;li3;arallel0l8o7r4ump0;e5o4;c0Ilo0Hnou1Ppos0te2;fe0Koc9pZ;i1Cli0P;a4e15;nn0;c5rgan17verlo4;ok0;cupi0;e4ot0;ed0gle2;a6e5ix0o4;di3t0E;as0Nlt0;n4rk0;ag0ufact0L;eft,i5o4;ad0st;cens0mit0st0;agg0us0K;mp9n4sol1;br0debt0f7t4volv0;e4ox0C;gr1n4re14;d0si3;e2oW;li0oMrov0;amm0We1o4;ok0r4;ri3;aNe7i6lavo06ocus0r4;a4i0;ct04g0Im0;niVx0;ar0;duc1n8quipp0stabliTx4;p4te6;a5e4;ct0rie0O;nd0;ha0MsW;aIeAi4;gni3miniMre2s4;a7c6grun01t4;o4rBurb0;rt0;iplPou05;bl0;cenTdMf8lay0pr7ra6t4velop0;a4ermM;il0;ng0;ess0;e5o4;rm0;rr0;mag0t0;alcul1eHharg0lGo9r6u4;lt4stomR;iv1;a5owd0u4;sh0;ck0mp0;d0lo9m6n4ok0vW;centr1s4troll0;idUolid1;b5pl4;ic1;in0;ur0;assi3os0;lebr1n6r4;ti3;fi0;tralB;a7i6o4urn0;il0r0t4und;tl0;as0;laJs0;bandon0cKdHffe2lEnCppAss8u4ward0;g5thor4;iz0;me4;nt0;o6u4;m0r0;li0re4;ci1;im1ticip1;at0;leg0t4;er0;ct0;ju5o7va4;nc0;st0;ce4knowledg0;pt0;ed",
@@ -21825,7 +21692,7 @@ var app = (function () {
     var unpack$3 = unpack$2;
 
     //words that can't be compressed, for whatever reason
-    let misc$6 = {
+    let misc$7 = {
       // numbers
       '20th century fox': 'Organization',
       '7 eleven': 'Organization',
@@ -21888,10 +21755,10 @@ var app = (function () {
       'shrunk': 'PastTense',
 
     };
-    var misc$7 = misc$6;
+    var misc$8 = misc$7;
 
     /** patterns for turning 'bus' to 'buses'*/
-    const suffixes$1 = {
+    const suffixes$4 = {
       a: [
         [/(antenn|formul|nebul|vertebr|vit)a$/i, '$1ae'],
         [/([ti])a$/i, '$1a'],
@@ -21926,7 +21793,7 @@ var app = (function () {
       y: [[/([^aeiouy]|qu)y$/i, '$1ies']],
       z: [[/(quiz)$/i, '$1zes']],
     };
-    var rules$2 = suffixes$1;
+    var rules$2 = suffixes$4;
 
     const addE = /([xsz]|ch|sh)$/;
 
@@ -21975,7 +21842,7 @@ var app = (function () {
     // more clever things are done on the data later
     //  - once the plugin is applied
     const hasSwitch = /\|/;
-    let lexicon = misc$7;
+    let lexicon = misc$8;
     let switches = {};
 
     const tmpModel$1 = { two: { irregularPlurals, uncountable: {} } };
@@ -21993,7 +21860,7 @@ var app = (function () {
       // add them as seperate key-val object
       Object.keys(wordsObj).forEach(w => {
         switches[w] = tag;
-        // pluralize Infinitive|Singular
+        // pluralize Noun|Verb switches
         if (tag === 'Noun|Verb') {
           let plural = nounToPlural(w, tmpModel$1);
           switches[plural] = 'Plural|Verb';
@@ -22238,13 +22105,13 @@ var app = (function () {
     // the commercial market
     // watching the commercial
 
-    const misc$5 = {
+    const misc$6 = {
       beforeTags: {
         Determiner: undefined //the premier university
       }
     };
     const clue$5 = {
-      beforeTags: Object.assign({}, adj$1.beforeTags, noun$1.beforeTags, misc$5.beforeTags),
+      beforeTags: Object.assign({}, adj$1.beforeTags, noun$1.beforeTags, misc$6.beforeTags),
       afterTags: Object.assign({}, adj$1.afterTags, noun$1.afterTags),
       beforeWords: Object.assign({}, adj$1.beforeWords, noun$1.beforeWords, {
         // are representative
@@ -22384,7 +22251,7 @@ var app = (function () {
     };
 
     // 'would mean' vs 'is mean'
-    const misc$4 = {
+    const misc$5 = {
       afterTags: {
         Noun: 'Adjective',//ruling party
         Conjunction: undefined //clean and excellent
@@ -22393,12 +22260,12 @@ var app = (function () {
     const clue$4 = {
       beforeTags: Object.assign({}, adj$1.beforeTags, verb.beforeTags, {
         // always clean
-        Adverb: undefined
+        Adverb: undefined, Negative: undefined
       }),
-      afterTags: Object.assign({}, adj$1.afterTags, verb.afterTags, misc$4.afterTags),
+      afterTags: Object.assign({}, adj$1.afterTags, verb.afterTags, misc$5.afterTags),
       beforeWords: Object.assign({}, adj$1.beforeWords, verb.beforeWords, {
         // have seperate contracts
-        have: undefined, had: undefined,
+        have: undefined, had: undefined, not: undefined,
         //went wrong, got wrong
         went: 'Adjective', goes: 'Adjective', got: 'Adjective',
         // be sure
@@ -22413,7 +22280,7 @@ var app = (function () {
     var adjPresent = clue$4;
 
     // 'operating the crane', or 'operating room'
-    const misc$3 = {
+    const misc$4 = {
       beforeTags: {
         Copula: 'Gerund', PastTense: 'Gerund', PresentTense: 'Gerund', Infinitive: 'Gerund'
       },
@@ -22433,10 +22300,10 @@ var app = (function () {
       },
     };
     const clue$3 = {
-      beforeTags: Object.assign({}, gerund.beforeTags, noun$1.beforeTags, misc$3.beforeTags),
-      afterTags: Object.assign({}, gerund.afterTags, noun$1.afterTags, misc$3.afterTags),
-      beforeWords: Object.assign({}, gerund.beforeWords, noun$1.beforeWords, misc$3.beforeWords),
-      afterWords: Object.assign({}, gerund.afterWords, noun$1.afterWords, misc$3.afterWords),
+      beforeTags: Object.assign({}, gerund.beforeTags, noun$1.beforeTags, misc$4.beforeTags),
+      afterTags: Object.assign({}, gerund.afterTags, noun$1.afterTags, misc$4.afterTags),
+      beforeWords: Object.assign({}, gerund.beforeWords, noun$1.beforeWords, misc$4.beforeWords),
+      afterWords: Object.assign({}, gerund.afterWords, noun$1.afterWords, misc$4.afterWords),
     };
     var nounGerund = clue$3;
 
@@ -22645,7 +22512,7 @@ var app = (function () {
       }),
       afterWords: copy(clues['Noun|Verb'].afterWords, {
         his: 'PresentTense', her: 'PresentTense', its: 'PresentTense',
-        in: null
+        in: null, to: null,
       }),
       beforeTags: copy(clues['Noun|Verb'].beforeTags, {
         Conjunction: 'PresentTense', //and changes
@@ -23045,7 +22912,7 @@ var app = (function () {
       n: [
         [/.[lsrnpb]ian$/, Adj, 'republican'],
         [/[^aeiou]ician$/, Actor, 'musician'],
-        [/[aeiou][ktrp]in$/, 'Gerund', "cookin'"], // 'cookin', 'hootin'
+        [/[aeiou][ktrp]in'$/, 'Gerund', "cookin'"], // 'cookin', 'hootin'
       ],
       o: [
         [/^no+$/, Exp, 'noooo'],
@@ -23144,8 +23011,6 @@ var app = (function () {
         ['PastTense', nn],
         ['Conjunction', nn],
         ['Modal', nn],
-        ['Pluperfect', nn],
-        ['PerfectTense', vb], //32%
       ],
       // looking at the next word:
       rightWords: [
@@ -23272,7 +23137,7 @@ var app = (function () {
 
     const prefix$2 = /^([0-9]+)/;
 
-    const expand$4 = function (key = '', val = '') {
+    const expand$2 = function (key = '', val = '') {
       val = String(val);
       let m = val.match(prefix$2);
       if (m === null) {
@@ -23288,7 +23153,7 @@ var app = (function () {
       const pipe = /\|/;
       return txt.split(/,/).map(str => {
         let a = str.split(pipe);
-        return expand$4(a[0], a[1])
+        return expand$2(a[0], a[1])
       })
     };
 
@@ -23939,6 +23804,283 @@ var app = (function () {
     // console.log(toPresent.rules.y)
     // console.log(convert('buy', toPresent))
 
+    //sweep-through all suffixes
+    const suffixLoop$1 = function (str = '', suffixes = []) {
+      const len = str.length;
+      let max = len <= 6 ? len - 1 : 6;
+      for (let i = max; i >= 1; i -= 1) {
+        let suffix = str.substring(len - i, str.length);
+        if (suffixes[suffix.length].hasOwnProperty(suffix) === true) {
+          let pre = str.slice(0, len - i);
+          let post = suffixes[suffix.length][suffix];
+          return pre + post
+        }
+      }
+      return null
+    };
+    var doRules = suffixLoop$1;
+
+    const s$1 = 'ically';
+    const ical = new Set([
+      'analyt' + s$1, //analytical
+      'chem' + s$1,// chemical
+      'class' + s$1, //classical
+      'clin' + s$1, // clinical
+      'crit' + s$1,// critical
+      'ecolog' + s$1,// ecological
+      'electr' + s$1,// electrical
+      'empir' + s$1, // empirical
+      'frant' + s$1, // frantical
+      'grammat' + s$1,// grammatical
+      'ident' + s$1, // identical
+      'ideolog' + s$1, // ideological
+      'log' + s$1, // logical
+      'mag' + s$1, //magical
+      'mathemat' + s$1,// mathematical
+      'mechan' + s$1,// mechanical
+      'med' + s$1,// medical
+      'method' + s$1, // methodical
+      'method' + s$1,// methodical
+      'mus' + s$1, // musical
+      'phys' + s$1, // physical
+      'phys' + s$1,// physical
+      'polit' + s$1,// political
+      'pract' + s$1,// practical
+      'rad' + s$1, //radical
+      'satir' + s$1, // satirical
+      'statist' + s$1, // statistical
+      'techn' + s$1,// technical
+      'technolog' + s$1, // technological
+      'theoret' + s$1,// theoretical
+      'typ' + s$1,// typical
+      'vert' + s$1,// vertical
+      'whims' + s$1,// whimsical
+    ]);
+
+    const suffixes$3 = [
+      null,
+      {},
+      { 'ly': '' },
+      {
+        'ily': 'y',
+        'bly': 'ble',
+        'ply': 'ple',
+      },
+      {
+        'ally': 'al',
+        'rply': 'rp',
+      },
+      {
+        'ually': 'ual',
+        'ially': 'ial',
+        'cally': 'cal',
+        'eally': 'eal',
+        'rally': 'ral',
+        'nally': 'nal',
+        'mally': 'mal',
+        'eeply': 'eep',
+        'eaply': 'eap',
+      },
+      {
+        ically: 'ic',
+      }
+    ];
+
+    const noAdj = new Set([
+      'early',
+      'only',
+      'hourly',
+      'daily',
+      'weekly',
+      'monthly',
+      'yearly',
+      'mostly',
+      'duly',
+      'unduly',
+      'especially',
+      'undoubtedly',
+      'conversely',
+      'namely',
+      'exceedingly',
+      'presumably',
+      'accordingly',
+      'overly',
+      'best',
+      'latter',
+      'little',
+      'long',
+      'low'
+    ]);
+
+    // exceptions to rules
+    const exceptions$4 = {
+      wholly: 'whole',
+      fully: 'full',
+      truly: 'true',
+      gently: 'gentle',
+      singly: 'single',
+      customarily: 'customary',
+      idly: 'idle',
+      publically: 'public',
+      quickly: 'fast',
+
+      well: 'good',// -?
+    };
+
+
+    const toAdjective = function (str) {
+      if (!str.endsWith('ly')) {
+        return null
+      }
+      // 'electronic' vs 'electronical'
+      if (ical.has(str)) {
+        return str.replace(/ically/, 'ical')
+      }
+      if (noAdj.has(str)) {
+        return null
+      }
+      if (exceptions$4.hasOwnProperty(str)) {
+        return exceptions$4[str]
+      }
+      return doRules(str, suffixes$3) || str
+    };
+    var advToAdjective = toAdjective;
+
+    // console.log(toAdjective('emphatically'))
+    // console.log(toAdjective('usually'))
+    // console.log(toAdjective('mechanically'))
+    // console.log(toAdjective('vertically'))
+
+    const suffixes$2 = [
+      null,
+      {
+        y: 'ily'
+      },
+      {
+        ly: 'ly',//unchanged
+        ic: 'ically'
+      },
+      {
+        ial: 'ially',
+        ual: 'ually',
+        tle: 'tly',
+        ble: 'bly',
+        ple: 'ply',
+        ary: 'arily',
+      },
+      {},
+      {},
+      {},
+    ];
+
+    const exceptions$3 = {
+      whole: 'wholly',
+      full: 'fully',
+      good: 'well',
+      idle: 'idly',
+      public: 'publicly',
+      single: 'singly',
+      special: 'especially',
+    };
+
+    // a lot of adjectives *don't really* have a adverb
+    // 'roomy' -> 'roomily'
+    // but here, conjugate what it would be, if it made sense to
+    const toAdverb = function (str) {
+      if (exceptions$3.hasOwnProperty(str)) {
+        return exceptions$3[str]
+      }
+      let res = doRules(str, suffixes$2);
+      if (res) {
+        return res
+      }
+      return str + 'ly'
+    };
+    var adjToAdverb = toAdverb;
+    // console.log(toAdverb('unsightly'))
+
+    const suffixes$1 = [
+      null,
+      {
+        'y': 'iness',
+      },
+      {
+        'le': 'ility',
+        'al': 'ality',
+        'ay': 'ayness',
+      },
+      {
+        'ial': 'y',
+        'ing': 'ment',
+        'ess': 'essness',
+        'ous': 'ousness',
+        'ive': 'ivity',
+        'ect': 'ection'
+      },
+      {
+        'ting': 'ting',
+        'ring': 'ring',
+        'cial': 'ciality',
+        'nate': 'nation',
+        'rate': 'ration',
+        'bing': 'bingness',
+        'atic': 'acy',//democratic
+        'sing': 'se',
+        'iful': 'y',//beautify, merciful
+        'ible': 'ibility'//credible
+      },
+      {
+        'erate': 'eration'
+
+      },
+      {
+        'ionate': 'ion'
+      },
+    ];
+
+    const exceptions$2 = {
+      clean: 'cleanliness',
+      naive: 'naivety',
+      dramatic: 'drama',
+      ironic: 'irony',
+      deep: 'depth',
+      automatic: 'automation',
+      simple: 'simplicity',
+      boring: 'boredom',
+      free: 'freedom',
+      wise: 'wisdom',
+      fortunate: 'fortune',
+      gentle: 'gentleness',
+      quiet: 'quiet',
+      expensive: 'expense',
+      offensive: 'offence'
+    };
+
+    const dontDo = new Set([
+      'terrible',
+      'annoying',
+    ]);
+
+    // a lot of adjectives *don't really* have a noun-form
+    // 'broken' -> 'brokeness'?
+    // 'surreal' -> 'surrealness'?
+    // but here, conjugate what it would be, if it made sense to
+    const toNoun = function (str) {
+      if (exceptions$2.hasOwnProperty(str)) {
+        return exceptions$2[str]
+      }
+      if (dontDo.has(str)) {
+        return null
+      }
+      let res = doRules(str, suffixes$1);
+      if (res) {
+        return res
+      }
+      return str + 'ness'
+    };
+    var adjToNoun = toNoun;
+    // console.log(toNoun('clever'))
+
     const adjToSuperlative = function (adj, model) {
       const mod = model.two.models.toSuperlative;
       return convert$1(adj, mod)
@@ -23961,7 +24103,9 @@ var app = (function () {
       verbToInfinitive: toInfinitive$7, getTense: getTense$2,
       verbConjugate: conjugate$1,
 
-      adjToSuperlative, adjToComparative, adjFromSuperlative, adjFromComparative
+      adjToSuperlative, adjToComparative, adjFromSuperlative, adjFromComparative,
+
+      advToAdjective, adjToAdverb, adjToNoun
     };
 
     // transformations to make on our lexicon
@@ -24000,21 +24144,24 @@ var app = (function () {
 
       // 'walk up' should conjugate, too
       PhrasalVerb: (word, lex, methods, model) => {
+        let already = model.one.lexicon;
         lex[word] = ['PhrasalVerb', 'Infinitive'];
         let _multi = model.one._multiCache;
         let [inf, rest] = word.split(' ');
         // add root verb
-        lex[inf] = lex[inf] || 'Infinitive';
+        if (!already[inf]) {
+          lex[inf] = lex[inf] || 'Infinitive';
+        }
         // conjugate it
         let all = methods.two.transform.verbConjugate(inf, model);
         Object.entries(all).forEach(a => {
           // not 'walker up', or 'had taken up'
-          if (a[0] === 'Actor' || a[0] === 'PerfectTense' || a[0] === 'Pluperfect' || a[1] === '') {
+          if (a[0] === 'Actor' || a[1] === '') {
             return
           }
           // add the root verb, alone
-          if (lex[a[1]] === undefined) {
-            lex[a[1]] = lex[a[1]] || a[0];
+          if (!lex[a[1]] && !already[a[1]]) {
+            lex[a[1]] = a[0];
           }
           _multi[a[1]] = true;
           let str = a[1] + ' ' + rest;
@@ -24044,7 +24191,7 @@ var app = (function () {
 
     // derive clever things from our lexicon key-value pairs
     // this method runs as the pre-tagger plugin gets loaded
-    const expand$3 = function (words, world) {
+    const expand$1 = function (words, world) {
       const { methods, model } = world;
       let lex = {};
       // console.log('start:', Object.keys(lex).length)
@@ -24071,7 +24218,7 @@ var app = (function () {
       delete lex[' '];
       return { lex, _multi }
     };
-    var expandLexicon$2 = expand$3;
+    var expandLexicon$2 = expand$1;
 
     // roughly, split a document by comma or semicolon
 
@@ -24120,7 +24267,7 @@ var app = (function () {
 
     var quickSplit$1 = quickSplit;
 
-    var methods$9 = {
+    var methods$a = {
       two: {
         quickSplit: quickSplit$1,
         expandLexicon: expandLexicon$2,
@@ -24211,8 +24358,8 @@ var app = (function () {
 
     const expandLexicon = function (words, model) {
       // do clever tricks to grow the words
-      const world = { model, methods: methods$9 };
-      let { lex, _multi } = methods$9.two.expandLexicon(words, world);
+      const world = { model, methods: methods$a };
+      let { lex, _multi } = methods$a.two.expandLexicon(words, world);
       // store multiple-word terms in a cache
       Object.assign(model.one.lexicon, lex);
       Object.assign(model.one._multiCache, _multi);
@@ -24273,7 +24420,7 @@ var app = (function () {
       return model
     };
 
-    const expand$2 = function (model) {
+    const expand = function (model) {
       model = expandLexicon(model.one.lexicon, model);
       model = addUncountables(model.one.lexicon, model);
       model = expandVariable(model.two.switches, model);
@@ -24281,7 +24428,7 @@ var app = (function () {
       model = expandIrregulars$1(model);
       return model
     };
-    var expandLexicon$1 = expand$2;
+    var expandLexicon$1 = expand;
 
     let model$1 = {
       one: {
@@ -24347,7 +24494,7 @@ var app = (function () {
     };
 
     // a faster version than the user-facing one in ./methods
-    const setTag$1 = function (term, tag, reason) {
+    const setTag = function (term, tag, reason) {
       if (!tag || tag.length === 0) {
         return
       }
@@ -24364,7 +24511,7 @@ var app = (function () {
       }
     };
 
-    var fastTag = setTag$1;
+    var fastTag = setTag;
 
     //similar to plural/singularize rules, but not the same
     const isPlural$4 = {
@@ -24391,6 +24538,13 @@ var app = (function () {
         'men',
       ]
     };
+    // plural words as exceptions to suffix-rules
+    const exceptions$1 = new Set([
+      'formulas',
+      'koalas',
+      'israelis',
+      'menus',
+    ]);
 
     const notPlural$1 = [
       'bus',
@@ -24409,7 +24563,6 @@ var app = (function () {
       'tis',//mantis, testis
       'xis',
       'aus',
-      'bus',
       'cus',
       'eus',//nucleus
       'fus',//doofus
@@ -24431,6 +24584,10 @@ var app = (function () {
       // not long enough to be plural
       if (!str || str.length <= 3) {
         return false
+      }
+      // 'menus' etc
+      if (exceptions$1.has(str)) {
+        return true
       }
       let end = str[str.length - 1];
       // look at 'firemen'
@@ -24891,12 +25048,13 @@ var app = (function () {
     const tagOrgs = function (terms, i, model) {
       const orgWords = model.two.orgWords;
       let term = terms[i];
-      if (orgWords[term.normal] === true && isOrg(terms[i - 1])) {
-        terms[i].tags.add('Organization');
+      let str = term.machine || term.normal;
+      if (orgWords[str] === true && isOrg(terms[i - 1])) {
+        fastTag(terms[i], 'Organization', '3-[org-word]');
         // loop backwards, tag organization-like things
-        for (let t = terms.length - 1; t >= 0; t -= 1) {
+        for (let t = i; t >= 0; t -= 1) {
           if (isOrg(terms[t])) {
-            terms[t].tags.add('Organization');
+            fastTag(terms[t], 'Organization', '3-[org-word]');
           } else {
             break
           }
@@ -25010,19 +25168,10 @@ var app = (function () {
       return tag
     };
 
-    const setTag = function (term, tag, model) {
-      if (!term.tags.has(tag)) {
-        term.tags.clear();
-        fastTag(term, tag, `3-[variable]`);
-        if (model.one.tagSet[tag]) {
-          let parents = model.one.tagSet[tag].parents;
-          fastTag(term, parents, `  -inferred by #${tag}`);
-        }
-      }
-    };
-
     // words like 'bob' that can change between two tags
-    const doSwitches = function (terms, i, model) {
+    const doSwitches = function (terms, i, world) {
+      const model = world.model;
+      const setTag = world.methods.one.setTag;
       const { switches, clues } = model.two;
       const term = terms[i];
       let str = term.normal || term.implicit || '';
@@ -25032,8 +25181,6 @@ var app = (function () {
       }
       if (term.switch) {
         let form = term.switch;
-        // console.log(`\n'${term.normal}'  : ${form}`)
-        // console.log(clues[form])
         // skip propernouns, acronyms, etc
         if (term.tags.has('Acronym') || term.tags.has('PhrasalVerb')) {
           return
@@ -25048,7 +25195,8 @@ var app = (function () {
           if (env.DEBUG_TAGS) {
             console.log(`\n  \x1b[32m [variable] - '${str}' - (${form}) → #${tag} \x1b[0m\n`);//eslint-disable-line
           }
-          setTag(term, tag, model);
+          // setTag(term, tag, model)
+          setTag([term], tag, world, null, `3-[variable]`);
         } else if (env.DEBUG_TAGS) {
           console.log(`\n -> X  - '${str}'  : ${form}  `);//eslint-disable-line
         }
@@ -25071,15 +25219,13 @@ var app = (function () {
       if (prefixes[term.normal] === true) {
         // 'over cooked'
         if (nextTerm.tags.has('Verb')) {
-          term.tags.clear();
-          term.tags.add('Verb');
-          term.tags.add('Prefix');
+          fastTag(term, 'Verb', '3-[prefix]');
+          fastTag(term, 'Prefix', '3-[prefix]');
         }
         // 'pseudo clean'
         if (nextTerm.tags.has('Adjective')) {
-          term.tags.clear();
-          term.tags.add('Adjective');
-          term.tags.add('Prefix');
+          fastTag(term, 'Adjective', '3-[prefix]');
+          fastTag(term, 'Prefix', '3-[prefix]');
         }
       }
 
@@ -25123,7 +25269,7 @@ var app = (function () {
       }
     };
 
-    const thirdPass = function (terms, model) {
+    const thirdPass = function (terms, model, world) {
       for (let i = 0; i < terms.length; i += 1) {
         // let these tags get layered
         let found = third.checkAcronym(terms, i, model);
@@ -25140,12 +25286,12 @@ var app = (function () {
         // support 'out-lived'
         second.checkHyphen(terms, i, model);
         // verb-noun disambiguation, etc
-        third.variables(terms, i, model);
+        third.variables(terms, i, world);
       }
     };
 
     const preTagger = function (view) {
-      const { methods, model } = view;
+      const { methods, model, world } = view;
       // assign known-words
       // view.compute('lexicon')
       // roughly split sentences up by clause
@@ -25157,7 +25303,7 @@ var app = (function () {
         // guess by the letters
         secondPass(terms, model);
         // guess by the neighbours
-        thirdPass(terms, model);
+        thirdPass(terms, model, world);
       }
       // leave a nice cache for the next people
       view.compute('cache');
@@ -25202,6 +25348,12 @@ var app = (function () {
       'Superlative': (term, world) => {
         let str = term.machine || term.normal || term.text;
         return world.methods.two.transform.adjFromSuperlative(str, world.model)
+      },
+      // 'suddenly' -> 'sudden'
+      'Adverb': (term, world) => {
+        const toAdj = world.methods.two.transform.advToAdjective;
+        let str = term.machine || term.normal || term.text;
+        return toAdj(str)
       },
     };
 
@@ -25321,7 +25473,7 @@ var app = (function () {
     };
     var penn = pennTag;
 
-    var compute$2 = { preTagger: preTagger$1, root, penn };
+    var compute$3 = { preTagger: preTagger$1, root, penn };
 
     const entity = ['Person', 'Place', 'Organization'];
 
@@ -25333,6 +25485,7 @@ var app = (function () {
         is: 'Noun',
         not: ['Plural'],
       },
+      // 'Canada'
       ProperNoun: {
         is: 'Noun',
       },
@@ -25356,6 +25509,7 @@ var app = (function () {
         is: 'Person',
         not: ['FirstName'],
       },
+      // 'dr.'
       Honorific: {
         is: 'Noun',
         not: ['FirstName', 'LastName', 'Value'],
@@ -25374,6 +25528,7 @@ var app = (function () {
         also: ['ProperNoun'],
         not: ['Country'],
       },
+      // 'california'
       Region: {
         is: 'Place',
         also: ['ProperNoun'],
@@ -25398,32 +25553,43 @@ var app = (function () {
         is: 'Noun',
         not: ['Singular'],
       },
+      // 'gravity'
       Uncountable: {
         is: 'Noun',
       },
+      // 'it'
       Pronoun: {
         is: 'Noun',
         not: entity,
       },
+      // 'swimmer'
       Actor: {
         is: 'Noun',
         not: entity,
       },
+      // walking
       Activity: {
         is: 'Noun',
         not: ['Person', 'Place'],
       },
+      // kilometres
       Unit: {
         is: 'Noun',
         not: entity,
       },
+      // canadian
       Demonym: {
         is: 'Noun',
         also: ['ProperNoun'],
         not: entity,
       },
+      // [spencer's] hat
       Possessive: {
         is: 'Noun',
+      },
+      // 'yourself'
+      Reflexive: {
+        is: 'Pronoun',
       },
     };
 
@@ -25431,52 +25597,56 @@ var app = (function () {
       Verb: {
         not: ['Noun', 'Adjective', 'Adverb', 'Value', 'Expression'],
       },
+      // 'he [walks]'
       PresentTense: {
         is: 'Verb',
         not: ['PastTense'],
       },
+      // 'will [walk]'
       Infinitive: {
         is: 'PresentTense',
         not: ['Gerund'],
       },
+      // '[walk] now!'
       Imperative: {
         is: 'Infinitive',
       },
+      // walking
       Gerund: {
         is: 'PresentTense',
         not: ['Copula'],
       },
+      // walked
       PastTense: {
         is: 'Verb',
         not: ['PresentTense', 'Gerund'],
       },
+      // is/was
       Copula: {
         is: 'Verb',
       },
+      // '[could] walk'
       Modal: {
         is: 'Verb',
         not: ['Infinitive'],
       },
-      PerfectTense: {
-        is: 'Verb',
-        not: ['Gerund'],
-      },
-      Pluperfect: {
-        is: 'Verb',
-      },
+      // 'awaken'
       Participle: {
         is: 'PastTense',
       },
-      PhrasalVerb: {
-        is: 'Verb',
-      },
-      Particle: {
-        is: 'PhrasalVerb',
-        not: ['PastTense', 'PresentTense', 'Copula', 'Gerund'],
-      },
+      // '[will have had] walked'
       Auxiliary: {
         is: 'Verb',
         not: ['PastTense', 'PresentTense', 'Gerund', 'Conjunction'],
+      },
+      // 'walk out'
+      PhrasalVerb: {
+        is: 'Verb',
+      },
+      // 'walk [out]'
+      Particle: {
+        is: 'PhrasalVerb',
+        not: ['PastTense', 'PresentTense', 'Copula', 'Gerund'],
       },
     };
 
@@ -25497,7 +25667,7 @@ var app = (function () {
         not: ['Noun'],
       },
       Multiple: {
-        is: 'Value',
+        is: 'TextValue',
       },
       RomanNumeral: {
         is: 'Cardinal',
@@ -25567,7 +25737,7 @@ var app = (function () {
 
     const anything = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Value', 'QuestionWord'];
 
-    var misc$2 = {
+    var misc$3 = {
       Adjective: {
         not: ['Noun', 'Verb', 'Adverb', 'Value'],
       },
@@ -25629,20 +25799,20 @@ var app = (function () {
         not: ['Plural', 'RomanNumeral'],
       },
       Negative: {
-        not: ['Noun', 'Adjective', 'Value'],
+        not: ['Noun', 'Adjective', 'Value', 'Expression'],
       },
       Condition: {
         not: ['Verb', 'Adjective', 'Noun', 'Value'],
-      },
+      }
     };
 
-    let allTags = Object.assign({}, nouns$1, verbs$2, values, dates$7, misc$2);
+    let allTags = Object.assign({}, nouns$1, verbs$2, values, dates$7, misc$3);
     // const tagSet = compute(allTags)
     var tags = allTags;
 
     var preTag = {
-      compute: compute$2,
-      methods: methods$9,
+      compute: compute$3,
+      methods: methods$a,
       model: model$2,
       tags,
       hooks: ['preTagger'],
@@ -25720,7 +25890,7 @@ var app = (function () {
       return str
     };
 
-    const api$c = function (View) {
+    const api$k = function (View) {
       /** */
       class Contractions extends View {
         constructor(document, pointer, groups) {
@@ -25758,7 +25928,7 @@ var app = (function () {
       View.prototype.contract = contract$1;
     };
 
-    var api$d = api$c;
+    var api$l = api$k;
 
     // put n new words where 1 word was
     const insertContraction = function (document, point, words) {
@@ -25882,17 +26052,21 @@ var app = (function () {
     const banList = {
       that: true,
       there: true,
-    };
-    const hereThere = {
+      let: true,
       here: true,
-      there: true,
       everywhere: true,
+    };
+
+    const beforePossessive = {
+      in: true,//in sunday's
+      by: true,//by sunday's
+      for: true,//for sunday's
     };
 
     const isPossessive = (terms, i) => {
       let term = terms[i];
       // these can't be possessive
-      if (hereThere.hasOwnProperty(term.machine)) {
+      if (banList.hasOwnProperty(term.machine || term.normal)) {
         return false
       }
       // if we already know it
@@ -25901,9 +26075,6 @@ var app = (function () {
       }
       //a pronoun can't be possessive - "he's house"
       if (term.tags.has('Pronoun') || term.tags.has('QuestionWord')) {
-        return false
-      }
-      if (banList.hasOwnProperty(term.normal)) {
         return false
       }
       //if end of sentence, it is possessive - "was spencer's"
@@ -25925,10 +26096,15 @@ var app = (function () {
       }
       //spencer's house
       if (nextTerm.tags.has('Noun')) {
+        let nextStr = nextTerm.machine || nextTerm.normal;
         // 'spencer's here'
-        if (hereThere.hasOwnProperty(nextTerm.normal) === true) {
+        if (nextStr === 'here' || nextStr === 'there' || nextStr === 'everywhere') {
           return false
         }
+        return true
+      }
+      // by sunday's final
+      if (terms[i - 1] && beforePossessive[terms[i - 1].normal] === true) {
         return true
       }
       //rocket's red glare
@@ -25962,7 +26138,7 @@ var app = (function () {
       s: (terms, i, world) => {
         // [bob's house] vs [bob's cool]
         if (isPossessive$1(terms, i)) {
-          return world.methods.one.setTag([terms[i]], 'Possessive', world)
+          return world.methods.one.setTag([terms[i]], 'Possessive', world, '2-contraction')
         }
         return apostropheS$2(terms, i)
       },
@@ -25973,7 +26149,7 @@ var app = (function () {
     };
 
     //really easy ones
-    const contractions = (view) => {
+    const contractionTwo$1 = (view) => {
       let { world, document } = view;
       // each sentence
       document.forEach((terms, n) => {
@@ -26003,9 +26179,13 @@ var app = (function () {
         }
       });
     };
-    var apostropheS = contractions;
+    var compute$2 = { contractionTwo: contractionTwo$1 };
 
-    var contractionTwo = { compute: { apostropheS }, api: api$d, hooks: ['apostropheS'] };
+    var contractionTwo = {
+      compute: compute$2,
+      api: api$l,
+      hooks: ['contractionTwo']
+    };
 
     var adj = [
       // all fell apart
@@ -26312,6 +26492,8 @@ var app = (function () {
       { match: 'do [so]', group: 0, tag: 'Noun', reason: 'so-noun' },
       // what the hell
       { match: '#Determiner [(shit|damn|hell)]', group: 0, tag: 'Noun', reason: 'swears-noun' },
+      // go to shit
+      { match: 'to [(shit|hell)]', group: 0, tag: 'Noun', reason: 'to-swears' },
       // the staff were
       { match: '(the|these) [#Singular] (were|are)', group: 0, tag: 'Plural', reason: 'singular-were' },
       // a comdominium, or simply condo
@@ -26369,13 +26551,17 @@ var app = (function () {
       // photographs of a computer are
       { match: '[#PresentTense] (of|by|for) (a|an|the) #Noun #Copula', group: 0, tag: 'Plural', reason: 'photographs-of' },
       // soft music playing
-      { match: '%Noun|Gerund%$', tag: 'Noun', reason: 'music-playing' },
-      // hopes and dreams
-      { match: '#Plural and [%Plural|Verb%]', group: 0, tag: 'Plural', reason: 'hopes-and-dreams' },
+      // { match: '%Noun|Gerund%$', tag: 'Noun', reason: 'music-playing' },
       // fight and win
       { match: '#Infinitive and [%Noun|Verb%]', group: 0, tag: 'Infinitive', reason: 'fight and win' },
+      // hopes and dreams
+      // { match: '#Noun and [%Plural|Verb%]', group: 0, tag: 'Plural', reason: 'hopes-and-dreams' },
+      // bride and groom
+      { match: '#Noun and [%Noun|Verb%]', group: 0, tag: 'Singular', ifNo: ['#ProperNoun'], reason: 'bride-and-groom' },
       // an impressionist painting
       { match: '#Determiner [%Adj|Noun%] #Noun', group: 0, tag: 'Adjective', ifNo: ['#ProperNoun'], reason: 'a-complex-relationship' },
+      // visit houses
+      { match: '^[%Noun|Verb%] #Noun', group: 0, tag: 'Verb', reason: 'visit-boards' },
     ];
 
     var gerundNouns = [
@@ -26747,6 +26933,8 @@ var app = (function () {
       { match: '#Singular #Acronym #LastName', tag: '#FirstName #Person .', reason: 'title-acro-noun', safe: true },
       //Foo Ford
       { match: '[#ProperNoun] #Person', group: 0, tag: 'Person', reason: 'proper-person', safe: true },
+      //Cliff Clavin
+      { match: '%Person|Noun% #ProperNoun', tag: 'Person', reason: 'switch-person', safe: true },
       // john keith jones
       {
         match: '#Person [#ProperNoun #ProperNoun]',
@@ -26998,6 +27186,12 @@ var app = (function () {
         tag: 'Auxiliary',
         reason: 'going-to-walk',
       },
+      // tell me
+      { match: '#Imperative [(me|him|her)]', group: 0, tag: 'Reflexive', reason: 'tell-him' },
+      // walk yourself
+      // { match: '#Imperative [#Reflexive]', group: 0, tag: 'Auxiliary', reason: 'tell-him' },
+      // there is no x
+      { match: '(is|was) #Adverb? [no]', group: 0, tag: 'Negative', reason: 'is-no' },
     ];
 
     var phrasal = [
@@ -27038,22 +27232,48 @@ var app = (function () {
     // this is really hard to do
     const notIf = ['i', 'we', 'they']; //we do not go
     var imperative = [
-
       // do not go
       { match: '^do not? [#Infinitive #Particle?]', notIf, group: 0, tag: 'Imperative', reason: 'do-eat' },
       // please go
       { match: '^please do? not? [#Infinitive #Particle?]', group: 0, tag: 'Imperative', reason: 'please-go' },
+      // just go
+      { match: '^just do? not? [#Infinitive #Particle?]', group: 0, tag: 'Imperative', reason: 'just-go' },
       // do it better
       { match: '^[#Infinitive] it #Comparative', notIf, group: 0, tag: 'Imperative', reason: 'do-it-better' },
       // do it again
       { match: '^[#Infinitive] it (please|now|again|plz)', notIf, group: 0, tag: 'Imperative', reason: 'do-it-please' },
       // go!
       // { match: '^[#Infinitive]$', group: 0, tag: 'Imperative', reason: 'go' },
-      { match: '^[#Infinitive] (#Adjective|#Adverb)$', group: 0, tag: 'Imperative', reason: 'go' },
+      // go quickly.
+      { match: '^[#Infinitive] (#Adjective|#Adverb)$', group: 0, tag: 'Imperative', ifNo: ['so', 'such', 'rather', 'enough'], reason: 'go-quickly' },
       // turn down the noise
       { match: '^[#Infinitive] (up|down|over) #Determiner', group: 0, tag: 'Imperative', reason: 'turn-down' },
       // eat my shorts
       { match: '^[#Infinitive] (your|my|the|some|a|an)', group: 0, tag: 'Imperative', reason: 'eat-my-shorts' },
+      // tell him the story
+      { match: '^[#Infinitive] (him|her|it|us|me)', group: 0, tag: 'Imperative', reason: 'tell-him' },
+      // one-word imperatives
+      { match: '^(go|stop|wait|hurry) please?$', tag: 'Imperative', reason: 'go' },
+      // somebody call
+      { match: '^(somebody|everybody) [#Infinitive]', group: 0, tag: 'Imperative', reason: 'somebody-call' },
+      // let's leave
+      { match: '^let (us|me) [#Infinitive]', group: 0, tag: 'Imperative', reason: 'lets-leave' },
+      // shut the door
+      { match: '^[(shut|close|open|start|stop|end|keep)] #Determiner #Noun', group: 0, tag: 'Imperative', reason: 'shut-the-door' },
+      // go to toronto
+      { match: '^[go] to .', group: 0, tag: 'Imperative', reason: 'go-to-toronto' },
+      // never say
+      { match: '^never [#Infinitive]', group: 0, tag: 'Imperative', reason: 'never-stop' },
+      // stay away
+      { match: '^stay (out|away|back)', tag: 'Imperative', reason: 'stay-away' },
+      // stay cool
+      { match: '^[stay] #Adjective', tag: 'Imperative', reason: 'stay-cool' },
+      // keep it silent
+      { match: '^[keep it] #Adjective', group: 0, tag: 'Imperative', reason: 'keep-it-cool' },
+      // don't be late
+      { match: '^do not [#Infinitive]', group: 0, tag: 'Imperative', reason: 'do-not-be' },
+      // allow yourself
+      { match: '[#Infinitive] (yourself|yourselves)', group: 0, tag: 'Imperative', reason: 'allow-yourself' },
     ];
 
     var adjGerund = [
@@ -27108,9 +27328,9 @@ var app = (function () {
       // dude we should
       { match: '^[(dude|man|girl)] #Pronoun', group: 0, tag: 'Expression', reason: 'dude-i' },
       // are welcome
-      { match: '#Copula [#Expression]', group: 0, tag: 'Noun', reason: 'are-welcome' },
+      // { match: '#Copula [#Expression]', group: 0, tag: 'Noun', reason: 'are-welcome' },
     ];
-    var misc$1 = matches$1;
+    var misc$2 = matches$1;
 
     // import orgWords from './_orgWords.js'
     // let orgMap = `(${orgWords.join('|')})`
@@ -27289,7 +27509,7 @@ var app = (function () {
       phrasal,
       imperative,
       adjGerund,
-      misc$1,
+      misc$2,
       orgs$1,
       places$1,
       conjunctions
@@ -27308,15 +27528,8 @@ var app = (function () {
       // perform these matches on a comma-seperated document
       let document = methods.two.quickSplit(view.document);
       let found = methods.two.bulkMatch(document, byGroup, methods);
-      // console.log(found.length, 'found')
       methods.two.bulkTagger(found, document, world);
       // 2nd time?
-      // let subset = new Set(found.map(todo => todo.pointer[0]))
-      // subset = Array.from(subset).map(n => document[n])
-      // found = methods.two.bulkMatch(subset, byGroup, methods)
-      // methods.two.bulkTagger(found, subset, world)
-      // leave a nice cache for the next person?
-      // view.compute('cache')
       view.uncache();
       return document
     };
@@ -27358,7 +27571,7 @@ var app = (function () {
       })
     };
 
-    const expand = function (matches) {
+    const buildUp = function (matches) {
       let all = [];
       matches.forEach(obj => {
         // expand simple '(one|two)' matches
@@ -27368,7 +27581,6 @@ var app = (function () {
           more.forEach(mo => {
             let newObj = Object.assign({}, obj); //clone
             newObj.regs = obj.regs.slice(0); //clone
-            // console.log(mo)
             newObj.regs[foundOr] = mo;
             newObj._expanded = true;
             all.push(newObj);
@@ -27393,7 +27605,7 @@ var app = (function () {
       return all
     };
 
-    var expand$1 = expand;
+    var buildUp$1 = buildUp;
 
     const cache = function (matches, methods) {
       const cacheMatch = methods.one.cacheMatch;
@@ -27423,8 +27635,8 @@ var app = (function () {
       // turn match-syntax into json
       matches = parse$7(matches, methods);
       // convert (a|b) to ['a', 'b']
-      matches = expand$1(matches);
-      matches = expand$1(matches); // run this twice
+      matches = buildUp$1(matches);
+      matches = buildUp$1(matches); // run this twice
       // retrieve the needs of each match statement
       matches = cache$1(matches, methods);
 
@@ -27602,7 +27814,7 @@ var app = (function () {
     };
     var canBe$1 = canBe;
 
-    var methods$8 = {
+    var methods$9 = {
       two: {
         compile: compile$1,
         bulkMatch,
@@ -27613,7 +27825,7 @@ var app = (function () {
 
     const round$1 = n => Math.round(n * 100) / 100;
 
-    function api$b (View) {
+    function api$j (View) {
       View.prototype.confidence = function () {
         let sum = 0;
         let count = 0;
@@ -27631,17 +27843,87 @@ var app = (function () {
     }
 
     const plugin$2 = {
-      api: api$b,
+      api: api$j,
       compute: compute$1,
-      methods: methods$8,
+      methods: methods$9,
       model,
       hooks: ['postTagger'],
     };
     var postTag = plugin$2;
 
+    const matchVerb = function (m, lemma) {
+      const conjugate = m.methods.two.transform.verbConjugate;
+      let all = conjugate(lemma, m.model);
+      if (m.has('#PastTense')) {
+        return all.PastTense
+      }
+      if (m.has('#PresentTense')) {
+        return all.PresentTense
+      }
+      if (m.has('#Gerund')) {
+        return all.Gerund
+      }
+      return lemma
+    };
+
+    const swapVerb = function (m, lemma) {
+      let str = lemma;
+      if (!m.has('#Infinitive')) {
+        str = matchVerb(m, lemma);
+      }
+      m.replaceWith(str);
+    };
+    var swapVerb$1 = swapVerb;
+
+    const swapNoun = function (m, lemma) {
+      let str = lemma;
+      if (m.has('#Plural')) {
+        const toPlural = m.methods.two.transform.nounToPlural;
+        str = toPlural(lemma, m.model);
+      }
+      m.replaceWith(str);
+    };
+
+    const swapAdverb = function (m, lemma) {
+      const toAdverb = m.methods.two.transform.adjToAdverb;
+      let str = lemma;
+      let adv = toAdverb(str);
+      if (adv) {
+        m.replaceWith(adv);
+      }
+    };
+
+    const swap$1 = function (from, to, tag) {
+      let m = this.match(`{${from}}`);
+      // guard against some homonyms
+      if (tag) {
+        m = m.if(tag);
+      }
+      if (m.has('#Verb')) {
+        return swapVerb$1(m, to)
+      }
+      if (m.has('#Noun')) {
+        return swapNoun(m, to)
+      }
+      if (m.has('#Adverb')) {
+        return swapAdverb(m, to)
+      }
+      return this
+    };
+    var swap$2 = swap$1;
+
+    const api$i = function (View) {
+      View.prototype.swap = swap$2;
+    };
+
+    var swap = {
+      api: api$i
+    };
+
     nlp$1.plugin(preTag); //~103kb  
     nlp$1.plugin(contractionTwo); //
     nlp$1.plugin(postTag); //~33kb
+    nlp$1.plugin(swap); //
 
     /* spencermountain/spacetime 6.13.0 Apache 2.0 */
     function _typeof(obj) {
@@ -28048,7 +28330,7 @@ var app = (function () {
       return h;
     }, {}); //try to match these against iana form
 
-    var normalize$5 = function normalize(tz) {
+    var normalize$6 = function normalize(tz) {
       tz = tz.replace(/ time/g, '');
       tz = tz.replace(/ (standard|daylight|summer)/g, '');
       tz = tz.replace(/\b(east|west|north|south)ern/g, '$1');
@@ -28082,7 +28364,7 @@ var app = (function () {
       } //lookup more loosely..
 
 
-      tz = normalize$5(tz);
+      tz = normalize$6(tz);
 
       if (zones.hasOwnProperty(tz) === true) {
         return tz;
@@ -28105,7 +28387,7 @@ var app = (function () {
       throw new Error("Spacetime: Cannot find timezone named: '" + str + "'. Please enter an IANA timezone id.");
     };
 
-    var find$c = lookupTz$2;
+    var find$d = lookupTz$2;
 
     var o$3 = {
       millisecond: 1
@@ -30405,7 +30687,7 @@ var app = (function () {
       var tz = s.tz;
 
       if (zones.hasOwnProperty(tz) === false) {
-        tz = find$c(s.tz, zones);
+        tz = find$d(s.tz, zones);
       }
 
       if (tz === null) {
@@ -30480,7 +30762,7 @@ var app = (function () {
         s = input$1(s, input$1$1, null);
 
         if (tz) {
-          this.tz = find$c(tz);
+          this.tz = find$d(tz);
         }
 
         return s;
@@ -30552,7 +30834,7 @@ var app = (function () {
       //travel to this timezone
       "goto": function goto(tz) {
         var s = this.clone();
-        s.tz = find$c(tz, s.timezones); //science!
+        s.tz = find$d(tz, s.timezones); //science!
 
         return s;
       },
@@ -31470,21 +31752,21 @@ var app = (function () {
     };
     var _03Year$1 = methods$1$2;
 
-    var methods$7 = Object.assign({}, _01Time$1, _02Date$1, _03Year$1); //aliases
+    var methods$8 = Object.assign({}, _01Time$1, _02Date$1, _03Year$1); //aliases
 
-    methods$7.milliseconds = methods$7.millisecond;
-    methods$7.seconds = methods$7.second;
-    methods$7.minutes = methods$7.minute;
-    methods$7.hours = methods$7.hour;
-    methods$7.hour24 = methods$7.hour;
-    methods$7.h12 = methods$7.hour12;
-    methods$7.h24 = methods$7.hour24;
-    methods$7.days = methods$7.day;
+    methods$8.milliseconds = methods$8.millisecond;
+    methods$8.seconds = methods$8.second;
+    methods$8.minutes = methods$8.minute;
+    methods$8.hours = methods$8.hour;
+    methods$8.hour24 = methods$8.hour;
+    methods$8.h12 = methods$8.hour12;
+    methods$8.h24 = methods$8.hour24;
+    methods$8.days = methods$8.day;
 
     var addMethods$4$2 = function addMethods(Space) {
       //hook the methods into prototype
-      Object.keys(methods$7).forEach(function (k) {
-        Space.prototype[k] = methods$7[k];
+      Object.keys(methods$8).forEach(function (k) {
+        Space.prototype[k] = methods$8[k];
       });
     };
 
@@ -31924,7 +32206,7 @@ var app = (function () {
       //the holy moment
       this.epoch = null; //the shift for the given timezone
 
-      this.tz = find$c(tz, timezones$2); //whether to output warnings to console
+      this.tz = find$d(tz, timezones$2); //whether to output warnings to console
 
       this.silent = options.silent || true; // favour british interpretation of 02/02/2018, etc
 
@@ -33454,7 +33736,7 @@ var app = (function () {
       return h;
     }, {}); //try to match these against iana form
 
-    var normalize$4 = function normalize(tz) {
+    var normalize$5 = function normalize(tz) {
       tz = tz.replace(/ time/g, '');
       tz = tz.replace(/ (standard|daylight|summer)/g, '');
       tz = tz.replace(/\b(east|west|north|south)ern/g, '$1');
@@ -33488,7 +33770,7 @@ var app = (function () {
       } //lookup more loosely..
 
 
-      tz = normalize$4(tz);
+      tz = normalize$5(tz);
 
       if (zones.hasOwnProperty(tz) === true) {
         return tz;
@@ -33511,7 +33793,7 @@ var app = (function () {
       throw new Error("Spacetime: Cannot find timezone named: '" + str + "'. Please enter an IANA timezone id.");
     };
 
-    var find$b = lookupTz$1;
+    var find$c = lookupTz$1;
 
     var o$2 = {
       millisecond: 1
@@ -35802,7 +36084,7 @@ var app = (function () {
       var tz = s.tz;
 
       if (zones.hasOwnProperty(tz) === false) {
-        tz = find$b(s.tz, zones);
+        tz = find$c(s.tz, zones);
       }
 
       if (tz === null) {
@@ -35871,13 +36153,13 @@ var app = (function () {
 
     var units$3$1 = ['century', 'decade', 'year', 'month', 'date', 'day', 'hour', 'minute', 'second', 'millisecond']; //the spacetime instance methods (also, the API)
 
-    var methods$6 = {
+    var methods$7 = {
       set: function set(input$1, tz) {
         var s = this.clone();
         s = input(s, input$1, null);
 
         if (tz) {
-          this.tz = find$b(tz);
+          this.tz = find$c(tz);
         }
 
         return s;
@@ -35949,7 +36231,7 @@ var app = (function () {
       //travel to this timezone
       "goto": function goto(tz) {
         var s = this.clone();
-        s.tz = find$b(tz, s.timezones); //science!
+        s.tz = find$c(tz, s.timezones); //science!
 
         return s;
       },
@@ -36033,10 +36315,10 @@ var app = (function () {
       }
     }; // aliases
 
-    methods$6.inDST = methods$6.isDST;
-    methods$6.round = methods$6.nearest;
-    methods$6.each = methods$6.every;
-    var methods_1 = methods$6;
+    methods$7.inDST = methods$7.isDST;
+    methods$7.round = methods$7.nearest;
+    methods$7.each = methods$7.every;
+    var methods_1 = methods$7;
 
     //these methods wrap around them.
 
@@ -37307,7 +37589,7 @@ var app = (function () {
       //the holy moment
       this.epoch = null; //the shift for the given timezone
 
-      this.tz = find$b(tz, timezones$1); //whether to output warnings to console
+      this.tz = find$c(tz, timezones$1); //whether to output warnings to console
 
       this.silent = options.silent || true; // favour british interpretation of 02/02/2018, etc
 
@@ -37487,62 +37769,6 @@ var app = (function () {
 
     var spacetime$1 = src;
 
-    // return the nth elem of a doc
-    const getNth$9 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
-
-    /** return anything tagged as a phone number */
-    const phoneNumbers = function (n) {
-      let m = this.splitAfter('@hasComma');
-      m = m.match('#PhoneNumber+');
-      m = getNth$9(m, n);
-      return m
-    };
-
-    // setup easy helper methods
-    const selections = [
-      ['hyphenated', '@hasHyphen .'],
-      ['adjectives', '#Adjective'],
-      ['hashTags', '#HashTag'],
-      ['emails', '#Email'],
-      ['emoji', '#Emoji'],
-      ['emoticons', '#Emoticon'],
-      ['atMentions', '#AtMention'],
-      ['urls', '#Url'],
-      ['adverbs', '#Adverb'],
-      ['pronouns', '#Pronoun'],
-      ['conjunctions', '#Conjunction'],
-      ['prepositions', '#Preposition'],
-      ['abbreviations', '#Abbreviation'],
-      ['acronyms', '#Acronym'],
-      ['possessives', '#Possessive'],
-    ];
-
-    // aliases
-    let aliases$2 = [
-      ['emojis', 'emoji'],
-      ['atmentions', 'atMentions'],
-      ['words', 'terms'],
-      ['things', 'entities'],
-      ['topics', 'entities'],
-    ];
-
-    const addMethods$5 = function (View) {
-      // add a list of new helper methods
-      selections.forEach(a => {
-        View.prototype[a[0]] = function (n) {
-          let m = this.match(a[1]);
-          return typeof n === 'number' ? m.get(n) : m
-        };
-      });
-      View.prototype.phoneNumbers = phoneNumbers;
-      // add aliases
-      aliases$2.forEach(a => {
-        View.prototype[a[0]] = View.prototype[a[1]];
-      });
-    };
-
-    var selections$1 = addMethods$5;
-
     const clauses = function (n) {
       // an awkward way to disambiguate a comma use
       let commas = this.if('@hasComma')
@@ -37603,102 +37829,11 @@ var app = (function () {
 
     var clauses$1 = clauses;
 
-    const pairs = {
-      '\u0022': '\u0022', // 'StraightDoubleQuotes'
-      '\uFF02': '\uFF02', // 'StraightDoubleQuotesWide'
-      '\u0027': '\u0027', // 'StraightSingleQuotes'
-      '\u201C': '\u201D', // 'CommaDoubleQuotes'
-      '\u2018': '\u2019', // 'CommaSingleQuotes'
-      '\u201F': '\u201D', // 'CurlyDoubleQuotesReversed'
-      '\u201B': '\u2019', // 'CurlySingleQuotesReversed'
-      '\u201E': '\u201D', // 'LowCurlyDoubleQuotes'
-      '\u2E42': '\u201D', // 'LowCurlyDoubleQuotesReversed'
-      '\u201A': '\u2019', // 'LowCurlySingleQuotes'
-      '\u00AB': '\u00BB', // 'AngleDoubleQuotes'
-      '\u2039': '\u203A', // 'AngleSingleQuotes'
-      // Prime 'non quotation'
-      '\u2035': '\u2032', // 'PrimeSingleQuotes'
-      '\u2036': '\u2033', // 'PrimeDoubleQuotes'
-      '\u2037': '\u2034', // 'PrimeTripleQuotes'
-      // Prime 'quotation' variation
-      '\u301D': '\u301E', // 'PrimeDoubleQuotes'
-      '\u0060': '\u00B4', // 'PrimeSingleQuotes'
-      '\u301F': '\u301E', // 'LowPrimeDoubleQuotesReversed'
-    };
-
-    const hasOpen$1 = RegExp('(' + Object.keys(pairs).join('|') + ')');
-
-    const findEnd$1 = function (terms, i) {
-      const have = terms[i].pre.match(hasOpen$1)[0] || '';
-      if (!have || !pairs[have]) {
-        return null
-      }
-      const want = pairs[have];
-      for (; i < terms.length; i += 1) {
-        if (terms[i].post && terms[i].post.match(want)) {
-          return i
-        }
-      }
-      return null
-    };
-
-    const find$a = function () {
-      let ptrs = [];
-      this.docs.forEach(terms => {
-        for (let i = 0; i < terms.length; i += 1) {
-          let term = terms[i];
-          if (term.pre && hasOpen$1.test(term.pre)) {
-            let end = findEnd$1(terms, i);
-            if (end !== null) {
-              let [n, start] = terms[i].index;
-              ptrs.push([n, start, end + 1, terms[i].id]);
-              i = end;
-            }
-          }
-        }
-      });
-      return this.update(ptrs)
-    };
-
-    var quotations = find$a;
-
-    const hasOpen = /\(/;
-    const hasClosed = /\)/;
-
-    const findEnd = function (terms, i) {
-      for (; i < terms.length; i += 1) {
-        if (terms[i].post && hasClosed.test(terms[i].post)) {
-          return i
-        }
-      }
-      return null
-    };
-
-    const find$9 = function () {
-      let ptrs = [];
-      this.docs.forEach(terms => {
-        for (let i = 0; i < terms.length; i += 1) {
-          let term = terms[i];
-          if (term.pre && hasOpen.test(term.pre)) {
-            let end = findEnd(terms, i);
-            if (end !== null) {
-              let [n, start] = terms[i].index;
-              ptrs.push([n, start, end + 1, terms[i].id]);
-              i = end;
-            }
-          }
-        }
-      });
-      return this.update(ptrs)
-    };
-
-    var parentheses = find$9;
-
-    const chunks = function (view) {
+    const chunks = function () {
       let carry = [];
       let roll = null;
       let same = null;
-      view.docs.forEach(terms => {
+      this.docs.forEach(terms => {
         terms.forEach(term => {
           // start a new chunk
           if (term.chunk !== same) {
@@ -37714,25 +37849,16 @@ var app = (function () {
       if (roll) {
         carry.push(roll);
       }
-      return view.update(carry)
+
+      return this.update(carry)
     };
     var getChunks = chunks;
 
-    const chunker$1 = function (View) {
-      View.prototype.chunks = function () {
-        return getChunks(this)
-      };
-
-      selections$1(View);
+    const api$g = function (View) {
+      View.prototype.chunks = getChunks;
       View.prototype.clauses = clauses$1;
-      View.prototype.quotations = quotations;
-      View.prototype.parentheses = parentheses;
     };
-    var api$a = chunker$1;
-
-    // const byWord = {
-    //   that: 'Conjunction',
-    // }
+    var api$h = api$g;
 
     // simply chunk Nouns as <Noun>
     const easyMode = function (document) {
@@ -37754,12 +37880,9 @@ var app = (function () {
           }
           //
           if (term.tags.has('QuestionWord')) {
-            term.chunk = 'Conjunction';
+            term.chunk = 'Pivot';
             continue
           }
-          // if (byWord.hasOwnProperty(term.normal)) {
-          //   term.chunk = byWord[term.normal]
-          // }
         }
       }
     };
@@ -37785,6 +37908,8 @@ var app = (function () {
       // === Verb ===
       // quickly run
       { match: '#Adverb+ {Verb}', chunk: 'Verb' },
+      // quickly and suddenly run
+      { match: '#Adverb+ and #Adverb #Verb', chunk: 'Verb' },
       // run quickly
       { match: '{Verb} #Adverb+', chunk: 'Verb' },
       // sitting near
@@ -37803,12 +37928,20 @@ var app = (function () {
       { match: '#Adverb #Negative', chunk: 'Verb' },
       // want to see
       { match: '(want|wants|wanted) to #Infinitive', chunk: 'Verb' },
+      // walk ourselves
+      { match: '#Verb #Reflexive', chunk: 'Verb' },
+      // tell him the story
+      { match: '#Verb [#Pronoun] #Determiner', group: 0, chunk: 'Verb' },
+      // tries to walk
+      { match: '#Verb [to] #Adverb? #Infinitive', group: 0, chunk: 'Verb' },
+      // upon seeing
+      { match: '[#Preposition] #Gerund', group: 0, chunk: 'Verb' },
 
       // === Noun ===
       // the brown fox
       { match: '#Determiner #Adjective+ #Noun', chunk: 'Noun' },
       // the fox
-      { match: '#Determiner <Noun>', chunk: 'Noun' },
+      { match: '(the|this) <Noun>', chunk: 'Noun' },
       // brown fox
       { match: '#Adjective+ <Noun>', chunk: 'Noun' },
       // --- of ---
@@ -37817,7 +37950,7 @@ var app = (function () {
       // --- in ---
       { match: '#Noun in #Determiner? #Noun', chunk: 'Noun' },
       // indoor and outdoor seating
-      { match: '#Noun and #Determiner? #Noun', chunk: 'Noun' },
+      { match: '#Singular and #Determiner? #Singular', chunk: 'Noun' },
       // that is why
       // { match: '[that] (is|was)', group: 0, chunk: 'Noun' },
     ];
@@ -37828,8 +37961,8 @@ var app = (function () {
       let terms = getDoc([todo.pointer], document)[0];
       const env = typeof process === 'undefined' ? self.env || {} : process.env;
       terms.forEach(term => {
-        if (term.chunk) {
-          return //don't overwrite
+        if (term.chunk === todo.chunk) {
+          return
         }
         if (env.DEBUG_CHUNKS) {
           let str = (term.normal + "'").padEnd(8);
@@ -37890,16 +38023,32 @@ var app = (function () {
     var fallback$1 = fallback;
 
     const fixUp = function (docs) {
+      let byChunk = [];
+      let current = null;
       docs.forEach(terms => {
         // ensure an adjective chunk is preceded by a copula
         for (let i = 0; i < terms.length; i += 1) {
           let term = terms[i];
-          if (term.tags.has('#Copula')) {
-            return
+          if (current && term.chunk === current) {
+            byChunk[byChunk.length - 1].terms.push(term);
+          } else {
+            byChunk.push({ chunk: term.chunk, terms: [term] });
+            current = term.chunk;
           }
-          if (term.chunk === 'Adjective') {
-            term.chunk = 'Noun';
-            // console.log(`✗ ${term.normal}`)
+        }
+      });
+      // ensure every verb-phrase actually has a verb
+      byChunk.forEach(c => {
+        if (c.chunk === 'Verb') {
+          const hasVerb = c.terms.find(t => t.tags.has('Verb'));
+          if (!hasVerb) {
+            c.terms.forEach(t => t.chunk = null);
+          }
+        }
+        if (c.chunk === 'Noun') {
+          const hasNoun = c.terms.find(t => t.tags.has('Noun'));
+          if (!hasNoun) {
+            c.terms.forEach(t => t.chunk = null);
           }
         }
       });
@@ -37908,9 +38057,9 @@ var app = (function () {
 
     /* Chunks:
         Noun
-        .Verb
+        Verb
         Adjective
-        Preposition
+        Pivot
     */
 
     const findChunks = function (view) {
@@ -37925,8 +38074,472 @@ var app = (function () {
 
     var chunker = {
       compute: compute,
-      api: api$a,
+      api: api$h,
       hooks: ['chunks'],
+    };
+
+    // return the nth elem of a doc
+    const getNth$e = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+    const apostropheS = /'s$/;
+
+    const find$b = function (doc) {
+      let m = doc.match('#Possessive+');
+      // expand it to include 'john smith's'
+      if (m.has('#Person')) {
+        m = m.growLeft('#Person+');
+      }
+      if (m.has('#Place')) {
+        m = m.growLeft('#Place+');
+      }
+      if (m.has('#Organization')) {
+        m = m.growLeft('#Organization+');
+      }
+      return m
+    };
+
+
+    const api$f = function (View) {
+
+      class Possessives extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Possessives';
+        }
+        strip() {
+          this.docs.forEach(terms => {
+            terms.forEach(term => {
+              term.text = term.text.replace(apostropheS, '');
+              term.normal = term.normal.replace(apostropheS, '');
+            });
+          });
+          return this
+        }
+      }
+
+      View.prototype.possessives = function (n) {
+        let m = find$b(this);
+        m = getNth$e(m, n);
+        return new Possessives(m.document, m.pointer)
+      };
+    };
+    var addPossessives = api$f;
+
+    const hasOpen$1 = /\(/;
+    const hasClosed$1 = /\)/;
+
+    const findEnd$1 = function (terms, i) {
+      for (; i < terms.length; i += 1) {
+        if (terms[i].post && hasClosed$1.test(terms[i].post)) {
+          return i
+        }
+      }
+      return null
+    };
+
+    const find$a = function (doc) {
+      let ptrs = [];
+      doc.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          let term = terms[i];
+          if (term.pre && hasOpen$1.test(term.pre)) {
+            let end = findEnd$1(terms, i);
+            if (end !== null) {
+              let [n, start] = terms[i].index;
+              ptrs.push([n, start, end + 1, terms[i].id]);
+              i = end;
+            }
+          }
+        }
+      });
+      return doc.update(ptrs)
+    };
+
+    const strip$1 = function (m) {
+      m.docs.forEach(terms => {
+        terms[0].pre = terms[0].pre.replace(hasOpen$1, '');
+        let last = terms[terms.length - 1];
+        last.post = last.post.replace(hasClosed$1, '');
+      });
+      return m
+    };
+
+    const getNth$d = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+
+    const api$e = function (View) {
+
+      class Parentheses extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Possessives';
+        }
+        strip() {
+          return strip$1(this)
+        }
+      }
+
+      View.prototype.parentheses = function (n) {
+        let m = find$a(this);
+        m = getNth$d(m, n);
+        return new Parentheses(m.document, m.pointer)
+      };
+    };
+    var addParentheses = api$e;
+
+    const pairs = {
+      '\u0022': '\u0022', // 'StraightDoubleQuotes'
+      '\uFF02': '\uFF02', // 'StraightDoubleQuotesWide'
+      '\u0027': '\u0027', // 'StraightSingleQuotes'
+      '\u201C': '\u201D', // 'CommaDoubleQuotes'
+      '\u2018': '\u2019', // 'CommaSingleQuotes'
+      '\u201F': '\u201D', // 'CurlyDoubleQuotesReversed'
+      '\u201B': '\u2019', // 'CurlySingleQuotesReversed'
+      '\u201E': '\u201D', // 'LowCurlyDoubleQuotes'
+      '\u2E42': '\u201D', // 'LowCurlyDoubleQuotesReversed'
+      '\u201A': '\u2019', // 'LowCurlySingleQuotes'
+      '\u00AB': '\u00BB', // 'AngleDoubleQuotes'
+      '\u2039': '\u203A', // 'AngleSingleQuotes'
+      // Prime 'non quotation'
+      '\u2035': '\u2032', // 'PrimeSingleQuotes'
+      '\u2036': '\u2033', // 'PrimeDoubleQuotes'
+      '\u2037': '\u2034', // 'PrimeTripleQuotes'
+      // Prime 'quotation' variation
+      '\u301D': '\u301E', // 'PrimeDoubleQuotes'
+      '\u0060': '\u00B4', // 'PrimeSingleQuotes'
+      '\u301F': '\u301E', // 'LowPrimeDoubleQuotesReversed'
+    };
+
+    const hasOpen = RegExp('(' + Object.keys(pairs).join('|') + ')');
+    const hasClosed = RegExp('(' + Object.values(pairs).join('|') + ')');
+
+    const findEnd = function (terms, i) {
+      const have = terms[i].pre.match(hasOpen)[0] || '';
+      if (!have || !pairs[have]) {
+        return null
+      }
+      const want = pairs[have];
+      for (; i < terms.length; i += 1) {
+        if (terms[i].post && terms[i].post.match(want)) {
+          return i
+        }
+      }
+      return null
+    };
+
+    const find$9 = function (doc) {
+      let ptrs = [];
+      doc.docs.forEach(terms => {
+        for (let i = 0; i < terms.length; i += 1) {
+          let term = terms[i];
+          if (term.pre && hasOpen.test(term.pre)) {
+            let end = findEnd(terms, i);
+            if (end !== null) {
+              let [n, start] = terms[i].index;
+              ptrs.push([n, start, end + 1, terms[i].id]);
+              i = end;
+            }
+          }
+        }
+      });
+      return doc.update(ptrs)
+    };
+
+    const strip = function (m) {
+      m.docs.forEach(terms => {
+        terms[0].pre = terms[0].pre.replace(hasOpen, '');
+        let lastTerm = terms[terms.length - 1];
+        lastTerm.post = lastTerm.post.replace(hasClosed, '');
+      });
+    };
+
+    const getNth$c = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+
+    const api$d = function (View) {
+
+      class Quotations extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Possessives';
+        }
+        strip() {
+          return strip(this)
+        }
+      }
+
+      View.prototype.quotations = function (n) {
+        let m = find$9(this);
+        m = getNth$c(m, n);
+        return new Quotations(m.document, m.pointer)
+      };
+    };
+    var addQuotations = api$d;
+
+    // return the nth elem of a doc
+    const getNth$b = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+    const hasPeriod = /\./g;
+
+    const api$c = function (View) {
+
+      class Acronyms extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Acronyms';
+        }
+        strip() {
+          this.docs.forEach(terms => {
+            terms.forEach(term => {
+              term.text = term.text.replace(hasPeriod, '');
+              term.normal = term.normal.replace(hasPeriod, '');
+            });
+          });
+          return this
+        }
+        addPeriods() {
+          this.docs.forEach(terms => {
+            terms.forEach(term => {
+              term.text = term.text.replace(hasPeriod, '');
+              term.normal = term.normal.replace(hasPeriod, '');
+              term.text = term.text.split('').join('.') + '.';
+              term.normal = term.normal.split('').join('.') + '.';
+            });
+          });
+          return this
+        }
+      }
+
+      View.prototype.acronyms = function (n) {
+        let m = this.match('#Acronym');
+        m = getNth$b(m, n);
+        return new Acronyms(m.document, m.pointer)
+      };
+    };
+    var addAcronyms = api$c;
+
+    // return the nth elem of a doc
+    const getNth$a = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+
+    const api$b = function (View) {
+
+      class Adverbs extends View {
+        constructor(document, pointer, groups) {
+          super(document, pointer, groups);
+          this.viewType = 'Adverbs';
+        }
+        json(opts = {}) {
+          const toAdj = this.methods.two.transform.advToAdjective;
+          opts.normal = true;
+          return this.map(m => {
+            let json = m.toView().json(opts)[0] || {};
+            json.adverb = {
+              adjective: toAdj(json.normal)
+            };
+            return json
+          }, [])
+        }
+      }
+
+      View.prototype.adverbs = function (n) {
+        let m = this.match('#Adverb');
+        m = getNth$a(m, n);
+        return new Adverbs(m.document, m.pointer)
+      };
+    };
+    var addAdverbs = api$b;
+
+    // return the nth elem of a doc
+    const getNth$9 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
+
+    /** return anything tagged as a phone number */
+    const phoneNumbers = function (n) {
+      let m = this.splitAfter('@hasComma');
+      m = m.match('#PhoneNumber+');
+      m = getNth$9(m, n);
+      return m
+    };
+
+    // setup easy helper methods
+    const selections = [
+      ['hyphenated', '@hasHyphen .'],
+      ['adjectives', '#Adjective'],
+      ['hashTags', '#HashTag'],
+      ['emails', '#Email'],
+      ['emoji', '#Emoji'],
+      ['emoticons', '#Emoticon'],
+      ['atMentions', '#AtMention'],
+      ['urls', '#Url'],
+      ['pronouns', '#Pronoun'],
+      ['conjunctions', '#Conjunction'],
+      ['prepositions', '#Preposition'],
+      ['abbreviations', '#Abbreviation'],
+      ['honorifics', '#Honorific'],
+    ];
+
+    // aliases
+    let aliases$2 = [
+      ['emojis', 'emoji'],
+      ['atmentions', 'atMentions'],
+    ];
+
+    const addMethods$5 = function (View) {
+      // add a list of new helper methods
+      selections.forEach(a => {
+        View.prototype[a[0]] = function (n) {
+          let m = this.match(a[1]);
+          return typeof n === 'number' ? m.get(n) : m
+        };
+      });
+      View.prototype.phoneNumbers = phoneNumbers;
+      // add aliases
+      aliases$2.forEach(a => {
+        View.prototype[a[0]] = View.prototype[a[1]];
+      });
+    };
+
+    var addSelections = addMethods$5;
+
+    var misc$1 = {
+      api: function (View) {
+        addSelections(View);
+        addPossessives(View);
+        addParentheses(View);
+        addQuotations(View);
+        addAdverbs(View);
+        addAcronyms(View);
+      }
+    };
+
+    const termLoop = function (view, cb) {
+      view.docs.forEach(terms => {
+        terms.forEach(cb);
+      });
+    };
+
+    var methods$6 = {
+      // remove titlecasing, uppercase
+      'case': (doc) => {
+        termLoop(doc, (term) => {
+          term.text = term.text.toLowerCase();
+        });
+      },
+      // visually romanize/anglicize 'Björk' into 'Bjork'.
+      'unicode': (doc) => {
+        const world = doc.world;
+        const killUnicode = world.methods.one.killUnicode;
+        termLoop(doc, (term) => term.text = killUnicode(term.text, world));
+      },
+      // remove hyphens, newlines, and force one space between words
+      'whitespace': (doc) => {
+        termLoop(doc, (term) => {
+          // one space between words
+          term.post = term.post.replace(/\s+/g, ' ');
+          term.post = term.post.replace(/\s([.,?!:;])/g, '$1');//no whitespace before a period, etc
+          // no whitepace before a word
+          term.pre = term.pre.replace(/\s+/g, '');
+        });
+      },
+      // remove commas, semicolons - but keep sentence-ending punctuation
+      'punctuation': (doc) => {
+        termLoop(doc, (term) => {
+          // turn dashes to spaces
+          term.post = term.post.replace(/[–—-]/g, ' ');
+          // remove comma, etc 
+          term.post = term.post.replace(/[,:;]/g, '');
+          // remove elipses
+          term.post = term.post.replace(/\.{2,}/g, '');
+          // remove repeats
+          term.post = term.post.replace(/\?{2,}/g, '?');
+          term.post = term.post.replace(/!{2,}/g, '!');
+          // replace ?!
+          term.post = term.post.replace(/\?!+/g, '?');
+        });
+        // trim end
+        let docs = doc.docs;
+        let terms = docs[docs.length - 1];
+        let lastTerm = terms[terms.length - 1];
+        lastTerm.post = lastTerm.post.replace(/ /g, '');
+      },
+
+      // ====== subsets ===
+
+      // turn "isn't" to "is not"
+      'contractions': (doc) => {
+        doc.contractions().expand();
+      },
+      //remove periods from acronyms, like 'F.B.I.'
+      'acronyms': (doc) => {
+        doc.acronyms().strip();
+      },
+      //remove words inside brackets (like these)
+      'parentheses': (doc) => {
+        doc.parentheses().strip();
+      },
+      // turn "Google's tax return" to "Google tax return"
+      'possessives': (doc) => {
+        doc.possessives().strip();
+      },
+      // turn "tax return" to tax return
+      'quotations': (doc) => {
+        doc.quotations().strip();
+      },
+
+      // remove them
+      'emoji': (doc) => {
+        doc.emojis().remove();
+      },
+      //turn 'Vice Admiral John Smith' to 'John Smith'
+      'honorifics': (doc) => {
+        doc.honorifics().remove();
+      },
+      // remove needless adverbs
+      'adverbs': (doc) => {
+        doc.adverbs().remove();
+      },
+
+      // turn "batmobiles" into "batmobile"
+      'nouns': (doc) => {
+        doc.nouns().toSingular();
+      },
+      // turn all verbs into Infinitive form - "I walked" → "I walk"
+      'verbs': (doc) => {
+        doc.verbs().toInfinitive();
+      },
+
+
+    };
+
+    // turn presets into key-vals
+    const split = (str) => {
+      return str.split('|').reduce((h, k) => {
+        h[k] = true;
+        return h
+      }, {})
+    };
+
+    const light = 'unicode|punctuation|whitespace|acronyms';
+    const medium = '|case|contractions|parentheses|quotations|emoji|honorifics';
+    const heavy = '|possessives|adverbs|nouns|verbs';
+    const presets = {
+      light: split(light),
+      medium: split(light + medium),
+      heavy: split(light + medium + heavy)
+    };
+
+    function api$a (View) {
+      View.prototype.normalize = function (opts = 'light') {
+        if (typeof opts === 'string') {
+          opts = presets[opts];
+        }
+        // run each method
+        Object.keys(opts).forEach(fn => {
+          if (opts[fn]) {
+            methods$6[fn](this, opts[fn]);
+          }
+        });
+        return this
+      };
+    }
+
+    var normalize$4 = {
+      api: api$a
     };
 
     const findNouns = function (doc) {
@@ -38218,6 +38831,9 @@ var app = (function () {
       m = m.filter(r => {
         return !r.lookBehind('#Value and$').found
       });
+      // thirty seconds
+      m = m.notIf('#Value seconds');
+
       if (typeof n === 'number') {
         m = m.eq(n);
       }
@@ -38876,8 +39492,8 @@ var app = (function () {
       if (!obj.numerator || !obj.denominator) {
         return ''
       }
-      let a = textCardinal(obj.numerator);
-      let b = textCardinal(obj.denominator);
+      let a = textCardinal({ num: obj.numerator });
+      let b = textCardinal({ num: obj.denominator });
       return `${a} out of ${b}`
     };
     var toCardinal$2 = toCardinal$1;
@@ -38924,8 +39540,8 @@ var app = (function () {
         return ''
       }
       // create [two] [fifths]
-      let start = textCardinal(obj.numerator);
-      let end = textOrdinal$1(obj.denominator);
+      let start = textCardinal({ num: obj.numerator });
+      let end = textOrdinal$1({ num: obj.denominator });
       // 'one secondth' -> 'one half'
       if (obj.denominator === 2) {
         end = 'half';
@@ -38989,6 +39605,9 @@ var app = (function () {
           getNth$7(this, n).forEach(m => {
             let obj = parseFraction$1(m);
             let str = toOrdinal$1(obj);
+            if (m.after('^#Noun').found) {
+              str += ' of'; // three fifths of dentists
+            }
             m.replaceWith(str);
           });
           return this
@@ -39106,33 +39725,34 @@ var app = (function () {
 
     var find$6 = findNumbers;
 
-    const parseNumeric = function (str, p, isFraction) {
+    const parseNumeric = function (str, m) {
       str = str.replace(/,/g, '');
-      //parse a numeric-number (easy)
-      let arr = str.split(/^([^0-9]*)([0-9.,]*)([^0-9]*)$/);
-      if (arr && arr[2] && p.terms().length < 2) {
-        let num = parseFloat(arr[2] || str);
+      //parse a numeric-number
+      let arr = str.split(/([0-9.,]*)/);
+      let [prefix, num] = arr;
+      let suffix = arr.slice(2).join('');
+      if (num !== '' && m.length < 2) {
+        num = Number(num || str);
         //ensure that num is an actual number
         if (typeof num !== 'number') {
           num = null;
         }
         // strip an ordinal off the suffix
-        let suffix = arr[3] || '';
+        suffix = suffix || '';
         if (suffix === 'st' || suffix === 'nd' || suffix === 'rd' || suffix === 'th') {
           suffix = '';
         }
         // support M for million, k for thousand
-        if (suffix === 'm' || suffix === 'M') {
-          num *= 1000000;
-          suffix = '';
-        }
-        if (suffix === 'k' || suffix === 'k') {
-          num *= 1000;
-          suffix = '';
-        }
-        num = isFraction ? 1 / num : num;
+        // if (suffix === 'm' || suffix === 'M') {
+        //   num *= 1000000
+        //   suffix = ''
+        // }
+        // if (suffix === 'k' || suffix === 'k') {
+        //   num *= 1000
+        //   suffix = ''
+        // }
         return {
-          prefix: arr[1] || '',
+          prefix: prefix || '',
           num: num,
           suffix: suffix,
         }
@@ -39149,10 +39769,12 @@ var app = (function () {
       // is it in '3,123' format?
       let hasComma = /[0-9],[0-9]/.test(m.text('text'));
       // parse a numeric-number like '$4.00'
-      let res = parseNumeric(str, m);
-      if (res !== null) {
-        res.hasComma = hasComma;
-        return res
+      if (m.terms().length === 1 && !m.has('#Multiple')) {
+        let res = parseNumeric(str, m);
+        if (res !== null) {
+          res.hasComma = hasComma;
+          return res
+        }
       }
       // -- parse text-formats --
       // Fractions: remove 'and a half' etc. from the end
@@ -39284,7 +39906,11 @@ var app = (function () {
         return prefix + textCardinal(obj) + suffix
       }
       // assume Cardinal
-      return obj.prefix + String(obj.num) + obj.suffix
+      let num = obj.num;
+      if (obj.hasComma) {
+        num = num.toLocaleString();
+      }
+      return obj.prefix + String(num) + obj.suffix
     };
     var format$3 = format$2;
 
@@ -39302,9 +39928,7 @@ var app = (function () {
           return getNth$6(this, n).map(parse$4)
         }
         get(n) {
-          return getNth$6(this, n)
-            .map(parse$4)
-            .map(o => o.num)
+          return getNth$6(this, n).map(parse$4).map(o => o.num)
         }
         json(n) {
           let doc = getNth$6(this, n);
@@ -39452,7 +40076,7 @@ var app = (function () {
           })
         }
         /** set these number to n */
-        set(n, agree) {
+        set(n) {
           if (n === undefined) {
             return this // don't bother
           }
@@ -39483,7 +40107,7 @@ var app = (function () {
           });
           return new Numbers(res.document, res.pointer)
         }
-        add(n, agree) {
+        add(n) {
           if (!n) {
             return this // don't bother
           }
@@ -39502,11 +40126,6 @@ var app = (function () {
               fmt = val.has('#Ordinal') ? 'TextOrdinal' : 'TextCardinal';
             }
             let str = format$3(obj, fmt);
-            val = val.not('#Currency');
-            // add commas to number
-            if (obj.hasComma && fmt === 'Cardinal') {
-              str = Number(str).toLocaleString();
-            }
             val.replaceWith(str, { tags: true });
             // handle plural/singular unit
             // agreeUnits(agree, val, obj)
@@ -39571,6 +40190,37 @@ var app = (function () {
       api: api$7,
     };
 
+    const defaults$2 = {
+      people: true,
+      emails: true,
+      phoneNumbers: true,
+      places: true,
+    };
+
+    const redact = function (opts = {}) {
+      opts = Object.assign({}, defaults$2, opts);
+      if (opts.people !== false) {
+        this.people().replaceWith('██████████');
+      }
+      if (opts.emails !== false) {
+        this.emails().replaceWith('██████████');
+      }
+      if (opts.places !== false) {
+        this.places().replaceWith('██████████');
+      }
+      if (opts.phoneNumbers !== false) {
+        this.phoneNumbers().replaceWith('███████');
+      }
+      return this
+    };
+
+    const plugin = {
+      api: function (View) {
+        View.prototype.redact = redact;
+      }
+    };
+    var redact$1 = plugin;
+
     //is this sentence asking a question?
     const isQuestion = function (doc) {
       let clauses = doc.clauses();
@@ -39617,9 +40267,9 @@ var app = (function () {
 
       // Clause starts with a question word
       // e.g., Anyway the wind blows, what doesn't really matter to me
-      if (clauses.has('^#QuestionWord')) {
-        return true
-      }
+      // if (clauses.has('^#QuestionWord')) {
+      //   return true
+      // }
 
       //is wayne gretskzy alive
       if (clauses.has('(do|does|is|was) #Noun+ #Adverb? (#Adjective|#Infinitive)$')) {
@@ -39648,27 +40298,91 @@ var app = (function () {
         return isQuestion(m)
       })
     };
-    var questions = findQuestions;
+    var isQuestion$1 = findQuestions;
 
-    const parse$2 = function () {
-      // let chunks = s.chunks().debug()
+    // if a clause starts with these, it's not a main clause
+    const subordinate = `(after|although|as|because|before|if|since|than|that|though|when|whenever|where|whereas|wherever|whether|while|why|unless|until|once)`;
+    const relative = `(that|which|whichever|who|whoever|whom|whose|whomever)`;
 
+    //try to remove secondary clauses
+    const mainClause = function (s) {
+      let m = s;
+      if (m.length === 1) {
+        return m
+      }
+      // if there's no verb, it's dependent
+      m = m.if('#Verb');
+      if (m.length === 1) {
+        return m
+      }
+      // this is a signal for subordinate-clauses
+      m = m.ifNo(subordinate);
+      m = m.ifNo('^even (if|though)');
+      m = m.ifNo('^so that');
+      m = m.ifNo('^rather than');
+      m = m.ifNo('^provided that');
+      if (m.length === 1) {
+        return m
+      }
+      // relative clauses
+      m = m.ifNo(relative);
+      if (m.length === 1) {
+        return m
+      }
+
+      m = m.ifNo('(despite|during|before|through|throughout)');
+      if (m.length === 1) {
+        return m
+      }
+      // did we go too far?
+      if (m.length === 0) {
+        m = s;
+      }
+      // choose the first one?
+      return m.eq(0)
+    };
+    var findMain = mainClause;
+
+    const parse$2 = function (s) {
+      let clauses = s.clauses();
+      let main = findMain(clauses);
+      let chunks = main.chunks();
+      let subj = s.none();
+      let verb = s.none();
+      let pred = s.none();
+      chunks.forEach((ch, i) => {
+        if (i === 0 && !ch.has('<Verb>')) {
+          subj = ch;
+          return
+        }
+        if (!verb.found && ch.has('<Verb>')) {
+          verb = ch;
+          return
+        }
+        if (verb.found) {
+          pred = pred.concat(ch);
+        }
+      });
+      // cleanup a missed parse
+      if (verb.found && !subj.found) {
+        subj = verb.before('<Noun>+').first();
+      }
       return {
-        // mainVerb:
+        subj,
+        verb,
+        pred
       }
     };
     var parse$3 = parse$2;
 
     const toPast$2 = function (s) {
       let verbs = s.verbs();
-
-      // already past
-      if (verbs.has('#PastTense')) {
-        return s
-      }
-
       // translate the first verb, no-stress
       let first = verbs.eq(0);
+      // already past
+      if (first.has('#PastTense')) {
+        return s
+      }
       first.toPastTense();
 
       // force agreement with any 2nd/3rd verbs:
@@ -39676,9 +40390,10 @@ var app = (function () {
         verbs = verbs.slice(1);
         // remove any sorta infinitive - 'to engage'
         verbs = verbs.filter((v) => !v.lookBehind('to$').found);
+
         // keep -ing verbs
         verbs = verbs.if('#PresentTense');
-        verbs = verbs.if('!#Gerund');
+        verbs = verbs.notIf('#Gerund');
 
         //run-on infinitive-list - 'to walk, sit and eat'
         let list = s.match('to #Verb+ #Conjunction #Verb').terms();
@@ -39696,7 +40411,35 @@ var app = (function () {
     var toPast$3 = toPast$2;
 
     const toPresent$2 = function (s) {
-      s.verbs().toPresentTense();
+      let verbs = s.verbs();
+      // translate the first verb, no-stress
+      let first = verbs.eq(0);
+      // already present
+      // if (first.has('#PresentTense')) {
+      //   return s
+      // }
+      first.toPresentTense();
+
+      // force agreement with any 2nd/3rd verbs:
+      if (verbs.length > 1) {
+        verbs = verbs.slice(1);
+        // remove any sorta infinitive - 'to engage'
+        verbs = verbs.filter((v) => !v.lookBehind('to$').found);
+
+        // keep -ing verbs
+        // verbs = verbs.if('#PresentTense')
+        verbs = verbs.notIf('#Gerund');
+
+        //run-on infinitive-list - 'to walk, sit and eat'
+        // let list = s.match('to #Verb+ #Conjunction #Verb').terms()
+        // verbs = verbs.not(list)
+
+        // otherwise, I guess so?
+        if (verbs.found) {
+          verbs.verbs().toPresentTense();
+        }
+      }
+
       // s.compute('chunks')
       return s
     };
@@ -39704,11 +40447,9 @@ var app = (function () {
 
     const toFuture$2 = function (s) {
       let verbs = s.verbs();
-
       // translate the first verb, no-stress
       let first = verbs.eq(0);
       first.toFutureTense();
-
       s = s.fullSentence();
       verbs = s.verbs();//re-do it
       // verbs.debug()
@@ -39717,19 +40458,26 @@ var app = (function () {
         verbs = verbs.slice(1);
         // remove any sorta infinitive - 'to engage'
         verbs = verbs.filter((v) => !v.lookBehind('to$').found);
-
         // verbs.debug()
         // otherwise, I guess so?
         if (verbs.found) {
-          verbs.verbs().toFutureTense();
+          verbs.verbs().toInfinitive();
         }
       }
-
       // s = s.fullSentence()
       // s.compute('chunks')
       return s
     };
     var toFuture$3 = toFuture$2;
+
+    const toNegative$2 = function (s) {
+      s.verbs().first().toNegative().compute('chunks');
+      return s
+    };
+    const toPositive = function (s) {
+      s.verbs().first().toPositive().compute('chunks');
+      return s
+    };
 
     const toInfinitive$4 = function (s) {
       s.verbs().toInfinitive();
@@ -39747,36 +40495,65 @@ var app = (function () {
           super(document, pointer, groups);
           this.viewType = 'Sentences';
         }
+        json(opts = {}) {
+          return this.map(m => {
+            let json = m.toView().json(opts)[0] || {};
+            let { subj, verb, pred } = parse$3(m);
+            json.sentence = {
+              subject: subj.text('normal'),
+              verb: verb.text('normal'),
+              predicate: pred.text('normal'),
+            };
+            return json
+          }, [])
+        }
         toPastTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toPast$3(vb, parsed)
+          return getNth$5(this, n).map(s => {
+            let parsed = parse$3(s);
+            return toPast$3(s, parsed)
           })
         }
         toPresentTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toPresent$3(vb, parsed)
+          return getNth$5(this, n).map(s => {
+            let parsed = parse$3(s);
+            return toPresent$3(s, parsed)
           })
         }
         toFutureTense(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toFuture$3(vb, parsed)
+          return getNth$5(this, n).map(s => {
+            let parsed = parse$3(s);
+            s = toFuture$3(s, parsed);
+            return s
           })
         }
         toInfinitive(n) {
-          return getNth$5(this, n).map(vb => {
-            let parsed = parse$3(vb);
-            return toInfinitive$5(vb, parsed)
+          return getNth$5(this, n).map(s => {
+            let parsed = parse$3(s);
+            return toInfinitive$5(s, parsed)
           })
         }
-        toNegative() {
-          // return getNth(this, n).map(vb => {
-          //   let parsed = parse(vb)
-          //   return toInfinitive(vb, parsed)
-          // })
-          return this
+        toNegative(n) {
+          return getNth$5(this, n).map(vb => {
+            let parsed = parse$3(vb);
+            return toNegative$2(vb, parsed)
+          })
+        }
+        toPositive(n) {
+          return getNth$5(this, n).map(vb => {
+            let parsed = parse$3(vb);
+            return toPositive(vb, parsed)
+          })
+        }
+        isQuestion(n) {
+          return this.questions(n)
+        }
+        isExclamation(n) {
+          let res = this.filter(s => s.lastTerm().has('@hasExclamation'));
+          return getNth$5(res, n)
+        }
+        isStatement(n) {
+          let res = this.filter(s => !s.isExclamation().found && !s.isQuestion().found);
+          return getNth$5(res, n)
         }
         // overloaded - keep Sentences class
         update(pointer) {
@@ -39797,7 +40574,7 @@ var app = (function () {
           return new Sentences(this.document, m.pointer)
         },
         questions: function (n) {
-          let m = questions(this);
+          let m = isQuestion$1(this);
           return getNth$5(m, n)
         },
       };
@@ -39989,7 +40766,6 @@ var app = (function () {
     const getNth$3 = (doc, n) => (typeof n === 'number' ? doc.eq(n) : doc);
 
     const addMethod = function (View) {
-
       View.prototype.places = function (n) {
         let m = find$3(this);
         m = getNth$3(m, n);
@@ -40021,26 +40797,24 @@ var app = (function () {
       m = m.concat(r.organizations());
       m = m.not('(someone|man|woman|mother|brother|sister|father)');
       //return them to normal ordering
-      m.sort('sequence');
-      // yup.unique() //? not sure
+      m = m.sort('seq');
+      // m = m.unique()
       m = getNth$1(m, n);
       return m
     };
 
     const api$3 = function (View) {
       View.prototype.topics = find$1;
-      // aliases
-      View.prototype.entities = find$1;
     };
-    var topics = api$3;
+    var topics$1 = api$3;
 
     const api$2 = function (View) {
       people(View);
       places(View);
       orgs(View);
-      topics(View);
+      topics$1(View);
     };
-    var subjects = { api: api$2 };
+    var topics = { api: api$2 };
 
     const findVerbs = function (doc) {
       let m = doc.match('<Verb>');
@@ -40072,6 +40846,8 @@ var app = (function () {
       if (toVerbs.found && !toVerbs.has('^go')) {
         m = m.splitBefore('(#PresentTense|#PastTense) [#Infinitive]', 0);
       }
+      // 'allow yourself'
+      m = m.not('#Reflexive$');
       //ensure there's actually a verb
       m = m.if('#Verb');
       // the reason he will is ...
@@ -40120,7 +40896,7 @@ var app = (function () {
         }
       }
       // it must be the second one
-      if (parts.eq(0).is(root)) {
+      if (parts.eq(0).isDoc(root)) {
         res.post = parts.eq(1).adverbs();
         return res
       }
@@ -40251,6 +41027,8 @@ var app = (function () {
       'past-perfect': [
         // he had walked
         ['^had #PastTense$', [past, complete]],
+        // had been to see
+        ['^had #PastTense to #Infinitive', [past, complete]],
       ],
       'future-perfect': [
         // he will have
@@ -40360,8 +41138,8 @@ var app = (function () {
         vb.remove(res.adverbs.pre);
       }
       // remove negatives
-      if (vb.has('not')) {
-        vb = vb.remove('not');
+      if (vb.has('#Negative')) {
+        vb = vb.remove('#Negative');
       }
       // remove prefixes like 'anti'
       if (vb.has('#Prefix')) {
@@ -40420,7 +41198,7 @@ var app = (function () {
       let parts = before.clauses();
       parts = parts.filter((m, i) => {
         // if it was raining..
-        if (m.has('^(if|unless|while|but|for|per)')) {
+        if (m.has('^(if|unless|while|but|for|per|at|by|that|which|who|from)')) {
           return false
         }
         // bowed to her,
@@ -40482,10 +41260,10 @@ var app = (function () {
 
     const isPlural$1 = function (subj, vb) {
       // 'we are' vs 'he is'
-      if (vb.has('are')) {
+      if (vb.has('(are|were|does)')) {
         return true
       }
-      if (subj.has('(those|they)')) {
+      if (subj.has('(those|they|we)')) {
         return true
       }
       if (subj.found && subj.isPlural) {
@@ -40512,6 +41290,14 @@ var app = (function () {
         return true
       }
       return subj.plural
+    };
+
+    const wasWere = (vb, parsed) => {
+      let { subject, plural } = getSubject$1(vb, parsed);
+      if (plural || subject.has('we')) {
+        return 'were'
+      }
+      return 'was'
     };
 
     // present-tense copula
@@ -40545,17 +41331,6 @@ var app = (function () {
       return 'does'
     };
 
-    const toInf = function (vb, parsed) {
-      const { verbToInfinitive } = vb.methods.two.transform;
-      let str = parsed.root.text({ keepPunct: false });
-      str = verbToInfinitive(str, vb.model);
-      if (str) {
-        vb.replace(parsed.root, str);
-      }
-      return vb
-    };
-
-
     const getTense = function (m) {
       if (m.has('#Participle')) {
         return 'Participle'
@@ -40570,6 +41345,27 @@ var app = (function () {
         return 'PresentTense'
       }
       return undefined
+    };
+
+    const toInf = function (vb, parsed) {
+      const { verbToInfinitive } = vb.methods.two.transform;
+      let str = parsed.root.text({ keepPunct: false });
+      str = verbToInfinitive(str, vb.model, getTense(vb));
+      if (str) {
+        vb.replace(parsed.root, str);
+      }
+      return vb
+    };
+
+
+
+    // i will start looking -> i started looking
+    // i will not start looking -> i did not start looking
+    const noWill = (vb) => {
+      if (vb.has('will not')) {
+        return vb.replace('will not', 'have not')
+      }
+      return vb.remove('will')
     };
 
     const toArray = function (m) {
@@ -40656,6 +41452,10 @@ var app = (function () {
       simple: (vb, parsed) => {
         const { verbConjugate, verbToInfinitive } = vb.methods.two.transform;
         const root = parsed.root;
+        // 'i may'
+        if (root.has('#Modal')) {
+          return vb
+        }
         let str = root.text({ keepPunct: false });
         str = verbToInfinitive(str, vb.model, getTense(root));
         let all = verbConjugate(str, vb.model);
@@ -40664,8 +41464,8 @@ var app = (function () {
         // all.Participle || all.PastTense
         // but skip the 'is' participle..
         str = str === 'been' ? 'was' : str;
-        if (str === 'was' && isPlural(vb, parsed)) {
-          str = 'were';
+        if (str === 'was') {
+          str = wasWere(vb, parsed);
         }
         if (str) {
           vb.replace(root, str, keep$5);
@@ -40699,6 +41499,8 @@ var app = (function () {
         str = verbToInfinitive(str, vb.model, getTense(root));
         return verbConjugate(str, vb.model).Participle
       },
+
+
 
     };
 
@@ -40735,7 +41537,10 @@ var app = (function () {
       // will have walked -> had walked
       'future-perfect': (vb, parsed) => {
         vb.match(parsed.root).insertBefore('had');
-        vb.remove('(will|have)');
+        if (vb.has('will')) {
+          vb = noWill(vb);
+        }
+        vb.remove('have');
         return vb
       },
 
@@ -40823,7 +41628,8 @@ var app = (function () {
       'gerund-phrase': (vb, parsed) => {
         parsed.root = parsed.root.not('#Gerund$');
         fns$1.simple(vb, parsed);
-        return vb.remove('will')
+        noWill(vb);
+        return vb
       },
     };
 
@@ -40859,6 +41665,7 @@ var app = (function () {
         vb = vb.replace(root, str, keep$4);
         vb.not('#Particle').tag('PresentTense');
       }
+      // vb.replace('not ' + str, str + ' not')
       return vb
     };
 
@@ -40924,6 +41731,7 @@ var app = (function () {
           let str = isAreAm(vb, parsed);
           vb.replace(root, str);
           vb = vb.remove('will');
+          vb.replace('not ' + str, str + ' not');
         } else {
           simple$1(vb, parsed);
           vb = vb.remove('will');
@@ -40948,7 +41756,7 @@ var app = (function () {
       // has walked ->  (?)
       'present-perfect': (vb, parsed) => {
         simple$1(vb, parsed);
-        vb = vb.remove('(have|had)');
+        vb = vb.remove('(have|had|has)');
         return vb
       },
 
@@ -41072,6 +41880,10 @@ var app = (function () {
     const simple = (vb, parsed) => {
       const { verbToInfinitive } = vb.methods.two.transform;
       const { root, auxiliary } = parsed;
+      // 'i may'
+      if (root.has('#Modal')) {
+        return vb
+      }
       let str = root.text('normal');
       str = verbToInfinitive(str, vb.model, getTense(root));
       if (str) {
@@ -41217,24 +42029,31 @@ var app = (function () {
 
     // all verb forms are the same
     const toGerund = function (vb, parsed) {
+      // console.log(form)
       const { verbToInfinitive, verbConjugate } = vb.methods.two.transform;
       const { root, auxiliary } = parsed;
       if (vb.has('#Gerund')) {
         return vb
       }
+
+      // conjugate '-ing' verb
       let str = root.text('normal');
       str = verbToInfinitive(str, vb.model, getTense(root));
       let gerund = verbConjugate(str, vb.model).Gerund;
+      // 'are walking', 'is walking'
       if (gerund) {
+        gerund = `${isAreAm(vb, parsed)} ${gerund}`;
+        // console.log(root, gerund)
+        // vb.match(root).debug()
         vb.replace(root, gerund, keep$2);
       }
-      // remove any auxiliary
+
+      // remove any existing auxiliary
       if (auxiliary.found) {
-        auxiliary.terms().forEach(m => {
-          vb.remove(m); //super awkward
-        });
+        vb.remove(auxiliary);
       }
-      // remove any auxiliary
+      vb.replace('not is', 'is not');
+      vb.replace('not are', 'are not');
       vb.fullSentence().compute(['preTagger', 'postTagger', 'chunks']);
       return vb
     };
@@ -41291,6 +42110,7 @@ var app = (function () {
         }
         // he walk
         vb = toInf(vb, parsed);
+        // vb.debug()
         // did not walk
         vb.prepend('did not');
         return vb
@@ -41412,6 +42232,9 @@ var app = (function () {
             return getSubject$1(vb, parsed).subject
           })
         }
+        adverbs(n) {
+          return getNth(this, n).map(vb => vb.match('#Adverb'))
+        }
         isSingular(n) {
           return getNth(this, n).filter(vb => {
             return getSubject$1(vb).plural !== true
@@ -41519,44 +42342,15 @@ var app = (function () {
       api: api$1,
     };
 
-    const defaults$2 = {
-      people: true,
-      emails: true,
-      phoneNumbers: true,
-      places: true,
-    };
-
-    const redact = function (opts = {}) {
-      opts = Object.assign({}, defaults$2, opts);
-      if (opts.people !== false) {
-        this.people().replaceWith('██████████');
-      }
-      if (opts.emails !== false) {
-        this.emails().replaceWith('██████████');
-      }
-      if (opts.places !== false) {
-        this.places().replaceWith('██████████');
-      }
-      if (opts.phoneNumbers !== false) {
-        this.phoneNumbers().replaceWith('███████');
-      }
-      return this
-    };
-
-    const plugin = {
-      api: function (View) {
-        View.prototype.redact = redact;
-      }
-    };
-    var redact$1 = plugin;
-
     nlp$1.plugin(chunker); //
+    nlp$1.plugin(misc$1); //
+    nlp$1.plugin(normalize$4); //
     nlp$1.plugin(nouns); //
     nlp$1.plugin(numbers); //
-    nlp$1.plugin(sentences); //
-    nlp$1.plugin(subjects); //
-    nlp$1.plugin(verbs); //
     nlp$1.plugin(redact$1); //
+    nlp$1.plugin(sentences); //
+    nlp$1.plugin(topics); //
+    nlp$1.plugin(verbs); //
 
     const MSEC_IN_HOUR = 60 * 60 * 1000;
 
@@ -46155,7 +46949,7 @@ var app = (function () {
       return null
     };
 
-    const a={second:!0,minute:!0,hour:!0,day:!0,week:!0,weekend:!0,month:!0,season:!0,quarter:!0,year:!0},n={wk:"week",min:"minute",sec:"second",weekend:"week"},i=function(t){let e=t.match("#Duration").text("normal");return e=e.replace(/s$/,""),n.hasOwnProperty(e)&&(e=n[e]),e},r={minute:!0},s={daybreak:"7:00am",breakfast:"8:00am",morning:"9:00am",noon:"12:00pm",midday:"12:00pm",afternoon:"2:00pm",lunchtime:"12:00pm",evening:"6:00pm",dinnertime:"6:00pm",night:"8:00pm",eod:"10:00pm",midnight:"12:00am"},o={quarter:15,half:30},u=function(t){let e=t.time("6:00am");return t.isBefore(e)?t.ampm("pm"):t},d=function(e,a){let n=e.match("(at|by|for|before|this|after)? #Time+");n=n.not("^(at|by|for|before|this|after)"),n=n.not("sharp"),n=n.not("on the dot");let i=t.now(a.timezone),r=i.clone(),d=n.text("reduced");if(s.hasOwnProperty(d))return {result:s[d],m:n};let m=n.match("^#Cardinal oclock (am|pm)?");if(m.found&&(i=i.hour(m.text("reduced")),i=i.startOf("hour"),i.isValid()&&!i.isEqual(r))){let t=m.match("(am|pm)");return i=t.found?i.ampm(t.text("reduced")):u(i),{result:i.time(),m:m}}if(m=n.match("(half|quarter|25|20|15|10|5) (past|after|to) #Cardinal"),m.found&&(i=function(t,e){let a=t.match("#Cardinal$"),n=t.not(a).match("(half|quarter|25|20|15|10|5)");a=a.text("reduced");let i=n.text("reduced");o.hasOwnProperty(i)&&(i=o[i]);let r=t.has("to");return e=(e=e.hour(a)).startOf("hour"),a<6&&(e=e.ampm("pm")),r?e.subtract(i,"minutes"):e.add(i,"minutes")}(m,i),i.isValid()&&!i.isEqual(r)))return i=u(i),{result:i.time(),m:m};if(m=n.match("[<min>(half|quarter|25|20|15|10|5)] (past|after)"),m.found){let e=m.groups("min").text("reduced"),n=t(a.today);if(o.hasOwnProperty(e)&&(e=o[e]),n=n.next("hour").startOf("hour").minute(e),n.isValid()&&!n.isEqual(r))return {result:n.time(),m:m}}if(m=n.match("[<min>(half|quarter|25|20|15|10|5)] to"),m.found){let e=m.groups("min").text("reduced"),n=t(a.today);if(o.hasOwnProperty(e)&&(e=o[e]),n=n.next("hour").startOf("hour").minus(e,"minutes"),n.isValid()&&!n.isEqual(r))return {result:n.time(),m:m}}if(m=n.match("[<time>#Time] (in|at) the? [<desc>(morning|evening|night|nighttime)]"),m.found){let t=m.groups("time").text("normal");if(/^[0-9]{1,2}$/.test(t)?(i=i.hour(t),i=i.startOf("hour")):i=i.time(t),i.isValid()&&!i.isEqual(r)){let t=m.groups("desc").text("reduced");return "evening"!==t&&"night"!==t||(i=i.ampm("pm")),{result:i.time(),m:m}}}if(m=n.match("this? [<desc>(morning|evening|tonight)] at [<time>(#Cardinal|#Time)]"),m.found){let t=m.groups(),e=t.time.text("reduced");if(/^[0-9]{1,2}$/.test(e)?(i=i.hour(e),i=i.startOf("hour")):i=i.time(e),i.isValid()&&!i.isEqual(r)){let e=t.desc.text("reduced");return "morning"===e&&(i=i.ampm("am")),"evening"!==e&&"tonight"!==e||(i=i.ampm("pm")),{result:i.time(),m:m}}}if(m=n.match("^#Cardinal$"),m.found){let t=m.text("reduced");if(i=i.hour(t),i=i.startOf("hour"),i.isValid()&&!i.isEqual(r))return !1===/(am|pm)/i.test(t)&&(i=u(i)),{result:i.time(),m:m}}let l=n.text("reduced");return i=i.time(l),i.isValid()&&!i.isEqual(r)?(!1===/(am|pm)/i.test(l)&&(i=u(i)),{result:i.time(),m:n}):a.dayStart?{result:a.dayStart,m:e.none()}:{result:null,m:e.none()}},m="Australia/",l="Pacific/",h={"british summer time":"Europe/London",bst:"Europe/London","british time":"Europe/London","britain time":"Europe/London","irish summer time":"Europe/Dublin","irish time":"Europe/Dublin",ireland:"Europe/Dublin","central european time":"Europe/Berlin",cet:"Europe/Berlin","central european summer time":"Europe/Berlin",cest:"Europe/Berlin","central europe":"Europe/Berlin","eastern european time":"Europe/Riga",eet:"Europe/Riga","eastern european summer time":"Europe/Riga",eest:"Europe/Riga","eastern europe time":"Europe/Riga","western european time":"Europe/Lisbon","western european summer time":"Europe/Lisbon","western europe":"Europe/Lisbon","turkey standard time":"Europe/Istanbul",trt:"Europe/Istanbul","turkish time":"Europe/Istanbul",etc:"Africa/Freetown",utc:"Africa/Freetown","greenwich standard time":"Africa/Freetown",gmt:"Africa/Freetown","east africa time":"Africa/Nairobi","east african time":"Africa/Nairobi","eastern africa time":"Africa/Nairobi","central africa time":"Africa/Khartoum","central african time":"Africa/Khartoum","south africa standard time":"Africa/Johannesburg",sast:"Africa/Johannesburg","southern africa":"Africa/Johannesburg","south african":"Africa/Johannesburg","west africa standard time":"Africa/Lagos","western africa time":"Africa/Lagos","west african time":"Africa/Lagos","australian central standard time":m+"Adelaide",acst:m+"Adelaide","australian central daylight time":m+"Adelaide",acdt:m+"Adelaide","australia central":m+"Adelaide","australian eastern standard time":m+"Brisbane",aest:m+"Brisbane","australian eastern daylight time":m+"Brisbane",aedt:m+"Brisbane","australia east":m+"Brisbane","australian western standard time":m+"Perth",awst:m+"Perth","australian western daylight time":m+"Perth",awdt:m+"Perth","australia west":m+"Perth","australian central western standard time":m+"Eucla",acwst:m+"Eucla","australia central west":m+"Eucla","lord howe standard time":m+"Lord_Howe",lhst:m+"Lord_Howe","lord howe daylight time":m+"Lord_Howe",lhdt:m+"Lord_Howe","russian standard time":"Europe/Moscow",msk:"Europe/Moscow",russian:"Europe/Moscow","central standard time":"America/Chicago","central time":"America/Chicago",cst:"America/Havana","central daylight time":"America/Chicago",cdt:"America/Havana","mountain standard time":"America/Denver","mountain time":"America/Denver",mst:"America/Denver","mountain daylight time":"America/Denver",mdt:"America/Denver","atlantic standard time":"America/Halifax","atlantic time":"America/Halifax",ast:"Asia/Baghdad","atlantic daylight time":"America/Halifax",adt:"America/Halifax","eastern standard time":"America/New_York","eastern time":"America/New_York",est:"America/New_York","eastern daylight time":"America/New_York",edt:"America/New_York","pacific time":"America/Los_Angeles","pacific standard time":"America/Los_Angeles",pst:"America/Los_Angeles","pacific daylight time":"America/Los_Angeles",pdt:"America/Los_Angeles","alaskan standard time":"America/Anchorage","alaskan time":"America/Anchorage",ahst:"America/Anchorage","alaskan daylight time":"America/Anchorage",ahdt:"America/Anchorage","hawaiian standard time":l+"Honolulu","hawaiian time":l+"Honolulu",hst:l+"Honolulu","aleutian time":l+"Honolulu","hawaii time":l+"Honolulu","newfoundland standard time":"America/St_Johns","newfoundland time":"America/St_Johns",nst:"America/St_Johns","newfoundland daylight time":"America/St_Johns",ndt:"America/St_Johns","brazil time":"America/Sao_Paulo",brt:"America/Sao_Paulo","brasília":"America/Sao_Paulo",brasilia:"America/Sao_Paulo","brazilian time":"America/Sao_Paulo","argentina time":"America/Buenos_Aires","argentinian time":"America/Buenos_Aires","amazon time":"America/Manaus",amt:"America/Manaus","amazonian time":"America/Manaus","easter island standard time":"Chile/Easterisland",east:"Chile/Easterisland","easter island summer time":"Chile/Easterisland",easst:"Chile/Easterisland","venezuelan standard time":"America/Caracas","venezuelan time":"America/Caracas",vet:"America/Caracas","venezuela time":"America/Caracas","paraguay time":"America/Asuncion",pyt:"America/Asuncion","paraguay summer time":"America/Asuncion",pyst:"America/Asuncion","cuba standard time":"America/Havana","cuba time":"America/Havana","cuba daylight time":"America/Havana","cuban time":"America/Havana","bolivia time":"America/La_Paz","bolivian time":"America/La_Paz","colombia time":"America/Bogota",cot:"America/Bogota","colombian time":"America/Bogota","acre time":"America/Eirunepe","peru time":"America/Lima","chile standard time":"America/Punta_Arenas","chile time":"America/Punta_Arenas",clst:"America/Punta_Arenas","chile summer time":"America/Punta_Arenas",cldt:"America/Punta_Arenas","uruguay time":"America/Montevideo",uyt:"America/Montevideo",ist:"Asia/Jerusalem","arabic standard time":"Asia/Baghdad","arabic time":"Asia/Baghdad","arab time":"Asia/Baghdad","iran standard time":"Asia/Tehran","iran time":"Asia/Tehran",irst:"Asia/Tehran","iran daylight time":"Asia/Tehran",irdt:"Asia/Tehran",iranian:"Asia/Tehran","pakistan standard time":"Asia/Karachi","pakistan time":"Asia/Karachi",pkt:"Asia/Karachi","india standard time":"Asia/Kolkata","indian time":"Asia/Kolkata","indochina time":"Asia/Bangkok",ict:"Asia/Bangkok","south east asia":"Asia/Bangkok","china standard time":"Asia/Shanghai",ct:"Asia/Shanghai","chinese time":"Asia/Shanghai","alma-ata time":"Asia/Almaty",almt:"Asia/Almaty","oral time":"Asia/Oral","orat time":"Asia/Oral","yakutsk time":"Asia/Yakutsk",yakt:"Asia/Yakutsk","gulf standard time":"Asia/Dubai","gulf time":"Asia/Dubai",gst:"Asia/Dubai",uae:"Asia/Dubai","hong kong time":"Asia/Hong_Kong",hkt:"Asia/Hong_Kong","western indonesian time":"Asia/Jakarta",wib:"Asia/Jakarta","indonesia time":"Asia/Jakarta","central indonesian time":"Asia/Makassar",wita:"Asia/Makassar","israel daylight time":"Asia/Jerusalem",idt:"Asia/Jerusalem","israel standard time":"Asia/Jerusalem","israel time":"Asia/Jerusalem",israeli:"Asia/Jerusalem","krasnoyarsk time":"Asia/Krasnoyarsk",krat:"Asia/Krasnoyarsk","malaysia time":"Asia/Kuala_Lumpur",myt:"Asia/Kuala_Lumpur","singapore time":"Asia/Singapore",sgt:"Asia/Singapore","korea standard time":"Asia/Seoul","korea time":"Asia/Seoul",kst:"Asia/Seoul","korean time":"Asia/Seoul","uzbekistan time":"Asia/Samarkand",uzt:"Asia/Samarkand","vladivostok time":"Asia/Vladivostok",vlat:"Asia/Vladivostok","maldives time":"Indian/Maldives",mvt:"Indian/Maldives","mauritius time":"Indian/Mauritius",mut:"Indian/Mauritius","marshall islands time":l+"Kwajalein",mht:l+"Kwajalein","samoa standard time":l+"Midway",sst:l+"Midway","somoan time":l+"Midway","chamorro standard time":l+"Guam",chst:l+"Guam","papua new guinea time":l+"Bougainville",pgt:l+"Bougainville"};let c=t().timezones,f=Object.keys(c).reduce((t,e)=>(t[e]=e,t),{});var y=Object.assign({},h,f);const g=/(\-?[0-9]+)h(rs)?/i,p=/(\-?[0-9]+)/,D=/utc([\-+]?[0-9]+)/i,A=/gmt([\-+]?[0-9]+)/i,w=function(t){return (t=Number(t))>-13&&t<13?"Etc/GMT"+(t=((t*=-1)>0?"+":"")+t):null},k=function(t){let e=t.match("#Timezone+");e=e.not("(in|for|by|near|at)");let a=e.text("reduced");if(y.hasOwnProperty(a))return {result:y[a],m:e};let n=function(t){let e=t.match(g);if(null!==e)return w(e[1]);if(e=t.match(D),null!==e)return w(e[1]);if(e=t.match(A),null!==e){let t=-1*Number(e[1]);return w(t)}return e=t.match(p),null!==e?w(e[1]):null}(a);return n?{result:n,m:e}:{result:null,m:t.none()}},b=function(t,e){let n=function(t){let e={},n=t.none(),r=t.match("#DateShift+");if(!1===r.found)return {res:e,m:n};if(r.match("#Cardinal #Duration").forEach(t=>{let n=t.match("#Cardinal").numbers().get()[0];if(n&&"number"==typeof n){let r=i(t);!0===a[r]&&(e[r]=n);}}),!0===r.has("(before|ago|hence|back)$")&&Object.keys(e).forEach(t=>e[t]*=-1),n=r.match("#Cardinal #Duration"),r=r.not(n),n=r.match("[<unit>#Duration] [<dir>(after|before)]"),n.found){let t=n.groups("unit").text("reduced"),a=n.groups("dir").text("reduced");"after"===a?e[t]=1:"before"===a&&(e[t]=-1);}if(n=r.match("half (a|an) [#Duration]",0),n.found){let t=i(n);e[t]=.5;}return n=t.match("#DateShift+"),{result:e,m:n}}(t),s=n.result;n=function(t){let e=t.match("[<num>#Value] [<unit>#Duration+] (of|in)");if(e.found){let t=e.groups(),a=t.num.numbers().get()[0],n=t.unit.text("reduced"),i={unit:n,num:Number(a)||0};return r[n]||(i.num-=1),{result:i,m:e}}if(e=t.match("[<dir>(first|initial|last|final)] [<unit>#Duration+] (of|in)"),e.found){let t=e.groups(),a=t.dir.text("reduced"),n=t.unit.text("reduced");return "initial"===a&&(a="first"),"final"===a&&(a="last"),{result:{unit:n,dir:a},m:e}}return {result:null,m:t.none()}}(t=t.not(n.m));let o=n.result;t=t.not(n.m),n=k(t);let u=n.result;t=t.not(n.m),n=d(t,e);let m=n.result;n=function(t){let e=t.match("#WeekDay");return e.found&&!t.has("^#WeekDay$")?t.has("(this|next|last) (next|upcoming|coming|past)? #WeekDay")?{result:null,m:t.none()}:{result:e.text("reduced"),m:e}:{result:null,m:t.none()}}(t=t.not(n.m));let l=n.result;n=function(t){let e=t.match("[(start|beginning) of] .",0);return e.found?{result:"start",m:e}:(e=t.match("[end of] .",0),e.found?{result:"end",m:e}:(e=t.match("[(middle|midpoint|center) of] .",0),e.found?{result:"middle",m:e}:{result:null,m:e}))}(t=t.not(n.m));let h=n.result;return n=function(t){if(t.has("(next|last|this)$"))return {result:null,m:t.none()};let e=t.match("^this? (next|upcoming|coming)");return e.found?{result:"next",m:e}:(e=t.match("^this? (past)"),e.found?{result:"this-past",m:e}:(e=t.match("^this? (last|previous)"),e.found?{result:"last",m:e}:(e=t.match("^(this|current)"),e.found?{result:"this",m:e}:{result:null,m:t.none()})))}(t=t.not(n.m)),{shift:s,counter:o,tz:u,time:m,weekDay:l,section:h,rel:n.result,doc:t=function(t){return (t=(t=(t=(t=(t=(t=t.not("[^the] !#Value",0)).not("#Preposition$")).not("#Conjunction$")).not("sharp")).not("on the dot")).not("^on")).not("(next|last|this)$")}(t=t.not(n.m))}};class Unit{constructor(e,a,n){this.unit=a||"day",this.setTime=!1;let i={};(n=n||{}).today&&(i={date:n.today.date(),month:n.today.month(),year:n.today.year()});let r=t(e,n.timezone,{today:i});Object.defineProperty(this,"d",{enumerable:!1,writable:!0,value:r}),Object.defineProperty(this,"context",{enumerable:!1,writable:!0,value:n});}clone(){let t=new Unit(this.d,this.unit,this.context);return t.setTime=this.setTime,t}log(){return console.log("--"),this.d.log(),console.log("\n"),this}applyShift(t={}){return Object.keys(t).forEach(e=>{this.d=this.d.add(t[e],e),"hour"!==e&&"minute"!==e||(this.setTime=!0);}),this}applyTime(t){if(t){if(/^[0-9]{1,2}$/.test(t)?this.d=this.d.hour(t):this.d=this.d.time(t),!/[ap]m/.test(t)){let t=this.d.time("6:00am");this.d.isBefore(t)&&(this.d=this.d.ampm("pm"));let e=this.d.time("10:00pm");this.d.isAfter(e)&&(this.d=this.d.ampm("am"));}}else this.d=this.d.startOf("day");return this.setTime=!0,this}applyWeekDay(t){if(t){let e=this.d.epoch;this.d=this.d.day(t),this.d.epoch<e&&(this.d=this.d.add(1,"week"));}return this}applyRel(t){return "next"===t?this.next():"last"===t||"this-past"===t?this.last():this}applySection(t){return "start"===t?this.start():"end"===t?this.end():"middle"===t?this.middle():this}format(t){return this.d.format(t)}start(){return this.d=this.d.startOf(this.unit),this.context.dayStart&&(this.d=this.d.time(this.context.dayStart)),this}end(){if(this.d=this.d.endOf(this.unit),this.context.dayEnd){this.d=this.d.startOf("day");let t=this.d.time(this.context.dayEnd);if(t.isAfter(this.d))return this.d=t,this}return this}middle(){let t=this.d.diff(this.d.endOf(this.unit)),e=Math.round(t.minutes/2);return this.d=this.d.add(e,"minutes"),this}beforeEnd(){let t=this.d.startOf(this.unit).diff(this.d.endOf(this.unit)),e=Math.round(t.minutes/4);return this.d=this.d.endOf(this.unit),this.d=this.d.minus(e,"minutes"),this.context.dayStart&&(this.d=this.d.time(this.context.dayStart)),this}before(){return this.d=this.d.minus(1,this.unit),this.d=this.d.endOf(this.unit),this.context.dayEnd&&(this.d=this.d.time(this.context.dayEnd)),this}after(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf(this.unit),this}next(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,this.unit),this.d=this.d.startOf(this.unit),this}}class Day extends Unit{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}middle(){return this.d=this.d.time("10am"),this}beforeEnd(){return this.d=this.d.time("2pm"),this}}class CalendarDate extends Day{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}next(){return this.d=this.d.add(1,"year"),this}last(){return this.d=this.d.minus(1,"year"),this}}class WeekDay extends Day{constructor(e,a,n){super(e,a,n),this.unit="day",this.isWeekDay=!0,"string"==typeof e?(this.d=t(n.today,n.timezone),this.d=this.d.day(e),this.d.isBefore(n.today)&&(this.d=this.d.add(7,"days"))):this.d=e,this.weekDay=this.d.dayName(),this.d.isValid()&&(this.d=this.d.startOf("day"));}next(){return this.d=this.d.add(7,"days"),this.d=this.d.day(this.weekDay),this}last(){return this.d=this.d.minus(7,"days"),this.d=this.d.day(this.weekDay),this}before(){return this.d=this.d.minus(1,"day"),this.d=this.d.endOf("day"),this.context.dayEnd&&(this.d=this.d.time(this.context.dayEnd)),this}applyRel(t){if("next"===t){let t=this.context.today.endOf("week").add(1,"week");return this.next(),this.d.isAfter(t)&&this.last(),this}if("this-past"===t)return this.last();if("last"===t){let t=this.context.today.startOf("week");return this.last(),!1===this.d.isBefore(t)&&this.last(),this}return this}}class Holiday extends CalendarDate{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}}class Hour extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="hour",this.d.isValid()&&(this.d=this.d.startOf("hour"));}}class Minute extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="minute",this.d.isValid()&&(this.d=this.d.startOf("minute"));}}class Moment extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="millisecond";}}class Month extends Unit{constructor(t,e,a){super(t,e,a),this.unit="month",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf("month"),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf("month"),this}}class AnyQuarter extends Unit{constructor(t,e,a){super(t,e,a),this.unit="quarter",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}last(){return this.d=this.d.minus(1,"quarter"),this.d=this.d.startOf(this.unit),this}}class Quarter extends Unit{constructor(t,e,a){super(t,e,a),this.unit="quarter",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf(this.unit),this}}class Season extends Unit{constructor(t,e,a){super(t,e,a),this.unit="season",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf(this.unit),this}}class Year extends Unit{constructor(t,e,a){super(t,e,a),this.unit="year",this.d.isValid()&&(this.d=this.d.startOf("year"));}}class Week extends Unit{constructor(t,e,a){super(t,e,a),this.unit="week",this.d.isValid()&&(this.d=this.d.startOf("week"));}clone(){return new Week(this.d,this.unit,this.context)}middle(){return this.d=this.d.add(2,"days"),this}beforeEnd(){return this.d=this.d.day("friday"),this}}class WeekEnd extends Unit{constructor(t,e,a){super(t,e,a),this.unit="week",this.d.isValid()&&(this.d=this.d.day("saturday"),this.d=this.d.startOf("day"));}start(){return this.d=this.d.day("saturday").startOf("day"),this}next(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf("weekend"),this}last(){return this.d=this.d.minus(1,this.unit),this.d=this.d.startOf("weekend"),this}}const x={today:t=>new Day(t.today,null,t),yesterday:t=>new Day(t.today.minus(1,"day"),null,t),tomorrow:t=>new Day(t.today.plus(1,"day"),null,t),eom:t=>{let e=t.today.endOf("month");return e=e.startOf("day"),new Day(e,null,t)},eoy:t=>{let e=t.today.endOf("year");return e=e.startOf("day"),new Day(e,null,t)},now:t=>new Moment(t.today,null,t)};x.tommorrow=x.tomorrow,x.tmrw=x.tomorrow,x.anytime=x.today,x.sometime=x.today;const v={day:Day,hour:Hour,evening:Hour,second:Moment,milliscond:Moment,instant:Moment,minute:Minute,week:Week,weekend:WeekEnd,month:class AnyMonth extends Unit{constructor(t,e,a){super(t,e,a),this.unit="month",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}},quarter:AnyQuarter,year:Year,season:Season,yr:Year,qtr:AnyQuarter,wk:Week,sec:Moment,hr:Hour};let V=`^(${Object.keys(v).join("|")})$`;const M=function(t){return {date:t.today.date(),month:t.today.month(),year:t.today.year()}},T=function(a,n,i){let r=null;return r=r||function(t,e,a){let n=null;!1===t.found&&(null!==a.time&&(n=new Moment(e.today,null,e)),a.shift&&Object.keys(a.shift).length>0&&(n=a.shift.hour||a.shift.minute?new Moment(e.today,null,e):new Day(e.today,null,e)));let i=t.text("reduced");return !0===x.hasOwnProperty(i)?x[i](e):"next"===i&&a.shift&&Object.keys(a.shift).length>0?x.tomorrow(e):n}(a,n,i),r=r||function(t,a){let n=null,i=t.match("[<holiday>#Holiday+] [<year>#Year?]"),r=a.today.year();i.groups("year").found&&(r=Number(i.groups("year").text("reduced"))||r);let s=i.groups("holiday").text("reduced"),o=spacetimeHoliday(s,r,a.timezone);return null!==o&&(o.isBefore(a.today)&&r===a.today.year()&&(o=spacetimeHoliday(s,r+1,a.timezone)),n=new Holiday(o,null,a)),n}(a,n),r=r||function(t,e){let a=t.match(V);if(!0===a.found){let t=a.text("reduced");if(v.hasOwnProperty(t)){let a=v[t];return a?new a(null,t,e):null}}if(a=t.match("^#WeekDay$"),!0===a.found){let t=a.text("reduced");return new WeekDay(t,null,e)}return null}(a,n),r=r||function(e,a){let n=e.match("(spring|summer|winter|fall|autumn) [<year>#Year?]");if(n.found){let n=e.text("reduced"),i=t(n,a.timezone,{today:M(a)}),r=new Season(i,null,a);if(!0===r.d.isValid())return r}if(n=e.match("[<q>#FinancialQuarter] [<year>#Year?]"),n.found){let e=n.groups("q").text("reduced"),i=t(e,a.timezone,{today:M(a)});if(n.groups("year")){let t=Number(n.groups("year").text())||a.today.year();i=i.year(t);}let r=new Quarter(i,null,a);if(!0===r.d.isValid())return r}if(n=e.match("[<q>#Value] quarter (of|in)? [<year>#Year?]"),n.found){let e=n.groups("q").text("reduced"),i=t("q"+e,a.timezone,{today:M(a)});if(n.groups("year")){let t=Number(n.groups("year").text())||a.today.year();i=i.year(t);}let r=new Quarter(i,null,a);if(!0===r.d.isValid())return r}if(n=e.match("^#Year$"),n.found){let n=e.text("reduced"),i=t(null,a.timezone,{today:M(a)});i=i.year(n);let r=new Year(i,null,a);if(!0===r.d.isValid())return r}return null}(a,n),r=r||function(t,e){let a=e.today.year(),n=t.match("[<date>#Value] of? [<month>#Month] [<year>#Year]");if(n.found||(n=t.match("[<month>#Month] the? [<date>#Value] [<year>#Year]")),n.found){let t={month:n.groups("month").text("reduced"),date:n.groups("date").text("reduced"),year:n.groups("year").text()||a},i=new CalendarDate(t,null,e);if(!0===i.d.isValid())return i}if(n=t.match("[<month>#Month] of? [<year>#Year]"),n.found){let t={month:n.groups("month").text("reduced"),year:n.groups("year").text("reduced")||a},i=new Month(t,null,e);if(!0===i.d.isValid())return i}if(n=t.match("[<date>#Value] of? [<month>#Month]"),n.found||(n=t.match("[<month>#Month] the? [<date>#Value]")),n.found){let t={month:n.groups("month").text("reduced"),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(a.d.month()<e.today.month()&&(t.year+=1,a=new CalendarDate(t,null,e)),!0===a.d.isValid())return a}if(t.has("#Month")){let a={month:t.match("#Month").text("reduced"),date:1,year:e.today.year()},n=new Month(a,null,e);if(n.d.month()<e.today.month()&&(a.year+=1,n=new Month(a,null,e)),!0===n.d.isValid())return n}if(n=t.match("#WeekDay [<date>#Value]"),n.found){let t={month:e.today.month(),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(!0===a.d.isValid())return a}if(n=t.match("the [<date>#Value]"),n.found){let t={month:e.today.month(),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(!0===a.d.isValid())return a.d.isBefore(e.today)&&(a.d=a.d.add(1,"month")),a}if(n=t.match("/[0-9]{4}-[0-9]{2}-[0-9]{2}t[0-9]{2}:/"),n.found){let a=t.text("reduced"),n=new Moment(a,null,e);if(!0===n.d.isValid())return n}let i=t.text("reduced");if(!i)return new Moment(e.today,null,e);let r=new Day(i,null,e);return !1===r.d.isValid()?null:r}(a,n),r},E={day:Day,week:Week,weekend:WeekEnd,month:Month,quarter:Quarter,season:Season,hour:Hour,minute:Minute},O=function(t,e,a){if(!t&&a.weekDay&&(t=new WeekDay(a.weekDay,null,e),a.weekDay=null),!t)return null;if(a.shift){let e=a.shift;t.applyShift(e),e.hour||e.minute?t=new Moment(t.d,null,t.context):(e.week||e.day||e.month)&&(t=new Day(t.d,null,t.context));}return a.weekDay&&"day"!==t.unit&&(t.applyWeekDay(a.weekDay),t=new WeekDay(t.d,null,t.context)),a.rel&&t.applyRel(a.rel),a.section&&t.applySection(a.section),a.time&&t.applyTime(a.time),a.counter&&a.counter.unit&&(t=function(t,e={}){let a=E[e.unit];if(!a)return t;let n=t.d;"first"===e.dir||0===e.num?(n=t.start().d,n=n.startOf(e.unit)):"last"===e.dir?(n=n.endOf(t.unit),n="weekend"===e.unit?n.day("saturday",!1):n.startOf(e.unit)):e.num&&("weekend"===e.unit&&(n=n.day("saturday",!0).add(1,"day")),n=n.add(e.num,e.unit));let i=new a(n,null,t.context);return !0===i.d.isValid()?i:t}(t,a.counter)),t},C="undefined"==typeof process?self.env||{}:process.env,S=function(t,e){let a=b(t,e);if(t=a.doc,(t=>{C.DEBUG_DATE&&(console.log(`\n==== '${t.doc.text()}' =====`),Object.keys(t).forEach(e=>{"doc"!==e&&t[e]&&console.log(e,t[e]);}),t.doc.debug());})(a),a.tz){let t=(e=Object.assign({},e,{timezone:a.tz})).today.format("iso-short");e.today=e.today.goto(e.timezone).set(t);}let n=T(t,e,a);return n=O(n,e,a),n},_={mon:"monday",tue:"tuesday",tues:"wednesday",wed:"wednesday",thu:"thursday",fri:"friday",sat:"saturday",sun:"sunday",monday:"monday",tuesday:"tuesday",wednesday:"wednesday",thursday:"thursday",friday:"friday",saturday:"saturday",sunday:"sunday"},z=function(t){return t.match("(every|each)").found?"AND":t.match("(any|a)").found?"OR":null},$=function(t){let e=t.start,a=t.end;if(e.d.isAfter(a.d)){if(e.isWeekDay&&a.isWeekDay)return t.end.next(),t;let n=e;t.start=a,t.end=n;}return t},q=function(t){let e=t.start,a=t.end;return e.d.isAfter(a.d)&&a.d.hour()<10&&(a.d=a.d.ampm("pm")),t};const j=function(t,e){return t=t.applyShift(e.punt)};const P=[].concat([{match:"[<from>#Time+] (to|until|upto|through|thru|and) [<to>#Time+ #Date+]",desc:"3pm to 4pm january 5th",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to"),i=S(n,e);if(i){let t=i.clone();if(t.applyTime(a.text("implicit")),t){let e={start:t,end:i,unit:"time"};return !1===/(am|pm)/.test(n)&&(e=q(e)),e=$(e),e}}return null}},{match:"[<main>#Date+] from [<a>#Time] (to|until|upto|through|thru|and) [<b>#Time+]",desc:"january from 3pm to 4pm",parse:(t,e)=>{let a=t.groups("main"),n=t.groups("a"),i=t.groups("b");if(a=S(a,e),a){a.applyTime(n.text("implicit"));let t=a.clone();if(t.applyTime(i.text("implicit")),t){let e={start:a,end:t,unit:"time"};return !1===/(am|pm)/.test(i.text())&&(e=q(e)),e=$(e),e}}return null}},{match:"[<from>#Date+] (to|until|upto|through|thru|and) [<to>#Time+]",desc:"january from 3pm to 4pm",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to");if(a=S(a,e),a){let t=a.clone();if(t.applyTime(n.text("implicit")),t){let e={start:a,end:t,unit:"time"};return !1===/(am|pm)/.test(n.text())&&(e=q(e)),e=$(e),e}}return null}}],[{match:"^during? #Month+ (or|and) #Month [<year>#Year]?",desc:"march or june",parse:(t,e)=>{let a=t.match("^during? [#Month]",0);t=t.not("(or|and)");let n=S(a,e);if(n){let i=[{start:n,end:n.clone().end(),unit:n.unit}],r=t.not(a);r.found&&r.match("#Month").forEach(t=>{let a=S(t,e);i.push({start:a,end:a.clone().end(),unit:a.unit});});let s=t.match("#Year$");return s.found&&(s=s.text("reduced"),i.forEach(t=>{t.start.d=t.start.d.year(s),t.end.d=t.end.d.year(s);})),i}return null}},{match:"^#Month #Value+ (or|and)? #Value$",desc:"jan 5 or 8",parse:(t,e)=>{let a=(t=t.not("(or|and)")).match("^#Month #Value"),n=S(a,e);if(n){let e=[{start:n,end:n.clone().end(),unit:n.unit}],i=t.not(a);return i.found&&i.match("#Value").forEach(t=>{let a=n.clone();a.d=a.d.date(t.text("reduced")),e.push({start:a,end:a.clone().end(),unit:a.unit});}),e}return null}},{match:"^#Month+ #Value #Value+$",desc:"jan 5 8",parse:(t,e)=>{let a=t.match("#Month"),n=t.match("#Year");t=t.not("#Year");let i=[];return t.match("#Value").forEach(t=>{let r=(t=t.clone()).prepend(a.text());n.found&&r.append(n);let s=S(r,e);s&&i.push({start:s,end:s.clone().end(),unit:s.unit});}),i}},{match:"^#Value+ (or|and)? #Value of #Month #Year?$",desc:"5 or 8 of Jan",parse:(t,e)=>{let a=t.match("#Month"),n=t.match("#Year");t=t.not("#Year");let i=[];return t.match("#Value").forEach(t=>{let r=t.append(a);n.found&&r.append(n);let s=S(r,e);s&&i.push({start:s,end:s.clone().end(),unit:s.unit});}),i}},{match:"^!(between|from|during)? [<from>#Date+] (and|or) [<to>#Date+]$",desc:"A or B",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to"),i=S(a,e),r=S(n,e);return i&&r?[{start:i,end:i.clone().end()},{start:r,end:r.clone().end()}]:null}}],[{match:"between [<start>.+] and [<end>.+]",desc:"between friday and sunday",parse:(t,e)=>{let a=t.groups("start");a=S(a,e);let n=t.groups("end");return n=S(n,e),a&&n?(n=n.before(),{start:a,end:n}):null}},{match:"[<from>#Month #Value] (to|through|thru) [<to>#Month #Value] [<year>#Year?]",desc:"june 5 to june 7",parse:(t,e)=>{let a=t.groups(),n=a.from;if(a.year&&(n=n.append(a.year)),n=S(n,e),n){let t=a.to;if(a.year&&(t=t.append(a.year)),t=S(t,e),t){return n.d.isAfter(t.d)&&(t.d=t.d.add(1,"year")),{start:n,end:t.end()}}}return null}},{match:"[<month>#Month] [<from>#Value] (to|through|thru) [<to>#Value] of? [<year>#Year]",desc:"january 5 to 7 1998",parse:(t,e)=>{let{month:a,from:n,to:i,year:r}=t.groups(),s=r.clone(),o=n.prepend(a).append(r);if(o=S(o,e),o){let t=i.prepend(a).append(s);return t=S(t,e),{start:o,end:t.end()}}return null}},{match:"[<from>#Value] (to|through|thru) [<to>#Value of? #Month #Date+?]",desc:"5 to 7 of january 1998",parse:(t,e)=>{let a=t.groups("to");if(a=S(a,e),a){let e=t.groups("from"),n=a.clone();return n.d=n.d.date(e.text("implicit")),{start:n,end:a.end()}}return null}},{match:"[<from>#Month #Value] (to|through|thru) [<to>#Value]",desc:"january 5 to 7",parse:(t,e)=>{let a=t.groups("from");if(a=S(a,e),a){let e=t.groups("to"),n=a.clone();return n.d=n.d.date(e.text("implicit")),{start:a,end:n.end()}}return null}},{match:"from? [<from>#Month] (to|until|upto|through|thru) [<to>#Month] [<year>#Year]",desc:"january to may 2020",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("year").numbers().get()[0],i=t.groups("to");if(a=S(a,e),i=S(i,e),a.d=a.d.year(n),i.d=i.d.year(n),a&&i){let t={start:a,end:i.end()};return t=$(t),t}return null}}],[{match:"from? [<from>.+] (to|until|upto|through|thru) [<to>.+]",desc:"from A to B",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to");if(a=S(a,e),n=S(n,e),a&&n){let t={start:a,end:n.end()};return t=$(t),t}return null}},{match:"^due? (by|before) [.+]",desc:"before june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);if(a){let t=new Unit(e.today,null,e);return t.d.isAfter(a.d)&&(t=a.clone().applyShift({weeks:-2})),{start:t,end:a.clone().applyShift({day:-1}).end()}}return null}},{match:"^(on|in|at|@|during) [.+]",desc:"in june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);return a?{start:a,end:a.clone().end(),unit:a.unit}:null}},{match:"^(after|following) [.+]",desc:"after june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);return a?(a=a.after(),{start:a.clone(),end:j(a.clone(),e)}):null}},{match:"^(middle|center|midpoint) of [.+]",desc:"middle of",parse:(t,e)=>{t=t.group(0);let a=S(t,e),n=a.clone().middle(),i=a.beforeEnd();return a?{start:n,end:i}:null}},{match:".+ after #Time+$",desc:"tuesday after 5pm",parse:(t,e)=>{let a=S(t,e);if(a){return {start:a.clone(),end:a.end(),unit:"time"}}return null}},{match:".+ before #Time+$",desc:"tuesday before noon",parse:(t,e)=>{let a=S(t,e);if(a){let t=a.clone(),e=a.start();if(a)return {start:e,end:t,unit:"time"}}return null}}]),H="undefined"==typeof process?self.env||{}:process.env,B=function(t,e){let a={start:null,end:null};if(!t.found)return a;let n=S(t,e);if(n){let t=n.clone().end();a={start:n,end:t,unit:n.setTime?"time":n.unit};}return a},W=function(t,e){let a=function(t,e){let a=t.match("[<logic>(every|any|each)] [<skip>other?] [<unit>#Duration] (starting|beginning|commencing)?");if(a.found){let e={interval:{}},n=a.groups("unit").text("reduced");return e.interval[n]=1,e.choose=z(a),a.groups("skip").found&&(e.interval[n]=2),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each)] [<num>#Value] [<unit>#Duration] (starting|beginning|commencing)?"),a.found){let e={interval:{}},n=a.groups("unit");n.nouns().toSingular();let i=n.text("reduced");return e.interval[i]=a.groups("num").numbers().get()[0],e.choose=z(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each|a)] [<skip>other?] [<day>#WeekDay+] (starting|beginning|commencing)?"),a.found){let e={interval:{day:1},filter:{weekDays:{}}},n=a.groups("day").text("reduced");if(n=_[n],n)return e.filter.weekDays[n]=!0,e.choose=z(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each|a)] [<day>(weekday|week day|weekend|weekend day)] (starting|beginning|commencing)?"),a.found){let e={interval:{day:1},filter:{weekDays:{}}},n=a.groups("day");return n.has("(weekday|week day)")?e.filter.weekDays={monday:!0,tuesday:!0,wednesday:!0,thursday:!0,friday:!0}:n.has("(weekend|weekend day)")&&(e.filter.weekDays={saturday:!0,sunday:!0}),e.choose=z(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<day>(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)] (at|near|after)? [<time>#Time+?]"),a.found){let n={interval:{day:1},filter:{weekDays:{}}},i=a.groups("day").text("reduced");if(i=i.replace(/s$/,""),i=_[i],i){n.filter.weekDays[i]=!0,n.choose="OR",t=t.remove(a);let r=a.groups("time");return r.found&&(n.time=d(r,e)),{repeat:n}}}return null}(t,e)||{},n=function(t,e){for(let i=0;i<P.length;i+=1){let r=P[i],s=t.match(r.match);if(s.found){n=`  ---[${r.desc}]---`,H.DEBUG_DATE&&console.log(`\n  [32m ${n} [0m`);let t=r.parse(s,e);if(null!==t)return a=t,"[object Array]"!==Object.prototype.toString.call(a)&&(t=[t]),t}}var a,n;return null}(t,e);return n||(n=[B(t,e)]),n=n.map(t=>Object.assign({},a,t)),n.forEach(t=>{t.start&&t.end&&t.start.d.epoch>t.end.d.epoch&&(t.start=t.start.start());}),n},N=function(e,a){return !1===(a=a||{}).timezone&&(a.timezone="UTC"),a.today=a.today||t.now(a.timezone),a.today=t(a.today,a.timezone),e=function(t){return t.numbers||console.warn("\nCompromise warning: compromise/three must be used with compromise-dates plugin\n"),(t=t.clone()).numbers().toNumber(),t.contractions().expand(),t.replace("week end","weekend",!0).tag("Date"),t.replace("up to","upto",!0).tag("Date"),!1===t.has("once (a|an) #Duration")&&t.match("[(a|an)] #Duration",0).replaceWith("1",{tags:!0}).compute("lexicon"),t.match("@hasDash").insertAfter("to").tag("Date"),t}(e),W(e,a)},Y=function(t){if(!t.start)return {start:null,end:null,timezone:null,duration:{}};let e=t.end?function(t){let e=t.end.d.add(1,"millisecond").since(t.start.d).diff;return delete e.milliseconds,delete e.seconds,e}(t):{};return {start:t.start.format("iso"),end:t.end?t.end.format("iso"):null,timezone:t.start.d.format("timezone"),duration:e}},L=function(e,a={}){let n=d(e,a);if(!n.result)return {time:null,"24h":null};let i=t.now().time(n.result);return {time:n.result,"24h":i.format("time-24"),hour:i.hour(),minute:i.minute()}},J=(t,e)=>"number"==typeof e?t.eq(e):t,K={century:!0,day:!0,decade:!0,hour:!0,millisecond:!0,minute:!0,month:!0,second:!0,weekend:!0,week:!0,year:!0,quarter:!0,season:!0};let R={m:"minute",h:"hour",hr:"hour",min:"minute",sec:"second","week end":"weekend",wk:"week",yr:"year",qtr:"quarter"};Object.keys(R).forEach(t=>{R[t+"s"]=R[t];});const I=function(t){let e={},a=t.match("#Value+ #Duration");if(a.found)a.forEach(t=>{let a=t.numbers().get()[0],n=t.terms().last().nouns().toSingular().text("reduced");R.hasOwnProperty(n)&&(n=R[n]),K.hasOwnProperty(n)&&null!==a&&(e[n]=a);});else {if(t.match("(#Duration && /[0-9][a-z]+$/)").found){let a=t.text(),n=a.match(/([0-9]+)/),i=a.match(/([a-z]+)/);n&&i&&(n=n[0]||null,i=i[0]||null,R.hasOwnProperty(i)&&(i=R[i]),K.hasOwnProperty(i)&&null!==n&&(e[i]=Number(n)));}}return e},U={get:function(t){let e=[];return this.forEach(t=>{let a=I(t);e.push(a);}),"number"==typeof t?e[t]:e},json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};return t&&!0!==t.times&&(a.duration=I(e)),a},[])}},F="(in|by|before|during|on|until|after|of|within|all)",Q="(last|next|this|previous|current|upcoming|coming)",G="(start|end|middle|starting|ending|midpoint|beginning)",X="(spring|summer|winter|fall|autumn)",Z=(t,e)=>{!0===t.found&&t.forEach(t=>{let a=t.text("reduced"),n=parseInt(a,10);n&&n>1e3&&n<3e3&&t.tag("Year",e);});},tt=(t,e)=>{!0===t.found&&t.forEach(t=>{let a=t.text("reduced"),n=parseInt(a,10);n&&n>1900&&n<2030&&t.tag("Year",e);});},et="date-values",at="date-tagger",nt="section-tagger",it="time-tagger",rt=function(t,e){if(t.found){t.tag("Date",e),t.numbers().lessThan(31).ifNo("#Year").tag("#Time",e);}},st="shift-tagger",ot=["act","aft","akst","anat","art","azot","azt","bnt","bot","bt","cast","cat","cct","chast","chut","ckt","cvt","cxt","davt","eat","ect","fjt","fkst","fnt","gamt","get","gft","gilt","gyt","hast","hncu","hneg","hnnomx","hnog","hnpm","hnpmx","hntn","hovt","iot","irkt","jst","kgt","kost","lint","magt","mart","mawt","mmt","nct","nft","novt","npt","nrt","nut","nzst","omst","pet","pett","phot","phst","pont","pwt","ret","sakt","samt","sbt","sct","sret","srt","syot","taht","tft","tjt","tkt","tlt","tmt","tot","tvt","ulat","vut","wakt","wat","wet","wft","wit","wst","yekt"].reduce((t,e)=>(t[e]=!0,t),{});var ut={dates:function(t){var e;return function(t){t.match("in the (night|evening|morning|afternoon|day|daytime)").tag("Time","in-the-night"),t.match("(#Value|#Time) (am|pm)").tag("Time","value-ampm"),t.match("/^[0-9]{4}-[0-9]{2}$/").tag("Date","2012-06"),t.match("(tue|thu)").tag("WeekDay","misc-weekday"),t.match("(march|april|may) (and|to|or|through|until)? (march|april|may)").tag("Date").match("(march|april|may)").tag("Month","march|april|may");let e=t.if("#Month");!0===e.found&&(e.match("#Month #Date+").tag("Date","correction-numberRange"),e.match("#Value of #Month").tag("Date","value-of-month"),e.match("#Cardinal #Month").tag("Date","cardinal-month"),e.match("#Month #Value (and|or|to)? #Value+").tag("Date","value-to-value"),e.match("#Month the #Value").tag("Date","month-the-value"),e.match("(march|may) to? #Date").tag("Date").match("^.").tag("Month","march-to"),e.match("^(march|may)$").tag("Month","single-march"),e.match("#Month or #Month").tag("Date","month-or-month"));let a=t.if("#Value");if(!0===a.found){a.match("(#WeekDay|#Month) #Value").ifNo("#Money").tag("Date","date-value"),a.match("#Value (#WeekDay|#Month)").ifNo("#Money").tag("Date","value-date"),a.match("#TextValue #TextValue").if("#Date").tag("#Date","textvalue-date"),a.match("#Value (#WeekDay|#Duration) back").tag("#Date","3-back");let t=a.if("#Duration");!0===t.found&&(t.match("for #Value #Duration").tag("Date","for-x-duration"),t.match("#Value #Duration #Conjunction").tag("Date","val-duration-conjunction"),t.match(F+"? #Value #Duration").tag("Date","value-duration"),t.match("#Value #Duration old").unTag("Date","val-years-old"));}let n=t.if(X);!0===n.found&&(n.match(`${F}? ${Q} ${X}`).tag("Date","thisNext-season"),n.match(`the? ${G} of ${X}`).tag("Date","section-season"),n.match(`${X} ${F}? #Cardinal`).tag("Date","season-year"));let i=t.if("#Date");!0===i.found&&(i.match("#Date the? #Ordinal").tag("Date","correction"),i.match(Q+" #Date").tag("Date","thisNext-date"),i.match("due? (by|before|after|until) #Date").tag("Date","by"),i.match("(last|next|this|previous|current|upcoming|coming|the) #Date").tag("Date","next-feb"),i.match(`the? ${G} of #Date`).tag("Date","section-of"),i.match("#Ordinal #Duration in #Date").tag("Date","duration-in"),i.match("(early|late) (at|in)? the? #Date").tag("Time","early-evening"),i.match("#Date (by|before|after|at|@|about) #Cardinal").not("^#Date").tag("Time","date-before-Cardinal"),i.match("#Date [(am|pm)]",0).unTag("Verb").unTag("Copula").tag("Time","date-am"),i.match("#Date (#Preposition|to) #Date").ifNo("#Duration").tag("Date","date-prep-date"));let r=t.if("#Cardinal");if(!0===r.found){let t=r.match("#Date #Value [#Cardinal]",0);Z(t,"date-value-year"),t=r.match("#Date [#Cardinal]",0),tt(t,"date-year"),t=r.match(G+" of [#Cardinal]"),tt(t,"section-year"),t=r.match("#Month #Value [#Cardinal]",0),Z(t,"month-value-year"),t=r.match("#Month #Value to #Value [#Cardinal]",0),Z(t,"month-range-year"),t=r.match("(in|of|by|during|before|starting|ending|for|year|since) [#Cardinal]",0),Z(t,"in-year-1"),t=r.match("(q1|q2|q3|q4) [#Cardinal]",0),Z(t,"in-year-2"),t=r.match("#Ordinal quarter of? [#Cardinal]",0),Z(t,"in-year-3"),t=r.match("the year [#Cardinal]",0),Z(t,"in-year-4"),t=r.match("it (is|was) [#Cardinal]",0),tt(t,"in-year-5"),r.match(G+" of #Year").tag("Date");let e=r.match("between [#Cardinal] and [#Cardinal]");Z(e.groups("0"),"between-year-and-year-1"),Z(e.groups("1"),"between-year-and-year-2");}let s=t.if("#Time");!0===s.found&&s.match("(by|before|after|at|@|about) #Time").tag("Time","preposition-time");let o=t.match("^/^20[012][0-9]$/$");tt(o,"2020-ish"),t.match("(in|after) /^[0-9]+(min|sec|wk)s?/").tag("Date","shift-units"),t.match("#Date [(now|night|sometime)]",0).tag("Time","date-now"),t.match("(from|starting|until|by) now").tag("Date","for-now"),t.match("(each|every) night").tag("Date","for-now");}(t),(e=t).has("#Value")&&(e.match("#Month #Value to #Value of? #Year?").tag("Date",et),e.match("#Value to #Value of? #Month #Year?").tag("Date",et),e.match("#Value #Duration of #Date").tag("Date",et),e.match("#Value+ #Duration (after|before|into|later|afterwards|ago)?").tag("Date",et),e.match("#Value #Date").tag("Date",et),e.match("#Date #Value").tag("Date",et),e.match("#Date #Preposition #Value").tag("Date",et),e.match("#Date (after|before|during|on|in) #Value").tag("Date",et),e.match("#Value (year|month|week|day) and a half").tag("Date",et),e.match("#Value and a half (years|months|weeks|days)").tag("Date",et),e.match("on the #Ordinal").tag("Date",et),e.match("#Month #Value+ (and|or) #Value").tag("Date","date-or-date"),e.match("#Value+ (and|or) #Value of #Month ").tag("Date","date-and-date")),function(t){t.match("(spring|summer|winter|fall|autumn|springtime|wintertime|summertime)").match("#Noun").tag("Season",at),t.match("(q1|q2|q3|q4)").tag("FinancialQuarter",at),t.match("(this|next|last|current) quarter").tag("FinancialQuarter",at),t.match("(this|next|last|current) season").tag("Season",at),t.has("#Date")&&(t.match("#Date #Preposition #Date").tag("Date",at),t.match("(once|twice) (a|an|each) #Date").tag("Date",at),t.match("#Date+").tag("Date",at),t.match("(by|until|on|in|at|during|over|every|each|due) the? #Date").notIf("#PhrasalVerb").tag("Date","until-june"),t.match("a #Duration").tag("Date",at),t.match("(between|from) #Date").tag("Date",at),t.match("(to|until|upto) #Date").tag("Date",at),t.match("#Date and #Date").tag("Date",at),t.match("(by|until|after|before|during|on|in|following|since) (next|this|last)? (#Date|#Date)").notIf("#PhrasalVerb").tag("Date",at),t.match("the? #Date after next one?").tag("Date",at),t.match("(about|approx|approximately|around) #Date").tag("Date",at));}(t),function(t){t.has("#Date")&&(t.match("this? (last|next|past|this|previous|current|upcoming|coming|the) #Date").tag("Date",nt),t.match("(starting|beginning|ending) #Date").tag("Date",nt),t.match("the? (start|end|middle|beginning) of (last|next|this|the) (#Date|#Date)").tag("Date",nt),t.match("(the|this) #Date").tag("Date",nt),t.match("#Date up to #Date").tag("Date",nt));}(t),function(t){t.match("#Cardinal oclock").tag("Time",it),t.match("/^[0-9]{2}h[0-9]{2}$/").tag("Time",it),t.match("/^[0-9]{2}/[0-9]{2}/").tag("Date",it).unTag("Value"),t.match("#Value (in|at) the? (morning|evening|night|nighttime)").tag("Time",it),t.has("#Month")||(t.match("(5|10|15|20|five|ten|fifteen|quarter|twenty|half) (to|after|past) #Cardinal").tag("Time",it),t.match("(at|by|before) (5|10|15|20|five|ten|fifteen|twenty|quarter|half) (after|past|to)").tag("Time","at-20-past"));let e=t.if("#Date");if(e.found){e.match("/^[0-9]{4}[:-][0-9]{2}[:-][0-9]{2}T[0-9]/").tag("Time",it),e.match("#Date [at #Cardinal]",0).notIf("#Year").tag("Time",it),e.match("half an (hour|minute|second)").tag("Date",it),e.match("(in|for|by|near|at) #Timezone").tag("Timezone",it),e.match("#Time to #Time").tag("Date",it),e.match("#Time [(sharp|on the dot)]",0).tag("Time",it);let a=e.if("#NumberRange");if(a.found){let t=a.match("[#NumberRange+] (on|by|at)? #WeekDay",0);rt(t,"3-4-tuesday"),t=a.match("[#NumberRange+] (on|by|at)? #Month #Value",0),rt(t,"3-4 mar 3"),t=a.match("[#NumberRange] to (#NumberRange && #Time)",0),rt(t,"3-4pm"),t=a.match("(#NumberRange && #Time) to [#NumberRange]",0),rt(t,"3pm-4");}let n=e.match("(from|between) #Cardinal and #Cardinal (in|on)? (#WeekDay|tomorrow|yesterday)");rt(n,"from 9-5 tues"),n=t.match("#Cardinal to #Cardinal (#WeekDay|tomorrow|yesterday)"),rt(n,"9-5 tues"),n=e.match("(from|between) [#NumericValue] (to|and) #Time",0).tag("Time","4-to-5pm"),rt(n,"from 9-5pm"),n=e.match("(#WeekDay|tomorrow|yesterday) (from|between)? (#Cardinal|#Time) (and|to) (#Cardinal|#Time)"),rt(n,"tues 3-5"),n=e.match("#Month #Value+ (from|between) [<time>(#Cardinal|#Time) (and|to) (#Cardinal|#Time)]").group("time"),rt(n,"sep 4 from 9-5"),n=e.match("#Time to #Cardinal on? #Date"),rt(n,"3pm-4 wed"),n=e.match("#Cardinal to #Time on? #Date"),rt(n,"3-4pm wed"),n=e.match("#Cardinal to #Cardinal on? (#WeekDay|#Month #Value)"),rt(n,"3-4 wed");}t.match("(at|around|near|#Date) [#Cardinal (thirty|fifteen) (am|pm)?]",0).tag("Time",it),t.match("(anytime|sometime) (before|after|near) #Cardinal").tag("Date","antime-after-3").lastTerm().tag("Time");}(t),function(t){t.has("#Date")&&(t.match("#Cardinal #Duration (before|after|ago|from|hence|back)").tag("DateShift",st),t.match("in #Cardinal #Duration").tag("DateShift",st),t.match("in (a|an) #Duration").tag("DateShift",st),t.match("[(a|an) #Duration from] #Date",0).tag("DateShift",st),t.match("(a|an) #Duration ago").tag("DateShift",st),t.match("in half (a|an) #Duration").tag("DateShift",st),t.match("in a (few|couple) of? #Duration").tag("DateShift",st),t.match("#Cardinal #Duration and? #DateShift").tag("DateShift",st),t.match("#DateShift and #Cardinal #Duration").tag("DateShift",st),t.match("[#Duration (after|before)] #Date",0).tag("DateShift",st));}(t),function(t){t.match("#Month #Ordinal and #Ordinal").tag("Date","ord-and-ord"),t.match("every other #Duration").tag("Date","every-other"),t.match("(every|any|each|a) (day|weekday|week day|weekend|weekend day)").tag("Date","any-weekday"),t.match("(every|any|each|a) (#WeekDay)").tag("Date","any-wednesday"),t.match("(every|any|each|a) (#Duration)").tag("Date","any-week");}(t),function(t){let e=t.match("#Time [#Acronym]",0);if(e.found){let t=e.text("reduced");!0===ot[t]&&e.tag("Timezone","tz-abbr");}}(t),function(t){if(t.has("#Date")){let e=t.match("#Date+ by #Date+");e.found&&!e.has("^due")&&e.match("^#Date+").unTag("Date","by-monday"),t.match("[(wed|sat)] (#Month|#Year|on|between|during|from)",0).tag("WeekDay","wed");let a=t.match("#Date+");a.match("^day$").unTag("Date","spa-day"),a.match("(in|of|by|for)? (#Possessive && #Date)").unTag("Date","tomorrows meeting");let n="(yesterday|today|tomorrow)";a.has(n)&&(a.match(n+" [#Value]$").unTag("Date","yesterday-7"),a.match(`^[#Value] ${n}$`,0).unTag("Date","7 yesterday"),a.match(`#WeekDay+ ${n}$`).unTag("Date").lastTerm().tag("Date","fri-yesterday")),a.match("on #Cardinal$").unTag("Date","on 5"),a.match("this tomorrow").terms(0).unTag("Date","this-tomorrow"),a.match("(q1|q2|q3|q4) #Year").tag("Date","fix-tagger"),a.match("^#Value (this|next|last)").terms(0).unTag("Date","4 next"),a.has("(last|this|next)")&&(a.match("(last|this|next) #Duration #Value").terms(2).unTag("Date","this month 7"),a.match("!#Month #Value (last|this|next) #Date").terms(0).unTag("Date","7 this month")),a.has("^between")&&!a.has("and .")&&a.unTag("Date","fix-tagger"),a.match("(in|over) the #Duration #Date+?").unTag("Date","over-the-duration"),a.has("(minutes|seconds|weeks|hours|days|months)")&&!a.has("#Value #Duration")&&a.match("(minutes|seconds|weeks|hours|days|months)").unTag("Date","log-hours"),a.has("about #Holiday")&&a.match("about").unTag("#Date","about-thanksgiving"),a.match("#Ordinal quarter of? #Year").unTag("Fraction"),a.match("(from|by|before) now").unTag("Time"),a.match("#Date+").match("^the").unTag("Date");}}(t),t}};const dt="Australia/",mt="Pacific/",lt={"british summer time":"Europe/London",bst:"Europe/London","british time":"Europe/London","britain time":"Europe/London","irish summer time":"Europe/Dublin","irish time":"Europe/Dublin","central european time":"Europe/Berlin",cet:"Europe/Berlin","central european summer time":"Europe/Berlin",cest:"Europe/Berlin","central europe":"Europe/Berlin","eastern european time":"Europe/Riga",eet:"Europe/Riga","eastern european summer time":"Europe/Riga",eest:"Europe/Riga","eastern europe time":"Europe/Riga","western european time":"Europe/Lisbon","western european summer time":"Europe/Lisbon","turkey standard time":"Europe/Istanbul","turkish time":"Europe/Istanbul",utc:"Africa/Freetown","greenwich standard time":"Africa/Freetown",gmt:"Africa/Freetown","east africa time":"Africa/Nairobi","east african time":"Africa/Nairobi","eastern africa time":"Africa/Nairobi","central africa time":"Africa/Khartoum","central african time":"Africa/Khartoum","south africa standard time":"Africa/Johannesburg","west africa standard time":"Africa/Lagos","western africa time":"Africa/Lagos","west african time":"Africa/Lagos","australian central standard time":dt+"Adelaide",acst:dt+"Adelaide","australian central daylight time":dt+"Adelaide",acdt:dt+"Adelaide","australian eastern standard time":dt+"Brisbane",aest:dt+"Brisbane","australian eastern daylight time":dt+"Brisbane",aedt:dt+"Brisbane","australian western standard time":dt+"Perth",awst:dt+"Perth","australian western daylight time":dt+"Perth",awdt:dt+"Perth","australian central western standard time":dt+"Eucla",acwst:dt+"Eucla","lord howe standard time":dt+"Lord_Howe",lhst:dt+"Lord_Howe","lord howe daylight time":dt+"Lord_Howe",lhdt:dt+"Lord_Howe","russian standard time":"Europe/Moscow",msk:"Europe/Moscow","central standard time":"America/Chicago","central time":"America/Chicago",cst:"America/Havana","central daylight time":"America/Chicago",cdt:"America/Havana","mountain standard time":"America/Denver","mountain time":"America/Denver",mst:"America/Denver","mountain daylight time":"America/Denver",mdt:"America/Denver","atlantic standard time":"America/Halifax","atlantic time":"America/Halifax",ast:"Asia/Baghdad","atlantic daylight time":"America/Halifax",adt:"America/Halifax","eastern standard time":"America/New_York","eastern time":"America/New_York",est:"America/New_York","eastern daylight time":"America/New_York",edt:"America/New_York","pacific time":"America/Los_Angeles","pacific standard time":"America/Los_Angeles",pst:"America/Los_Angeles","pacific daylight time":"America/Los_Angeles",pdt:"America/Los_Angeles","alaskan standard time":"America/Anchorage","alaskan time":"America/Anchorage",ahst:"America/Anchorage","alaskan daylight time":"America/Anchorage",ahdt:"America/Anchorage","hawaiian standard time":mt+"Honolulu","hawaiian time":mt+"Honolulu",hst:mt+"Honolulu","aleutian time":mt+"Honolulu","hawaii time":mt+"Honolulu","newfoundland standard time":"America/St_Johns","newfoundland time":"America/St_Johns","newfoundland daylight time":"America/St_Johns","brazil time":"America/Sao_Paulo","brazilian time":"America/Sao_Paulo","argentina time":"America/Buenos_Aires","argentinian time":"America/Buenos_Aires","amazon time":"America/Manaus","amazonian time":"America/Manaus","easter island standard time":"Chile/Easterisland","easter island summer time":"Chile/Easterisland",easst:"Chile/Easterisland","venezuelan standard time":"America/Caracas","venezuelan time":"America/Caracas","venezuela time":"America/Caracas","paraguay time":"America/Asuncion","paraguay summer time":"America/Asuncion","cuba standard time":"America/Havana","cuba time":"America/Havana","cuba daylight time":"America/Havana","cuban time":"America/Havana","bolivia time":"America/La_Paz","bolivian time":"America/La_Paz","colombia time":"America/Bogota","colombian time":"America/Bogota","acre time":"America/Eirunepe","peru time":"America/Lima","chile standard time":"America/Punta_Arenas","chile time":"America/Punta_Arenas",clst:"America/Punta_Arenas","chile summer time":"America/Punta_Arenas",cldt:"America/Punta_Arenas","uruguay time":"America/Montevideo",uyt:"America/Montevideo","arabic standard time":"Asia/Baghdad","iran standard time":"Asia/Tehran","iran time":"Asia/Tehran","iran daylight time":"Asia/Tehran","pakistan standard time":"Asia/Karachi","pakistan time":"Asia/Karachi","india standard time":"Asia/Kolkata","indian time":"Asia/Kolkata","indochina time":"Asia/Bangkok","china standard time":"Asia/Shanghai","alma-ata time":"Asia/Almaty","oral time":"Asia/Oral","orat time":"Asia/Oral","yakutsk time":"Asia/Yakutsk",yakt:"Asia/Yakutsk","gulf standard time":"Asia/Dubai","gulf time":"Asia/Dubai","hong kong time":"Asia/Hong_Kong","western indonesian time":"Asia/Jakarta","indonesia time":"Asia/Jakarta","central indonesian time":"Asia/Makassar","israel daylight time":"Asia/Jerusalem","israel standard time":"Asia/Jerusalem","israel time":"Asia/Jerusalem","krasnoyarsk time":"Asia/Krasnoyarsk","malaysia time":"Asia/Kuala_Lumpur","singapore time":"Asia/Singapore","korea standard time":"Asia/Seoul","korea time":"Asia/Seoul",kst:"Asia/Seoul","korean time":"Asia/Seoul","uzbekistan time":"Asia/Samarkand","vladivostok time":"Asia/Vladivostok","maldives time":"Indian/Maldives","mauritius time":"Indian/Mauritius","marshall islands time":mt+"Kwajalein","samoa standard time":mt+"Midway","somoan time":mt+"Midway","chamorro standard time":mt+"Guam","papua new guinea time":mt+"Bougainville"};let ht=t().timezones,ct=Object.keys(ht).reduce((t,e)=>(t[e]=e,t),{});var ft=Object.assign({},lt,ct);let yt={"a couple":"Value",thur:"WeekDay",thurs:"WeekDay"};const gt=function(t,e){t.forEach(t=>{yt[t]=e;});};gt(Object.keys(ft),"#Timezone"),gt(["weekday","summer","winter","autumn","all day","eod","eom","eoy","standard time","daylight time","tommorrow"],"#Date"),gt(["centuries","century","day","days","decade","decades","hour","hours","hr","hrs","millisecond","milliseconds","minute","minutes","min","mins","month","months","seconds","sec","secs","week end","week ends","weekend","weekends","week","weeks","wk","wks","year","years","yr","yrs","quarter","qtr","qtrs","season","seasons"],"#Duration"),gt(["all hallows eve","all saints day","all sts day","april fools","armistice day","australia day","bastille day","boxing day","canada day","christmas eve","christmas","cinco de mayo","day of the dead","dia de muertos","dieciseis de septiembre","emancipation day","grito de dolores","groundhog day","halloween","harvey milk day","inauguration day","independence day","independents day","juneteenth","labour day","national freedom day","national nurses day","new years eve","new years","purple heart day","rememberance day","rosa parks day","saint andrews day","saint patricks day","saint stephens day","saint valentines day","st andrews day","st patricks day","st stephens day","st valentines day ","valentines day","valentines","veterans day","victoria day","womens equality day","xmas","epiphany","orthodox christmas day","orthodox new year","assumption of mary","all souls day","feast of the immaculate conception","feast of our lady of guadalupe","kwanzaa","imbolc","beltaine","lughnassadh","samhain","martin luther king day","mlk day","presidents day","mardi gras","tax day","commonwealth day","mothers day","memorial day","fathers day","columbus day","indigenous peoples day","canadian thanksgiving","election day","thanksgiving","t-day","turkey day","black friday","cyber monday","ash wednesday","palm sunday","maundy thursday","good friday","holy saturday","easter","easter sunday","easter monday","orthodox good friday","orthodox holy saturday","orthodox easter","orthodox easter monday","ascension day","pentecost","whitsunday","whit sunday","whit monday","trinity sunday","corpus christi","advent","tu bishvat","tu bshevat","purim","passover","yom hashoah","lag baomer","shavuot","tisha bav","rosh hashana","yom kippur","sukkot","shmini atzeret","simchat torah","chanukah","hanukkah","isra and miraj","lailat al-qadr","eid al-fitr","id al-Fitr","eid ul-Fitr","ramadan","eid al-adha","muharram","the prophets birthday","ostara","march equinox","vernal equinox","litha","june solistice","summer solistice","mabon","september equinox","fall equinox","autumnal equinox","yule","december solstice","winter solstice","chinese new year","diwali"],"#Holiday"),gt(["noon","midnight","morning","tonight","evening","afternoon","breakfast time","lunchtime","dinnertime","midday","eod","oclock","oclock","at night"],"#Time");var pt={tags:{FinancialQuarter:{is:"Date",not:["Fraction"]},Season:{is:"Date"},Year:{is:"Date",not:["RomanNumeral"]},Holiday:{is:"Date",also:"Noun"},DateShift:{is:"Date",not:["Timezone","Holiday"]}},words:yt,compute:ut,api:function(t){!function(t){class Dates extends t{constructor(t,e,a,n={}){super(t,e,a),this.viewType="Nouns",this.opts=n;}get(t){let e=[];return this.forEach(t=>{N(t,this.opts).forEach(t=>{e.push(Y(t));});}),"number"==typeof t?e[t]:e}json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};if(t&&!0!==t.dates){let t=N(e,this.opts);a.dates=Y(t[0]);}return a},[])}format(t){let e=this.freeze().map(e=>{e.repair();let a=N(e,this.opts)[0]||{};if(a.start){let n=a.start.d,i=n.format(t);if(a.end){let e=a.end.d;!1===n.isSame(e,"day")&&(i+=" to "+e.format(t));}e.replaceWith(i);}return e});return new Dates(this.document,e.pointer,null,this.opts)}}t.prototype.dates=function(t){let e=function(t){let e=t.match("#Date+");e=e.filter(t=>{let e=t.has("^#Duration+$")||t.has("^#Value #Duration+$");return !(!0!==e||!t.has("(#FinancialQuarter|quarter)"))||!1===e});let a=e.match("[#Cardinal #Duration (in|on|this|next|during|for)] #Date",0);return a.found&&(e=e.not(a)),a=e.match("[#Cardinal #Duration] #WeekDay",0),a.found&&(e=e.not(a)),a=e.match("#Date [for #Value #Duration]$",0),a.found&&(e=e.not(a)),a=e.match("[#Cardinal #Duration] #Date",0),a.found&&!e.has("#Cardinal #Duration] (ago|from|before|after|back)")&&(e=e.not(a)),a=e.match("for #Cardinal #Duration"),a.found&&(e=e.not(a)),e=e.notIf("^one (#WeekDay|#Month)$"),e=function(t){let e=null;return t.has("^(between|within) #Date")?t:(t.has("#Month")&&(e=t.match("[#Month #Value] and? #Month",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),e=t.match("[#Value #Month] and? #Value #Month",0),e.found&&(t=t.splitAfter(e)),e=t.match("^[#Month] and? #Month #Ordinal?$",0),e.found&&(t=t.splitAfter(e)),e=t.match("[#Month #Value] #Month",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e))),t.has("#WeekDay")&&(e=t.match("^[#WeekDay] and? #WeekDay$",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),e=t.match("#WeekDay #WeekDay and? #WeekDay"),e.found&&(t=t.splitOn("#WeekDay")),e=t.match("[#WeekDay] (and|or|this|next)? #WeekDay",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter("#WeekDay"))),e=t.match("(this|next) #Duration [(today|tomorrow|yesterday)]",0),e.found&&(t=t.splitBefore(e)),e=t.match("[(today|tomorrow|yesterday)] #Value #Month",0),e.found&&(t=t.splitAfter(e)),e=t.match("[(today|tomorrow|yesterday)] (today|tomorrow|yesterday|#WeekDay)",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),t=t.not("^and"))}(e),e=e.notIf("(#Money|#Percentage)"),e=e.notIf("^per #Duration"),e}(this);return new Dates(this.document,e.pointer,null,t)};}(t),function(t){class Times extends t{constructor(t,e,a){super(t,e,a),this.viewType="Nouns";}get(t){return J(this,t).map(L)}json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};return t&&!0!==t.times&&(a.time=L(e)),a},[])}}t.prototype.times=function(t){let e=this.match("#Time+ (am|pm)?");return e=J(e,t),new Times(this.document,e.pointer)};}(t),function(t){class Durations extends t{constructor(t,e,a){super(t,e,a),this.context={};}}Object.assign(Durations.prototype,U),t.prototype.durations=function(t){let e=this.match("#Value+ #Duration (and? #Value+ #Duration)?");return e=e.concat(this.match("(#Duration && /[0-9][a-z]+$/)")),e=e.notIf("#DateShift"),"number"==typeof t&&(e=e.eq(t)),new Durations(this.document,e.pointer)};}(t);},hooks:["dates"]};
+    const a={second:!0,minute:!0,hour:!0,day:!0,week:!0,weekend:!0,month:!0,season:!0,quarter:!0,year:!0},n={wk:"week",min:"minute",sec:"second",weekend:"week"},r=function(t){let e=t.match("#Duration").text("normal");return e=e.replace(/s$/,""),n.hasOwnProperty(e)&&(e=n[e]),e},i={minute:!0},s={daybreak:"7:00am",breakfast:"8:00am",morning:"9:00am",noon:"12:00pm",midday:"12:00pm",afternoon:"2:00pm",lunchtime:"12:00pm",evening:"6:00pm",dinnertime:"6:00pm",night:"8:00pm",eod:"10:00pm",midnight:"12:00am"},o={quarter:15,half:30},u=function(t){let e=t.time("6:00am");return t.isBefore(e)?t.ampm("pm"):t},d=function(e,a){let n=e.match("(at|by|for|before|this|after)? #Time+");n=n.not("^(at|by|for|before|this|after)"),n=n.not("sharp"),n=n.not("on the dot");let r=t.now(a.timezone),i=r.clone(),d=n.text("reduced");if(s.hasOwnProperty(d))return {result:s[d],m:n};let m=n.match("^#Cardinal oclock (am|pm)?");if(m.found&&(r=r.hour(m.text("reduced")),r=r.startOf("hour"),r.isValid()&&!r.isEqual(i))){let t=m.match("(am|pm)");return r=t.found?r.ampm(t.text("reduced")):u(r),{result:r.time(),m:m}}if(m=n.match("(half|quarter|25|20|15|10|5) (past|after|to) #Cardinal"),m.found&&(r=function(t,e){let a=t.match("#Cardinal$"),n=t.not(a).match("(half|quarter|25|20|15|10|5)");a=a.text("reduced");let r=n.text("reduced");o.hasOwnProperty(r)&&(r=o[r]);let i=t.has("to");return e=(e=e.hour(a)).startOf("hour"),a<6&&(e=e.ampm("pm")),i?e.subtract(r,"minutes"):e.add(r,"minutes")}(m,r),r.isValid()&&!r.isEqual(i)))return r=u(r),{result:r.time(),m:m};if(m=n.match("[<min>(half|quarter|25|20|15|10|5)] (past|after)"),m.found){let e=m.groups("min").text("reduced"),n=t(a.today);if(o.hasOwnProperty(e)&&(e=o[e]),n=n.next("hour").startOf("hour").minute(e),n.isValid()&&!n.isEqual(i))return {result:n.time(),m:m}}if(m=n.match("[<min>(half|quarter|25|20|15|10|5)] to"),m.found){let e=m.groups("min").text("reduced"),n=t(a.today);if(o.hasOwnProperty(e)&&(e=o[e]),n=n.next("hour").startOf("hour").minus(e,"minutes"),n.isValid()&&!n.isEqual(i))return {result:n.time(),m:m}}if(m=n.match("[<time>#Time] (in|at) the? [<desc>(morning|evening|night|nighttime)]"),m.found){let t=m.groups("time").text("normal");if(/^[0-9]{1,2}$/.test(t)?(r=r.hour(t),r=r.startOf("hour")):r=r.time(t),r.isValid()&&!r.isEqual(i)){let t=m.groups("desc").text("reduced");return "evening"!==t&&"night"!==t||(r=r.ampm("pm")),{result:r.time(),m:m}}}if(m=n.match("this? [<desc>(morning|evening|tonight)] at [<time>(#Cardinal|#Time)]"),m.found){let t=m.groups(),e=t.time.text("reduced");if(/^[0-9]{1,2}$/.test(e)?(r=r.hour(e),r=r.startOf("hour")):r=r.time(e),r.isValid()&&!r.isEqual(i)){let e=t.desc.text("reduced");return "morning"===e&&(r=r.ampm("am")),"evening"!==e&&"tonight"!==e||(r=r.ampm("pm")),{result:r.time(),m:m}}}if(m=n.match("^#Cardinal$"),m.found){let t=m.text("reduced");if(r=r.hour(t),r=r.startOf("hour"),r.isValid()&&!r.isEqual(i))return !1===/(am|pm)/i.test(t)&&(r=u(r)),{result:r.time(),m:m}}let l=n.text("reduced");return r=r.time(l),r.isValid()&&!r.isEqual(i)?(!1===/(am|pm)/i.test(l)&&(r=u(r)),{result:r.time(),m:n}):a.dayStart?{result:a.dayStart,m:e.none()}:{result:null,m:e.none()}},m="Australia/",l="Pacific/",h={"british summer time":"Europe/London",bst:"Europe/London","british time":"Europe/London","britain time":"Europe/London","irish summer time":"Europe/Dublin","irish time":"Europe/Dublin",ireland:"Europe/Dublin","central european time":"Europe/Berlin",cet:"Europe/Berlin","central european summer time":"Europe/Berlin",cest:"Europe/Berlin","central europe":"Europe/Berlin","eastern european time":"Europe/Riga",eet:"Europe/Riga","eastern european summer time":"Europe/Riga",eest:"Europe/Riga","eastern europe time":"Europe/Riga","western european time":"Europe/Lisbon","western european summer time":"Europe/Lisbon","western europe":"Europe/Lisbon","turkey standard time":"Europe/Istanbul",trt:"Europe/Istanbul","turkish time":"Europe/Istanbul",etc:"Africa/Freetown",utc:"Africa/Freetown","greenwich standard time":"Africa/Freetown",gmt:"Africa/Freetown","east africa time":"Africa/Nairobi","east african time":"Africa/Nairobi","eastern africa time":"Africa/Nairobi","central africa time":"Africa/Khartoum","central african time":"Africa/Khartoum","south africa standard time":"Africa/Johannesburg",sast:"Africa/Johannesburg","southern africa":"Africa/Johannesburg","south african":"Africa/Johannesburg","west africa standard time":"Africa/Lagos","western africa time":"Africa/Lagos","west african time":"Africa/Lagos","australian central standard time":m+"Adelaide",acst:m+"Adelaide","australian central daylight time":m+"Adelaide",acdt:m+"Adelaide","australia central":m+"Adelaide","australian eastern standard time":m+"Brisbane",aest:m+"Brisbane","australian eastern daylight time":m+"Brisbane",aedt:m+"Brisbane","australia east":m+"Brisbane","australian western standard time":m+"Perth",awst:m+"Perth","australian western daylight time":m+"Perth",awdt:m+"Perth","australia west":m+"Perth","australian central western standard time":m+"Eucla",acwst:m+"Eucla","australia central west":m+"Eucla","lord howe standard time":m+"Lord_Howe",lhst:m+"Lord_Howe","lord howe daylight time":m+"Lord_Howe",lhdt:m+"Lord_Howe","russian standard time":"Europe/Moscow",msk:"Europe/Moscow",russian:"Europe/Moscow","central standard time":"America/Chicago","central time":"America/Chicago",cst:"America/Havana","central daylight time":"America/Chicago",cdt:"America/Havana","mountain standard time":"America/Denver","mountain time":"America/Denver",mst:"America/Denver","mountain daylight time":"America/Denver",mdt:"America/Denver","atlantic standard time":"America/Halifax","atlantic time":"America/Halifax",ast:"Asia/Baghdad","atlantic daylight time":"America/Halifax",adt:"America/Halifax","eastern standard time":"America/New_York",eastern:"America/New_York","eastern time":"America/New_York",est:"America/New_York","eastern daylight time":"America/New_York",edt:"America/New_York","pacific time":"America/Los_Angeles","pacific standard time":"America/Los_Angeles",pst:"America/Los_Angeles","pacific daylight time":"America/Los_Angeles",pdt:"America/Los_Angeles","alaskan standard time":"America/Anchorage","alaskan time":"America/Anchorage",ahst:"America/Anchorage","alaskan daylight time":"America/Anchorage",ahdt:"America/Anchorage","hawaiian standard time":l+"Honolulu","hawaiian time":l+"Honolulu",hst:l+"Honolulu","aleutian time":l+"Honolulu","hawaii time":l+"Honolulu","newfoundland standard time":"America/St_Johns","newfoundland time":"America/St_Johns",nst:"America/St_Johns","newfoundland daylight time":"America/St_Johns",ndt:"America/St_Johns","brazil time":"America/Sao_Paulo",brt:"America/Sao_Paulo","brasília":"America/Sao_Paulo",brasilia:"America/Sao_Paulo","brazilian time":"America/Sao_Paulo","argentina time":"America/Buenos_Aires","argentinian time":"America/Buenos_Aires","amazon time":"America/Manaus",amt:"America/Manaus","amazonian time":"America/Manaus","easter island standard time":"Chile/Easterisland",east:"Chile/Easterisland","easter island summer time":"Chile/Easterisland",easst:"Chile/Easterisland","venezuelan standard time":"America/Caracas","venezuelan time":"America/Caracas",vet:"America/Caracas","venezuela time":"America/Caracas","paraguay time":"America/Asuncion",pyt:"America/Asuncion","paraguay summer time":"America/Asuncion",pyst:"America/Asuncion","cuba standard time":"America/Havana","cuba time":"America/Havana","cuba daylight time":"America/Havana","cuban time":"America/Havana","bolivia time":"America/La_Paz","bolivian time":"America/La_Paz","colombia time":"America/Bogota",cot:"America/Bogota","colombian time":"America/Bogota","acre time":"America/Eirunepe","peru time":"America/Lima","chile standard time":"America/Punta_Arenas","chile time":"America/Punta_Arenas",clst:"America/Punta_Arenas","chile summer time":"America/Punta_Arenas",cldt:"America/Punta_Arenas","uruguay time":"America/Montevideo",uyt:"America/Montevideo",ist:"Asia/Jerusalem","arabic standard time":"Asia/Baghdad","arabic time":"Asia/Baghdad","arab time":"Asia/Baghdad","iran standard time":"Asia/Tehran","iran time":"Asia/Tehran",irst:"Asia/Tehran","iran daylight time":"Asia/Tehran",irdt:"Asia/Tehran",iranian:"Asia/Tehran","pakistan standard time":"Asia/Karachi","pakistan time":"Asia/Karachi",pkt:"Asia/Karachi","india standard time":"Asia/Kolkata","indian time":"Asia/Kolkata","indochina time":"Asia/Bangkok",ict:"Asia/Bangkok","south east asia":"Asia/Bangkok","china standard time":"Asia/Shanghai",ct:"Asia/Shanghai","chinese time":"Asia/Shanghai","alma-ata time":"Asia/Almaty",almt:"Asia/Almaty","oral time":"Asia/Oral","orat time":"Asia/Oral","yakutsk time":"Asia/Yakutsk",yakt:"Asia/Yakutsk","gulf standard time":"Asia/Dubai","gulf time":"Asia/Dubai",gst:"Asia/Dubai",uae:"Asia/Dubai","hong kong time":"Asia/Hong_Kong",hkt:"Asia/Hong_Kong","western indonesian time":"Asia/Jakarta",wib:"Asia/Jakarta","indonesia time":"Asia/Jakarta","central indonesian time":"Asia/Makassar",wita:"Asia/Makassar","israel daylight time":"Asia/Jerusalem",idt:"Asia/Jerusalem","israel standard time":"Asia/Jerusalem","israel time":"Asia/Jerusalem",israeli:"Asia/Jerusalem","krasnoyarsk time":"Asia/Krasnoyarsk",krat:"Asia/Krasnoyarsk","malaysia time":"Asia/Kuala_Lumpur",myt:"Asia/Kuala_Lumpur","singapore time":"Asia/Singapore",sgt:"Asia/Singapore","korea standard time":"Asia/Seoul","korea time":"Asia/Seoul",kst:"Asia/Seoul","korean time":"Asia/Seoul","uzbekistan time":"Asia/Samarkand",uzt:"Asia/Samarkand","vladivostok time":"Asia/Vladivostok",vlat:"Asia/Vladivostok","maldives time":"Indian/Maldives",mvt:"Indian/Maldives","mauritius time":"Indian/Mauritius",mut:"Indian/Mauritius","marshall islands time":l+"Kwajalein",mht:l+"Kwajalein","samoa standard time":l+"Midway",sst:l+"Midway","somoan time":l+"Midway","chamorro standard time":l+"Guam",chst:l+"Guam","papua new guinea time":l+"Bougainville",pgt:l+"Bougainville"};let c=t().timezones,f=Object.keys(c).reduce((t,e)=>(t[e]=e,t),{});var y=Object.assign({},h,f);const p=/(-?[0-9]+)h(rs)?/i,g=/(-?[0-9]+)/,w=/utc([-+]?[0-9]+)/i,D=/gmt([-+]?[0-9]+)/i,A=function(t){return (t=Number(t))>-13&&t<13?"Etc/GMT"+(t=((t*=-1)>0?"+":"")+t):null},k=function(t){let e=t.match("#Timezone+");e=e.not("(in|for|by|near|at)");let a=e.text("reduced");if(y.hasOwnProperty(a))return {result:y[a],m:e};let n=function(t){let e=t.match(p);if(null!==e)return A(e[1]);if(e=t.match(w),null!==e)return A(e[1]);if(e=t.match(D),null!==e){let t=-1*Number(e[1]);return A(t)}return e=t.match(g),null!==e?A(e[1]):null}(a);return n?{result:n,m:e}:{result:null,m:t.none()}},b=function(t,e){let n=function(t){let e={},n=t.none(),i=t.match("#DateShift+");if(!1===i.found)return {res:e,m:n};if(i.match("#Cardinal #Duration").forEach(t=>{let n=t.match("#Cardinal").numbers().get()[0];if(n&&"number"==typeof n){let i=r(t);!0===a[i]&&(e[i]=n);}}),!0===i.has("(before|ago|hence|back)$")&&Object.keys(e).forEach(t=>e[t]*=-1),n=i.match("#Cardinal #Duration"),i=i.not(n),n=i.match("[<unit>#Duration] [<dir>(after|before)]"),n.found){let t=n.groups("unit").text("reduced"),a=n.groups("dir").text("reduced");"after"===a?e[t]=1:"before"===a&&(e[t]=-1);}if(n=i.match("half (a|an) [#Duration]",0),n.found){let t=r(n);e[t]=.5;}return n=t.match("#DateShift+"),{result:e,m:n}}(t),s=n.result;n=function(t){let e=t.match("[<num>#Value] [<unit>#Duration+] (of|in)");if(e.found){let t=e.groups(),a=t.num.numbers().get()[0],n=t.unit.text("reduced"),r={unit:n,num:Number(a)||0};return i[n]||(r.num-=1),{result:r,m:e}}if(e=t.match("[<dir>(first|initial|last|final)] [<unit>#Duration+] (of|in)"),e.found){let t=e.groups(),a=t.dir.text("reduced"),n=t.unit.text("reduced");return "initial"===a&&(a="first"),"final"===a&&(a="last"),{result:{unit:n,dir:a},m:e}}return {result:null,m:t.none()}}(t=t.not(n.m));let o=n.result;t=t.not(n.m),n=k(t);let u=n.result;t=t.not(n.m),n=d(t,e);let m=n.result;n=function(t){let e=t.match("#WeekDay");return e.found&&!t.has("^#WeekDay$")?t.has("(this|next|last) (next|upcoming|coming|past)? #WeekDay")?{result:null,m:t.none()}:{result:e.text("reduced"),m:e}:{result:null,m:t.none()}}(t=t.not(n.m));let l=n.result;n=function(t){let e=t.match("[(start|beginning) of] .",0);return e.found?{result:"start",m:e}:(e=t.match("[end of] .",0),e.found?{result:"end",m:e}:(e=t.match("[(middle|midpoint|center) of] .",0),e.found?{result:"middle",m:e}:{result:null,m:e}))}(t=t.not(n.m));let h=n.result;return n=function(t){if(t.has("(next|last|this)$"))return {result:null,m:t.none()};let e=t.match("^this? (next|upcoming|coming)");return e.found?{result:"next",m:e}:(e=t.match("^this? (past)"),e.found?{result:"this-past",m:e}:(e=t.match("^this? (last|previous)"),e.found?{result:"last",m:e}:(e=t.match("^(this|current)"),e.found?{result:"this",m:e}:{result:null,m:t.none()})))}(t=t.not(n.m)),{shift:s,counter:o,tz:u,time:m,weekDay:l,section:h,rel:n.result,doc:t=function(t){return (t=(t=(t=(t=(t=(t=t.not("[^the] !#Value",0)).not("#Preposition$")).not("#Conjunction$")).not("sharp")).not("on the dot")).not("^(on|of)")).not("(next|last|this)$")}(t=t.not(n.m))}};class Unit{constructor(e,a,n){this.unit=a||"day",this.setTime=!1;let r={};(n=n||{}).today&&(r={date:n.today.date(),month:n.today.month(),year:n.today.year()});let i=t(e,n.timezone,{today:r});Object.defineProperty(this,"d",{enumerable:!1,writable:!0,value:i}),Object.defineProperty(this,"context",{enumerable:!1,writable:!0,value:n});}clone(){let t=new Unit(this.d,this.unit,this.context);return t.setTime=this.setTime,t}log(){return console.log("--"),this.d.log(),console.log("\n"),this}applyShift(t={}){return Object.keys(t).forEach(e=>{this.d=this.d.add(t[e],e),"hour"!==e&&"minute"!==e||(this.setTime=!0);}),this}applyTime(t){if(t){if(/^[0-9]{1,2}$/.test(t)?this.d=this.d.hour(t):this.d=this.d.time(t),!/[ap]m/.test(t)){let t=this.d.time("6:00am");this.d.isBefore(t)&&(this.d=this.d.ampm("pm"));let e=this.d.time("10:00pm");this.d.isAfter(e)&&(this.d=this.d.ampm("am"));}}else this.d=this.d.startOf("day");return this.setTime=!0,this}applyWeekDay(t){if(t){let e=this.d.epoch;this.d=this.d.day(t),this.d.epoch<e&&(this.d=this.d.add(1,"week"));}return this}applyRel(t){return "next"===t?this.next():"last"===t||"this-past"===t?this.last():this}applySection(t){return "start"===t?this.start():"end"===t?this.end():"middle"===t?this.middle():this}format(t){return this.d.format(t)}start(){return this.d=this.d.startOf(this.unit),this.context.dayStart&&(this.d=this.d.time(this.context.dayStart)),this}end(){if(this.d=this.d.endOf(this.unit),this.context.dayEnd){this.d=this.d.startOf("day");let t=this.d.time(this.context.dayEnd);if(t.isAfter(this.d))return this.d=t,this}return this}middle(){let t=this.d.diff(this.d.endOf(this.unit)),e=Math.round(t.minutes/2);return this.d=this.d.add(e,"minutes"),this}beforeEnd(){let t=this.d.startOf(this.unit).diff(this.d.endOf(this.unit)),e=Math.round(t.minutes/4);return this.d=this.d.endOf(this.unit),this.d=this.d.minus(e,"minutes"),this.context.dayStart&&(this.d=this.d.time(this.context.dayStart)),this}before(){return this.d=this.d.minus(1,this.unit),this.d=this.d.endOf(this.unit),this.context.dayEnd&&(this.d=this.d.time(this.context.dayEnd)),this}after(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf(this.unit),this}next(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,this.unit),this.d=this.d.startOf(this.unit),this}}class Day extends Unit{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}middle(){return this.d=this.d.time("10am"),this}beforeEnd(){return this.d=this.d.time("2pm"),this}}class CalendarDate extends Day{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}next(){return this.d=this.d.add(1,"year"),this}last(){return this.d=this.d.minus(1,"year"),this}}class WeekDay extends Day{constructor(e,a,n){super(e,a,n),this.unit="day",this.isWeekDay=!0,"string"==typeof e?(this.d=t(n.today,n.timezone),this.d=this.d.day(e),this.d.isBefore(n.today)&&(this.d=this.d.add(7,"days"))):this.d=e,this.weekDay=this.d.dayName(),this.d.isValid()&&(this.d=this.d.startOf("day"));}next(){return this.d=this.d.add(7,"days"),this.d=this.d.day(this.weekDay),this}last(){return this.d=this.d.minus(7,"days"),this.d=this.d.day(this.weekDay),this}before(){return this.d=this.d.minus(1,"day"),this.d=this.d.endOf("day"),this.context.dayEnd&&(this.d=this.d.time(this.context.dayEnd)),this}applyRel(t){if("next"===t){let t=this.context.today.endOf("week").add(1,"week");return this.next(),this.d.isAfter(t)&&this.last(),this}if("this-past"===t)return this.last();if("last"===t){let t=this.context.today.startOf("week");return this.last(),!1===this.d.isBefore(t)&&this.last(),this}return this}}class Holiday extends CalendarDate{constructor(t,e,a){super(t,e,a),this.unit="day",this.d.isValid()&&(this.d=this.d.startOf("day"));}}class Hour extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="hour",this.d.isValid()&&(this.d=this.d.startOf("hour"));}}class Minute extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="minute",this.d.isValid()&&(this.d=this.d.startOf("minute"));}}class Moment extends Unit{constructor(t,e,a){super(t,e,a,!0),this.unit="millisecond";}}class Month extends Unit{constructor(t,e,a){super(t,e,a),this.unit="month",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf("month"),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf("month"),this}}class AnyQuarter extends Unit{constructor(t,e,a){super(t,e,a),this.unit="quarter",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}last(){return this.d=this.d.minus(1,"quarter"),this.d=this.d.startOf(this.unit),this}}class Quarter extends Unit{constructor(t,e,a){super(t,e,a),this.unit="quarter",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf(this.unit),this}}class Season extends Unit{constructor(t,e,a){super(t,e,a),this.unit="season",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}next(){return this.d=this.d.add(1,"year"),this.d=this.d.startOf(this.unit),this}last(){return this.d=this.d.minus(1,"year"),this.d=this.d.startOf(this.unit),this}}class Year extends Unit{constructor(t,e,a){super(t,e,a),this.unit="year",this.d.isValid()&&(this.d=this.d.startOf("year"));}}class Week extends Unit{constructor(t,e,a){super(t,e,a),this.unit="week",this.d.isValid()&&(this.d=this.d.startOf("week"));}clone(){return new Week(this.d,this.unit,this.context)}middle(){return this.d=this.d.add(2,"days"),this}beforeEnd(){return this.d=this.d.day("friday"),this}}class WeekEnd extends Unit{constructor(t,e,a){super(t,e,a),this.unit="week",this.d.isValid()&&(this.d=this.d.day("saturday"),this.d=this.d.startOf("day"));}start(){return this.d=this.d.day("saturday").startOf("day"),this}next(){return this.d=this.d.add(1,this.unit),this.d=this.d.startOf("weekend"),this}last(){return this.d=this.d.minus(1,this.unit),this.d=this.d.startOf("weekend"),this}}const x={today:t=>new Day(t.today,null,t),yesterday:t=>new Day(t.today.minus(1,"day"),null,t),tomorrow:t=>new Day(t.today.plus(1,"day"),null,t),eom:t=>{let e=t.today.endOf("month");return e=e.startOf("day"),new Day(e,null,t)},eoy:t=>{let e=t.today.endOf("year");return e=e.startOf("day"),new Day(e,null,t)},now:t=>new Moment(t.today,null,t)};x.tommorrow=x.tomorrow,x.tmrw=x.tomorrow,x.anytime=x.today,x.sometime=x.today;const v={day:Day,hour:Hour,evening:Hour,second:Moment,milliscond:Moment,instant:Moment,minute:Minute,week:Week,weekend:WeekEnd,month:class AnyMonth extends Unit{constructor(t,e,a){super(t,e,a),this.unit="month",this.d.isValid()&&(this.d=this.d.startOf(this.unit));}},quarter:AnyQuarter,year:Year,season:Season,yr:Year,qtr:AnyQuarter,wk:Week,sec:Moment,hr:Hour};let V=`^(${Object.keys(v).join("|")})$`;const M=function(t){return {date:t.today.date(),month:t.today.month(),year:t.today.year()}},T=function(a,n,r){let i=null;return i=i||function(t,e,a){let n=null;!1===t.found&&(null!==a.time&&(n=new Moment(e.today,null,e)),a.shift&&Object.keys(a.shift).length>0&&(n=a.shift.hour||a.shift.minute?new Moment(e.today,null,e):new Day(e.today,null,e)));let r=t.text("reduced");return !0===x.hasOwnProperty(r)?x[r](e):"next"===r&&a.shift&&Object.keys(a.shift).length>0?x.tomorrow(e):n}(a,n,r),i=i||function(t,a){let n=null,r=t.match("[<holiday>#Holiday+] [<year>#Year?]"),i=a.today.year();r.groups("year").found&&(i=Number(r.groups("year").text("reduced"))||i);let s=r.groups("holiday").text("reduced"),o=spacetimeHoliday(s,i,a.timezone);return null!==o&&(o.isBefore(a.today)&&i===a.today.year()&&(o=spacetimeHoliday(s,i+1,a.timezone)),n=new Holiday(o,null,a)),n}(a,n),i=i||function(t,e){let a=t.match(V);if(!0===a.found){let t=a.text("reduced");if(v.hasOwnProperty(t)){let a=v[t];return a?new a(null,t,e):null}}if(a=t.match("^#WeekDay$"),!0===a.found){let t=a.text("reduced");return new WeekDay(t,null,e)}return null}(a,n),i=i||function(e,a){let n=e.match("(spring|summer|winter|fall|autumn) [<year>#Year?]");if(n.found){let n=e.text("reduced"),r=t(n,a.timezone,{today:M(a)}),i=new Season(r,null,a);if(!0===i.d.isValid())return i}if(n=e.match("[<q>#FinancialQuarter] [<year>#Year?]"),n.found){let e=n.groups("q").text("reduced"),r=t(e,a.timezone,{today:M(a)});if(n.groups("year")){let t=Number(n.groups("year").text())||a.today.year();r=r.year(t);}let i=new Quarter(r,null,a);if(!0===i.d.isValid())return i}if(n=e.match("[<q>#Value] quarter (of|in)? [<year>#Year?]"),n.found){let e=n.groups("q").text("reduced"),r=t("q"+e,a.timezone,{today:M(a)});if(n.groups("year")){let t=Number(n.groups("year").text())||a.today.year();r=r.year(t);}let i=new Quarter(r,null,a);if(!0===i.d.isValid())return i}if(n=e.match("^#Year$"),n.found){let n=e.text("reduced"),r=t(null,a.timezone,{today:M(a)});r=r.year(n);let i=new Year(r,null,a);if(!0===i.d.isValid())return i}return null}(a,n),i=i||function(t,e){let a=e.today.year(),n=t.match("[<date>#Value] of? [<month>#Month] [<year>#Year]");if(n.found||(n=t.match("[<month>#Month] the? [<date>#Value] [<year>#Year]")),n.found){let t={month:n.groups("month").text("reduced"),date:n.groups("date").text("reduced"),year:n.groups("year").text()||a},r=new CalendarDate(t,null,e);if(!0===r.d.isValid())return r}if(n=t.match("[<month>#Month] of? [<year>#Year]"),n.found){let t={month:n.groups("month").text("reduced"),year:n.groups("year").text("reduced")||a},r=new Month(t,null,e);if(!0===r.d.isValid())return r}if(n=t.match("[<date>#Value] of? [<month>#Month]"),n.found||(n=t.match("[<month>#Month] the? [<date>#Value]")),n.found){let t={month:n.groups("month").text("reduced"),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(a.d.month()<e.today.month()&&(t.year+=1,a=new CalendarDate(t,null,e)),!0===a.d.isValid())return a}if(t.has("#Month")){let a={month:t.match("#Month").text("reduced"),date:1,year:e.today.year()},n=new Month(a,null,e);if(n.d.month()<e.today.month()&&(a.year+=1,n=new Month(a,null,e)),!0===n.d.isValid())return n}if(n=t.match("#WeekDay [<date>#Value]"),n.found){let t={month:e.today.month(),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(!0===a.d.isValid())return a}if(n=t.match("the [<date>#Value]"),n.found){let t={month:e.today.month(),date:n.groups("date").text("reduced"),year:e.today.year()},a=new CalendarDate(t,null,e);if(!0===a.d.isValid())return a.d.isBefore(e.today)&&(a.d=a.d.add(1,"month")),a}if(n=t.match("/[0-9]{4}-[0-9]{2}-[0-9]{2}t[0-9]{2}:/"),n.found){let a=t.text("reduced"),n=new Moment(a,null,e);if(!0===n.d.isValid())return n}let r=t.text("reduced");if(!r)return new Moment(e.today,null,e);let i=new Day(r,null,e);return !1===i.d.isValid()?null:i}(a,n),i},E={day:Day,week:Week,weekend:WeekEnd,month:Month,quarter:Quarter,season:Season,hour:Hour,minute:Minute},O=function(t,e,a){if(!t&&a.weekDay&&(t=new WeekDay(a.weekDay,null,e),a.weekDay=null),!t)return null;if(a.shift){let e=a.shift;t.applyShift(e),e.hour||e.minute?t=new Moment(t.d,null,t.context):(e.week||e.day||e.month)&&(t=new Day(t.d,null,t.context));}return a.weekDay&&"day"!==t.unit&&(t.applyWeekDay(a.weekDay),t=new WeekDay(t.d,null,t.context)),a.rel&&t.applyRel(a.rel),a.section&&t.applySection(a.section),a.time&&t.applyTime(a.time),a.counter&&a.counter.unit&&(t=function(t,e={}){let a=E[e.unit];if(!a)return t;let n=t.d;"first"===e.dir||0===e.num?(n=t.start().d,n=n.startOf(e.unit)):"last"===e.dir?(n=n.endOf(t.unit),n="weekend"===e.unit?n.day("saturday",!1):n.startOf(e.unit)):e.num&&("weekend"===e.unit&&(n=n.day("saturday",!0).add(1,"day")),n=n.add(e.num,e.unit));let r=new a(n,null,t.context);return !0===r.d.isValid()?r:t}(t,a.counter)),t},C="undefined"==typeof process?self.env||{}:process.env,S=function(t,e){let a=b(t,e);if(t=a.doc,(t=>{C.DEBUG_DATE&&(console.log(`\n==== '${t.doc.text()}' =====`),Object.keys(t).forEach(e=>{"doc"!==e&&t[e]&&console.log(e,t[e]);}),t.doc.debug());})(a),a.tz){let t=(e=Object.assign({},e,{timezone:a.tz})).today.format("iso-short");e.today=e.today.goto(e.timezone).set(t);}let n=T(t,e,a);return n=O(n,e,a),n},_={mon:"monday",tue:"tuesday",tues:"wednesday",wed:"wednesday",thu:"thursday",fri:"friday",sat:"saturday",sun:"sunday",monday:"monday",tuesday:"tuesday",wednesday:"wednesday",thursday:"thursday",friday:"friday",saturday:"saturday",sunday:"sunday"},j=function(t){return t.match("(every|each)").found?"AND":t.match("(any|a)").found?"OR":null},q=function(t){let e=t.start,a=t.end;if(e.d.isAfter(a.d)){if(e.isWeekDay&&a.isWeekDay)return t.end.next(),t;let n=e;t.start=a,t.end=n;}return t},$=function(t){let e=t.start,a=t.end;return e.d.isAfter(a.d)&&a.d.hour()<10&&(a.d=a.d.ampm("pm")),t};const z=function(t,e){return t=t.applyShift(e.punt)};const N=[].concat([{match:"[<from>#Time+] (to|until|upto|through|thru|and) [<to>#Time+ #Date+]",desc:"3pm to 4pm january 5th",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to"),r=S(n,e);if(r){let t=r.clone();if(t.applyTime(a.text("implicit")),t){let e={start:t,end:r,unit:"time"};return !1===/(am|pm)/.test(n)&&(e=$(e)),e=q(e),e}}return null}},{match:"[<main>#Date+] from [<a>#Time] (to|until|upto|through|thru|and) [<b>#Time+]",desc:"january from 3pm to 4pm",parse:(t,e)=>{let a=t.groups("main"),n=t.groups("a"),r=t.groups("b");if(a=S(a,e),a){a.applyTime(n.text("implicit"));let t=a.clone();if(t.applyTime(r.text("implicit")),t){let e={start:a,end:t,unit:"time"};return !1===/(am|pm)/.test(r.text())&&(e=$(e)),e=q(e),e}}return null}},{match:"[<from>#Date+] (to|until|upto|through|thru|and) [<to>#Time+]",desc:"january from 3pm to 4pm",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to");if(a=S(a,e),a){let t=a.clone();if(t.applyTime(n.text("implicit")),t){let e={start:a,end:t,unit:"time"};return !1===/(am|pm)/.test(n.text())&&(e=$(e)),e=q(e),e}}return null}}],[{match:"^during? #Month+ (or|and) #Month [<year>#Year]?",desc:"march or june",parse:(t,e)=>{let a=t.match("^during? [#Month]",0);t=t.not("(or|and)");let n=S(a,e);if(n){let r=[{start:n,end:n.clone().end(),unit:n.unit}],i=t.not(a);i.found&&i.match("#Month").forEach(t=>{let a=S(t,e);r.push({start:a,end:a.clone().end(),unit:a.unit});});let s=t.match("#Year$");return s.found&&(s=s.text("reduced"),r.forEach(t=>{t.start.d=t.start.d.year(s),t.end.d=t.end.d.year(s);})),r}return null}},{match:"^#Month #Value+ (or|and)? #Value$",desc:"jan 5 or 8",parse:(t,e)=>{let a=(t=t.not("(or|and)")).match("^#Month #Value"),n=S(a,e);if(n){let e=[{start:n,end:n.clone().end(),unit:n.unit}],r=t.not(a);return r.found&&r.match("#Value").forEach(t=>{let a=n.clone();a.d=a.d.date(t.text("reduced")),e.push({start:a,end:a.clone().end(),unit:a.unit});}),e}return null}},{match:"^#Month+ #Value #Value+$",desc:"jan 5 8",parse:(t,e)=>{let a=t.match("#Month"),n=t.match("#Year");t=t.not("#Year");let r=[];return t.match("#Value").forEach(t=>{let i=(t=t.clone()).prepend(a.text());n.found&&i.append(n);let s=S(i,e);s&&r.push({start:s,end:s.clone().end(),unit:s.unit});}),r}},{match:"^#Value+ (or|and)? #Value of #Month #Year?$",desc:"5 or 8 of Jan",parse:(t,e)=>{let a=t.match("#Month"),n=t.match("#Year");t=t.not("#Year");let r=[];return t.match("#Value").forEach(t=>{let i=t.append(a);n.found&&i.append(n);let s=S(i,e);s&&r.push({start:s,end:s.clone().end(),unit:s.unit});}),r}},{match:"^!(between|from|during)? [<from>#Date+] (and|or) [<to>#Date+]$",desc:"A or B",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to"),r=S(a,e),i=S(n,e);return r&&i?[{start:r,end:r.clone().end()},{start:i,end:i.clone().end()}]:null}}],[{match:"between [<start>.+] and [<end>.+]",desc:"between friday and sunday",parse:(t,e)=>{let a=t.groups("start");a=S(a,e);let n=t.groups("end");return n=S(n,e),a&&n?(n=n.before(),{start:a,end:n}):null}},{match:"[<from>#Month #Value] (to|through|thru) [<to>#Month #Value] [<year>#Year?]",desc:"june 5 to june 7",parse:(t,e)=>{let a=t.groups(),n=a.from;if(a.year&&(n=n.append(a.year)),n=S(n,e),n){let t=a.to;if(a.year&&(t=t.append(a.year)),t=S(t,e),t){return n.d.isAfter(t.d)&&(t.d=t.d.add(1,"year")),{start:n,end:t.end()}}}return null}},{match:"[<month>#Month] [<from>#Value] (to|through|thru) [<to>#Value] of? [<year>#Year]",desc:"january 5 to 7 1998",parse:(t,e)=>{let{month:a,from:n,to:r,year:i}=t.groups(),s=i.clone(),o=n.prepend(a).append(i);if(o=S(o,e),o){let t=r.prepend(a).append(s);return t=S(t,e),{start:o,end:t.end()}}return null}},{match:"[<from>#Value] (to|through|thru) [<to>#Value of? #Month #Date+?]",desc:"5 to 7 of january 1998",parse:(t,e)=>{let a=t.groups("to");if(a=S(a,e),a){let e=t.groups("from"),n=a.clone();return n.d=n.d.date(e.text("implicit")),{start:n,end:a.end()}}return null}},{match:"[<from>#Month #Value] (to|through|thru) [<to>#Value]",desc:"january 5 to 7",parse:(t,e)=>{let a=t.groups("from");if(a=S(a,e),a){let e=t.groups("to"),n=a.clone();return n.d=n.d.date(e.text("implicit")),{start:a,end:n.end()}}return null}},{match:"from? [<from>#Month] (to|until|upto|through|thru) [<to>#Month] [<year>#Year]",desc:"january to may 2020",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("year").numbers().get()[0],r=t.groups("to");if(a=S(a,e),r=S(r,e),a.d=a.d.year(n),r.d=r.d.year(n),a&&r){let t={start:a,end:r.end()};return t=q(t),t}return null}}],[{match:"from? [<from>.+] (to|until|upto|through|thru) [<to>.+]",desc:"from A to B",parse:(t,e)=>{let a=t.groups("from"),n=t.groups("to");if(a=S(a,e),n=S(n,e),a&&n){let t={start:a,end:n.end()};return t=q(t),t}return null}},{match:"^due? (by|before) [.+]",desc:"before june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);if(a){let t=new Unit(e.today,null,e);return t.d.isAfter(a.d)&&(t=a.clone().applyShift({weeks:-2})),{start:t,end:a.clone().applyShift({day:-1}).end()}}return null}},{match:"^(on|in|at|@|during) [.+]",desc:"in june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);return a?{start:a,end:a.clone().end(),unit:a.unit}:null}},{match:"^(after|following) [.+]",desc:"after june",parse:(t,e)=>{t=t.group(0);let a=S(t,e);return a?(a=a.after(),{start:a.clone(),end:z(a.clone(),e)}):null}},{match:"^(middle|center|midpoint) of [.+]",desc:"middle of",parse:(t,e)=>{t=t.group(0);let a=S(t,e),n=a.clone().middle(),r=a.beforeEnd();return a?{start:n,end:r}:null}},{match:".+ after #Time+$",desc:"tuesday after 5pm",parse:(t,e)=>{let a=S(t,e);if(a){return {start:a.clone(),end:a.end(),unit:"time"}}return null}},{match:".+ before #Time+$",desc:"tuesday before noon",parse:(t,e)=>{let a=S(t,e);if(a){let t=a.clone(),e=a.start();if(a)return {start:e,end:t,unit:"time"}}return null}}]),P="undefined"==typeof process?self.env||{}:process.env,H=function(t,e){let a={start:null,end:null};if(!t.found)return a;let n=S(t,e);if(n){let t=n.clone().end();a={start:n,end:t,unit:n.setTime?"time":n.unit};}return a},B=function(t,e){let a=function(t,e){let a=t.match("[<logic>(every|any|each)] [<skip>other?] [<unit>#Duration] (starting|beginning|commencing)?");if(a.found){let e={interval:{}},n=a.groups("unit").text("reduced");return e.interval[n]=1,e.choose=j(a),a.groups("skip").found&&(e.interval[n]=2),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each)] [<num>#Value] [<unit>#Duration] (starting|beginning|commencing)?"),a.found){let e={interval:{}},n=a.groups("unit");n.nouns().toSingular();let r=n.text("reduced");return e.interval[r]=a.groups("num").numbers().get()[0],e.choose=j(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each|a)] [<skip>other?] [<day>#WeekDay+] (starting|beginning|commencing)?"),a.found){let e={interval:{day:1},filter:{weekDays:{}}},n=a.groups("day").text("reduced");if(n=_[n],n)return e.filter.weekDays[n]=!0,e.choose=j(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<logic>(every|any|each|a)] [<day>(weekday|week day|weekend|weekend day)] (starting|beginning|commencing)?"),a.found){let e={interval:{day:1},filter:{weekDays:{}}},n=a.groups("day");return n.has("(weekday|week day)")?e.filter.weekDays={monday:!0,tuesday:!0,wednesday:!0,thursday:!0,friday:!0}:n.has("(weekend|weekend day)")&&(e.filter.weekDays={saturday:!0,sunday:!0}),e.choose=j(a),t=t.remove(a),{repeat:e}}if(a=t.match("[<day>(mondays|tuesdays|wednesdays|thursdays|fridays|saturdays|sundays)] (at|near|after)? [<time>#Time+?]"),a.found){let n={interval:{day:1},filter:{weekDays:{}}},r=a.groups("day").text("reduced");if(r=r.replace(/s$/,""),r=_[r],r){n.filter.weekDays[r]=!0,n.choose="OR",t=t.remove(a);let i=a.groups("time");return i.found&&(n.time=d(i,e)),{repeat:n}}}return null}(t,e)||{},n=function(t,e){for(let r=0;r<N.length;r+=1){let i=N[r],s=t.match(i.match);if(s.found){n=`  ---[${i.desc}]---`,P.DEBUG_DATE&&console.log(`\n  [32m ${n} [0m`);let t=i.parse(s,e);if(null!==t)return a=t,"[object Array]"!==Object.prototype.toString.call(a)&&(t=[t]),t}}var a,n;return null}(t,e);return n||(n=[H(t,e)]),n=n.map(t=>Object.assign({},a,t)),n.forEach(t=>{t.start&&t.end&&t.start.d.epoch>t.end.d.epoch&&(t.start=t.start.start());}),n},W=function(e,a){return !1===(a=a||{}).timezone&&(a.timezone="UTC"),a.today=a.today||t.now(a.timezone),a.today=t(a.today,a.timezone),e=function(t){return t.numbers||console.warn("\nCompromise warning: compromise/three must be used with compromise-dates plugin\n"),(t=t.clone()).numbers().toNumber(),t.contractions().expand(),t.replace("week end","weekend",!0).tag("Date"),t.replace("up to","upto",!0).tag("Date"),!1===t.has("once (a|an) #Duration")&&t.match("[(a|an)] #Duration",0).replaceWith("1",{tags:!0}).compute("lexicon"),t.match("@hasDash").insertAfter("to").tag("Date"),t}(e),B(e,a)},Y=function(t){if(!t.start)return {start:null,end:null,timezone:null,duration:{}};let e=t.end?function(t){let e=t.end.d.add(1,"millisecond").since(t.start.d).diff;return delete e.milliseconds,delete e.seconds,e}(t):{};return {start:t.start.format("iso"),end:t.end?t.end.format("iso"):null,timezone:t.start.d.format("timezone"),duration:e}},L=function(e,a={}){let n=d(e,a);if(!n.result)return {time:null,"24h":null};let r=t.now().time(n.result);return {time:n.result,"24h":r.format("time-24"),hour:r.hour(),minute:r.minute()}},J=(t,e)=>"number"==typeof e?t.eq(e):t,K={century:!0,day:!0,decade:!0,hour:!0,millisecond:!0,minute:!0,month:!0,second:!0,weekend:!0,week:!0,year:!0,quarter:!0,season:!0};let R={m:"minute",h:"hour",hr:"hour",min:"minute",sec:"second","week end":"weekend",wk:"week",yr:"year",qtr:"quarter"};Object.keys(R).forEach(t=>{R[t+"s"]=R[t];});const U=function(t){let e={},a=t.match("#Value+ #Duration");if(a.found)a.forEach(t=>{let a=t.numbers().get()[0],n=t.terms().last().text("reduced");n=n.replace(/ies$/,"y"),n=n.replace(/s$/,""),R.hasOwnProperty(n)&&(n=R[n]),K.hasOwnProperty(n)&&null!==a&&(e[n]=a);});else {if(t.match("(#Duration && /[0-9][a-z]+$/)").found){let a=t.text(),n=a.match(/([0-9]+)/),r=a.match(/([a-z]+)/);n&&r&&(n=n[0]||null,r=r[0]||null,R.hasOwnProperty(r)&&(r=R[r]),K.hasOwnProperty(r)&&null!==n&&(e[r]=Number(n)));}}return e},I="(start|end|middle|starting|ending|midpoint|beginning)",F=(t,e)=>{!0===t.found&&t.forEach(t=>{let a=t.text("reduced"),n=parseInt(a,10);n&&n>1e3&&n<3e3&&t.tag("Year",e);});},Q=(t,e)=>{!0===t.found&&t.forEach(t=>{let a=t.text("reduced"),n=parseInt(a,10);n&&n>1900&&n<2030&&t.tag("Year",e);});},G=function(t,e){if(t.found){t.tag("Date",e),t.numbers().lessThan(31).ifNo("#Year").tag("#Time",e);}},X=["act","aft","akst","anat","art","azot","azt","bnt","bot","bt","cast","cat","cct","chast","chut","ckt","cvt","cxt","davt","eat","ect","fjt","fkst","fnt","gamt","get","gft","gilt","gyt","hast","hncu","hneg","hnnomx","hnog","hnpm","hnpmx","hntn","hovt","iot","irkt","jst","kgt","kost","lint","magt","mart","mawt","mmt","nct","nft","novt","npt","nrt","nut","nzst","omst","pet","pett","phot","phst","pont","pwt","ret","sakt","samt","sbt","sct","sret","srt","syot","taht","tft","tjt","tkt","tlt","tmt","tot","tvt","ulat","vut","wakt","wat","wet","wft","wit","wst","yekt"].reduce((t,e)=>(t[e]=!0,t),{}),Z="(in|by|before|during|on|until|after|of|within|all)",tt="(last|next|this|previous|current|upcoming|coming)",et="(start|end|middle|starting|ending|midpoint|beginning)",at="(spring|summer|winter|fall|autumn)";let nt=[{match:"in the (night|evening|morning|afternoon|day|daytime)",tag:"Time",reason:"in-the-night"},{match:"(#Value|#Time) (am|pm)",tag:"Time",reason:"value-ampm"},{match:"(tue|thu)",tag:"WeekDay",reason:"misc-weekday"},{match:"#Month #Date+",tag:"Date",reason:"correction-numberRange"},{match:"#Value of #Month",tag:"Date",unTag:"Time",reason:"value-of-month"},{match:"#Cardinal #Month",tag:"Date",reason:"cardinal-month"},{match:"#Month #Value (and|or|to)? #Value+",tag:"Date",reason:"value-to-value"},{match:"#Month the #Value",tag:"Date",reason:"month-the-value"},{match:"[(march|may)] to? #Date",group:0,tag:"Month",reason:"march-to"},{match:"^(march|may)$",tag:"Month",reason:"single-march"},{match:"#Month or #Month",tag:"Date",reason:"month-or-month"},{match:"(#WeekDay|#Month) #Value",ifNo:"#Money",tag:"Date",reason:"date-value"},{match:"#Value (#WeekDay|#Month)",ifNo:"#Money",tag:"Date",reason:"value-date"},{match:"#TextValue #TextValue",if:"#Date",tag:"#Date",reason:"textvalue-date"},{match:"#Value (#WeekDay|#Duration) back",tag:"#Date",reason:"3-back"},{match:"for #Value #Duration",tag:"Date",reason:"for-x-duration"},{match:"#Value #Duration #Conjunction",tag:"Date",reason:"val-duration-conjunction"},{match:Z+"? #Value #Duration",tag:"Date",reason:"value-duration"},{match:"#Value #Duration old",unTag:"Date",reason:"val-years-old"},{match:`${Z}? ${tt} ${at}`,tag:"Date",reason:"thisNext-season"},{match:`the? ${et} of ${at}`,tag:"Date",reason:"section-season"},{match:`${at} ${Z}? #Cardinal`,tag:"Date",reason:"season-year"},{match:"#Date the? #Ordinal",tag:"Date",reason:"correction"},{match:tt+" #Date",tag:"Date",reason:"thisNext-date"},{match:"due? (by|before|after|until) #Date",tag:"Date",reason:"by"},{match:"(last|next|this|previous|current|upcoming|coming|the) #Date",tag:"Date",reason:"next-feb"},{match:`the? ${et} of #Date`,tag:"Date",reason:"section-of"},{match:"#Ordinal #Duration in #Date",tag:"Date",reason:"duration-in"},{match:"(early|late) (at|in)? the? #Date",tag:"Time",reason:"early-evening"},{match:"#Date [(by|before|after|at|@|about) #Cardinal]",group:0,tag:"Time",reason:"date-before-Cardinal"},{match:"#Date (#Preposition|to) #Date",ifNo:"#Duration",tag:"Date",reason:"date-prep-date"},{match:"(by|before|after|at|@|about) #Time",tag:"Time",reason:"preposition-time"},{match:"(in|after) /^[0-9]+(min|sec|wk)s?/",tag:"Date",reason:"shift-units"},{match:"#Date [(now|night|sometime)]",group:0,tag:"Time",reason:"date-now"},{match:"(from|starting|until|by) now",tag:"Date",reason:"for-now"},{match:"(each|every) night",tag:"Date",reason:"for-now"},{match:"#Date [(am|pm)]",group:0,tag:"Time",reason:"date-am"},{match:"#Month #Value to #Value of? #Year?",tag:"Date",reason:"june 5 to 7th"},{match:"#Value to #Value of? #Month #Year?",tag:"Date",reason:"5 to 7th june"},{match:"#Value #Duration of #Date",tag:"Date",reason:"third week of may"},{match:"#Value+ #Duration (after|before|into|later|afterwards|ago)?",tag:"Date",reason:"two days after"},{match:"#Value #Date",tag:"Date",reason:"two days"},{match:"#Date #Value",tag:"Date",reason:"june 5th"},{match:"#Date #Preposition #Value",tag:"Date",reason:"tuesday at 5"},{match:"#Date (after|before|during|on|in) #Value",tag:"Date",reason:"tomorrow before 3"},{match:"#Value (year|month|week|day) and a half",tag:"Date",reason:"a year and a half"},{match:"#Value and a half (years|months|weeks|days)",tag:"Date",reason:"5 and a half years"},{match:"on the #Ordinal",tag:"Date",reason:"on the fifth"},{match:"#Month #Value+ (and|or) #Value",tag:"Date",reason:"date-or-date"},{match:"#Value+ (and|or) #Value of #Month ",tag:"Date",reason:"date-and-date"},{match:"(spring|summer|winter|fall|autumn|springtime|wintertime|summertime)",tag:"Season",reason:"date-tag1"},{match:"(q1|q2|q3|q4)",tag:"FinancialQuarter",reason:"date-tag2"},{match:"(this|next|last|current) quarter",tag:"FinancialQuarter",reason:"date-tag3"},{match:"(this|next|last|current) season",tag:"Season",reason:"date-tag4"},{match:"#Date #Preposition #Date",tag:"Date",reason:"friday to sunday"},{match:"(once|twice) (a|an|each) #Date",tag:"Date",reason:"once a day"},{match:"a #Duration",tag:"Date",reason:"a year"},{match:"(between|from) #Date",tag:"Date",reason:"between x and y"},{match:"(to|until|upto) #Date",tag:"Date",reason:"between x and y2"},{match:"#Date and #Date",tag:"Date",reason:"between x and y3"},{match:"the? #Date after next one?",tag:"Date",reason:"day after next"},{match:"(about|approx|approximately|around) #Date",tag:"Date",reason:"approximately june"},{match:"(by|until|on|in|at|during|over|every|each|due) the? #Date",ifNo:"#PhrasalVerb",tag:"Date",reason:"until june"},{match:"(by|until|after|before|during|on|in|following|since) (next|this|last)? #Date",ifNo:"#PhrasalVerb",tag:"Date",reason:"until last june"},{match:"this? (last|next|past|this|previous|current|upcoming|coming|the) #Date",tag:"Date",reason:"next september"},{match:"(starting|beginning|ending) #Date",tag:"Date",reason:"starting this june"},{match:"the? (start|end|middle|beginning) of (last|next|this|the) #Date",tag:"Date",reason:"start of june"},{match:"(the|this) #Date",tag:"Date",reason:"this coming june"},{match:"#Date up to #Date",tag:"Date",reason:"january up to june"},{match:"#Cardinal oclock",tag:"Time",reason:"2 oclock"},{match:"#Value (in|at) the? (morning|evening|night|nighttime)",tag:"Time",reason:"3 in the morning"},{match:"(5|10|15|20|five|ten|fifteen|quarter|twenty|half) (after|past) #Cardinal",tag:"Time",reason:"ten to seven"},{match:"(at|by|before) (5|10|15|20|five|ten|fifteen|twenty|quarter|half) (after|past|to)",tag:"Time",reason:"at-20-past"},{match:"#Date [at #Cardinal]",group:0,ifNo:"#Year",tag:"Time",reason:" tuesday at 4"},{match:"half an (hour|minute|second)",tag:"Date",reason:"half an hour"},{match:"(in|for|by|near|at) #Timezone",tag:"Date",reason:"in eastern time"},{match:"#Time to #Time",tag:"Date",reason:"3pm to 4pm"},{match:"#Time [(sharp|on the dot)]",group:0,tag:"Time",reason:"4pm sharp"},{match:"(at|around|near|#Date) [#Cardinal (thirty|fifteen) (am|pm)?]",group:0,tag:"Time",reason:"around four thirty"},{match:"(anytime|sometime) (before|after|near) [#Cardinal]",group:0,tag:"Time",reason:"antime-after-3"},{match:"(#Cardinal|a|an) #Duration (before|after|ago|from|hence|back)",tag:"DateShift",reason:"nine weeks frow now"},{match:"in #Cardinal #Duration",tag:"DateShift",reason:"in two weeks"},{match:"in (a|an) #Duration",tag:"DateShift",reason:"in a week"},{match:"[(a|an) #Duration from] #Date",group:0,tag:"DateShift",reason:"an hour from now"},{match:"(a|an) #Duration ago",tag:"DateShift",reason:"a month ago"},{match:"in half (a|an) #Duration",tag:"DateShift",reason:"in half an hour"},{match:"in a (few|couple) of? #Duration",tag:"DateShift",reason:"in a few weeks"},{match:"#Cardinal #Duration and? #DateShift",tag:"DateShift",reason:"three days before"},{match:"#DateShift and #Cardinal #Duration",tag:"DateShift",reason:"date-shift"},{match:"[#Duration (after|before)] #Date",group:0,tag:"DateShift",reason:"day after tomorrow"},{match:"#Month #Ordinal and #Ordinal",tag:"Date",reason:"ord-and-ord"},{match:"every other #Duration",tag:"Date",reason:"every-other"},{match:"(every|any|each|a) (day|weekday|week day|weekend|weekend day)",tag:"Date",reason:"any-weekday"},{match:"(every|any|each|a) (#WeekDay)",tag:"Date",reason:"any-wednesday"},{match:"(every|any|each|a) (#Duration)",tag:"Date",reason:"any-week"},{match:"[(wed|sat)] (#Month|#Year|on|between|during|from)",group:0,tag:"WeekDay",reason:"wed"},{match:"^day$",unTag:"Date",reason:"spa-day"},{match:"(in|of|by|for)? (#Possessive && #Date)",unTag:"Date",reason:"tomorrows meeting"},{match:"(yesterday|today|tomorrow) [#Value]$",unTag:"Date",group:0,reason:"yesterday-7"},{match:"^[#Value] (yesterday|today|tomorrow)$",group:0,unTag:"Date",reason:"7 yesterday"},{match:"on #Cardinal$",unTag:"Date",reason:"on 5"},{match:"[this] tomorrow",group:0,unTag:"Date",reason:"this-tomorrow"},{match:"(q1|q2|q3|q4) #Year",tag:"Date",reason:"q2 2016"},{match:"^[#Value] (this|next|last)",group:0,unTag:"Date",reason:"4 next"},{match:"(last|this|next) #Duration [#Value]",group:0,unTag:"Date",reason:"this month 7"},{match:"[!#Month] #Value (last|this|next) #Date",group:0,unTag:"Date",reason:"7 this month"},{match:"(in|over) the #Duration #Date+?",unTag:"Date",reason:"over-the-duration"},{match:"#Ordinal quarter of? #Year",unTag:"Fraction"},{match:"(from|by|before) now",unTag:"Time",tag:"Date"}],rt=null;var it={dates:function(t){return t.cache(),function(t){let{document:e,world:a}=t;const{methods:n}=a;rt=rt||n.two.compile(nt,n);let r=n.two.bulkMatch(e,rt,n);n.two.bulkTagger(r,e,a);}(t),function(t){t.match("(march|april|may) (and|to|or|through|until)? (march|april|may)").tag("Date").match("(march|april|may)").tag("Month","march|april|may");let e=t.if("#Cardinal");if(!0===e.found){let t=e.match("#Date #Value [#Cardinal]",0);F(t,"date-value-year"),t=e.match("#Date [#Cardinal]",0),Q(t,"date-year"),t=e.match(I+" of [#Cardinal]"),Q(t,"section-year"),t=e.match("#Month #Value [#Cardinal]",0),F(t,"month-value-year"),t=e.match("#Month #Value to #Value [#Cardinal]",0),F(t,"month-range-year"),t=e.match("(in|of|by|during|before|starting|ending|for|year|since) [#Cardinal]",0),F(t,"in-year-1"),t=e.match("(q1|q2|q3|q4) [#Cardinal]",0),F(t,"in-year-2"),t=e.match("#Ordinal quarter of? [#Cardinal]",0),F(t,"in-year-3"),t=e.match("the year [#Cardinal]",0),F(t,"in-year-4"),t=e.match("it (is|was) [#Cardinal]",0),Q(t,"in-year-5"),e.match(I+" of #Year").tag("Date");let a=e.match("between [#Cardinal] and [#Cardinal]");F(a.groups("0"),"between-year-and-year-1"),F(a.groups("1"),"between-year-and-year-2");}let a=t.match("^/^20[012][0-9]$/$");Q(a,"2020-ish");}(t),function(t){let e=t.if("#Date");if(e.found){let a=e.if("#NumberRange");if(a.found){let t=a.match("[#NumberRange+] (on|by|at)? #WeekDay",0);G(t,"3-4-tuesday"),t=a.match("[#NumberRange+] (on|by|at)? #Month #Value",0),G(t,"3-4 mar 3"),t=a.match("[#NumberRange] to (#NumberRange && #Time)",0),G(t,"3-4pm"),t=a.match("(#NumberRange && #Time) to [#NumberRange]",0),G(t,"3pm-4");}let n=e.match("(from|between) #Cardinal and #Cardinal (in|on)? (#WeekDay|tomorrow|yesterday)");G(n,"from 9-5 tues"),n=t.match("#Cardinal to #Cardinal (#WeekDay|tomorrow|yesterday)"),G(n,"9-5 tues"),n=e.match("(from|between) [#NumericValue] (to|and) #Time",0).tag("Time","4-to-5pm"),G(n,"from 9-5pm"),n=e.match("(#WeekDay|tomorrow|yesterday) (from|between)? (#Cardinal|#Time) (and|to) (#Cardinal|#Time)"),G(n,"tues 3-5"),n=e.match("#Month #Value+ (from|between) [<time>(#Cardinal|#Time) (and|to) (#Cardinal|#Time)]").group("time"),G(n,"sep 4 from 9-5"),n=e.match("#Time to #Cardinal on? #Date"),G(n,"3pm-4 wed"),n=e.match("#Cardinal to #Time on? #Date"),G(n,"3-4pm wed"),n=e.match("#Cardinal to #Cardinal on? (#WeekDay|#Month #Value)"),G(n,"3-4 wed");}}(t),function(t){let e=t.match("#Time [#Acronym]",0);if(e.found){let t=e.text("reduced");!0===X[t]&&e.tag("Timezone","tz-abbr");}}(t),function(t){if(t.has("#Date")){let e=t.match("#Date+ by #Date+");e.found&&!e.has("^due")&&e.match("^#Date+").unTag("Date","by-monday");let a=t.match("#Date+");a.has("^between")&&!a.has("and .")&&a.unTag("Date","fix-tagger"),a.has("(minutes|seconds|weeks|hours|days|months)")&&!a.has("#Value #Duration")&&a.match("(minutes|seconds|weeks|hours|days|months)").unTag("Date","log-hours"),a.has("about #Holiday")&&a.match("about").unTag("#Date","about-thanksgiving"),a.match("#Date+").match("^the").unTag("Date");}}(t),t.uncache(),t}};const st="Australia/",ot="Pacific/",ut={"british summer time":"Europe/London",bst:"Europe/London","british time":"Europe/London","britain time":"Europe/London","irish summer time":"Europe/Dublin","irish time":"Europe/Dublin","central european time":"Europe/Berlin",cet:"Europe/Berlin","central european summer time":"Europe/Berlin",cest:"Europe/Berlin","central europe":"Europe/Berlin","eastern european time":"Europe/Riga",eet:"Europe/Riga","eastern european summer time":"Europe/Riga",eest:"Europe/Riga","eastern europe time":"Europe/Riga","western european time":"Europe/Lisbon","western european summer time":"Europe/Lisbon","turkey standard time":"Europe/Istanbul","turkish time":"Europe/Istanbul",utc:"Africa/Freetown","greenwich standard time":"Africa/Freetown",gmt:"Africa/Freetown","east africa time":"Africa/Nairobi","east african time":"Africa/Nairobi","eastern africa time":"Africa/Nairobi","central africa time":"Africa/Khartoum","central african time":"Africa/Khartoum","south africa standard time":"Africa/Johannesburg","west africa standard time":"Africa/Lagos","western africa time":"Africa/Lagos","west african time":"Africa/Lagos","australian central standard time":st+"Adelaide",acst:st+"Adelaide","australian central daylight time":st+"Adelaide",acdt:st+"Adelaide","australian eastern standard time":st+"Brisbane",aest:st+"Brisbane","australian eastern daylight time":st+"Brisbane",aedt:st+"Brisbane","australian western standard time":st+"Perth",awst:st+"Perth","australian western daylight time":st+"Perth",awdt:st+"Perth","australian central western standard time":st+"Eucla",acwst:st+"Eucla","lord howe standard time":st+"Lord_Howe",lhst:st+"Lord_Howe","lord howe daylight time":st+"Lord_Howe",lhdt:st+"Lord_Howe","russian standard time":"Europe/Moscow",msk:"Europe/Moscow","central standard time":"America/Chicago","central time":"America/Chicago",cst:"America/Havana","central daylight time":"America/Chicago",cdt:"America/Havana","mountain standard time":"America/Denver","mountain time":"America/Denver",mst:"America/Denver","mountain daylight time":"America/Denver",mdt:"America/Denver","atlantic standard time":"America/Halifax","atlantic time":"America/Halifax",ast:"Asia/Baghdad","atlantic daylight time":"America/Halifax",adt:"America/Halifax","eastern standard time":"America/New_York","eastern time":"America/New_York",est:"America/New_York","eastern daylight time":"America/New_York",edt:"America/New_York","pacific time":"America/Los_Angeles","pacific standard time":"America/Los_Angeles",pst:"America/Los_Angeles","pacific daylight time":"America/Los_Angeles",pdt:"America/Los_Angeles","alaskan standard time":"America/Anchorage","alaskan time":"America/Anchorage",ahst:"America/Anchorage","alaskan daylight time":"America/Anchorage",ahdt:"America/Anchorage","hawaiian standard time":ot+"Honolulu","hawaiian time":ot+"Honolulu",hst:ot+"Honolulu","aleutian time":ot+"Honolulu","hawaii time":ot+"Honolulu","newfoundland standard time":"America/St_Johns","newfoundland time":"America/St_Johns","newfoundland daylight time":"America/St_Johns","brazil time":"America/Sao_Paulo","brazilian time":"America/Sao_Paulo","argentina time":"America/Buenos_Aires","argentinian time":"America/Buenos_Aires","amazon time":"America/Manaus","amazonian time":"America/Manaus","easter island standard time":"Chile/Easterisland","easter island summer time":"Chile/Easterisland",easst:"Chile/Easterisland","venezuelan standard time":"America/Caracas","venezuelan time":"America/Caracas","venezuela time":"America/Caracas","paraguay time":"America/Asuncion","paraguay summer time":"America/Asuncion","cuba standard time":"America/Havana","cuba time":"America/Havana","cuba daylight time":"America/Havana","cuban time":"America/Havana","bolivia time":"America/La_Paz","bolivian time":"America/La_Paz","colombia time":"America/Bogota","colombian time":"America/Bogota","acre time":"America/Eirunepe","peru time":"America/Lima","chile standard time":"America/Punta_Arenas","chile time":"America/Punta_Arenas",clst:"America/Punta_Arenas","chile summer time":"America/Punta_Arenas",cldt:"America/Punta_Arenas","uruguay time":"America/Montevideo",uyt:"America/Montevideo","arabic standard time":"Asia/Baghdad","iran standard time":"Asia/Tehran","iran time":"Asia/Tehran","iran daylight time":"Asia/Tehran","pakistan standard time":"Asia/Karachi","pakistan time":"Asia/Karachi","india standard time":"Asia/Kolkata","indian time":"Asia/Kolkata","indochina time":"Asia/Bangkok","china standard time":"Asia/Shanghai","alma-ata time":"Asia/Almaty","oral time":"Asia/Oral","orat time":"Asia/Oral","yakutsk time":"Asia/Yakutsk",yakt:"Asia/Yakutsk","gulf standard time":"Asia/Dubai","gulf time":"Asia/Dubai","hong kong time":"Asia/Hong_Kong","western indonesian time":"Asia/Jakarta","indonesia time":"Asia/Jakarta","central indonesian time":"Asia/Makassar","israel daylight time":"Asia/Jerusalem","israel standard time":"Asia/Jerusalem","israel time":"Asia/Jerusalem","krasnoyarsk time":"Asia/Krasnoyarsk","malaysia time":"Asia/Kuala_Lumpur","singapore time":"Asia/Singapore","korea standard time":"Asia/Seoul","korea time":"Asia/Seoul",kst:"Asia/Seoul","korean time":"Asia/Seoul","uzbekistan time":"Asia/Samarkand","vladivostok time":"Asia/Vladivostok","maldives time":"Indian/Maldives","mauritius time":"Indian/Mauritius","marshall islands time":ot+"Kwajalein","samoa standard time":ot+"Midway","somoan time":ot+"Midway","chamorro standard time":ot+"Guam","papua new guinea time":ot+"Bougainville"};let dt=t().timezones,mt=Object.keys(dt).reduce((t,e)=>(t[e]=e,t),{});var lt=Object.assign({},ut,mt);let ht={"a couple":"Value",thur:"WeekDay",thurs:"WeekDay"};const ct=function(t,e){t.forEach(t=>{ht[t]=e;});};ct(Object.keys(lt),"Timezone"),ct(["weekday","summer","winter","autumn","all day","eod","eom","eoy","standard time","daylight time","tommorrow"],"Date"),ct(["centuries","century","day","days","decade","decades","hour","hours","hr","hrs","millisecond","milliseconds","minute","minutes","min","mins","month","months","seconds","sec","secs","week end","week ends","weekend","weekends","week","weeks","wk","wks","year","years","yr","yrs","quarter","qtr","qtrs","season","seasons"],"Duration"),ct(["all hallows eve","all saints day","all sts day","april fools","armistice day","australia day","bastille day","boxing day","canada day","christmas eve","christmas","cinco de mayo","day of the dead","dia de muertos","dieciseis de septiembre","emancipation day","grito de dolores","groundhog day","halloween","harvey milk day","inauguration day","independence day","independents day","juneteenth","labour day","national freedom day","national nurses day","new years eve","new years","purple heart day","rememberance day","rosa parks day","saint andrews day","saint patricks day","saint stephens day","saint valentines day","st andrews day","st patricks day","st stephens day","st valentines day ","valentines day","valentines","veterans day","victoria day","womens equality day","xmas","epiphany","orthodox christmas day","orthodox new year","assumption of mary","all souls day","feast of the immaculate conception","feast of our lady of guadalupe","kwanzaa","imbolc","beltaine","lughnassadh","samhain","martin luther king day","mlk day","presidents day","mardi gras","tax day","commonwealth day","mothers day","memorial day","fathers day","columbus day","indigenous peoples day","canadian thanksgiving","election day","thanksgiving","t-day","turkey day","black friday","cyber monday","ash wednesday","palm sunday","maundy thursday","good friday","holy saturday","easter","easter sunday","easter monday","orthodox good friday","orthodox holy saturday","orthodox easter","orthodox easter monday","ascension day","pentecost","whitsunday","whit sunday","whit monday","trinity sunday","corpus christi","advent","tu bishvat","tu bshevat","purim","passover","yom hashoah","lag baomer","shavuot","tisha bav","rosh hashana","yom kippur","sukkot","shmini atzeret","simchat torah","chanukah","hanukkah","isra and miraj","lailat al-qadr","eid al-fitr","id al-Fitr","eid ul-Fitr","ramadan","eid al-adha","muharram","the prophets birthday","ostara","march equinox","vernal equinox","litha","june solistice","summer solistice","mabon","september equinox","fall equinox","autumnal equinox","yule","december solstice","winter solstice","chinese new year","diwali"],"Holiday"),ct(["noon","midnight","morning","tonight","evening","afternoon","breakfast time","lunchtime","dinnertime","midday","eod","oclock","oclock","at night"],"Time");var ft=[[/^[0-9]+(min|sec|hr|d)s?$/,"Duration","30min"],[/^[0-9]{4}-[0-9]{2}$/,"Date","2012-06"],[/^[0-9]{2}h[0-9]{2}$/,"Time","13h30"],[/^[0-9]{2}\/[0-9]{2}/,"Date","03/02"],[/^[0-9]{4}[:-][0-9]{2}[:-][0-9]{2}T[0-9]/,"Time","iso-time-tag"]],yt={tags:{FinancialQuarter:{is:"Date",not:["Fraction"]},Season:{is:"Date"},Year:{is:"Date",not:["RomanNumeral"]},Holiday:{is:"Date",also:"Noun"},DateShift:{is:"Date",not:["Timezone","Holiday"]}},words:ht,compute:it,api:function(t){!function(t){class Dates extends t{constructor(t,e,a,n={}){super(t,e,a),this.viewType="Nouns",this.opts=n;}get(t){let e=[];return this.forEach(t=>{W(t,this.opts).forEach(t=>{e.push(Y(t));});}),"number"==typeof t?e[t]:e}json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};if(t&&!0!==t.dates){let t=W(e,this.opts);a.dates=Y(t[0]);}return a},[])}format(t){let e=this.map(e=>{let a=W(e,this.opts)[0]||{};if(a.start){let n=a.start.d,r=n.format(t);if(a.end){let e=a.end.d;!1===n.isSame(e,"day")&&(r+=" to "+e.format(t));}e.replaceWith(r);}return e});return new Dates(this.document,e.pointer,null,this.opts)}}t.prototype.dates=function(t){let e=function(t){let e=t.match("#Date+");e=e.filter(t=>{let e=t.has("^#Duration+$")||t.has("^#Value #Duration+$");return !(!0!==e||!t.has("(#FinancialQuarter|quarter)"))||!1===e});let a=e.match("[#Cardinal #Duration (in|on|this|next|during|for)] #Date",0);return a.found&&(e=e.not(a)),a=e.match("[#Cardinal #Duration] #WeekDay",0),a.found&&(e=e.not(a)),a=e.match("#Date [for #Value #Duration]$",0),a.found&&(e=e.not(a)),a=e.match("[#Cardinal #Duration] #Date",0),a.found&&!e.has("#Cardinal #Duration] (ago|from|before|after|back)")&&(e=e.not(a)),a=e.match("for #Cardinal #Duration"),a.found&&(e=e.not(a)),e=e.notIf("^one (#WeekDay|#Month)$"),e=function(t){let e=null;return t.has("^(between|within) #Date")?t:(t.has("#Month")&&(e=t.match("[#Month #Value] and? #Month",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),e=t.match("[#Value #Month] and? #Value #Month",0),e.found&&(t=t.splitAfter(e)),e=t.match("^[#Month] and? #Month #Ordinal?$",0),e.found&&(t=t.splitAfter(e)),e=t.match("[#Month #Value] #Month",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e))),t.has("#WeekDay")&&(e=t.match("^[#WeekDay] and? #WeekDay$",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),e=t.match("#WeekDay #WeekDay and? #WeekDay"),e.found&&(t=t.splitOn("#WeekDay")),e=t.match("[#WeekDay] (and|or|this|next)? #WeekDay",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter("#WeekDay"))),e=t.match("(this|next) #Duration [(today|tomorrow|yesterday)]",0),e.found&&(t=t.splitBefore(e)),e=t.match("[(today|tomorrow|yesterday)] #Value #Month",0),e.found&&(t=t.splitAfter(e)),e=t.match("[(today|tomorrow|yesterday)] (today|tomorrow|yesterday|#WeekDay)",0).ifNo("@hasDash$"),e.found&&(t=t.splitAfter(e)),t=t.not("^and"))}(e),e=e.notIf("(#Money|#Percentage)"),e=e.notIf("^per #Duration"),e}(this);return new Dates(this.document,e.pointer,null,t)};}(t),function(t){class Times extends t{constructor(t,e,a){super(t,e,a),this.viewType="Nouns";}get(t){return J(this,t).map(L)}json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};return t&&!0!==t.times&&(a.time=L(e)),a},[])}}t.prototype.times=function(t){let e=this.match("#Time+ (am|pm)?");return e=J(e,t),new Times(this.document,e.pointer)};}(t),function(t){class Durations extends t{constructor(t,e,a){super(t,e,a),this.context={};}json(t={}){return this.map(e=>{let a=e.toView().json(t)[0]||{};return t&&!0!==t.times&&(a.duration=U(e)),a},[])}get(t){let e=[];return this.forEach(t=>{let a=U(t);e.push(a);}),"number"==typeof t?e[t]:e}}t.prototype.durations=function(t){let e=this.match("#Value+ #Duration (and? #Value+ #Duration)?");return e=e.concat(this.match("(#Duration && /[0-9][a-z]+$/)")),e=e.notIf("#DateShift"),"number"==typeof t&&(e=e.eq(t)),new Durations(this.document,e.pointer)};}(t);},mutate:t=>{t.model.two.regexNormal=t.model.two.regexNormal.concat(ft);},hooks:["dates"]};
 
     /* three/dates/App.svelte generated by Svelte v3.43.0 */
     const file = "three/dates/App.svelte";
@@ -46574,7 +47368,7 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
-    	nlp$1.plugin(pt);
+    	nlp$1.plugin(yt);
     	let text = 'next weekend';
 
     	let example = `let doc = nlp('sometime next tuesday')
@@ -46657,7 +47451,7 @@ var app = (function () {
     		Year: Year$1,
     		spacetime: spacetime$1,
     		nlp: nlp$1,
-    		nlpDates: pt,
+    		nlpDates: yt,
     		text,
     		example,
     		options,

@@ -34,7 +34,7 @@
 
       <div class="tab">in a couple milliseconds</div>
     </div>
-    <div class="tab">
+    <div class="tab down">
       split text into <span class="cherry">sentences</span> and <span class="rose">words</span> and
       <span class="sky">punctuation</span>.
     </div>

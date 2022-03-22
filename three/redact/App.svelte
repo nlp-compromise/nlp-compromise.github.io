@@ -7,6 +7,9 @@
   const onchange = function (txt) {
     res = nlp(txt).redact(opts).text()
   }
+  const update = function () {
+    onchange(text)
+  }
   let example = `let doc = nlp('my number is 416-555-6732')
 doc.redact()
 doc.text()`
@@ -14,30 +17,30 @@ doc.text()`
 
 <Back href="https://compromise.cool" />
 <Page bottom="40px">
-  <div class="lib">compromise/three/redact</div>
+  <div class="lib">compromise/three</div>
+  <div class="plugin">.readact()</div>
   <div class="down tab desc">hide identifiable information in a document -</div>
-  <!-- <div class="plugin">.readact()</div> -->
   <div class="row">
     <TextArea value={text} size="18px" height="400px" cb={onchange} />
     <div class="col items">
       <div class="item">
-        <input type="checkbox" bind:checked={opts.people} />
+        <input type="checkbox" bind:checked={opts.people} on:click={update} />
         people
       </div>
       <div class="item">
-        <input type="checkbox" bind:checked={opts.places} />
+        <input type="checkbox" bind:checked={opts.places} on:click={update} />
         places
       </div>
       <div class="item">
-        <input type="checkbox" bind:checked={opts.money} />
+        <input type="checkbox" bind:checked={opts.money} on:click={update} />
         money
       </div>
       <div class="item">
-        <input type="checkbox" bind:checked={opts.phoneNumbers} />
+        <input type="checkbox" bind:checked={opts.phoneNumbers} on:click={update} />
         phoneNumbers
       </div>
       <div class="item">
-        <input type="checkbox" bind:checked={opts.emails} />
+        <input type="checkbox" bind:checked={opts.emails} on:click={update} />
         emails
       </div>
     </div>

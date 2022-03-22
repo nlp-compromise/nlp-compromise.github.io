@@ -131,7 +131,7 @@
     white-space: nowrap;
     flex-direction: row;
     align-items: flex-start;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
   @media only screen and (max-width: 600px) {
     .list {
