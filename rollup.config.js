@@ -11,30 +11,31 @@ let dir = process.argv[4] || ''
 let out = `./${dir}/build/bundle.js`
 let input = `${dir}/main.js`
 console.log(input)
-const production = !process.env.ROLLUP_WATCH
+// const production = !process.env.ROLLUP_WATCH
+const production = true
 
 function serve() {
-  let server
+  // let server
 
-  function toExit() {
-    if (server) server.kill(0)
-  }
+  // function toExit() {
+  //   if (server) server.kill(0)
+  // }
 
-  return {
-    writeBundle() {
-      if (server) return
-      if (dir === '.') {
-        dir = './'
-      }
-      server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
-        stdio: ['ignore', 'inherit', 'inherit'],
-        shell: true,
-      })
+  // return {
+  //   writeBundle() {
+  //     if (server) return
+  //     if (dir === '.') {
+  //       dir = './'
+  //     }
+  //     server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
+  //       stdio: ['ignore', 'inherit', 'inherit'],
+  //       shell: true,
+  //     })
 
-      process.on('SIGTERM', toExit)
-      process.on('exit', toExit)
-    },
-  }
+  //     process.on('SIGTERM', toExit)
+  //     process.on('exit', toExit)
+  //   },
+  // }
 }
 
 export default {
