@@ -1,0 +1,462 @@
+.res.svelte-1uo45n8{line-height:3.5rem;margin-top:6rem;margin-left:2rem;margin-bottom:8rem;color:#cc7066;font-size:3rem;display:flex;flex-direction:column;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}.col.svelte-1uo45n8{display:flex;flex-direction:column;justify-content:space-around;align-items:flex-start;text-align:center;flex-wrap:wrap;align-self:stretch}.column.svelte-s0w7u3{text-align:left;display:grid;grid-template-columns:1fr 2fr;width:100%;margin-top:150px;margin-bottom:150px}.box.svelte-s0w7u3{text-align:center}.body.svelte-s0w7u3{display:inline-block;text-align:left;padding-left:1.8rem;padding-right:1.8rem}.line.svelte-s0w7u3{width:33.3%;height:4px;border-radius:5px;margin-bottom:15px}@media(max-width: 900px){.column.svelte-s0w7u3{grid-template-columns:1fr}}.container.svelte-1qs1965{min-height:800px;border-radius:5px;text-align:left;padding:2rem;box-shadow:3px 12px 36px 1px rgba(0, 0, 0, 0.2);margin-left:55px;margin-right:55px;margin-bottom:140px;flex-basis:1200px;overflow-x:scroll}.side.svelte-1qs1965{flex:1}.row.svelte-1qs1965{display:flex;flex-direction:row;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}@media(max-width: 900px){.container.svelte-1qs1965{padding:0.5rem;margin:15px}}.column.svelte-1kpipmv{text-align:left;display:grid;grid-template-columns:2fr 1fr;width:100%;margin-top:150px;margin-bottom:150px}.body.svelte-1kpipmv{display:inline-block;text-align:left;margin-left:0.9rem;padding-left:0.9rem;padding-right:1.8rem}.line.svelte-1kpipmv{width:38.2%;height:5px;border-radius:5px;margin-bottom:15px}@media(max-width: 600px){.column.svelte-1kpipmv{grid-template-columns:1fr}}.column.svelte-1nervpm{text-align:left;display:grid;grid-template-columns:2fr 1fr;width:100%;margin-top:150px;margin-bottom:150px;margin-right:2rem}.body.svelte-1nervpm{text-align:center;display:inline-block;text-align:left;margin-left:0.9rem;padding-left:0.9rem;padding-right:1.8rem}.line.svelte-1nervpm{width:33.3%;height:4px;border-radius:5px;margin-bottom:15px}@media(max-width: 1100px){.column.svelte-1nervpm{grid-template-columns:1fr 1fr}}@media(max-width: 800px){.column.svelte-1nervpm{grid-template-columns:1fr}}.column.svelte-6r4k1{text-align:left;display:grid;grid-template-columns:1fr;width:100%;margin-top:150px;margin-bottom:150px}.body.svelte-6r4k1{text-align:left;display:inline-block;text-align:left;margin-left:0.9rem;padding-left:0.9rem;padding-right:1.8rem}.line.svelte-6r4k1{width:33.3%;height:4px;border-radius:5px;margin-bottom:15px}.container.svelte-109vqbk{flex-shrink:1;text-decoration:none;display:inline-flex;flex-direction:row;justify-content:flex-start;align-items:center;text-align:center;flex-wrap:nowrap;align-self:flex-start;transition:margin-left 180ms;white-space:nowrap}.container.svelte-109vqbk:hover{margin-left:0.6rem}.choose.svelte-109vqbk{white-space:nowrap;color:white;font-size:1.8rem;background-color:rgba(70, 130, 180, 0.8);min-width:150px;border-radius:2px;text-align:left;padding-top:0.7rem;padding-bottom:0.7rem;padding-left:10%;box-shadow:2px 2px 8px 0px rgba(0, 0, 0, 0.2);white-space:nowrap;overflow-x:grow}.choose.svelte-109vqbk:hover{box-shadow:2px 2px 8px 0px rgba(0, 0, 0, 0.5)}@media(max-width: 900px){.choose.svelte-109vqbk{font-size:1rem}}.half.svelte-1hre34c{width:50%;display:flex;justify-content:space-around}.container.svelte-1hre34c{min-height:25px;margin-bottom:140px;flex-basis:1200px;overflow-x:scroll;display:flex;flex-direction:row;justify-content:flex-end;align-items:flex-end;text-align:center;flex-wrap:wrap;align-self:flex-end}.side.svelte-1hre34c{flex:1}.row.svelte-1hre34c{display:flex;flex-direction:row;justify-content:space-around;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}@media(max-width: 600px){.half.svelte-1hre34c{width:100%}}.container.svelte-11w4uta{margin-left:0.1rem;transition:margin-left 180ms}.container.svelte-11w4uta:hover{}.container.svelte-2hakpb{margin-left:2rem;margin-bottom:2rem;height:40px}.name.svelte-2hakpb{font-size:0.5rem;color:grey}.container.svelte-owkcqy{min-height:800px;border-radius:5px;text-align:left;padding:2rem;box-shadow:3px 12px 36px 1px rgba(0, 0, 0, 0.2);margin-left:55px;margin-right:55px;margin-bottom:140px;flex-basis:1200px;overflow-x:scroll}.block.svelte-owkcqy{box-shadow:3px 12px 36px 1px rgba(0, 0, 0, 0.2);min-height:150px;flex:1;border-radius:5px}@media(max-width: 900px){.block.svelte-owkcqy{margin:15px}}.input.svelte-19ejfsy{font-family:'avenir next', avenir, sans-serif;display:block;padding:1rem;margin:0.3em 0.6em 0.3rem 5px;width:60%;max-width:50rem;line-height:24px;outline:0;border:0;border-radius:0.4rem;font-style:normal;box-shadow:1px 1px 4px 0 rgba(0, 0, 0, 0.2);transition:box-shadow 100ms;color:#c4cad5;resize:none;border-bottom:2px solid transparent;border-left:4px solid lightgrey;color:#577c97;box-shadow:2px 1px 5px 0 rgba(0, 0, 0, 0.2);border-bottom:2px solid lightsteelblue}.res.svelte-10l4whr{min-height:20px;min-width:300px;margin-left:3rem;margin-top:2rem;margin-bottom:3rem;padding-left:1rem;border-left:2px solid steelblue}.col.svelte-10l4whr{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}.row.svelte-10l4whr{display:flex;flex-direction:row;justify-content:flex-start;align-items:center;text-align:center;flex-wrap:wrap;align-self:stretch}.term.svelte-10l4whr{margin:0.5rem;border-bottom:2px solid grey}.outside.svelte-1qxuf{margin:2rem}.CodeMirror{height:auto;border-left:4px solid lightsteelblue !important;border-bottom:none !important;text-align:left !important}.tag{color:#2d85a8;border-radius:5px;opacity:1}.goldGrid.svelte-5bq61u{display:grid;height:100%;margin-top:60px;margin-bottom:50px}@media(max-width: 900px){.goldGrid.svelte-5bq61u{grid-template-columns:1fr 1.618fr 1fr 1.618fr;justify-self:stretch}}.one.svelte-5bq61u{}.row2.svelte-5bq61u{grid-column:span 2}.col2.svelte-5bq61u{grid-row:span 2}.four.svelte-5bq61u{grid-column:span 2;grid-row:span 2}.color.svelte-5bq61u{box-shadow:2px 2px 8px 0px rgba(0, 0, 0, 0.2)}.img.svelte-5bq61u{box-shadow:2px 2px 8px 0px rgba(0, 0, 0, 0.2);border-radius:2px}.mine.svelte-5ej3m3{border:1px solid lightgrey;border-radius:5px;box-shadow:2px 2px 8px 0px rgba(0, 0, 0, 0.2);display:block;width:400px;margin-top:4rem;line-height:1.6rem}.container.svelte-qzc69a{width:100%;height:50px}/* BASICS */
+
+.CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  height: auto;
+  width: 100%;
+  border-radius: 4px;
+  padding-left: 1rem;
+  color: #525050;
+  direction: ltr;
+  line-height:2.6rem;
+  font-size: 2rem;
+  padding-top:0.85rem;
+  padding-bottom:0.75rem;
+  font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
+  box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* PADDING */
+
+.CodeMirror-lines {
+  padding: 4px 0; /* Vertical padding around content */
+}
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+  padding: 0 4px; /* Horizontal padding of content */
+}
+
+.CodeMirror-scrollbar-filler,
+.CodeMirror-gutter-filler {
+  background-color: white; /* The little square between H and V scrollbars */
+}
+
+/* GUTTER */
+
+.CodeMirror-gutters {
+  border-right: 1px solid #ddd;
+  background-color: #f7f7f7;
+  white-space: nowrap;
+}
+
+.CodeMirror-linenumber {
+  padding: 0 3px 0 5px;
+  min-width: 20px;
+  text-align: right;
+  color: #999;
+  white-space: nowrap;
+}
+
+.CodeMirror-guttermarker {
+  color: black;
+}
+.CodeMirror-guttermarker-subtle {
+  color: #999;
+}
+
+/* CURSOR */
+
+.CodeMirror-cursor {
+  border-left: 3px solid #4d4d4d;
+  border-right: none;
+  width: 0;
+  visibility: visible !important;
+}
+/* Shown when moving in bi-directional text */
+.CodeMirror div.CodeMirror-secondarycursor {
+  border-left: 1px solid silver;
+}
+.cm-fat-cursor .CodeMirror-cursor {
+  width: auto;
+  border: 0 !important;
+  background: #7e7;
+}
+.cm-fat-cursor div.CodeMirror-cursors {
+  z-index: 1;
+}
+.cm-fat-cursor-mark {
+  background-color: rgba(20, 255, 20, 0.5);
+}
+.cm-animate-fat-cursor {
+  width: auto;
+  border: 0;
+  background-color: #7e7;
+}
+.cm-tab {
+  display: inline-block;
+  text-decoration: inherit;
+}
+
+.CodeMirror-rulers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -50px;
+  bottom: 0;
+  overflow: hidden;
+}
+.CodeMirror-ruler {
+  border-left: 1px solid #ccc;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+/* DEFAULT THEME */
+
+.cm-s-default .cm-header {
+  color: blue;
+}
+.cm-s-default .cm-quote {
+  color: #090;
+}
+.cm-negative {
+  color: #d44;
+}
+.cm-positive {
+  color: #292;
+}
+.cm-header,
+.cm-strong {
+  font-weight: bold;
+}
+.cm-em {
+  font-style: italic;
+}
+.cm-link {
+  text-decoration: underline;
+}
+.cm-strikethrough {
+  text-decoration: line-through;
+}
+
+.cm-s-default .cm-keyword {
+  color: #708;
+}
+.cm-s-default .cm-atom {
+  color: #219;
+}
+.cm-s-default .cm-number {
+  color: #164;
+}
+.cm-s-default .cm-def {
+  color: #00f;
+}
+.cm-s-default .cm-variable-2 {
+  color: #05a;
+}
+.cm-s-default .cm-variable-3,
+.cm-s-default .cm-type {
+  color: #085;
+}
+.cm-s-default .cm-comment {
+  color: #a50;
+}
+.cm-s-default .cm-string {
+  color: #a11;
+}
+.cm-s-default .cm-string-2 {
+  color: #f50;
+}
+.cm-s-default .cm-meta {
+  color: #555;
+}
+.cm-s-default .cm-qualifier {
+  color: #555;
+}
+.cm-s-default .cm-builtin {
+  color: #30a;
+}
+.cm-s-default .cm-bracket {
+  color: #997;
+}
+.cm-s-default .cm-tag {
+  color: #170;
+}
+.cm-s-default .cm-attribute {
+  color: #00c;
+}
+.cm-s-default .cm-hr {
+  color: #999;
+}
+.cm-s-default .cm-link {
+  color: #00c;
+}
+
+.cm-s-default .cm-error {
+  color: #f00;
+}
+.cm-invalidchar {
+  color: #f00;
+}
+
+.CodeMirror-composing {
+  border-bottom: 2px solid;
+}
+
+/* Default styles for common addons */
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+  color: #0b0;
+}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {
+  color: #a22;
+}
+.CodeMirror-matchingtag {
+  background: rgba(255, 150, 0, 0.3);
+}
+.CodeMirror-activeline-background {
+  background: #e8f2ff;
+}
+
+/* STOP */
+
+/* The rest of this file contains styles related to the mechanics of
+   the editor. You probably shouldn't touch them. */
+
+.CodeMirror {
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+
+.CodeMirror-scroll {
+  overflow: scroll !important; /* Things will break if this is overridden */
+  /* 30px is the magic margin used to hide the element's real scrollbars */
+  /* See overflow: hidden in .CodeMirror */
+  margin-bottom: -30px;
+  margin-right: -30px;
+  padding-bottom: 30px;
+  height: 100%;
+  outline: none; /* Prevent dragging from highlighting the element */
+  position: relative;
+}
+.CodeMirror-sizer {
+  position: relative;
+  border-right: 30px solid transparent;
+}
+
+/* The fake, visible scrollbars. Used to force redraw during scrolling
+   before actual scrolling happens, thus preventing shaking and
+   flickering artifacts. */
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar,
+.CodeMirror-scrollbar-filler,
+.CodeMirror-gutter-filler {
+  position: absolute;
+  z-index: 6;
+  display: none;
+}
+.CodeMirror-vscrollbar {
+  right: 0;
+  top: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.CodeMirror-hscrollbar {
+  bottom: 0;
+  left: 0;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+.CodeMirror-scrollbar-filler {
+  right: 0;
+  bottom: 0;
+}
+.CodeMirror-gutter-filler {
+  left: 0;
+  bottom: 0;
+}
+
+.CodeMirror-gutters {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-height: 100%;
+  z-index: 3;
+}
+.CodeMirror-gutter {
+  white-space: normal;
+  height: 100%;
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: -30px;
+}
+.CodeMirror-gutter-wrapper {
+  position: absolute;
+  z-index: 4;
+  background: none !important;
+  border: none !important;
+}
+.CodeMirror-gutter-background {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 4;
+}
+.CodeMirror-gutter-elt {
+  position: absolute;
+  cursor: default;
+  z-index: 4;
+}
+.CodeMirror-gutter-wrapper ::selection {
+  background-color: transparent;
+}
+.CodeMirror-gutter-wrapper ::-moz-selection {
+  background-color: transparent;
+}
+
+.CodeMirror-lines {
+  cursor: text;
+  min-height: 1px; /* prevents collapsing before first draw */
+}
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+  /* Reset some styles that the rest of the page might have set */
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border-width: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0;
+  white-space: pre;
+  word-wrap: normal;
+  line-height: inherit;
+  color: inherit;
+  z-index: 2;
+  position: relative;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-variant-ligatures: contextual;
+  font-variant-ligatures: contextual;
+}
+.CodeMirror-wrap pre.CodeMirror-line,
+.CodeMirror-wrap pre.CodeMirror-line-like {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.CodeMirror-linebackground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.CodeMirror-linewidget {
+  position: relative;
+  z-index: 2;
+  padding: 0.1px; /* Force widget margins to stay inside of the container */
+}
+
+.CodeMirror-widget {
+}
+
+.CodeMirror-rtl pre {
+  direction: rtl;
+}
+
+.CodeMirror-code {
+  outline: none;
+}
+
+/* Force content-box sizing for the elements where we expect it */
+.CodeMirror-scroll,
+.CodeMirror-sizer,
+.CodeMirror-gutter,
+.CodeMirror-gutters,
+.CodeMirror-linenumber {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.CodeMirror-measure {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.CodeMirror-cursor {
+  position: absolute;
+  pointer-events: none;
+}
+.CodeMirror-measure pre {
+  position: static;
+}
+
+div.CodeMirror-cursors {
+  visibility: hidden;
+  position: relative;
+  z-index: 3;
+}
+div.CodeMirror-dragcursors {
+  visibility: visible;
+}
+
+.CodeMirror-focused div.CodeMirror-cursors {
+  visibility: visible;
+}
+
+.CodeMirror-selected {
+  background: #d9d9d9;
+}
+.CodeMirror-focused .CodeMirror-selected {
+  background: #d7d4f0;
+}
+.CodeMirror-crosshair {
+  cursor: crosshair;
+}
+.CodeMirror-line::selection,
+.CodeMirror-line > span::selection,
+.CodeMirror-line > span > span::selection {
+  background: #d7d4f0;
+}
+.CodeMirror-line::-moz-selection,
+.CodeMirror-line > span::-moz-selection,
+.CodeMirror-line > span > span::-moz-selection {
+  background: #d7d4f0;
+}
+
+.cm-searching {
+  background-color: #ffa;
+  background-color: rgba(255, 255, 0, 0.4);
+}
+
+/* Used to force a border model for a node */
+.cm-force-border {
+  padding-right: 0.1px;
+}
+
+@media print {
+  /* Hide the cursor when printing */
+  .CodeMirror div.CodeMirror-cursors {
+    visibility: hidden;
+  }
+}
+
+/* See issue #2901 */
+.cm-tab-wrap-hack:after {
+  content: '';
+}
+
+/* Help users use markselection to safely style text background */
+span.CodeMirror-selectedtext {
+  background: none;
+}
+pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5px}/*!
+  Theme: GitHub
+  Description: Light theme as seen on github.com
+  Author: github.com
+  Maintainer: @Hirse
+  Updated: 2021-05-15
+
+  Outdated base version: https://github.com/primer/github-syntax-light
+  Current colors taken from GitHub's CSS
+*/.hljs{color:#24292e;background:#fff}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#d73a49}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#6f42c1}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#005cc5}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#032f62}.hljs-built_in,.hljs-symbol{color:#e36209}.hljs-code,.hljs-comment,.hljs-formula{color:#6a737d}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#22863a}.hljs-subst{color:#24292e}.hljs-section{color:#005cc5;font-weight:700}.hljs-bullet{color:#735c0f}.hljs-emphasis{color:#24292e;font-style:italic}.hljs-strong{color:#24292e;font-weight:700}.hljs-addition{color:#22863a;background-color:#f0fff4}.hljs-deletion{color:#b31d28;background-color:#ffeef0}
