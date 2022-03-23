@@ -57,11 +57,11 @@
     <!-- <div class="tab">we have published > 100 releases.</div> -->
 
     <div class="down f09">
-      the benevolent dictator,
-      <div class="f08  sea">and territorial benefactor</div>
       <div class="tab">
-        is <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a>.
+        <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a>.
       </div>
+      is the benevolent dictator.
+      <!-- <div class="f08  sea">and territorial benefactor</div> -->
     </div>
     <!-- <div class="tab">paid work often shows up <a href="">in our public discord</a>.</div> -->
     <div class="down f09">
@@ -122,14 +122,16 @@
   }
   .friend {
     font-size: 0.8rem;
-    padding: 1.2rem;
+    padding-right: 1.2rem;
+    padding-top: 1.2rem;
     display: inline-block;
     white-space: nowrap;
   }
   @media only screen and (max-width: 600px) {
     .friend {
       font-size: 0.7rem;
-      padding: 0.9rem;
+      padding-right: 0.9rem;
+      padding-top: 0.5rem;
     }
   }
 </style>

@@ -39,4 +39,10 @@
     border-radius: 5px;
     margin-bottom: 15px;
   }
+  @media only screen and (max-width: 600px) {
+    .body {
+      padding-left: 0rem;
+      padding-right: 0rem;
+    }
+  }
 </style>

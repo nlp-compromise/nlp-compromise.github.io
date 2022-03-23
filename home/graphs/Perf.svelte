@@ -29,7 +29,7 @@
       vector-effect="non-scaling-stroke"
       stroke-width="4"
       stroke-linecap="round"
-      d="M0,6L2,6"
+      d="M0,6L0.5,6"
       id="input-46606"
     />
     <g transform="translate(2 2)">
@@ -43,7 +43,7 @@
         font-size="5"
         style="font-size:2px;"
       >
-        <tspan x="0" dy="1.2em">One sentence - 6ms</tspan>
+        <tspan x="0" dy="1.2em">One sentence - 1ms</tspan>
       </text>
     </g>
     <path
@@ -101,10 +101,10 @@
       vector-effect="non-scaling-stroke"
       stroke-width="4"
       stroke-linecap="round"
-      d="M0,24L38,24"
+      d="M0,30L38,30"
       id="input-65336"
     />
-    <g transform="translate(20 20)">
+    <g transform="translate(20 26)">
       <text
         fill="lightblue"
         stroke="none"
@@ -125,10 +125,10 @@
       vector-effect="non-scaling-stroke"
       stroke-width="4"
       stroke-linecap="round"
-      d="M0,30L60,30"
+      d="M0,36L60,36"
       id="input-61678"
     />
-    <g transform="translate(42 26)">
+    <g transform="translate(42 32)">
       <text
         fill="lightblue"
         stroke="none"
@@ -149,10 +149,10 @@
       vector-effect="non-scaling-stroke"
       stroke-width="4"
       stroke-linecap="round"
-      d="M0,36L80,36"
+      d="M0,24L12,24"
       id="input-21034"
     />
-    <g transform="translate(62 32)">
+    <g transform="translate(15 20)">
       <text
         fill="#D68881"
         stroke="none"
@@ -163,7 +163,7 @@
         font-size="5"
         style="font-size:2px;"
       >
-        <tspan x="0" dy="1.2em">Wikipedia article - 400ms</tspan>
+        <tspan x="0" dy="1.2em">Wikipedia article - 40ms</tspan>
       </text>
     </g>
     <path

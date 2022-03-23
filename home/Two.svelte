@@ -6,7 +6,7 @@
   import Left from '../lib/Left.svelte'
   import Caret from '../lib/Caret.svelte'
   import Block from '../lib/Block.svelte'
-  import Tagger from './demos/Tagger.svelte'
+  // import Tagger from './demos/Tagger.svelte'
   import Grid from '../lib/Grid/Grid.svelte'
 </script>
 
@@ -20,37 +20,32 @@
     <div style="margin-top:5rem;" />
     <div class="down tab">classify Noun/Verb/Adjective, etc.</div>
     <div class="tab" style="margin-top:1.5rem;font-size:1.5rem; ">
-      -<span style="border-bottom:4px solid #D68881; padding-bottom:5px; ">
+      <!-- -<span style="border-bottom:4px solid #D68881; padding-bottom:5px; ">
         &nbsp;
         <span class="sky">buffalo</span>/
         <span class="rose">buffalo</span>/
         <span class="red">buffalo</span> &nbsp;
       </span>
-      -
+      - -->
       <div class="down f09">which is more handy than you may think.</div>
     </div>
   </Left>
-
-  <!-- <One>
-    <Tagger />
-  </One> -->
-
   <One>
     <div class="f09">it's nice because,</div>
-    <div class="tab">
+    <div class="tab" style="line-height:3rem;">
       you can say that <b class="f2 sea">'buffalo'</b> and <b class="f2 sky">'hamilton'</b>
-      <span class="tab">are</span>
+      <span class="">are</span>
       <span class="f2 red down" style="margin-left:10px;">#Nouns</span> -
     </div>
-    <div class="tab down i">without actually knowing <span class="sky">what those things are</span></div>
-    <div class="down">
+    <div class="tab down i">without actually knowing <span class="sky">what those things are</span>.</div>
+    <div class="down f09">
       it's a pretty modest
       <div class="tab">interpretation of the words</div>
       <div class="f09">so it actually works.</div>
       <div class="tab f09 down">you don't need to know any linguistics</div>
     </div>
   </One>
-  <One>
+  <Left>
     <div>
       it's sort of like a <i>regular expression</i> for words.
     </div>
@@ -63,7 +58,7 @@
     <div class="tab">
       <a href="https://observablehq.com/@spencermountain/compromise-match-syntax" class="red tab down"> - match docs</a>
     </div>
-  </One>
+  </Left>
   <One>
     <div>these match-templates -</div>
     <div class="tab i">can scoop-up information -</div>
@@ -132,11 +127,21 @@
     flex-direction: row;
     align-items: flex-start;
     flex-wrap: wrap;
+    text-decoration: none;
+  }
+
+  @media only screen and (max-width: 1000px) {
+    ul {
+      padding-left: 0.1rem;
+    }
   }
   @media only screen and (max-width: 600px) {
     .list {
       margin: 0.5rem;
       padding-left: 0.5rem;
+    }
+    ul {
+      padding-left: 0.1rem;
     }
   }
   .row {

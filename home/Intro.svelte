@@ -1,5 +1,5 @@
 <script>
-  import { Page, One, Two, Three, Grid, Caret } from '../lib/index.js'
+  import { Page, One, Two, Three, Grid, Caret, Left } from '../lib/index.js'
 </script>
 
 <Page>
@@ -88,19 +88,19 @@
     <!-- <div class="tab">trying to build clever ways:</div> -->
     <ul>
       <div>
-        to mess with it.
+        to mess with text.
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
       <div class="sea down tab f2 " style="position:relative; margin:4rem;">
-        like a crowbar, <div style="">for text.</div>
+        like a crowbar, <div style="">for words.</div>
       </div>
       <div class="f09 i down">
         so you can pull a chunk out, or
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
       </div>
-      <div class="down">ask a question off of -</div>
-      <div class="down f09">and <i>get something back</i>, from words.</div>
+      <div class="down">ask pop a question off -</div>
+      <div class="down f09">and <i>get something back</i>, from text.</div>
       <!-- <li>
         ways to make typing-interfaces
         <div class="i grey f09 tab2">make them actually good</div>
@@ -109,7 +109,7 @@
     <div class="down" />
   </One>
 
-  <One>
+  <Left>
     <Grid seed="0e387bb94350923b76a" />
     <div class="tab some">
       <div class="sea f09">seriously -</div>
@@ -117,7 +117,7 @@
       <kbd>npm install compromise</kbd>
     </div>
     <Grid seed="80bb8622591df22c704" />
-  </One>
+  </Left>
   <Three>
     <div style="width:35px; margin-left:2rem; padding-top:4rem; transform: rotate(-6deg);;">
       <svg
@@ -157,6 +157,9 @@
     }
     .some {
       margin-left: 0px;
+    }
+    kbd {
+      margin-left: 5px;
     }
   }
   .src {

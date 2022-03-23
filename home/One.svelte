@@ -21,24 +21,12 @@
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div> -->
     <div class="desc">flip a novel into JSON</div>
-    <!-- <div class="" style="margin-top:4.5rem;">
-      <Tokenize />
-    </div> -->
-  </Left>
-  <One>
-    <!-- <div class="f09">promise -</div> -->
-    <!-- <div><kbd>compromise/one</kbd> is a completely uncontroversial way</div> -->
-    <!-- <div class="f09">you can</div> -->
-    <div class="tab">
-      <!-- with a one-liner- -->
-
-      <div class="tab">in a couple milliseconds</div>
-    </div>
+    <div class="tab">in a couple milliseconds</div>
     <div class="tab down">
       split text into <span class="cherry">sentences</span> and <span class="rose">words</span> and
       <span class="sky">punctuation</span>.
     </div>
-  </One>
+  </Left>
 
   <One>
     <!-- <div class="down">the tokenizer's been refined over 10 ruthless github-years</div> -->
@@ -110,7 +98,7 @@
       </div>
 
       <!-- <Filesize /> -->
-      <img class="clean" style="width:450px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+      <img class="clean" style="width:80%;" src="./home/img/one.jpg" alt="compromise/one filesize" />
     </div>
     <div style="max-width:600px; margin-top:6rem;">
       <Perf />
@@ -143,7 +131,7 @@
     margin-left: 5rem;
   }
   .desc {
-    margin-bottom: 6rem;
+    margin-bottom: 4rem;
     opacity: 0.9;
   }
   .right {
@@ -161,8 +149,8 @@
     flex-wrap: wrap;
     align-self: stretch;
   }
-
   .nowrap {
     white-space: nowrap;
+    text-decoration: none;
   }
 </style>

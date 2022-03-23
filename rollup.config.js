@@ -4,38 +4,43 @@ import resolve from '@rollup/plugin-node-resolve'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
+import path from 'path'
 
+const watch = process.argv.find(str => str === '-w')
 
-let dir = process.argv[4] || ''
-// let dir = process.env.PAGE || '.'
-let out = `./${dir}/build/bundle.js`
-let input = `${dir}/main.js`
-console.log(input)
-// const production = !process.env.ROLLUP_WATCH
-const production = true
+let dir = process.argv[4] || '.'
+
+let out = path.join(dir, `./build/bundle.js`)
+let input = path.join(dir, `./main.js`)
+console.log(process.argv)
+console.log(out, input)
+const production = !Boolean(watch)
 
 function serve() {
-  // let server
+  let server
+  if (!watch) {
+    return {}
+  }
 
-  // function toExit() {
-  //   if (server) server.kill(0)
-  // }
+  function toExit() {
+    if (server) server.kill(0)
+  }
 
-  // return {
-  //   writeBundle() {
-  //     if (server) return
-  //     if (dir === '.') {
-  //       dir = './'
-  //     }
-  //     server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
-  //       stdio: ['ignore', 'inherit', 'inherit'],
-  //       shell: true,
-  //     })
+  return {
+    writeBundle() {
+      if (server) return
+      if (dir === '.') {
+        dir = './'
+      }
+      server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
+        stdio: ['ignore', 'inherit', 'inherit'],
+        shell: true,
+      })
 
-  //     process.on('SIGTERM', toExit)
-  //     process.on('exit', toExit)
-  //   },
-  // }
+      process.on('SIGTERM', toExit)
+      process.on('exit', toExit)
+    },
+  }
 }
 
 export default {
