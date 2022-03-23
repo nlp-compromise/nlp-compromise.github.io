@@ -1,5 +1,5 @@
 <script>
-  import { Page, One, Two, Three, Grid, Caret } from '../lib/index.js'
+  import { Page, One, Two, Three, Grid, Caret, Left } from '../lib/index.js'
 </script>
 
 <Page>
@@ -109,7 +109,7 @@
     <div class="down" />
   </One>
 
-  <One>
+  <Left>
     <Grid seed="0e387bb94350923b76a" />
     <div class="tab some">
       <div class="sea f09">seriously -</div>
@@ -117,7 +117,7 @@
       <kbd>npm install compromise</kbd>
     </div>
     <Grid seed="80bb8622591df22c704" />
-  </One>
+  </Left>
   <Three>
     <div style="width:35px; margin-left:2rem; padding-top:4rem; transform: rotate(-6deg);;">
       <svg
@@ -157,6 +157,9 @@
     }
     .some {
       margin-left: 0px;
+    }
+    kbd {
+      margin-left: 5px;
     }
   }
   .src {

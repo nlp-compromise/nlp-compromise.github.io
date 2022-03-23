@@ -98,7 +98,7 @@
       </div>
 
       <!-- <Filesize /> -->
-      <img class="clean" style="width:450px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+      <img class="clean" style="width:80%;" src="./home/img/one.jpg" alt="compromise/one filesize" />
     </div>
     <div style="max-width:600px; margin-top:6rem;">
       <Perf />
