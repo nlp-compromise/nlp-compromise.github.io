@@ -12,9 +12,10 @@ let dir = process.argv[4] || '.'
 
 let out = path.join(dir, `./build/bundle.js`)
 let input = path.join(dir, `./main.js`)
-console.log(process.argv)
-console.log(out, input)
 const production = !Boolean(watch)
+if (production) {
+  console.log(`building ${dir} -> ${out}`)
+}
 
 function serve() {
   let server
