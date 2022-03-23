@@ -49,4 +49,10 @@
       grid-template-columns: 1fr;
     }
   }
+  @media (max-width: 600px) {
+    .column {
+      margin-top: 100px;
+      margin-bottom: 100px;
+    }
+  }
 </style>

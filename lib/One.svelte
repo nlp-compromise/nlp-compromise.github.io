@@ -43,6 +43,8 @@
   @media (max-width: 600px) {
     .column {
       grid-template-columns: 1fr; /* full-thing */
+      margin-top: 100px;
+      margin-bottom: 100px;
     }
   }
 </style>

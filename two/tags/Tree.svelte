@@ -124,4 +124,12 @@
     color: grey;
     font-style: italic;
   }
+  @media only screen and (max-width: 600px) {
+    .box {
+      margin-left: 1rem;
+    }
+    .ul {
+      margin-left: 1rem;
+    }
+  }
 </style>

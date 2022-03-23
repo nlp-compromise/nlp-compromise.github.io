@@ -132,6 +132,7 @@
     flex-direction: row;
     align-items: flex-start;
     flex-wrap: wrap;
+    text-decoration: none;
   }
   @media only screen and (max-width: 600px) {
     .list {

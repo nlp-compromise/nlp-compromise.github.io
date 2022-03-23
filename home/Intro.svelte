@@ -88,19 +88,19 @@
     <!-- <div class="tab">trying to build clever ways:</div> -->
     <ul>
       <div>
-        to mess with it.
+        to mess with text.
         <!-- <div class="i grey f09 tab2">rejig, and hack it</div> -->
       </div>
       <!-- <div class="f09">so you can make a dent -</div> -->
       <div class="sea down tab f2 " style="position:relative; margin:4rem;">
-        like a crowbar, <div style="">for text.</div>
+        like a crowbar, <div style="">for words.</div>
       </div>
       <div class="f09 i down">
         so you can pull a chunk out, or
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
       </div>
-      <div class="down">ask a question off of -</div>
-      <div class="down f09">and <i>get something back</i>, from words.</div>
+      <div class="down">ask pop a question off -</div>
+      <div class="down f09">and <i>get something back</i>, from text.</div>
       <!-- <li>
         ways to make typing-interfaces
         <div class="i grey f09 tab2">make them actually good</div>

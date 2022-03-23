@@ -134,5 +134,6 @@
   }
   .nowrap {
     white-space: nowrap;
+    text-decoration: none;
   }
 </style>

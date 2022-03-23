@@ -63,4 +63,11 @@
     box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
     line-height: 1.8rem;
   }
+  @media only screen and (max-width: 600px) {
+    .res {
+      margin: 1rem;
+      font-size: 0.8rem;
+      line-height: 1.4rem;
+    }
+  }
 </style>

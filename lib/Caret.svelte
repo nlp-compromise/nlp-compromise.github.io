@@ -17,10 +17,16 @@
 <style>
   .container {
     margin-left: 0.1rem;
-    transition: margin-left 180ms;
+    /* transition: margin-left 180ms; */
   }
-  .container:hover {
-    /* margin-left: 0.6rem; */
-    /* height: 250px; */
+  @media only screen and (max-width: 600px) {
+    .container {
+      margin-left: 0rem;
+    }
   }
+
+  /* .container:hover { */
+  /* margin-left: 0.6rem; */
+  /* height: 250px; */
+  /* } */
 </style>
