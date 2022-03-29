@@ -25,7 +25,7 @@
 <Page bottom="40px">
   <div class="lib">compromise/three/dates</div>
   <div class="down tab desc">parse natural-language dates -</div>
-  <div style="margin:2rem;">
+  <div style="margin:2rem; " class="box">
     <Dates />
   </div>
   <One>
@@ -41,4 +41,13 @@
   <a href="https://github.com/spencermountain/compromise/tree/master/plugins/dates" class="">github</a>
 </Below>
 
-<style></style>
+<style>
+  .box {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    /* max-width: 600px; */
+  }
+</style>
