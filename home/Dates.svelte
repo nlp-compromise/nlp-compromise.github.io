@@ -4,7 +4,7 @@
 </script>
 
 <Page>
-  <div class="box">
+  <div id="dates" class="box">
     <Dates />
   </div>
 </Page>

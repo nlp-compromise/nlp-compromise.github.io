@@ -14,7 +14,7 @@
 <!-- <Block color="#D68881" /> -->
 <Page>
   <Left>
-    <b class="sky f2">compromise/one</b>
+    <b id="one" class="sky f2">compromise/one</b>
     <div>is <span class="plugin" style="margin-left:5px;">tokenization</span>.</div>
     <div style="margin-top:2rem;" />
     <!-- <div class="tab" style="font-size:1rem; ">
@@ -98,7 +98,7 @@
       </div>
 
       <!-- <Filesize /> -->
-      <img class="clean" style="width:80%;" src="./home/img/one.jpg" alt="compromise/one filesize" />
+      <img class="clean" style="width:80%; max-width:450px;" src="./home/img/one.jpg" alt="compromise/one filesize" />
     </div>
     <div style="max-width:600px; margin-top:6rem;">
       <Perf />
