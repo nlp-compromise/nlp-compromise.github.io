@@ -5,12 +5,14 @@
   import Two from './home/Two.svelte'
   import Three from './home/Three.svelte'
   import Tags from './home/Tags.svelte'
+  import Dates from './home/Dates.svelte'
 
   // import Four from './home/Four.svelte'
   import Out from './home/Out.svelte'
 </script>
 
 <Intro />
+<Dates />
 <Tagger />
 <One />
 <Two />

@@ -59,8 +59,8 @@
     <div class="down f09">
       <div class="tab">
         <a href="https://spencermounta.in/" class="sky">Spencer Kelly</a>.
+        <div>is the benevolent dictator.</div>
       </div>
-      is the benevolent dictator.
       <!-- <div class="f08  sea">and territorial benefactor</div> -->
     </div>
     <!-- <div class="tab">paid work often shows up <a href="">in our public discord</a>.</div> -->

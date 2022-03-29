@@ -96,11 +96,11 @@
         like a crowbar, <div style="">for words.</div>
       </div>
       <div class="f09 i down">
-        so you can pull a chunk out, or
+        pull a chunk out-
+        <!-- <div class="tab f09">find a certain bit,</div> -->
         <!-- <div class="i grey f09 tab2">like a ping-pong ball.</div> -->
+        <div class="tab f09">and <i>get something back</i> from your text.</div>
       </div>
-      <div class="down">ask pop a question off -</div>
-      <div class="down f09">and <i>get something back</i>, from text.</div>
       <!-- <li>
         ways to make typing-interfaces
         <div class="i grey f09 tab2">make them actually good</div>

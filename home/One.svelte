@@ -21,10 +21,10 @@
       - <span style="border-bottom:4px solid #D68881; padding-bottom:5px">&nbsp; splitting - it - up &nbsp;</span> -
     </div> -->
     <div class="desc">flip a novel into JSON</div>
-    <div class="tab">in a couple milliseconds</div>
     <div class="tab down">
       split text into <span class="cherry">sentences</span> and <span class="rose">words</span> and
       <span class="sky">punctuation</span>.
+      <div class="tab f09">in a couple milliseconds</div>
     </div>
   </Left>
 
@@ -36,7 +36,7 @@
     <!-- <div class="down f09">it actually just works.</div>
     <div class=" f09">you're allowed to be suspicious of it, though.</div> -->
     <div class="tab down f09">
-      when someone tells you it's impossible,
+      when someone tells you it's too difficult,
       <div class="tab">give a polite shrug.</div>
       <div class="tab i f09 down">haha, i dunno man!</div>
     </div>
@@ -60,7 +60,7 @@
     <ul class="list down">
       <li class="down">
         <a href="./one/lookup" class="nowrap">
-          <span class="choose" style="color:white;">Phrase Lookup</span>
+          <span class="choose" style="color:white;">Quick lookups</span>
           <Caret top="1rem" />
         </a>
       </li>
