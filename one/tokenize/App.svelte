@@ -1,5 +1,5 @@
 <script>
-  import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea, Three } from '../../lib/index.js'
+  import { Page, Back, Two, CodeMirror, Below, Code, Three } from '../../lib/index.js'
   import nlp from 'compromise/one'
   let str = `i have two questions. 'Why lie?' and 'Lies, why?'`
 

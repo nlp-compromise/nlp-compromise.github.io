@@ -11,7 +11,7 @@
     `cheshire`,
     `ayrshire`,
   ]
-  nlp.typeAhead(words)
+  nlp.typeahead(words)
 
   let text = `argyl`
   $: more = () => {
@@ -57,4 +57,20 @@ doc.text() // 'argyllshire'
   </Below>
 </div>
 
-<style></style>
+<style>
+  .res {
+    line-height: 2.5rem;
+    font-size: 2.2rem;
+    margin-top: 6rem;
+    margin-left: 2rem;
+    margin-bottom: 5rem;
+    color: #cc7066;
+    /* display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+  flex-wrap: wrap;
+  align-self: stretch; */
+  }
+</style>
