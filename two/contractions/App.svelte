@@ -1,5 +1,5 @@
 <script>
-  import { Page, Back, One, Two, Three, Left, CodeMirror, Below, Code } from '../../lib/index.js'
+  import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
   import nlp from 'compromise/two'
   let text = `no! we're not gonna take it..`
   let res = ''

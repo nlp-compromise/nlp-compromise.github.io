@@ -45,7 +45,7 @@ doc.debug() //see the new tags`
     </Two>
   </Page>
   <Below>
-    <a href="https://observablehq.com/@spencermountain/compromise-match-syntax" class="">docs</a>
+    <a href="https://observablehq.com/@spencermountain/compromise-tags" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#two" class="">github</a>
   </Below>
 </div>

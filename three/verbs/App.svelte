@@ -26,7 +26,7 @@ doc.verbs().json()
   </One>
 </Page>
 <Below>
-  <a href="https://observablehq.com/@spencermountain/compromise-lookup" class="">docs</a>
+  <a href="https://observablehq.com/@spencermountain/verbs" class="">docs</a>
   <a href="https://github.com/spencermountain/compromise#one" class="">github</a>
 </Below>
 
