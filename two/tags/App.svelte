@@ -1,8 +1,7 @@
 <script>
-  import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
+  import { Page, Back, One, Two, Below, Code } from '../../lib/index.js'
   import Tree from './Tree.svelte'
 
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
   const example = `const tags = {
   Doctor:{
     is:'Person'
@@ -46,7 +45,7 @@ doc.debug() //see the new tags`
     </Two>
   </Page>
   <Below>
-    <a href="https://observablehq.com/@spencermountain/compromise-match-syntax" class="">docs</a>
+    <a href="https://observablehq.com/@spencermountain/compromise-tags" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#two" class="">github</a>
   </Below>
 </div>

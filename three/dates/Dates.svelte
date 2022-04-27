@@ -3,7 +3,7 @@
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src/index.mjs'
   import spacetime from 'spacetime'
   import nlp from '/Users/spencer/mountain/compromise/src/three.js'
-  import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/builds/compromise-dates.mjs'
+  import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/src/plugin.js'
   nlp.plugin(nlpDates)
   let text = `meet next weekend`
 

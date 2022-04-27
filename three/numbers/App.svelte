@@ -1,8 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
-  import speech from '/Users/spencer/mountain/compromise/plugins/speech/src/plugin.js'
-  nlp.plugin(speech)
+  import nlp from 'compromise/three'
 
   let text = `four hundred seventy two`
   $: more = () => {

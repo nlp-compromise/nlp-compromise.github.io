@@ -4,7 +4,7 @@
 </script>
 
 <Page>
-  <div class="box">
+  <div id="tags" class="box">
     <Tree />
   </div>
 </Page>

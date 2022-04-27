@@ -1,6 +1,6 @@
 <script>
-  import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
+  import { Page, Back, Left, Two, Below, Code, TextArea } from '../../lib/index.js'
+  import nlp from 'compromise/one'
   import Picker from './Picker.svelte'
   let choice = 0
   let trie = null
@@ -21,7 +21,7 @@ m.debug()
     const found = doc.lookup(trie)
     let list = doc.if(found)
     // list.debug()
-    return list.html({ show: found })
+    return list.html({ '.show': found })
   }
   function recompile() {
     let terms = words.split(/\r?\n/).map(txt => txt.trim())
@@ -51,49 +51,44 @@ m.debug()
     <div class="both">
       <div class="list">
         {@html lookup()}
-        <!-- {#each lookup() as html}
-          <div class="sentence">• {@html html}</div>
-        {/each} -->
-      </div>
-    </div>
-
-    <!-- docs -->
-    <Left />
-    <Left accent="blue">
-      <div class="down tab desc">
-        looking up a list of words in a text is a <i>suprisingly-tough</i> thing.
-        <div class="down tab">
-          for every word in your text →
-          <div class="down tab">→ loop through every search</div>
-          <div class="down tab">→ and then every word in each search.</div>
-        </div>
-      </div>
-      <div class="down tab desc">
-        but much worse -
-        <div class="down tab">
-          you can stumble into <a href="https://javascript.info/regexp-catastrophic-backtracking"
-            >'catastrophic backtracking'</a
-          >
-          -
-          <div class="tab">when your terms have overlapping sub-matches.</div>
-        </div>
-        <div class="down tab desc">
-          this implementation compiles your terms <a href="https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm"
-            >into a graph</a
-          >
-          -
-          <div class="tab">to never look at the same word twice.</div>
-          <div class="down">
-            worst-case is <kbd>O(n)</kbd>
+        <Left />
+        <Left accent="blue">
+          <div class="down tab desc">
+            looking up a list of words in a text is a <i>suprisingly-tough</i> thing.
+            <div class="down tab">
+              for every word in your text →
+              <div class="down tab">→ loop through every search</div>
+              <div class="down tab">→ and then every word in each search.</div>
+            </div>
           </div>
-          <div class="">best-case is kind of outrageous actually.</div>
-        </div>
+          <div class="down tab desc">
+            but much worse -
+            <div class="down tab">
+              you can stumble into <a href="https://javascript.info/regexp-catastrophic-backtracking"
+                >'catastrophic backtracking'</a
+              >
+              -
+              <div class="tab">when your terms have overlapping sub-matches.</div>
+            </div>
+            <div class="down tab desc">
+              this implementation compiles your terms <a
+                href="https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm">into a graph</a
+              >
+              -
+              <div class="tab">to never look at the same word twice.</div>
+              <div class="down">
+                worst-case is <kbd>O(n)</kbd>
+              </div>
+              <div class="">best-case is kind of outrageous actually.</div>
+            </div>
+          </div>
+        </Left>
+        <Two>
+          <Code js={example} width="500px" />
+        </Two>
       </div>
-    </Left>
-    <Two>
-      <Code js={example} width="500px" />
-    </Two>
-  </Page>
+    </div></Page
+  >
   <Below>
     <a href="https://observablehq.com/@spencermountain/compromise-lookup" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise#one" class="">github</a>
@@ -113,12 +108,6 @@ m.debug()
   }
   .f08 {
     font-size: 0.7rem;
-  }
-  .sentence {
-    margin-top: 0.75rem;
-    margin-bottom: 1.75rem;
-    border-left: 4px solid #cc6966;
-    padding-left: 1rem;
   }
   .list {
     margin: 2rem;

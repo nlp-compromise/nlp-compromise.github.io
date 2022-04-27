@@ -11,7 +11,7 @@
 
 <Page>
   <Left>
-    <b class="sky f2">compromise/three</b>
+    <b id="three" class="sky f2">compromise/three</b>
     <div>helps interpret <span class="plugin">chunks</span>, or groups of words.</div>
 
     <!-- <kbd style="font-size:2rem; line-height:2rem">compromise/three</kbd><span class="f2">:</span> -->

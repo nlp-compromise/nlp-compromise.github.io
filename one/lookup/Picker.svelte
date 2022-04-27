@@ -2,7 +2,7 @@
   export let choice = 0
   export let title = ''
   export let doc = ''
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
+  import nlp from 'compromise/one'
   let list = [
     { file: './sotu/Bush_1989.txt', name: 'Bush 1989' },
     { file: './sotu/Bush_1990.txt', name: 'Bush 1990' },
