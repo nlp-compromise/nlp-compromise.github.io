@@ -1,5 +1,11 @@
 ### compromise.cool website
 
+code at [nlp-compromise/nlp-compromise.github.io](https://github.com/nlp-compromise/nlp-compromise.github.io)
+
+hosted at [nlp-compromise.github.io](nlp-compromise.github.io)
+
+
+### instructions
 
 work on any not gh-pages branch, then run
 `gh-pages -d .`
