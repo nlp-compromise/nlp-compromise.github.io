@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, TextArea, Code, Below } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
+  import nlp from 'compromise'
   import text from './text.js'
   let opts = { people: true, places: true, money: true, phoneNumbers: true, emails: true }
   let res = nlp(text).redact(opts).text()

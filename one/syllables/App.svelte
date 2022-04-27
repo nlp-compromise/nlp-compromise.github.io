@@ -1,7 +1,7 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
-  import speech from '/Users/spencer/mountain/compromise/plugins/speech/src/plugin.js'
+  import nlp from 'compromise/one'
+  import speech from 'compromise-speech'
   nlp.plugin(speech)
 
   let text = `edmonton oilers`
@@ -43,7 +43,7 @@ doc.json({syllables: true})
     </Two>
   </Page>
   <Below>
-    <a href="https://observablehq.com/@spencermountain/compromise" class="">docs</a>
+    <a href="https://observablehq.com/@spencermountain/compromise-syllables" class="">docs</a>
     <a href="https://github.com/spencermountain/compromise/" class="">github</a>
   </Below>
 </div>

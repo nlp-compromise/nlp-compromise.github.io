@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea, Three } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
+  import nlp from 'compromise/one'
   let str = `i have two questions. 'Why lie?' and 'Lies, why?'`
 
   $: res = nlp(str).json()

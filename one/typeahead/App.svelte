@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
+  import nlp from 'compromise/one'
 
   let words = [
     `bedfordshire`,

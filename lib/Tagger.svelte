@@ -1,6 +1,6 @@
 <script>
   import TextArea from './TextArea.svelte'
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
+  import nlp from 'compromise/two'
   export let text = ``
   $: res = nlp(text).json()
 </script>

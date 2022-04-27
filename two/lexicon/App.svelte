@@ -1,7 +1,7 @@
 <script>
   import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea, Tagger } from '../../lib/index.js'
   import Graph from './Graph.svelte'
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
+  import nlp from 'compromise/two'
   const example = `let words = nlp.model().one.lexicon`
 </script>
 

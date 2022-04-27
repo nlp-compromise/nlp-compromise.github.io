@@ -1,6 +1,6 @@
 <script>
-  import { Page, Back, One, Two, Three, Left, CodeMirror, TextArea, Code, Below } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
+  import { Page, Back, One, TextArea, Code, Below } from '../../lib/index.js'
+  import nlp from 'compromise'
   import text from './text.js'
   let res = nlp(text) //.json({ offset: true })
   const onchange = function (txt) {

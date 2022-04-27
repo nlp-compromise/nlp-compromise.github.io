@@ -1,7 +1,7 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/one.js'
-  import plg from '/Users/spencer/mountain/compromise/plugins/stats/src/plugin.js'
+  import nlp from 'compromise/one'
+  import plg from 'compromise-stats'
   nlp.plugin(plg)
   import { interpolateGnBu } from 'd3-scale-chromatic'
   // interpolateYlOrRd
@@ -81,4 +81,5 @@ doc.compute('tfidf').json()
   .smol {
     font-size: 0.8rem;
   }
+  
 </style>

@@ -1,8 +1,7 @@
 <script>
-  import { Page, Back, One, Left, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
+  import { Page, Back, One, Two, Below, Code } from '../../lib/index.js'
   import Tree from './Tree.svelte'
 
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
   const example = `const tags = {
   Doctor:{
     is:'Person'

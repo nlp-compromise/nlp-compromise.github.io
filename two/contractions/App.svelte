@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, Two, Three, Left, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/compromise/src/two.js'
+  import nlp from 'compromise/two'
   let text = `no! we're not gonna take it..`
   let res = ''
   let json = []

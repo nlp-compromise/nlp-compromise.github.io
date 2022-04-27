@@ -4,24 +4,14 @@ import resolve from '@rollup/plugin-node-resolve'
 import livereload from 'rollup-plugin-livereload'
 import { terser } from 'rollup-plugin-terser'
 import css from 'rollup-plugin-css-only'
-import path from 'path'
 
-const watch = process.argv.find(str => str === '-w')
-
-let dir = process.argv[4] || '.'
-
-let out = path.join(dir, `./build/bundle.js`)
-let input = path.join(dir, `./main.js`)
-const production = !Boolean(watch)
-if (production) {
-  console.log(`building ${dir} -> ${out}`)
-}
+const production = !process.env.ROLLUP_WATCH
+// const dir = '2022/year-empty'
+const dir = process.env.DIR || '.'
+console.log(dir, production ? 'production' : 'dev')
 
 function serve() {
   let server
-  if (!watch) {
-    return {}
-  }
 
   function toExit() {
     if (server) server.kill(0)
@@ -30,34 +20,31 @@ function serve() {
   return {
     writeBundle() {
       if (server) return
-      if (dir === '.') {
-        dir = './'
-      }
       server = require('child_process').spawn('npm', ['run', 'start', dir, '--', '--dev'], {
         stdio: ['ignore', 'inherit', 'inherit'],
-        shell: true,
+        shell: true
       })
 
       process.on('SIGTERM', toExit)
       process.on('exit', toExit)
-    },
+    }
   }
 }
 
 export default {
-  input: input,
+  input: dir + '/main.js',
   output: {
     sourcemap: false,
     format: 'iife',
     name: 'app',
-    file: out,
+    file: dir + '/build/bundle.js'
   },
   plugins: [
     svelte({
       compilerOptions: {
         // enable run-time checks when not in production
-        dev: !production,
-      },
+        dev: !production
+      }
     }),
     // we'll extract any component CSS out into
     // a separate file - better for performance
@@ -70,7 +57,7 @@ export default {
     // https://github.com/rollup/plugins/tree/master/packages/commonjs
     resolve({
       browser: true,
-      dedupe: ['svelte'],
+      dedupe: ['svelte']
     }),
     commonjs(),
 
@@ -80,13 +67,13 @@ export default {
 
     // Watch the `public` directory and refresh the
     // browser on changes when not in production
-    !production && livereload(dir),
+    !production && livereload(dir + '/build'),
 
     // If we're building for production (npm run build
     // instead of npm run dev), minify
-    production && terser(),
+    production && terser()
   ],
   watch: {
-    clearScreen: false,
-  },
+    clearScreen: false
+  }
 }
