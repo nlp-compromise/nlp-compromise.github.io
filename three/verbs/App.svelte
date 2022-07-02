@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, TextArea, Code, Below } from '../../lib/index.js'
-  import nlp from 'compromise'
+  // import nlp from 'compromise'
   import text from './text.js'
   let res = nlp(text) //.json({ offset: true })
   const onchange = function (txt) {
@@ -10,6 +10,7 @@
 doc.verbs().json()
 // [{text:'saying'}]
 `
+  console.log(nlp.version)
 </script>
 
 <Back href="https://compromise.cool" />

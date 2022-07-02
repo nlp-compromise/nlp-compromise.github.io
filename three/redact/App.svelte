@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, TextArea, Code, Below } from '../../lib/index.js'
-  import nlp from 'compromise'
+  // import nlp from 'compromise'
   import text from './text.js'
   let opts = { people: true, places: true, money: true, phoneNumbers: true, emails: true }
   let res = nlp(text).redact(opts).text()
@@ -13,6 +13,7 @@
   let example = `let doc = nlp('my number is 416-555-6732')
 doc.redact()
 doc.text()`
+  console.log(nlp.version)
 </script>
 
 <Back href="https://compromise.cool" />
