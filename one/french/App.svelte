@@ -94,8 +94,8 @@ doc.json()
   .number {
     margin-top: 12rem;
     justify-content: flex-end;
-  }
-  .col {
+    margin-top: 12rem;
+    justify-content: flex-end;
     display: flex;
     flex-direction: column;
     justify-content: space-around;

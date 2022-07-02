@@ -31,12 +31,12 @@ Dann sind wir Helden.
   }
   onchange(text)
 
-  // let numText = `Ich bin siebenunddreißig Jahre alt`
-  // $: more = () => {
-  //   let doc = deCompromise(numText)
-  //   // doc.numbers().toNumber()
-  //   return doc.text()
-  // }
+  let numText = `wenn ich vierundsechzig Jahre alt bin`
+  $: more = () => {
+    let doc = deCompromise(numText)
+    doc.numbers().toNumber()
+    return doc.text()
+  }
 
   let example = `import pln from 'de-compromise'
 
@@ -78,7 +78,7 @@ doc.json()
       </div>
     </div>
 
-    <!-- number parsing 
+    <!-- number parsing -->
     <div class="number col">
       <div style="text-align:left; align-self: flex-start; margin-left:3rem;">number-parsing:</div>
       <CodeMirror bind:text={numText} />
@@ -86,7 +86,7 @@ doc.json()
         {more()}
       </div>
     </div>
--->
+
     <Two>
       <Code js={example} width="500px" />
     </Two>
@@ -103,5 +103,21 @@ doc.json()
     padding: 1rem;
     box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
     line-height: 1.8rem;
+  }
+  .show {
+    color: steelblue;
+    font-size: 32px;
+    line-height: 2.5rem;
+  }
+  .number {
+    margin-top: 12rem;
+    justify-content: flex-end;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
   }
 </style>
