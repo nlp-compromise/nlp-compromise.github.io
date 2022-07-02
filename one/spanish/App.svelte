@@ -1,5 +1,5 @@
 <script>
-  import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
+  import { Page, Back, Two, TextArea, Below, Code, CodeMirror } from '../../lib/index.js'
   // import nlp from 'es-compromise'
   let text = `Sí, sabes que ya llevo un rato mirándote
 Tengo que bailar contigo hoy
@@ -13,8 +13,7 @@ Todos mis sentidos van pidiendo más
 Esto hay que tomarlo sin ningún apuro`
   let html = ''
   const onchange = function (txt) {
-    let nlp = window.esCompromise
-    let doc = nlp(txt)
+    let doc = esCompromise(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
@@ -22,6 +21,15 @@ Esto hay que tomarlo sin ningún apuro`
     })
   }
   onchange(text)
+
+  // number parsing demo
+  let numText = `cuando tenga sesenta y cuatro años`
+  $: more = () => {
+    let doc = esCompromise(numText)
+    doc.numbers().toNumber()
+    return doc.text()
+  }
+
   let example = `import pln from 'es-compromise'
 
 let doc = pln('Tú eres el imán ..')
@@ -57,6 +65,16 @@ doc.json()
         </div>
       </div>
     </div>
+
+    <!-- number parsing -->
+    <div class="number col">
+      <div style="text-align:left; align-self: flex-start; margin-left:3rem;">number-parsing:</div>
+      <CodeMirror bind:text={numText} />
+      <div class="show">
+        {more()}
+      </div>
+    </div>
+
     <Two>
       <Code js={example} width="500px" />
     </Two>
@@ -73,5 +91,23 @@ doc.json()
     padding: 1rem;
     box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
     line-height: 1.8rem;
+  }
+  .show {
+    color: steelblue;
+    font-size: 32px;
+    line-height: 2.5rem;
+  }
+  .number {
+    margin-top: 12rem;
+    justify-content: flex-end;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
   }
 </style>

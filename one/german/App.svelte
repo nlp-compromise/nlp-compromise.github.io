@@ -1,6 +1,5 @@
 <script>
-  import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  let nlp = window.deCompromise
+  import { Page, Back, Two, TextArea, Below, Code, CodeMirror } from '../../lib/index.js'
   // import nlp from 'de-compromise'
   let text = `Du, könntest du schwimmen.
 Wie Delphine, Delphine es tun.
@@ -23,8 +22,7 @@ Dann sind wir Helden.
       `
   let html = ''
   const onchange = function (txt) {
-    let nlp = window.deCompromise
-    let doc = nlp(txt)
+    let doc = deCompromise(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
@@ -32,6 +30,14 @@ Dann sind wir Helden.
     })
   }
   onchange(text)
+
+  // let numText = `Ich bin siebenunddreißig Jahre alt`
+  // $: more = () => {
+  //   let doc = deCompromise(numText)
+  //   // doc.numbers().toNumber()
+  //   return doc.text()
+  // }
+
   let example = `import pln from 'de-compromise'
 
 let doc = pln('Hast du etwas Zeit für mich?')
@@ -71,6 +77,16 @@ doc.json()
         </div>
       </div>
     </div>
+
+    <!-- number parsing 
+    <div class="number col">
+      <div style="text-align:left; align-self: flex-start; margin-left:3rem;">number-parsing:</div>
+      <CodeMirror bind:text={numText} />
+      <div class="show">
+        {more()}
+      </div>
+    </div>
+-->
     <Two>
       <Code js={example} width="500px" />
     </Two>

@@ -1,8 +1,10 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
   // import nlp from 'compromise/one'
-  import plg from 'compromise-wikipedia'
-  nlp.plugin(plg)
+  // import plg from 'compromise-wikipedia'
+  nlp.plugin(compromiseWikipedia)
+  console.log('nlp', nlp.version)
+  console.log('compromiseWikipedia', compromiseWikipedia.version)
   let text = `wait, there's a new mexico?`
   $: more = () => {
     let doc = nlp(text)

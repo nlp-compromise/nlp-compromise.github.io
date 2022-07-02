@@ -1,8 +1,10 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
   // import nlp from 'compromise/one'
-  import speech from 'compromise-speech'
-  nlp.plugin(speech)
+  // import speech from 'compromise-speech'
+  nlp.plugin(compromiseSpeech)
+  console.log('nlp', nlp.version)
+  console.log('speech', compromiseSpeech.version)
 
   let text = `edmonton oilers`
   $: more = () => {
