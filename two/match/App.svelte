@@ -47,6 +47,7 @@ nlp(myText).match(tokens) //works fine
     count += doc.length
     doit()
   })
+  console.log(nlp.version)
 </script>
 
 <Back href="https://compromise.cool" />

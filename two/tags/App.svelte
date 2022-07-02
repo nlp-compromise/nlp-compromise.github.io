@@ -22,6 +22,7 @@ m.text()
   const tagOne = `let doc = nlp('i bought an apple')
 doc.match('apple').tag('Organization')
 doc.debug() //see the new tags`
+  console.log(nlp.version)
 </script>
 
 <div class="col">
@@ -51,21 +52,7 @@ doc.debug() //see the new tags`
 </div>
 
 <style>
-  .box {
-    margin-top: 3rem;
-    margin-left: 2rem;
-  }
   .tag {
     margin-top: 0.5rem;
-  }
-  .ul {
-    margin-bottom: 1rem;
-    margin-left: 2rem;
-  }
-  .desc {
-    margin-left: 0.4rem;
-    font-size: 0.7rem;
-    color: grey;
-    font-style: italic;
   }
 </style>

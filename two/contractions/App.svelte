@@ -37,6 +37,7 @@ doc.contractions().length
     return offsets
   }
   onChange()
+  console.log(nlp.version)
 </script>
 
 <Back href="https://compromise.cool" />
