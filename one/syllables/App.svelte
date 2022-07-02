@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from 'compromise/one'
+  // import nlp from 'compromise/one'
   import speech from 'compromise-speech'
   nlp.plugin(speech)
 
@@ -19,6 +19,7 @@ doc.syllables()
 //or alternatively,
 doc.json({syllables: true})
 `
+  console.log(nlp.version)
 </script>
 
 <div class="col">

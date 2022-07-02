@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from 'compromise/one'
+  // import nlp from 'compromise/one'
   import plg from 'compromise-stats'
   nlp.plugin(plg)
   import { interpolateGnBu } from 'd3-scale-chromatic'
@@ -15,14 +15,15 @@
     return doc.terms().json()
   }
   let example = `import stats from 'compromise-stats'
-nlp.plugin(stats)
-
-let doc = nlp(text)
-doc.tfidf()
-
-// or alternatively,
-doc.compute('tfidf').json()
-`
+  nlp.plugin(stats)
+  
+  let doc = nlp(text)
+  doc.tfidf()
+  
+  // or alternatively,
+  doc.compute('tfidf').json()
+  `
+  console.log(nlp.version)
 </script>
 
 <div class="col">
@@ -81,5 +82,4 @@ doc.compute('tfidf').json()
   .smol {
     font-size: 0.8rem;
   }
-  
 </style>

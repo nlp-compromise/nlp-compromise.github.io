@@ -1,6 +1,5 @@
 <script>
   import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/fr-compromise/builds/fr-compromise.mjs'
   let text = `Je m'baladais sur l'avenue le cœur ouvert à l'inconnu
 J'avais envie de dire bonjour à n'importe qui
 N'importe qui et ce fut toi, je t'ai dit n'importe quoi
@@ -10,6 +9,7 @@ Au soleil, sous la pluie, à midi ou à minuit
 Il y a tout ce que vous voulez aux Champs-Elysées `
   let html = ''
   const onchange = function (txt) {
+    let nlp = window.frCompromise
     let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
@@ -35,6 +35,7 @@ doc.json()
   ]
 }]
 `
+  console.log(frCompromise.version)
 </script>
 
 <div class="col">
@@ -63,15 +64,6 @@ doc.json()
 </div>
 
 <style>
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
   .res {
     margin: 4rem;
     padding: 1rem;

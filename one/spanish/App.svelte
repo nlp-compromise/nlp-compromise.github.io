@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/es-compromise/builds/es-compromise.mjs'
+  // import nlp from 'es-compromise'
   let text = `Sí, sabes que ya llevo un rato mirándote
 Tengo que bailar contigo hoy
 Vi que tu mirada ya estaba llamándome
@@ -13,6 +13,7 @@ Todos mis sentidos van pidiendo más
 Esto hay que tomarlo sin ningún apuro`
   let html = ''
   const onchange = function (txt) {
+    let nlp = window.esCompromise
     let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
@@ -38,6 +39,7 @@ doc.json()
     ]
 }
 `
+  console.log(esCompromise.version)
 </script>
 
 <div class="col">
@@ -66,15 +68,6 @@ doc.json()
 </div>
 
 <style>
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
   .res {
     margin: 4rem;
     padding: 1rem;

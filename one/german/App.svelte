@@ -1,6 +1,7 @@
 <script>
   import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/de-compromise/builds/de-compromise.mjs'
+  let nlp = window.deCompromise
+  // import nlp from 'de-compromise'
   let text = `Du, könntest du schwimmen.
 Wie Delphine, Delphine es tun.
 Niemand gibt uns eine Chance.
@@ -22,6 +23,7 @@ Dann sind wir Helden.
       `
   let html = ''
   const onchange = function (txt) {
+    let nlp = window.deCompromise
     let doc = nlp(txt)
     html = doc.html({
       '.nouns': '#Noun+',
@@ -51,6 +53,7 @@ doc.json()
     ]
 }
 `
+  console.log(deCompromise.version)
 </script>
 
 <div class="col">
@@ -79,15 +82,6 @@ doc.json()
 </div>
 
 <style>
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
   .res {
     margin: 4rem;
     padding: 1rem;
