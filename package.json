@@ -9,23 +9,19 @@
     "start": "sirv --no-clear"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "rollup": "2.70.2",
+    "@rollup/plugin-commonjs": "22.0.1",
+    "@rollup/plugin-node-resolve": "13.3.0",
+    "rollup": "2.75.7",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.0.0",
     "rollup-plugin-terser": "^7.0.0",
-    "svelte": "3.47.0"
+    "svelte": "3.48.0"
   },
   "dependencies": {
-    "compromise": "^14.1.2",
-    "compromise-dates": "^3.1.1",
-    "compromise-speech": "0.0.2",
-    "compromise-stats": "0.0.3",
-    "compromise-wikipedia": "^0.0.2",
+    "compromise": "14.3.1",
     "d3-scale-chromatic": "^3.0.0",
     "highlight.js": "11.5.1",
-    "sirv-cli": "^1.0.0"
+    "sirv-cli": "2.0.2"
   }
 }

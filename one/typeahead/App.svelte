@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code, TextArea } from '../../lib/index.js'
-  import nlp from 'compromise/one'
+  // import nlp from 'compromise/one'
 
   let words = [
     `bedfordshire`,
@@ -30,6 +30,7 @@ doc.text() // 'argyl'
 doc.autoFill()
 doc.text() // 'argyllshire'
 `
+  console.log(nlp.version)
 </script>
 
 <div class="col">

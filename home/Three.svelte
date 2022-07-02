@@ -1,10 +1,5 @@
 <script>
-  import Page from '../lib/Page.svelte'
-  import One from '../lib/One.svelte'
-  import Two from '../lib/Two.svelte'
-  import Left from '../lib/Left.svelte'
-  import Caret from '../lib/Caret.svelte'
-  import Block from '../lib/Block.svelte'
+  import { Page, One, Two, Block, Caret, Left } from '../lib/index.js'
 </script>
 
 <Block color="#e6b3bc" />

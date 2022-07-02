@@ -1,5 +1,6 @@
 <script>
   import { Page, One, Two, Three, Grid, Caret, Left } from '../lib/index.js'
+  console.log(nlp.version)
 </script>
 
 <Page>

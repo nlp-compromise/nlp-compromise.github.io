@@ -2,10 +2,10 @@
   import { CodeMirror } from '../../lib/index.js'
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src/index.mjs'
   import spacetime from 'spacetime'
-  import nlp from '/Users/spencer/mountain/compromise/src/three.js'
-  import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/src/plugin.js'
-  nlp.plugin(nlpDates)
+  nlp.plugin(compromiseDates)
   let text = `meet next weekend`
+  console.log('nlp', nlp.version)
+  console.log('dates', compromiseDates.version)
 
   let days = {}
   let start = spacetime()

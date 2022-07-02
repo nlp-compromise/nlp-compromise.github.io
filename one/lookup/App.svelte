@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Left, Two, Below, Code, TextArea } from '../../lib/index.js'
-  import nlp from 'compromise/one'
+  // import nlp from 'compromise/one'
   import Picker from './Picker.svelte'
   let choice = 0
   let trie = null
@@ -29,6 +29,7 @@ m.debug()
     trie = nlp.compile(terms)
   }
   recompile()
+  console.log(nlp.version)
 </script>
 
 <div class="col">

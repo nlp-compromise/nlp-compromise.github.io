@@ -15,6 +15,7 @@ console.log(words)`
     }
   }
   onchange(text)
+  console.log(nlp.version)
 </script>
 
 <div class="col">

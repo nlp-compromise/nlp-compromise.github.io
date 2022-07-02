@@ -1,6 +1,6 @@
 <script>
-  import { Page, Back, Two, TextArea, Below, Code } from '../../lib/index.js'
-  import nlp from '/Users/spencer/mountain/de-compromise/builds/de-compromise.mjs'
+  import { Page, Back, Two, TextArea, Below, Code, CodeMirror } from '../../lib/index.js'
+  // import nlp from 'de-compromise'
   let text = `Du, könntest du schwimmen.
 Wie Delphine, Delphine es tun.
 Niemand gibt uns eine Chance.
@@ -22,7 +22,7 @@ Dann sind wir Helden.
       `
   let html = ''
   const onchange = function (txt) {
-    let doc = nlp(txt)
+    let doc = deCompromise(txt)
     html = doc.html({
       '.nouns': '#Noun+',
       '.verbs': '#Verb+',
@@ -30,6 +30,14 @@ Dann sind wir Helden.
     })
   }
   onchange(text)
+
+  let numText = `wenn ich vierundsechzig Jahre alt bin`
+  $: more = () => {
+    let doc = deCompromise(numText)
+    doc.numbers().toNumber()
+    return doc.text()
+  }
+
   let example = `import pln from 'de-compromise'
 
 let doc = pln('Hast du etwas Zeit für mich?')
@@ -51,6 +59,7 @@ doc.json()
     ]
 }
 `
+  console.log(deCompromise.version)
 </script>
 
 <div class="col">
@@ -68,6 +77,16 @@ doc.json()
         </div>
       </div>
     </div>
+
+    <!-- number parsing -->
+    <div class="number col">
+      <div style="text-align:left; align-self: flex-start; margin-left:3rem;">number-parsing:</div>
+      <CodeMirror bind:text={numText} />
+      <div class="show">
+        {more()}
+      </div>
+    </div>
+
     <Two>
       <Code js={example} width="500px" />
     </Two>
@@ -79,19 +98,26 @@ doc.json()
 </div>
 
 <style>
-  .row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
-    flex-wrap: wrap;
-    align-self: stretch;
-  }
   .res {
     margin: 4rem;
     padding: 1rem;
     box-shadow: 2px 2px 8px 0px rgba(0, 0, 0, 0.2);
     line-height: 1.8rem;
+  }
+  .show {
+    color: steelblue;
+    font-size: 32px;
+    line-height: 2.5rem;
+  }
+  .number {
+    margin-top: 12rem;
+    justify-content: flex-end;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
   }
 </style>

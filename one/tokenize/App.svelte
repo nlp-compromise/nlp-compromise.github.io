@@ -1,14 +1,8 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code, Three } from '../../lib/index.js'
-  import nlp from 'compromise/one'
   let str = `i have two questions. 'Why lie?' and 'Lies, why?'`
 
   $: res = nlp(str).json()
-
-  const doit = function () {
-    console.log('=-=-=-= here -=-=-=-')
-    res = nlp(str).json()
-  }
 
   const showSpaces = function (str) {
     str = str.replace(/ /g, '_')
@@ -56,6 +50,7 @@ doc.json()
   }]
 */
 `
+  console.log(nlp.version)
 </script>
 
 <div class="col">

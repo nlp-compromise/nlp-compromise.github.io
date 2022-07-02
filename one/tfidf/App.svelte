@@ -1,11 +1,11 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from 'compromise/one'
-  import plg from 'compromise-stats'
-  nlp.plugin(plg)
+  // import nlp from 'compromise/one'
+  // import plg from 'compromise-stats'
+  nlp.plugin(compromiseStats)
+  console.log('nlp', nlp.version)
+  console.log('compromiseStats', compromiseStats.version)
   import { interpolateGnBu } from 'd3-scale-chromatic'
-  // interpolateYlOrRd
-  // console.log(interpolateYlOrRd)
   let res = []
   let max = 7
   let text = `i pronounce it to be the most whimsical take of the season`
@@ -15,14 +15,15 @@
     return doc.terms().json()
   }
   let example = `import stats from 'compromise-stats'
-nlp.plugin(stats)
-
-let doc = nlp(text)
-doc.tfidf()
-
-// or alternatively,
-doc.compute('tfidf').json()
-`
+  nlp.plugin(stats)
+  
+  let doc = nlp(text)
+  doc.tfidf()
+  
+  // or alternatively,
+  doc.compute('tfidf').json()
+  `
+  console.log(nlp.version)
 </script>
 
 <div class="col">
@@ -81,5 +82,4 @@ doc.compute('tfidf').json()
   .smol {
     font-size: 0.8rem;
   }
-  
 </style>

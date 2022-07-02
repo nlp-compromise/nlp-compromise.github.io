@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from 'compromise/three'
+  // import nlp from 'compromise/three'
 
   let text = `four hundred seventy two`
   $: more = () => {
@@ -11,6 +11,7 @@ doc.numbers().toNumber()
 doc.text()
 // '700 seaguls'
 `
+  console.log(nlp.version)
 </script>
 
 <div class="col">
@@ -38,15 +39,6 @@ doc.text()
 </div>
 
 <style>
-  .word {
-    display: inline-block;
-    margin: 1rem;
-    font-size: 3rem;
-  }
-  .dash {
-    color: grey;
-    font-size: 1rem;
-  }
   .res {
     line-height: 3.5rem;
     margin-top: 6rem;

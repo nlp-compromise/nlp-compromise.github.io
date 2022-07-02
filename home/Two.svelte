@@ -1,13 +1,5 @@
 <script>
-  import Page from '../lib/Page.svelte'
-  import One from '../lib/One.svelte'
-  import Two from '../lib/Two.svelte'
-  import Three from '../lib/Three.svelte'
-  import Left from '../lib/Left.svelte'
-  import Caret from '../lib/Caret.svelte'
-  import Block from '../lib/Block.svelte'
-  // import Tagger from './demos/Tagger.svelte'
-  import Grid from '../lib/Grid/Grid.svelte'
+  import { Page, One, Two, Three, Grid, Block, Caret, Left } from '../lib/index.js'
 </script>
 
 <Block color="#978BA3" />
