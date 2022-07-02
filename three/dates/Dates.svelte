@@ -3,7 +3,16 @@
   import { Year } from '/Users/spencer/mountain/somehow-calendar/src/index.mjs'
   import spacetime from 'spacetime'
   // import nlp from 'compromise'
-  import nlpDates from 'compromise-dates'
+  // import nlpDates from 'compromise-dates'
+  import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/src/plugin.js'
+  // import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/src/plugin.js'
+  // import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/builds/compromise-dates.cjs'
+  // import nlpDates from '/Users/spencer/mountain/compromise/plugins/dates/builds/compromise-dates.min.js'
+  // console.log('dates:')
+  // console.log(Object.keys(nlpDates))
+  // console.log(typeof nlpDates)
+  // console.log(nlpDates)
+  // console.log(nlp.version)
   nlp.plugin(nlpDates)
   let text = `meet next weekend`
 

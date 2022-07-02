@@ -101,8 +101,4 @@
 </div>
 
 <style>
-  .topTwo {
-  }
-  .desc {
-  }
 </style>

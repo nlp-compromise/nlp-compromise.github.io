@@ -1,11 +1,5 @@
 <script>
-  import Page from '../lib/Page.svelte'
-  import One from '../lib/One.svelte'
-  import Two from '../lib/Two.svelte'
-  import Left from '../lib/Left.svelte'
-  import Row from '../lib/Row.svelte'
-  import Grid from '../lib/Grid/Grid.svelte'
-  import Block from '../lib/Block.svelte'
+  import { Page, One, Two, Grid, Left } from '../lib/index.js'
   import friends from './graphs/people.js'
 </script>
 
