@@ -135,18 +135,26 @@
       </svg>
     </div>
     <div class="row">
-      <a href="./one/spanish" class="nowrap">
-        spanish
-        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#72697D" /></span>
-      </a>
-      <a href="./one/french" style="margin-top:6rem;" class="nowrap">
-        french
-        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#cf9b97" /></span>
-      </a>
-      <a href="./one/german" style="margin-top:12rem;" class="nowrap">
-        german
-        <span style="position:relative; top:0.4rem;"><Caret width={30} color="#2D85A8" /></span>
-      </a>
+      <div>
+        <a href="./one/spanish" class="nowrap">
+          spanish
+          <span style="position:relative; top:0.4rem;"><Caret width={30} color="#72697D" /></span>
+        </a>
+        <a href="./one/german" style="margin-top:12rem;" class="nowrap">
+          german
+          <span style="position:relative; top:0.4rem;"><Caret width={30} color="#cf9b97" /></span>
+        </a>
+      </div>
+      <div>
+        <a href="./one/french" style="margin-top:6rem;" class="nowrap">
+          french
+          <span style="position:relative; top:0.4rem;"><Caret width={30} color="#cf9b97" /></span>
+        </a>
+        <a href="./one/italian" style="margin-top:18rem;" class="nowrap">
+          italian
+          <span style="position:relative; top:0.4rem;"><Caret width={30} color="#2D85A8" /></span>
+        </a>
+      </div>
     </div>
   </Three>
 </Page>
