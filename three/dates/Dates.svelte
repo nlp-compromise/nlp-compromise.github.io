@@ -11,6 +11,7 @@
   let start = spacetime()
   let end = null
   let today = spacetime.now().format('iso-short')
+  let year = start.year()
 
   const highlight = function (str = '') {
     let dates = nlp(str).dates()
@@ -43,7 +44,7 @@
 <div class="box">
   <CodeMirror bind:text {highlight} />
   <div class="months">
-    <Year date={start.format('iso-short')} {days} showToday={false} />
+    <Year year={start.year()} date={start.format('iso-short')} {days} showToday={false} />
   </div>
 </div>
 
