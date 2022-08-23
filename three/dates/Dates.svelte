@@ -45,7 +45,6 @@
   <CodeMirror bind:text {highlight} />
   <div class="months">
     <Year year={start.year()} date={start.format('iso-short')} {days} showToday={false} />
-    <!-- {start.year()} -->
   </div>
 </div>
 
