@@ -4,6 +4,7 @@
   import CodeMirror from './lib.js'
   export let text = ''
   export let autofocus = true
+  export let onChange = null
   let editor
   let el
   export let highlight = () => {}
@@ -25,6 +26,9 @@
     })
     // update each keypress
     editor.on('change', doc => {
+      if (onChange) {
+        onChange()
+      }
       clear(doc)
       text = doc.getValue()
       let offsets = highlight(text) || []
