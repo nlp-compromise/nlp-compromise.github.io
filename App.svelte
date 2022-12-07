@@ -1,6 +1,7 @@
 <script>
   import Intro from './home/Intro.svelte'
   import Tagger from './home/Tagger.svelte'
+  import Matcher from './home/Matcher.svelte'
   import One from './home/One.svelte'
   import Two from './home/Two.svelte'
   import Three from './home/Three.svelte'
@@ -12,6 +13,7 @@
 <Intro />
 <Dates />
 <Tagger />
+<Matcher />
 <One />
 <Two />
 <Tags />
