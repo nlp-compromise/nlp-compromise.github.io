@@ -4,8 +4,8 @@
   import spacetime from 'spacetime'
   nlp.plugin(compromiseDates)
   let text = `meet next weekend`
-  console.log('nlp', nlp.version)
-  console.log('dates', compromiseDates.version)
+  // console.log('nlp', nlp.version)
+  // console.log('dates', compromiseDates.version)
 
   let days = {}
   let start = spacetime()
@@ -42,7 +42,7 @@
 </script>
 
 <div class="box">
-  <CodeMirror bind:text {highlight} />
+  <CodeMirror bind:text {highlight} autofocus={false} />
   <div class="months">
     <Year year={start.year()} date={start.format('iso-short')} {days} showToday={false} />
   </div>

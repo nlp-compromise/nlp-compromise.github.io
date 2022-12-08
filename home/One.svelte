@@ -102,8 +102,8 @@
   </Left>
   <div style="margin-top:6rem; margin-left:2rem;">
     <div>sometimes just splitting things up is enough.</div>
-    <div class="m1">it feels like data now, a little.</div>
-    <div class="m2 sea down f09">or swing harder ↓</div>
+    <!-- <div class="m1">it feels like data now, a little.</div> -->
+    <div class="m2 sea down f09">sometimes it's not ↓</div>
   </div>
 </Page>
 

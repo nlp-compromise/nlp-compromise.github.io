@@ -111,13 +111,19 @@
       </div>
     </div>
     <div class="down">
-      but both times it's just an <b class="sky i">#Adjective</b> -
+      but both times it's just an <b class="sky i">#Adjective</b>.
     </div>
-    <div class="down tab f09">so the hard problem, still ahead ↓</div>
+    <!-- <div class="down tab f09">so the hard problem, still ahead ↓</div> -->
   </One>
 </Page>
 
 <style>
+  .plugin {
+    font-family: monospace, monospace;
+    color: #cc8a66;
+    margin-top: 1rem;
+    margin-left: 4px;
+  }
   .row {
     display: flex;
     flex-direction: row;

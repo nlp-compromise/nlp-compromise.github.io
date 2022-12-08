@@ -3,7 +3,8 @@
   import './style.css'
   import CodeMirror from './lib.js'
   export let text = ''
-  export let autofocus = true
+  export let autofocus = false
+  export let onChange = null
   let editor
   let el
   export let highlight = () => {}
@@ -17,7 +18,7 @@
   onMount(() => {
     // create codemirror instance
     editor = CodeMirror.fromTextArea(el, {
-      autofocus: autofocus,
+      autofocus: false,
       viewportMargin: Infinity,
       extraKeys: {
         Enter: onEnter,
@@ -25,6 +26,9 @@
     })
     // update each keypress
     editor.on('change', doc => {
+      if (onChange) {
+        onChange()
+      }
       clear(doc)
       text = doc.getValue()
       let offsets = highlight(text) || []
@@ -37,11 +41,12 @@
       })
     })
     CodeMirror.signal(editor, 'change', editor)
-
-    setTimeout(() => {
-      editor.focus()
-      editor.setCursor(editor.lineCount(), 0)
-    }, 500)
+    if (autofocus === true) {
+      setTimeout(() => {
+        editor.focus()
+        editor.setCursor(editor.lineCount(), 0)
+      }, 500)
+    }
   })
 </script>
 
