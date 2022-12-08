@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   // import nlp from 'compromise/two'
   let str = 'the #Adjective #Noun+'
 
@@ -25,11 +26,14 @@
     output = doc.wrap(obj)
   }
 
-  ;(async () => {
-    for (let i = 0; i < 3; i += 1) {
-      await loadMore(i)
-    }
-  })()
+  onMount(() => {
+    setTimeout(async function () {
+      console.log('calling')
+      for (let i = 0; i < 8; i += 1) {
+        await loadMore(i)
+      }
+    }, 1000)
+  })
 </script>
 
 <div class="col">

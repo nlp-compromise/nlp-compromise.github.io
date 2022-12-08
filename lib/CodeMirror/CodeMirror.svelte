@@ -3,7 +3,7 @@
   import './style.css'
   import CodeMirror from './lib.js'
   export let text = ''
-  export let autofocus = true
+  export let autofocus = false
   export let onChange = null
   let editor
   let el
@@ -18,7 +18,7 @@
   onMount(() => {
     // create codemirror instance
     editor = CodeMirror.fromTextArea(el, {
-      autofocus: autofocus,
+      autofocus: false,
       viewportMargin: Infinity,
       extraKeys: {
         Enter: onEnter,
@@ -41,11 +41,12 @@
       })
     })
     CodeMirror.signal(editor, 'change', editor)
-
-    setTimeout(() => {
-      editor.focus()
-      editor.setCursor(editor.lineCount(), 0)
-    }, 500)
+    if (autofocus === true) {
+      setTimeout(() => {
+        editor.focus()
+        editor.setCursor(editor.lineCount(), 0)
+      }, 500)
+    }
   })
 </script>
 

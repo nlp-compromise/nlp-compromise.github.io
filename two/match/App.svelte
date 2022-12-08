@@ -1,6 +1,6 @@
 <script>
   import { Page, Back, One, Two, CodeMirror, Below, Code } from '../../lib/index.js'
-  import nlp from 'compromise/two'
+  // import nlp from 'compromise/two'
   let str = 'the #Noun is #Adjective'
   let count = 0
   let example = `const doc = nlp('simon says clean the fridge')

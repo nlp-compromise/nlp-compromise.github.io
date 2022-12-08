@@ -3,6 +3,10 @@
   console.log(nlp.version)
 </script>
 
+<div class="row">
+  <a class="link" href="https://observablehq.com/@spencermountain/nlp-compromise">docs</a>
+  <a class="link" href="https://github.com/spencermountain/compromise">github</a>
+</div>
 <Page>
   <Two />
 
@@ -180,5 +184,19 @@
   .nowrap {
     white-space: nowrap;
     font-size: 0.8rem;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-self: stretch;
+  }
+  .link {
+    font-size: 12px;
+    color: steelblue;
+    margin-right: 3rem;
   }
 </style>
