@@ -7,8 +7,16 @@ hosted at [nlp-compromise.github.io](nlp-compromise.github.io)
 
 ### instructions
 
+a nuxt 3 (vue) single-page app:
+
+```
+npm install
+npm run dev        # local dev server
+npm run generate   # static site into .output/public
+```
+
 work on any not gh-pages branch, then run
-`gh-pages -d .`
+`gh-pages -d .output/public`
 
 then visit:
 

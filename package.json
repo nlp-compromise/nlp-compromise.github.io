@@ -1,27 +1,23 @@
 {
-  "name": "svelte-app",
+  "name": "compromise-site",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
-    "watch:demo": "DIR=one/tokenize rollup -c -w",
-    "start": "sirv --no-clear"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "22.0.1",
-    "@rollup/plugin-node-resolve": "13.3.0",
-    "rollup": "2.75.7",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "3.54.0"
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "nuxt": "~3.17.7"
   },
   "dependencies": {
+    "codemirror": "^5.50.2",
     "compromise": "14.8.0",
     "d3-scale-chromatic": "^3.0.0",
     "highlight.js": "11.7.0",
-    "sirv-cli": "2.0.2"
+    "spacetime": "^7.6.0"
   }
 }
